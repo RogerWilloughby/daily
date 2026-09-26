@@ -11,7 +11,7 @@ KI-generiert + freie APIs. Fakten (Wetter, Kurse, Sport, „An diesem Tag“ …
 ## 3. Raster 5 × 4 – Reihenfolge nach Priorität (jedes Thema nur in einer Kachel)
 Reihe 1 – täglicher Kern:
 1. Heute & Wetter – Wetter, Sonne, Mond, Luftqualität, Pollen (LIVE für Dresden über Open-Meteo)
-2. Kalender – Termine, Geburtstage, Jahrestage, Feiertage
+2. Kalender – Termine, Geburtstage, Jahrestage, Feiertage. LIVE über Vercel-Funktion `api/calendar.js` (Bibliothek node-ical, auch Serientermine); private iCal-Links werden im Konfigurator eingetragen (siehe Einstellungen), ersatzweise Vercel-Umgebungsvariable `CALENDAR_ICS_URL`; nie im Code. Zeigt heute bis +7 Tage.
 3. Mail – Zähler ungelesen/wichtig (Anbindung Google/IMAP, Stufe 2)
 4. Schlagzeilen – Originalüberschriften + Link, chronologisch, ohne eigene Auswahl/Zusammenfassung. LIVE über Vercel-Funktion `api/headlines.js` (Quellen dort in `FEEDS`: Tagesschau, MDR Sachsen, heise; Cache 10 min). Kennzahl = Meldungen der letzten 12 Stunden.
 5. Mein Daily – Aufgaben, Ziele, Notizen
@@ -32,6 +32,12 @@ Reihe 4:
 Leiste am unteren Rand (früher Kopfzeile): DAILY, Datum, Uhrzeit, Suchfeld „Frag DAILY“, Links „Impressum“ und „Datenschutz“ (1 Klick, Entwürfe mit Platzhaltern). Antworten von „Frag DAILY“ erscheinen direkt über der Leiste.
 
 Geschätzte Abdeckung der täglichen Info-Abfragen: V1 ≈ 40 %; mit Sport, Mail-Zähler, Suchfeld und Paketstatus ≈ 65–70 %.
+
+## 3a. Einstellungen (Konfigurator)
+Zahnrad-Button „Einstellungen“ in der unteren Leiste. Start mit zwei Punkten:
+- Ort für das Wetter (Ortssuche über Open-Meteo Geocoding, Auswahl aus Treffern; Standard Dresden)
+- Kalender: iCal-Links, einer pro Zeile
+Speicherung nur lokal im Browser (localStorage `daily-settings`), also pro Gerät neu einzutragen. Weitere Einstellungen folgen (z. B. Schlagzeilen-Quellen, Sportverein, Aktien). Späterer Ausbau: Einstellungen geräteübergreifend synchronisieren.
 
 ## 4. Interaktion Desktop
 „Raster wächst mit“: Zeile und Spalte der aktiven Kachel werden breiter (Faktor 4), die anderen schrumpfen, bleiben sichtbar.
@@ -71,4 +77,4 @@ Prototyp: `../prototyp/daily-prototyp.html`.
 ## Offen
 - Domain daily.craibotics.org bei GoDaddy einrichten
 - Belegung des letzten freien Platzes (nach Klickzähler entscheiden)
-- Reihenfolge der Datenanbindung nach Nutzung, Mail ans Ende: Schlagzeilen (erledigt) → Kalender (ICS-Link) → Geld → Verkehr → Sport (Verein) → … → Mail (vorerst ausgesetzt)
+- Reihenfolge der Datenanbindung nach Nutzung, Mail ans Ende: Schlagzeilen (erledigt) → Kalender (erledigt, Link eintragen) → Geld → Verkehr → Sport (Verein) → … → Mail (vorerst ausgesetzt)

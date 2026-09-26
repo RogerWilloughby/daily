@@ -4,6 +4,9 @@
   "version": "0.1.0",
   "description": "DAILY – Dein Tag auf einer Seite (PWA)",
   "scripts": { "build": "node build.js" },
+  "dependencies": {
+    "node-ical": "^0.27.2"
+  },
   "devDependencies": {
     "@fontsource-variable/bricolage-grotesque": "^5.2.0",
     "@fontsource/figtree": "^5.2.0",

@@ -52,12 +52,12 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .top{order:3}
 
 /* header */
-.top{display:flex;align-items:center;gap:20px;flex-wrap:wrap;min-height:48px}
+.top{display:flex;align-items:center;gap:16px;flex-wrap:wrap;min-height:48px}
 .brand{font-family:var(--display);font-weight:700;font-size:28px;letter-spacing:.08em}
 .date{color:var(--muted);font-size:15px}
 .clock{font-family:var(--display);font-weight:500;font-size:22px;font-variant-numeric:tabular-nums}
 .spacer{flex:1}
-.hint{color:var(--muted);font-size:13px}
+.hint{display:none}
 .chip{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:5px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
 
 /* desktop grid */
@@ -82,7 +82,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .tile.free{background:transparent;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px}
 .tile.free:hover{border-color:var(--line)}
 .tile.free[data-mode="small"] span{display:none}
-.ask{flex:1 1 320px;max-width:520px;display:flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface)}
+.ask{flex:1 1 280px;max-width:460px;display:flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface)}
 .ask:focus-within{border-color:var(--accent)}
 .ask .ico{width:18px;height:18px}
 .ask input{flex:1;min-width:0;border:0;background:transparent;font:inherit;font-size:15px;color:var(--ink);outline:none}
@@ -121,15 +121,17 @@ dl{margin:0;overflow:auto;min-height:0}
 .sheet{display:none}
 @media (max-width:760px), (max-height:520px){
   .hint,.top .chip{display:none}
-  .legal{order:2;margin-left:auto;gap:10px;font-size:12px}
+  .gear span{display:none}
+  .legal{order:4;gap:10px;font-size:12px}
+  .gear{order:2}
   .legal + .spacer{display:none}
   .top{gap:12px;min-height:0}
   .brand{font-size:24px}
-  .date{order:3;width:100%;margin-top:-6px;font-size:14px}
+  .date{order:3;flex:1 1 55%;min-width:0;font-size:14px}
   .clock{font-size:19px;margin-left:auto}
   .spacer{display:none}
   .grid{gap:7px;grid-template-columns:repeat(4,minmax(0,1fr)) !important;grid-template-rows:repeat(5,minmax(0,1fr)) !important}
-  .ask{order:4;flex-basis:100%;max-width:none}
+  .ask{order:5;flex-basis:100%;max-width:none}
   .tile.free span{display:none}
   .tile .head{padding:9px 8px !important;justify-content:space-between;height:100%;box-sizing:border-box}
   .tile .label{font-family:var(--display);font-size:14px !important;font-weight:700;flex-direction:column;align-items:flex-start;gap:6px}
@@ -162,6 +164,19 @@ dl{margin:0;overflow:auto;min-height:0}
 .legal{display:flex;gap:14px;font-size:13px}
 .legal button{color:var(--muted);text-decoration:underline;text-underline-offset:3px;min-height:32px}
 .legal button:hover{color:var(--ink)}
+.gear{display:flex;align-items:center;gap:6px;min-height:36px;padding:0 10px;border-radius:10px;border:1px solid var(--line);color:var(--muted);font-size:13px}
+.gear:hover{color:var(--ink);border-color:var(--accent)}
+.gear svg{width:16px;height:16px}
+.set-row{display:flex;gap:8px}
+.set-row input,#set-ics{flex:1;min-width:0;box-sizing:border-box;font:inherit;font-size:15px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--ground);color:var(--ink)}
+#set-ics{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monospace;resize:vertical}
+.btn{min-height:42px;padding:0 16px;border-radius:10px;border:1px solid var(--line);font-size:14px;font-weight:600}
+.btn.primary{background:var(--active-bg);color:var(--active-ink);border-color:var(--active-bg)}
+.set-results{display:flex;flex-direction:column;gap:2px;margin:8px 0}
+.set-results label{display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:8px;cursor:pointer}
+.set-results label:hover{background:var(--ground)}
+.set-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 dialog.doc{width:min(640px,calc(100vw - 32px));max-height:calc(100vh - 48px);box-sizing:border-box;padding:0;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);overflow:hidden}
 dialog.doc::backdrop{background:rgba(10,20,16,.45)}
 .doc-in{display:flex;flex-direction:column;max-height:calc(100vh - 48px)}
@@ -192,6 +207,7 @@ dialog.doc::backdrop{background:rgba(10,20,16,.45)}
     <div class="spacer"></div>
     <div class="hint">Esc schließt</div>
     <div class="chip" id="chip">Beispieldaten</div>
+    <button class="gear" type="button" id="open-settings" aria-label="Einstellungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Einstellungen</span></button>
     <nav class="legal" aria-label="Rechtliches">
       <button type="button" data-doc="impressum">Impressum</button>
       <button type="button" data-doc="datenschutz">Datenschutz</button>
@@ -244,9 +260,9 @@ dialog.doc::backdrop{background:rgba(10,20,16,.45)}
       <h3>Verantwortlicher</h3>
       <p><span class="ph">[Vorname Nachname]</span>, <span class="ph">[Anschrift]</span>, Dresden · <span class="ph">[E-Mail]</span></p>
       <h3>Was DAILY auf deinem Gerät speichert</h3>
-      <p>Der Klickzähler („Deine Nutzung“) und später deine Aufgaben und Notizen werden nur lokal in deinem Browser gespeichert. Sie werden nicht an uns übertragen. Du kannst sie jederzeit in der Kachel „Deine Nutzung“ zurücksetzen oder über die Browser-Einstellungen löschen.</p>
+      <p>Der Klickzähler („Deine Nutzung“), deine Einstellungen (Ort, Kalender-Links) und später deine Aufgaben und Notizen werden nur lokal in deinem Browser gespeichert. Sie werden nicht an uns übertragen. Du kannst sie jederzeit in der Kachel „Deine Nutzung“ zurücksetzen oder über die Browser-Einstellungen löschen.</p>
       <h3>Externe Dienste</h3>
-      <p><b>Open-Meteo</b> (Wetter, Luftqualität, Pollen): Beim Laden der Wetterdaten ruft dein Browser die Server von Open-Meteo auf. Dabei wird deine IP-Adresse übertragen. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (Bereitstellung der Wetteranzeige).</p>
+      <p><b>Open-Meteo</b> (Wetter, Luftqualität, Pollen, Ortssuche in den Einstellungen): Beim Laden der Wetterdaten ruft dein Browser die Server von Open-Meteo auf. Dabei wird deine IP-Adresse übertragen. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (Bereitstellung der Wetteranzeige).</p>
       <p><b>Schriftarten</b> werden direkt von diesem Server geladen, nicht von Google.</p>
       <p><b>Hosting</b>: Vercel Inc., USA. Beim Aufruf verarbeitet Vercel technisch notwendige Daten wie deine IP-Adresse. <span class="ph">[Vor Veröffentlichung: Auftragsverarbeitung und Drittlandübermittlung (EU-US Data Privacy Framework) ergänzen]</span></p>
       <h3>Keine Analyse, kein Tracking</h3>
@@ -256,6 +272,27 @@ dialog.doc::backdrop{background:rgba(10,20,16,.45)}
       <p class="draft">Entwurf mit Platzhaltern. Vor der Veröffentlichung vervollständigen und prüfen lassen.</p>
     </div>
   </div>
+</dialog>
+<dialog class="doc" id="settings" aria-labelledby="h-set">
+  <form class="doc-in" id="settings-form">
+    <div class="doc-head"><h2 id="h-set">Einstellungen</h2><button class="x" type="button" data-doc-close>Abbrechen</button></div>
+    <div class="doc-body">
+      <h3>Ort für das Wetter</h3>
+      <p>Aktuell: <b id="set-place-current"></b></p>
+      <div class="set-row">
+        <label for="set-place" class="sr">Ort suchen</label>
+        <input id="set-place" type="text" placeholder="Ort eingeben, z. B. Radebeul" autocomplete="off">
+        <button type="button" class="btn" id="set-place-search">Suchen</button>
+      </div>
+      <div id="set-place-results" class="set-results" role="radiogroup" aria-label="Gefundene Orte"></div>
+      <h3>Kalender</h3>
+      <p>iCal-Links deiner Kalender, einer pro Zeile. Bei Google: Kalender-Einstellungen → dein Kalender → „Privatadresse im iCal-Format“.</p>
+      <label for="set-ics" class="sr">Kalender-Links</label>
+      <textarea id="set-ics" rows="4" spellcheck="false" placeholder="https://calendar.google.com/calendar/ical/…/basic.ics"></textarea>
+      <p class="draft">Die Einstellungen bleiben nur auf diesem Gerät in diesem Browser. Der Kalender-Link geht zum Abrufen der Termine an die DAILY-Funktion auf Vercel und wird dort nicht gespeichert.</p>
+      <div class="set-actions"><button type="submit" class="btn primary">Speichern</button></div>
+    </div>
+  </form>
 </dialog>
 
 <script>
@@ -421,7 +458,7 @@ mobileMQ.addEventListener('change', () => { if (!mobileMQ.matches) hideSheet(); 
 // Frag DAILY – im Prototyp einfache Antworten aus den Beispieldaten
 const ANSWERS = [
   [/schirm|regen|wetter|warm|kalt|grad|sonne|pollen|luft/i, () => weatherAnswer()],
-  [/termin|kalender|heute|geburtstag|claude/i, 'Heute: 10:00 Geburtstag von Claude, 14:30 Wocheneinkauf, 19:00 Abendessen bei Freunden. Morgen hat Anna Geburtstag.'],
+  [/termin|kalender|heute|morgen|geburtstag|claude/i, () => calAnswer() || 'Heute: 10:00 Geburtstag von Claude, 14:30 Wocheneinkauf, 19:00 Abendessen bei Freunden. Morgen hat Anna Geburtstag.'],
   [/news|schlagzeil|nachrichten|neuigkeit/i, () => newsAnswer()],
   [/mail|e-mail|posteingang/i, '3 ungelesene Mails. Wichtig: Stadtwerke, Abschlagsrechnung.'],
   [/essen|koch|rezept|abend/i, 'Vorschlag für heute: Ofengemüse mit Feta, 30 Minuten, vegetarisch.'],
@@ -440,8 +477,14 @@ document.getElementById('ask').addEventListener('submit', e => {
 });
 document.getElementById('answer-close').onclick = () => { ansBox.hidden = true; };
 
-// ---------- Echtes Wetter für Dresden (Open-Meteo, ohne Schlüssel) ----------
-const PLACE = {name:'Dresden', lat:51.05, lon:13.74};
+// ---------- Einstellungen (nur lokal in diesem Browser) ----------
+const SETTINGS_KEY = 'daily-settings';
+function loadSettings(){ try { const v = JSON.parse(localStorage.getItem(SETTINGS_KEY)); if (v && typeof v === 'object') return v; } catch (e) {} return {}; }
+function saveSettings(v){ try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(v)); return true; } catch (e) { return false; } }
+let SETTINGS = loadSettings();
+
+// ---------- Echtes Wetter (Open-Meteo, ohne Schlüssel; Ort aus den Einstellungen, Standard Dresden) ----------
+let PLACE = (SETTINGS.place && typeof SETTINGS.place.lat === 'number') ? SETTINGS.place : {name:'Dresden', admin:'Sachsen', lat:51.05, lon:13.74};
 const WMO = {0:'Klar',1:'Überwiegend klar',2:'Teilweise bewölkt',3:'Bedeckt',45:'Nebel',48:'Nebel mit Reif',
   51:'Leichter Nieselregen',53:'Nieselregen',55:'Starker Nieselregen',56:'Gefrierender Nieselregen',57:'Gefrierender Nieselregen',
   61:'Leichter Regen',63:'Regen',65:'Starker Regen',66:'Gefrierender Regen',67:'Gefrierender Regen',
@@ -557,6 +600,94 @@ async function loadHeadlines(){
 }
 loadHeadlines();
 setInterval(loadHeadlines, 15*60*1000);
+
+// ---------- Kalender (Vercel-Funktion /api/calendar; ICS-Link liegt nur in Vercel als CALENDAR_ICS_URL) ----------
+const CAL_I = TILES.findIndex(d => d.t === 'Kalender');
+const CAL = {live:false, events:[], today:null};
+const berlinDay = d => new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Berlin',year:'numeric',month:'2-digit',day:'2-digit'}).format(d);
+function dayLabel(key){
+  if (key === berlinDay(new Date())) return 'Heute';
+  if (key === berlinDay(new Date(Date.now() + 864e5))) return 'Morgen';
+  return new Date(key + 'T12:00:00').toLocaleDateString('de-DE',{weekday:'short',day:'numeric',month:'numeric'});
+}
+const evTime = e => e.allDay ? 'ganztägig' : hm(e.start);
+function calAnswer(){
+  if (!CAL.live) return null;
+  const t = berlinDay(new Date()), m = berlinDay(new Date(Date.now() + 864e5));
+  const fmt = e => (e.allDay ? '' : hm(e.start) + ' ') + e.title;
+  const today = CAL.events.filter(e => e.day === t), tomorrow = CAL.events.filter(e => e.day === m);
+  let a = today.length ? 'Heute: ' + today.map(fmt).join(', ') + '.' : 'Heute stehen keine Termine an.';
+  if (tomorrow.length) a += ' Morgen: ' + tomorrow.map(fmt).join(', ') + '.';
+  return a;
+}
+async function loadCalendar(){
+  if (location.protocol !== 'https:') return; // lokal als Datei: Beispieldaten
+  try {
+    const urls = SETTINGS.icsUrls || [];
+    const r = urls.length
+      ? await fetch('/api/calendar', {method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({urls})})
+      : await fetch('/api/calendar');
+    if (!r.ok) throw new Error(r.status);
+    const j = await r.json(), d = TILES[CAL_I];
+    if (!j.configured) {
+      d.m = 'Kein Kalender'; d.ms = '–';
+      d.x = 'Noch kein Kalender verbunden. Unten auf „Einstellungen“ den iCal-Link eintragen.';
+      d.d = [['Einrichtung', 'Einstellungen (unten in der Leiste) → Kalender']];
+      CAL.live = false; paintTile(CAL_I); return;
+    }
+    CAL.live = true; CAL.events = j.events || [];
+    const t = berlinDay(new Date());
+    const todays = CAL.events.filter(e => e.day === t);
+    d.m = todays.length + (todays.length === 1 ? ' Termin' : ' Termine'); d.ms = todays.length + ' heute';
+    const nowIso = new Date().toISOString();
+    const next = CAL.events.find(e => !e.allDay && (e.end || e.start) > nowIso);
+    d.x = next ? `Als Nächstes: ${next.day === t ? '' : dayLabel(next.day) + ', '}${hm(next.start)} ${next.title}`
+               : (todays.length ? 'Heute: ' + todays.map(e => e.title).join(', ') : 'Heute keine Termine.');
+    d.d = CAL.events.slice(0, 12).map(e => [`${dayLabel(e.day)} · ${evTime(e)}`, e.title]);
+    if (!d.d.length) d.d = [['Nächste 7 Tage', 'keine Termine']];
+    if (j.failed) d.d.push(['Hinweis', j.failed + ' Kalender nicht erreichbar']);
+    paintTile(CAL_I);
+  } catch (e) { /* Beispieldaten bleiben stehen */ }
+}
+loadCalendar();
+setInterval(loadCalendar, 10*60*1000);
+
+// ---------- Einstellungen-Dialog ----------
+const setDlg = document.getElementById('settings');
+let placeChoice = null;
+function openSettings(){
+  placeChoice = null;
+  document.getElementById('set-place').value = '';
+  document.getElementById('set-place-results').innerHTML = '';
+  document.getElementById('set-place-current').textContent = PLACE.name + (PLACE.admin ? ', ' + PLACE.admin : '');
+  document.getElementById('set-ics').value = (SETTINGS.icsUrls || []).join('\n');
+  if (typeof setDlg.showModal === 'function') setDlg.showModal();
+}
+async function searchPlace(){
+  const q = document.getElementById('set-place').value.trim(), box = document.getElementById('set-place-results');
+  if (!q) return;
+  box.textContent = 'Suche …';
+  try {
+    const r = await fetch('https://geocoding-api.open-meteo.com/v1/search?count=6&language=de&format=json&name=' + encodeURIComponent(q));
+    const res = ((await r.json()).results) || [];
+    if (!res.length) { box.textContent = 'Kein Ort gefunden. Anders schreiben?'; return; }
+    box.innerHTML = res.map((p,k) => `<label><input type="radio" name="place" value="${k}"${k === 0 ? ' checked' : ''}> ${esc(p.name)}${p.admin1 ? ', ' + esc(p.admin1) : ''}${p.country ? ' (' + esc(p.country) + ')' : ''}</label>`).join('');
+    const pick = k => { const p = res[k]; placeChoice = {name:p.name, admin:p.admin1 || '', lat:p.latitude, lon:p.longitude}; };
+    pick(0);
+    box.querySelectorAll('input').forEach(i => i.addEventListener('change', () => pick(+i.value)));
+  } catch (e) { box.textContent = 'Die Ortssuche ist gerade nicht erreichbar.'; }
+}
+document.getElementById('open-settings').addEventListener('click', openSettings);
+document.getElementById('set-place-search').addEventListener('click', searchPlace);
+document.getElementById('set-place').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); searchPlace(); } });
+document.getElementById('settings-form').addEventListener('submit', e => {
+  e.preventDefault();
+  if (placeChoice) { SETTINGS.place = placeChoice; PLACE = placeChoice; }
+  SETTINGS.icsUrls = document.getElementById('set-ics').value.split(/\s+/).map(u => u.trim()).filter(u => /^(https|webcal):\/\//i.test(u));
+  saveSettings(SETTINGS);
+  setDlg.close();
+  loadWeather(); loadCalendar();
+});
 
 // Impressum & Datenschutz – ein Klick aus der Kopfzeile
 document.querySelectorAll('[data-doc]').forEach(b => b.addEventListener('click', () => {
