@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DAILY – Konzept & Projektübergabe</title>
+  <meta name="description" content="Konzeptdokument für DAILY – eine personalisierbare Tagesstartseite ohne Scrollen.">
+  <style>
+    :root{
+      --bg:#0b1020;
+      --panel:#11182b;
+      --panel2:#18223a;
+      --text:#eef3ff;
+      --muted:#aeb9d3;
+      --line:#26324e;
+      --accent:#7dd3fc;
+      --accent2:#a7f3d0;
+      --warm:#fde68a;
+      --danger:#fca5a5;
+      --radius:18px;
+      --shadow:0 12px 40px rgba(0,0,0,.28);
+      --max:1180px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:linear-gradient(180deg,#08101f 0%,#0b1020 45%,#0a0f1b 100%);
+      color:var(--text);
+      line-height:1.6;
+    }
+    a{color:var(--accent);text-decoration:none}
+    .wrap{max-width:var(--max);margin:auto;padding:48px 24px 80px}
+    .hero{
+      padding:52px;
+      border:1px solid var(--line);
+      background:
+        radial-gradient(circle at top right,rgba(125,211,252,.10),transparent 32%),
+        radial-gradient(circle at bottom left,rgba(167,243,208,.08),transparent 34%),
+        linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0));
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      margin-bottom:30px;
+    }
+    .eyebrow{letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-size:.78rem;font-weight:800}
+    h1{font-size:clamp(2.4rem,6vw,5.3rem);line-height:.98;margin:.4rem 0 1rem;letter-spacing:-.05em}
+    .subtitle{font-size:1.25rem;color:var(--muted);max-width:800px}
+    .tagline{
+      margin-top:22px;
+      padding:18px 20px;
+      border-left:4px solid var(--accent2);
+      background:rgba(167,243,208,.07);
+      border-radius:12px;
+      font-size:1.08rem;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(12,1fr);
+      gap:18px;
+      margin:26px 0;
+    }
+    .card{
+      grid-column:span 6;
+      padding:24px;
+      background:rgba(17,24,43,.85);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:0 8px 24px rgba(0,0,0,.18);
+    }
+    .card.full{grid-column:1/-1}
+    .card.third{grid-column:span 4}
+    .card h2,.card h3{margin-top:0}
+    h2{font-size:1.6rem;letter-spacing:-.02em}
+    h3{font-size:1.15rem;margin-bottom:.45rem}
+    p{margin:.4rem 0 1rem}
+    ul{margin:.5rem 0 0;padding-left:1.2rem}
+    li{margin:.25rem 0}
+    .muted{color:var(--muted)}
+    .section-title{
+      display:flex;align-items:center;gap:14px;
+      margin:48px 0 18px;
+    }
+    .num{
+      width:40px;height:40px;border-radius:12px;
+      display:grid;place-items:center;
+      background:var(--panel2);
+      border:1px solid var(--line);
+      color:var(--accent);
+      font-weight:800;
+      flex:none;
+    }
+    .section{
+      padding:26px;
+      background:rgba(17,24,43,.72);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      margin:14px 0;
+    }
+    .section h2{margin:0 0 8px}
+    .pillrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+    .pill{
+      padding:6px 10px;border:1px solid var(--line);border-radius:999px;
+      background:#0e1527;color:#cbd5e1;font-size:.9rem;
+    }
+    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:16px}
+    table{width:100%;border-collapse:collapse;min-width:760px}
+    th,td{padding:14px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+    th{text-align:left;background:#121b2f;color:var(--accent)}
+    tr:last-child td{border-bottom:none}
+    pre{
+      margin:0;
+      white-space:pre-wrap;
+      word-break:break-word;
+      background:#07101e;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:18px;
+      color:#dce7ff;
+      overflow:auto;
+      font-size:.94rem;
+    }
+    .quote{
+      font-size:1.2rem;
+      padding:24px;
+      border-radius:18px;
+      background:linear-gradient(135deg,rgba(125,211,252,.08),rgba(167,243,208,.06));
+      border:1px solid var(--line);
+      margin:22px 0;
+    }
+    .footer{
+      margin-top:52px;padding-top:20px;border-top:1px solid var(--line);
+      color:var(--muted);font-size:.92rem;
+    }
+    @media(max-width:850px){
+      .hero{padding:32px 24px}
+      .card,.card.third{grid-column:1/-1}
+      .wrap{padding:24px 14px 56px}
+    }
+    @media print{
+      body{background:white;color:#111}
+      .wrap{max-width:none;padding:0}
+      .hero,.card,.section{background:white;color:#111;box-shadow:none}
+      .muted,.subtitle,.footer{color:#444}
+      .pill{color:#222;background:#f6f6f6}
+      pre{background:#fafafa;color:#111}
+      a{color:#111}
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="hero">
+      <div class="eyebrow">Projektkonzept · Version 1.0</div>
+      <h1>DAILY</h1>
+      <p class="subtitle">Eine personalisierbare Tagesstartseite, die Nachrichten, Alltag, Wissen, Unterhaltung und persönliche Informationen auf einem einzigen Bildschirm zusammenführt.</p>
+      <div class="tagline"><strong>Kernidee:</strong> Alles Wichtige auf einem Bildschirm. Keine endlose Timeline. Kein Scrollen. Kachel anklicken → Inhalt wächst. Andere Inhalte treten zurück.</div>
+    </header>
+
+    <div class="grid">
+      <section class="card">
+        <h2>Zielbild</h2>
+        <p>DAILY soll zur zentralen Startseite für den Tag werden: schnell erfassbar, ruhig, visuell klar und konsequent auf tägliche Relevanz optimiert.</p>
+        <p class="muted">Im Zentrum steht nicht die maximale Informationsmenge, sondern die bestmögliche Verdichtung.</p>
+      </section>
+      <section class="card">
+        <h2>UX-Grundprinzip</h2>
+        <ul>
+          <li>Die Hauptseite nutzt den gesamten sichtbaren Browserbereich.</li>
+          <li>Auf der Hauptseite wird nicht gescrollt.</li>
+          <li>Alle Kacheln starten minimiert.</li>
+          <li>Ein Klick vergrößert eine Kachel.</li>
+          <li>Umliegende Kacheln verkleinern sich dynamisch.</li>
+          <li>Erst im vergrößerten Zustand erscheinen Details.</li>
+        </ul>
+      </section>
+    </div>
+
+    <div class="section-title"><div class="num">1</div><h2>Persönliche Tagesübersicht</h2></div>
+    <section class="section">
+      <p>Der Bereich, der morgens auf einen Blick sichtbar sein sollte.</p>
+      <div class="pillrow">
+        <span class="pill">Datum & Wochentag</span><span class="pill">Uhrzeit</span><span class="pill">Lokales Wetter</span>
+        <span class="pill">Wetterkarte</span><span class="pill">Weltwetterkarte</span><span class="pill">Weltklimakarte</span>
+        <span class="pill">Sonnenaufgang</span><span class="pill">Sonnenuntergang</span><span class="pill">Mondphase</span>
+        <span class="pill">Geburtstage</span><span class="pill">Jahrestage</span><span class="pill">Wissenschaftler-Geburtstage</span>
+        <span class="pill">Weltereignisse</span><span class="pill">Kalender</span><span class="pill">Termine</span>
+        <span class="pill">Aufgaben / Hausaufgaben</span><span class="pill">Mail</span><span class="pill">Social Media</span>
+        <span class="pill">Erinnerungen</span><span class="pill">On-Track</span><span class="pill">Tagesziele</span><span class="pill">Wochenziele</span>
+      </div>
+    </section>
+
+    <div class="section-title"><div class="num">2</div><h2>Persönliches Dashboard</h2></div>
+    <section class="section">
+      <h3>Kommunikation</h3>
+      <ul><li>E-Mail</li><li>Kalender</li><li>Social Media</li><li>Nachrichten / Benachrichtigungen</li></ul>
+      <h3>Finanzen</h3>
+      <ul><li>Kontenübersicht</li><li>Aktienkurse</li><li>Finanz-Tipp des Tages</li><li>Versicherungsübersicht</li><li>Angebote & Sparmöglichkeiten</li></ul>
+      <h3>Crypto</h3>
+      <ul><li>Crypto Assets</li><li>Crypto-Kurse</li><li>Crypto-Tipp des Tages</li><li>Portfolioentwicklung</li><li>optional eigenes Punkt-/Token-System</li></ul>
+      <h3>Gesundheit & Aktivität</h3>
+      <ul><li>Smartwatch-Daten</li><li>Sportziele vom Vortag</li><li>Schritte / Bewegung</li><li>Diät-Ticker</li><li>Gewicht / Ernährung</li><li>persönlicher Fortschritt</li></ul>
+    </section>
+
+    <div class="section-title"><div class="num">3</div><h2>„Des Tages“-Inhalte</h2></div>
+    <section class="section">
+      <h3>Wissen</h3>
+      <ul><li>Technik des Tages</li><li>Auto des Tages</li><li>Land des Tages</li><li>Buch des Tages</li><li>Buchzusammenfassung des Tages</li><li>Film des Tages</li><li>Reiseziel des Tages</li><li>historische Person / Wissenschaftler / Weltereignis des Tages</li><li>Wort des Tages</li><li>Buchstabe des Tages</li></ul>
+      <h3>Unterhaltung</h3>
+      <ul><li>Witz des Tages</li><li>Rätsel des Tages</li><li>Wortspiel des Tages</li><li>Weisheit des Tages</li><li>Morphing-Rätsel</li><li>Bilderrätsel</li><li>Instagram-Daily-Rätsel</li><li>Daily Schloss</li><li>Gewinnspiel des Tages</li></ul>
+      <h3>Lifestyle</h3>
+      <ul><li>Rezept des Tages</li><li>Discounter-Rezept</li><li>Haushaltstipp</li><li>Ernährungstipp</li><li>Sporttipp</li><li>Öko-Tipp</li><li>Shopping-Tipp</li><li>Schnäppchen des Tages</li><li>Geschenkvorschlag</li></ul>
+    </section>
+
+    <div class="section-title"><div class="num">4</div><h2>Nachrichten & Gesellschaft</h2></div>
+    <section class="section">
+      <h3>Nachrichten</h3>
+      <ul><li>Wichtigste News des Tages</li><li>International</li><li>Regional</li><li>Wirtschaft</li><li>Wissenschaft</li><li>Technik</li><li>Kultur</li><li>Sport</li></ul>
+      <h3>Faktencheck des Tages</h3>
+      <p>Virale Behauptung, Quelle, Faktenlage, Belege und sachliche Einordnung.</p>
+      <h3>Kritik & Diskussion</h3>
+      <ul><li>Kritik des Tages</li><li>Meckerecke des Tages</li><li>Thema des Tages</li><li>Verbesserungsidee des Tages</li><li>Lesermeinungen</li><li>Abstimmungen</li><li>Kommentare</li></ul>
+    </section>
+
+    <div class="section-title"><div class="num">5</div><h2>Politik & Gesellschaft</h2></div>
+    <section class="section">
+      <ul>
+        <li>Politisches Thema des Tages</li>
+        <li>Aktuelle politische Debatte</li>
+        <li>Pro- und Contra-Argumente</li>
+        <li>Fakten und Hintergründe</li>
+        <li>Verbesserungsvorschlag an Politik oder Verwaltung</li>
+        <li>Nutzerabstimmung</li>
+        <li>Historische Entwicklung eines Themas</li>
+      </ul>
+      <p class="muted">Beispiele: Rundfunkbeitrag, Sommerzeit, Negativzinsen und weitere von Nutzern vorgeschlagene Themen. Darstellung neutral, sachlich und quellenbasiert.</p>
+    </section>
+
+    <div class="section-title"><div class="num">6</div><h2>Beziehung & Partnerschaft</h2></div>
+    <section class="section">
+      <h3>Beziehungstipp des Tages</h3>
+      <ul><li>Kompliment</li><li>gemeinsam essen gehen</li><li>Kino</li><li>Spaziergang</li><li>Nachricht schicken</li><li>Überraschung</li><li>kleine Aufmerksamkeit</li></ul>
+      <h3>Beziehungskalender</h3>
+      <ul><li>Jahrestage</li><li>Geburtstage</li><li>gemeinsame Termine</li><li>Erinnerungen</li><li>Unternehmungen</li></ul>
+      <h3>Paar-Challenge</h3>
+      <ul><li>tägliche Aufgabe</li><li>Wochenaufgabe</li><li>gemeinsame Aktivität</li></ul>
+      <h3>Kleine Überraschungen</h3>
+      <ul><li>Geschenkidee</li><li>Date-Idee</li><li>kostenlose Überraschung</li><li>spontane Aktivität</li><li>Wochenendidee</li></ul>
+    </section>
+
+    <div class="section-title"><div class="num">7</div><h2>Ernährung & Kochen</h2></div>
+    <section class="section">
+      <ul><li>Rezept des Tages</li><li>schnelles Rezept</li><li>gesundes Rezept</li><li>günstiges Rezept</li><li>vegetarisches Rezept</li><li>Familienrezept</li></ul>
+      <h3>Discounter-Rezepte</h3>
+      <p>Aus aktuellen Angeboten soll später automatisch ein passendes Tagesrezept entstehen können.</p>
+      <h3>International</h3>
+      <ul><li>Rezept aus einem Land</li><li>Land des Tages</li><li>landestypisches Gericht</li><li>Hintergrund zum Gericht</li></ul>
+      <h3>Familie</h3>
+      <p>Rubrik „Heute für die Familie“ mit Erwachsenen-, Kinder- und Teenageroption sowie schnell / günstig / gesund.</p>
+    </section>
+
+    <div class="section-title"><div class="num">8</div><h2>Shopping & Schnäppchen</h2></div>
+    <section class="section">
+      <ul><li>Angebot des Tages</li><li>Preisvergleich</li><li>Discounterangebote</li><li>Technikangebote</li><li>Haushaltsangebote</li><li>Reiseangebote</li></ul>
+      <h3>Affiliate später</h3>
+      <p>Stufe 1 bleibt affiliate-frei. Später sind klar gekennzeichnete Partnerlinks denkbar, z. B. für Shopping, Reisen, Technik, Streaming, Leasing und Versicherungen.</p>
+    </section>
+
+    <div class="section-title"><div class="num">9</div><h2>Auto & Mobilität</h2></div>
+    <section class="section">
+      <ul><li>Auto des Tages</li><li>neue Fahrzeuge</li><li>Elektroautos</li><li>Verbrauch</li><li>Reichweite</li><li>Leasingangebote</li><li>beste Leasingraten</li><li>Gebrauchtwagen</li><li>Mobilitätstipp</li><li>Verkehrsinfos</li></ul>
+    </section>
+
+    <div class="section-title"><div class="num">10</div><h2>Reisen</h2></div>
+    <section class="section">
+      <ul><li>Reiseziel des Tages</li><li>Land des Tages</li><li>Stadt des Tages</li><li>Sehenswürdigkeit des Tages</li><li>Wetter am Reiseziel</li><li>günstige Reiseangebote</li><li>kulturelle Besonderheiten</li><li>Küche des Landes</li><li>Reisequiz</li></ul>
+      <p class="muted">Später erweiterbar um Hotels, Flüge, Aktivitäten und Affiliate-Angebote.</p>
+    </section>
+
+    <div class="section-title"><div class="num">11</div><h2>Fernsehen, Streaming & Medien</h2></div>
+    <section class="section">
+      <h3>Daily Entertainment</h3>
+      <ul><li>TV-Tipp des Tages</li><li>Film des Tages</li><li>Streaming-Tipp</li><li>Serie des Tages</li><li>Dokumentation des Tages</li></ul>
+      <h3>TV-Programm</h3>
+      <ul><li>heutige Highlights</li><li>Primetime</li><li>Filme</li><li>Sport</li><li>Dokumentationen</li></ul>
+    </section>
+
+    <div class="section-title"><div class="num">12</div><h2>Bücher & Wissen</h2></div>
+    <section class="section">
+      <ul><li>Buch des Tages</li><li>Buchzusammenfassung</li><li>Klassiker des Tages</li><li>Sachbuch des Tages</li><li>Zitat des Tages</li><li>Autor des Tages</li><li>wissenschaftliche Entdeckung des Tages</li></ul>
+    </section>
+
+    <div class="section-title"><div class="num">13</div><h2>Technik</h2></div>
+    <section class="section">
+      <h3>Tech des Tages</h3>
+      <ul><li>Gadget</li><li>App</li><li>Software</li><li>KI-Tool</li><li>Erfindung</li><li>Technikgeschichte</li></ul>
+      <h3>Tech-News</h3>
+      <ul><li>KI</li><li>Computer</li><li>Smartphones</li><li>Wissenschaft</li><li>Raumfahrt</li><li>Energie</li></ul>
+    </section>
+
+    <div class="section-title"><div class="num">14</div><h2>Umwelt & Nachhaltigkeit</h2></div>
+    <section class="section">
+      <ul><li>Öko-Tipp des Tages</li><li>Energie sparen</li><li>Wasser sparen</li><li>Müll vermeiden</li><li>nachhaltiges Einkaufen</li><li>CO₂-Themen</li><li>Weltklimakarte</li><li>Klimaereignisse</li></ul>
+    </section>
+
+    <div class="section-title"><div class="num">15</div><h2>Spiele, Rätsel & Gamification</h2></div>
+    <section class="section">
+      <ul><li>Rätsel des Tages</li><li>Wortspiel</li><li>Bilderrätsel</li><li>Morphing-Rätsel</li><li>Daily Schloss</li><li>Instagram-Rätsel</li><li>Quiz</li><li>Länderquiz</li><li>Filmquiz</li><li>Musikquiz</li><li>Wissenschaftsquiz</li></ul>
+      <h3>Belohnungssystem</h3>
+      <p>Die Idee „Wer liest bekommt Sehlat-Token“ wird zunächst als internes Punktesystem umgesetzt.</p>
+      <ul><li>Artikel lesen → Punkte</li><li>Rätsel lösen → Punkte</li><li>Quiz beantworten → Punkte</li><li>täglicher Besuch → Punkte</li><li>7-Tage-Serie → Bonus</li></ul>
+    </section>
+
+    <div class="section-title"><div class="num">16</div><h2>Kreative Daily-Formate</h2></div>
+    <section class="section">
+      <h3>Cartooneyesed</h3><p>Ein Foto oder Thema wird als Cartoon interpretiert.</p>
+      <h3>Paradeyesed</h3><p>Eigenständige künstlerische Daily-Rubrik, deren genaue Form noch definiert wird.</p>
+      <h3>Morphing-Video</h3><p>Ein Bild verändert sich langsam; Nutzer müssen erraten, was entsteht. Die Lösung erscheint später.</p>
+    </section>
+
+    <div class="section-title"><div class="num">17</div><h2>Social Media</h2></div>
+    <section class="section">
+      <p>DAILY soll zugleich als Content Engine funktionieren.</p>
+      <ul>
+        <li>Rätsel → Instagram</li><li>Witz → Story</li><li>Rezept → Pinterest</li>
+        <li>Reiseziel → Instagram</li><li>Tech-Tipp → Threads / X</li>
+        <li>Buch → Facebook</li><li>Morphing-Rätsel → TikTok / Reels</li>
+      </ul>
+    </section>
+
+    <div class="section-title"><div class="num">18</div><h2>Mögliche Markenstruktur</h2></div>
+    <section class="section">
+      <p><strong>Marke:</strong> DAILY oder DLY</p>
+      <p><strong>Produkt:</strong> Daily Dashboard</p>
+      <p><strong>Redaktioneller Bereich:</strong> Des Tages</p>
+      <div class="quote">DAILY — Dein Tag auf einer Seite.</div>
+      <p>Mögliche redaktionelle Untermarken: Wetter des Tages, Rezept des Tages, Rätsel des Tages, Tech des Tages, Reiseziel des Tages.</p>
+    </section>
+
+    <div class="section-title"><div class="num">19</div><h2>Bildschirmaufbau</h2></div>
+    <section class="section">
+      <p>Die Hauptseite bleibt vollständig innerhalb des sichtbaren Browserbereichs.</p>
+      <pre>┌───────────────────────────────────────────────────────────────┐
+│  DAILY        Samstag 26. September      02:16       ⚙︎      │
+├───────────────┬───────────────┬───────────────┬───────────────┤
+│ Wetter        │ Kalender      │ News          │ Finanzen      │
+├───────────────┼───────────────┼───────────────┼───────────────┤
+│ Tageswissen   │ Beziehung     │ Gesundheit    │ Rezept        │
+├───────────────┼───────────────┼───────────────┼───────────────┤
+│ Rätsel        │ Shopping      │ Entertainment │ Reisen        │
+├───────────────┼───────────────┼───────────────┼───────────────┤
+│ Tech          │ Öko           │ Social        │ Mehr          │
+└───────────────┴───────────────┴───────────────┴───────────────┘</pre>
+      <p>Alle Kacheln sind initial minimiert. Beim Aktivieren einer Kachel wächst diese und zeigt zusätzliche Daten, während die übrigen Kacheln Platz freigeben.</p>
+    </section>
+
+    <div class="section-title"><div class="num">20</div><h2>Wichtiges UX-Prinzip</h2></div>
+    <section class="section">
+      <p>Nicht 40 gleichwertige Kacheln gleichzeitig anzeigen, sondern etwa 12–16 Hauptkacheln, unter denen die vielen Einzelthemen gebündelt werden.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Hauptkachel</th><th>Inhalte</th></tr></thead>
+          <tbody>
+            <tr><td>Heute</td><td>Datum, Zeiten, Ereignisse</td></tr>
+            <tr><td>Wetter</td><td>lokal, Welt, Klima, Sonne, Mond</td></tr>
+            <tr><td>Kalender</td><td>Termine, Geburtstage</td></tr>
+            <tr><td>Nachrichten</td><td>News, Faktencheck, Politik</td></tr>
+            <tr><td>Geld</td><td>Finanzen, Aktien, Crypto</td></tr>
+            <tr><td>Gesundheit</td><td>Sport, Ernährung, Diät</td></tr>
+            <tr><td>Beziehung</td><td>Tipps, Kalender, Überraschung</td></tr>
+            <tr><td>Essen</td><td>Rezept, Discounter, Länder</td></tr>
+            <tr><td>Entdecken</td><td>Land, Reise, Wissen</td></tr>
+            <tr><td>Entertainment</td><td>TV, Streaming, Filme</td></tr>
+            <tr><td>Shopping</td><td>Angebote, Schnäppchen</td></tr>
+            <tr><td>Wissen</td><td>Buch, Wissenschaft, Geschichte</td></tr>
+            <tr><td>Tech</td><td>Technik, KI, Gadgets</td></tr>
+            <tr><td>Spielen</td><td>Rätsel, Quiz, Wortspiele</td></tr>
+            <tr><td>Umwelt</td><td>Öko, Klima</td></tr>
+            <tr><td>Mein Daily</td><td>Mail, Social, persönliche Daten</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="section-title"><div class="num">21</div><h2>Weitere sinnvolle Ergänzungen</h2></div>
+    <section class="section">
+      <div class="pillrow">
+        <span class="pill">Verkehr / Pendelzeit</span><span class="pill">Luftqualität</span><span class="pill">Pollen</span>
+        <span class="pill">Paketstatus</span><span class="pill">To-do-Liste</span><span class="pill">Erinnerungen</span>
+        <span class="pill">Einkaufszettel</span><span class="pill">Notizen</span><span class="pill">Favoriten</span>
+        <span class="pill">RSS / Lieblingsseiten</span><span class="pill">Börsenindizes</span><span class="pill">Währungen</span>
+        <span class="pill">Feiertage</span><span class="pill">Schulferien</span><span class="pill">lokale Veranstaltungen</span>
+        <span class="pill">Abfallkalender</span><span class="pill">Strompreis</span><span class="pill">Benzinpreise</span>
+        <span class="pill">Warnmeldungen</span><span class="pill">Countdowns</span><span class="pill">KI-Tageszusammenfassung</span>
+      </div>
+    </section>
+
+    <section class="card full" style="margin-top:46px">
+      <h2>Produktdefinition</h2>
+      <div class="quote"><strong>DAILY ist eine personalisierbare Startseite, die Nachrichten, Alltag, Wissen, Unterhaltung und persönliche Informationen auf einem einzigen Bildschirm zusammenfasst.</strong></div>
+      <p>Die Besonderheit ist nicht die schiere Menge an Informationen, sondern deren intelligente Verdichtung, Priorisierung und Interaktion.</p>
+    </section>
+
+    <section class="card full" style="margin-top:24px">
+      <h2>Übergabeprompt für den neuen Workspace / Cowork</h2>
+      <p class="muted">Diesen Prompt vollständig in den neuen Projekt-Workspace übernehmen:</p>
+      <pre>Wir starten ein neues Webprojekt mit dem Arbeitstitel „DAILY“.
+
+Ziel:
+DAILY soll eine personalisierbare tägliche Startseite werden, die die wichtigsten Informationen, Inhalte und persönlichen Übersichten auf EINEM Bildschirm bündelt.
+
+Zentrales UI-/UX-Prinzip:
+- Die Startseite nutzt den gesamten sichtbaren Browserbereich.
+- Auf der Hauptansicht darf nicht gescrollt werden.
+- Die Oberfläche ist kachelartig aufgebaut.
+- Alle Hauptkacheln starten minimiert.
+- Klickt der Nutzer auf eine Kachel, vergrößert sich diese dynamisch.
+- Umliegende Kacheln verkleinern sich entsprechend.
+- Erst im vergrößerten Zustand erscheinen ausführliche Informationen.
+- Die Oberfläche soll ruhig, hochwertig, modern, übersichtlich und professionell wirken.
+- Desktop zuerst, aber von Anfang an responsiv planen.
+- Keine endlose Feed-/Timeline-Logik.
+
+Inhaltliche Hauptbereiche:
+1. Persönliche Tagesübersicht
+2. Persönliches Dashboard
+3. „Des Tages“-Inhalte
+4. Nachrichten & Gesellschaft
+5. Politik & Gesellschaft
+6. Beziehung & Partnerschaft
+7. Ernährung & Kochen
+8. Shopping & Schnäppchen
+9. Auto & Mobilität
+10. Reisen
+11. Fernsehen, Streaming & Medien
+12. Bücher & Wissen
+13. Technik
+14. Umwelt & Nachhaltigkeit
+15. Spiele, Rätsel & Gamification
+16. Kreative Daily-Formate
+17. Social Media / Content Engine
+18. Markenstruktur
+19. Bildschirmaufbau
+20. Hauptkachel-Architektur
+21. Weitere Daily-Utilities
+
+Empfohlene Hauptkacheln:
+- Heute
+- Wetter
+- Kalender
+- Nachrichten
+- Geld
+- Gesundheit
+- Beziehung
+- Essen
+- Entdecken
+- Entertainment
+- Shopping
+- Wissen
+- Tech
+- Spielen
+- Umwelt
+- Mein Daily
+
+Wichtige Einzelideen:
+- Wetter, Weltwetter, Weltklima, Sonnenaufgang, Sonnenuntergang, Mondphase
+- Kalender, Geburtstage, Jahrestage, historische Ereignisse, Wissenschaftler-Geburtstage
+- Mail, Social Media, Aufgaben, Hausaufgaben, Erinnerungen, On-Track
+- Aktien, Finanzen, Crypto Assets, Versicherungen
+- Smartwatch-Ziele, Bewegung, Diät-Ticker
+- Beziehungstipp, Beziehungskalender, Paar-Challenges, kleine Überraschungen, Geschenkvorschläge
+- Rezept des Tages, Discounter-Rezepte, internationale Küche, Familien-/Teenageressen
+- News, Faktencheck des Tages, Meckerecke, Kritik, Diskussion
+- politisches Thema des Tages sachlich und quellenbasiert
+- Tech des Tages, Auto des Tages, Land des Tages, Buch des Tages, Film des Tages
+- TV-Tipp, Streaming-Tipp, Reiseziel des Tages
+- Öko-Tipp, Shopping-Tipp, Schnäppchen
+- Witz, Rätsel, Wortspiel, Weisheit, Daily Schloss, Morphing-Rätsel
+- Cartooneyesed und Paradeyesed als kreative Daily-Formate
+- internes Punktesystem / „Sehlat-Token“-Idee zunächst nur als Gamification, nicht als Kryptowährung
+- Social-Media-Ausspielung aus Daily-Inhalten
+- später mögliche Affiliate-Integration, aber NICHT in Stufe 1
+
+Produktprinzip:
+Nicht möglichst viele Inhalte gleichzeitig zeigen. Stattdessen ca. 12–16 Hauptkacheln und darunter die Einzelthemen gruppieren.
+
+Designziel:
+Eine Mischung aus Premium-Dashboard, digitalem Tagesmagazin und persönlicher Startseite. Die Seite soll sofort verständlich sein, schnell wirken und visuell nicht überladen sein.
+
+Arbeitsweise im Projekt:
+1. Zuerst Informationsarchitektur und Priorisierung finalisieren.
+2. Dann Desktop-Layout und Verhalten der expandierenden Kacheln definieren.
+3. Danach Designsystem: Typografie, Abstände, Farben, Icons, States.
+4. Anschließend interaktiven Frontend-Prototyp bauen.
+5. Erst danach Datenquellen/APIs und Personalisierung planen.
+6. Affiliate, Accounts, Payments oder komplexe Backends erst in späteren Stufen.
+
+Bitte arbeite nach Best Practices für moderne Webanwendungen:
+- Accessibility
+- Performance
+- responsive Design
+- klare Komponentenarchitektur
+- Datenschutz
+- progressive Enhancement
+- saubere Daten- und API-Trennung
+- langfristige Wartbarkeit
+
+Beginne mit:
+A) einer finalen Informationsarchitektur,
+B) einem konkreten 16-Kachel-Desktop-Raster,
+C) dem Interaktionsmodell für minimierte/aktive Kacheln,
+D) einem visuellen Designkonzept,
+E) einer MVP-Abgrenzung für Version 1.</pre>
+    </section>
+
+    <footer class="footer">
+      <p>DAILY · Konzept & Projektübergabe · Grundlage für die Weiterarbeit im neuen Workspace/Cowork.</p>
+    </footer>
+  </main>
+</body>
+</html>

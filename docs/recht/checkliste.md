@@ -1,0 +1,41 @@
+# DAILY – Rechtliche Checkliste Web vs. App (Stand 26.09.2026, keine Rechtsberatung)
+
+## Solange DAILY privat ist (nur Roger, nicht öffentlich erreichbar)
+Kein Impressum, keine Datenschutzerklärung, keine Medienpflichten nötig. Aktuell: Vercel Authentication „All Deployments“ aktiv.
+
+## Öffentliche Website
+- Impressum nach § 5 DDG (Name, ladungsfähige Anschrift, E-Mail, schnelle Kontaktmöglichkeit, ggf. USt-IdNr.); leicht erkennbar, unmittelbar erreichbar, ständig verfügbar (BGH: max. 2 Klicks als Faustregel).
+- DSGVO-Datenschutzerklärung; jede externe Anfrage (Wetter-API, Kurse) überträgt die IP → nennen oder serverseitig bündeln.
+- Schriften selbst hosten (erledigt).
+- § 25 TDDDG: localStorage für Funktionen, die der Nutzer will (Aufgaben, Klickzähler lokal), ohne Einwilligung ok; Analyse/Tracking an Server → Einwilligung.
+- Affiliate später: klar als Werbung kennzeichnen.
+
+## Nachrichten & Co. – Entscheidung: kein journalistisches Angebot
+Ein journalistisch-redaktionelles Angebot (eigene Auswahl, Gewichtung, Zusammenfassung oder Bewertung meinungsbildender Themen) würde auslösen:
+- § 18 Abs. 2 MStV: verantwortliche Person mit Name und Anschrift.
+- § 19 MStV: journalistische Sorgfalt (Wahrheit/Herkunft prüfen, Meinung und Nachricht trennen, Fehler korrigieren); Aufsicht Landesmedienanstalt (Sachsen: SLM).
+- § 20 MStV: Gegendarstellungsanspruch.
+- AI Act Art. 50 (seit 2.8.2026): KI-generierte Texte zu Themen öffentlichen Interesses kennzeichnen – außer bei echter redaktioneller Prüfung.
+
+Deshalb in DAILY:
+- **Schlagzeilen** nur als Originalüberschriften + Link aus selbst gewählten Quellen, chronologisch, ohne eigene Auswahl/Rangfolge/Zusammenfassung.
+- **Gestrichen/geparkt:** Politisches Thema, Faktencheck, Meckerecke/Kritik, „wichtigste News“, eigene KI-Zusammenfassungen aktueller Ereignisse, Tech-News-Texte, Spielberichte.
+- **Unproblematisch:** Wetter, Kalender, Mail, Aufgaben, Pakete, Kurse als Zahlen, Sportergebnisse/Tabellen, Rezepte, Rätsel, Witze, Wort des Tages, Lexikon-Fakten.
+- Urheberrecht / Presseverleger-Leistungsschutzrecht (§ 87f UrhG): nur Überschrift bzw. sehr kurze Auszüge + Link; RSS nach Nutzungsbedingungen der Anbieter.
+- Weitere Fallen: Finanz-Tipps nur allgemein (keine Anlageempfehlungen); TV-Programmdaten nur aus lizenzierter Quelle.
+
+## Zusätzlich als App (App Store / Google Play)
+- Impressum auch im Store-Eintrag und in der App (max. 2 Klicks, Link „Impressum“); ob der Store-Eintrag allein reicht, ist gerichtlich ungeklärt → beides.
+- Datenschutzerklärung in App und Store verlinkt; Apple „Datenschutz-Etiketten“ und Google „Datensicherheit“-Formular ausfüllen (müssen zu allen SDKs passen).
+- OS-Berechtigungen (Standort, Kalender, Mitteilungen) nur mit Zweck, erst bei Bedarf abfragen.
+- § 25 TDDDG gilt auch für Apps: Analyse-/Crash-SDKs mit Geräte-IDs → Einwilligung.
+- EU-Stores: DSA-Händlerstatus angeben. Händler (Werbung, Affiliate, Abo, Kauf) → Adresse, Telefon, E-Mail öffentlich im Store. Hobby ohne Einnahmen → Nicht-Händler möglich.
+- Mit Nutzerkonten: Konto muss in der App löschbar sein.
+- Alternative mit weniger Aufwand: PWA (installierbare Web-App) → nur Web-Pflichten, keine Store-Regeln. (Gewählt.)
+
+## Quellen
+- eRecht24: Impressum in App Stores – https://www.e-recht24.de/impressum/10176-app-impressum.html
+- LFK: Leitfaden Impressumspflicht 2024 – https://www.lfk.de/fileadmin/PDFs/Dokumente_und_Rechtsgrundlagen/Leitfaeden/leitfaden-impressumspflicht-2024.pdf
+- § 25 TDDDG – https://www.gesetze-im-internet.de/ttdsg/__25.html
+- FORUM Institut: KI-Kennzeichnung nach Art. 50 – https://forum-institut.de/eu-ai-act-2-august-2026/ki-kennzeichnung-nach-artikel-50
+- Apple: DSA-Händleranforderungen – https://developer.apple.com/help/app-store-connect/manage-compliance-information/manage-european-union-digital-services-act-trader-requirements/
