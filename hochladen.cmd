@@ -4,6 +4,12 @@ rem DAILY: Aenderungen zu GitHub hochladen (Vercel veroeffentlicht danach automa
 rem Liegt eine Datei .commit-msg.txt von Claude vor, wird deren Kommentar uebernommen.
 cd /d "%~dp0"
 
+rem Zuerst den aktuellen Stand von GitHub holen (Claude kann direkt dorthin hochladen)
+echo Hole den aktuellen Stand von GitHub ...
+git pull --rebase --autostash
+if errorlevel 1 goto fehler
+echo.
+
 git add .
 git diff --cached --quiet
 if %errorlevel%==0 (
