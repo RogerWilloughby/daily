@@ -35,4 +35,15 @@ const norm = s => String(s || '').toLowerCase()
   .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
   .normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
 
-module.exports = { getText, getJson, postJson, send, norm };
+// Privater Betrieb (Kalender, Schlagzeilen): nur wenn in Vercel DAILY_PRIVATE=1 gesetzt ist
+const isPrivate = () => process.env.DAILY_PRIVATE === '1';
+function privateOnly(res) {
+  if (isPrivate()) return false;
+  send(res, { error: 'Nur im privaten Betrieb verfügbar.' }, 0, 404);
+  return true;
+}
+
+// Koordinaten auf 2 Nachkommastellen (≈ 1 km) runden: schützt den genauen Standort und teilt den Cache
+const coord = (v, max) => { const n = Number(v); return Number.isFinite(n) && Math.abs(n) <= max ? Math.round(n * 100) / 100 : null; };
+
+module.exports = { getText, getJson, postJson, send, norm, isPrivate, privateOnly, coord };

@@ -2,6 +2,7 @@
 // Originalüberschriften + Link als JSON. Keine eigene Auswahl, Gewichtung
 // oder Zusammenfassung (siehe docs/konzept/entscheidungen.md, Punkt 7).
 // Quellen hier anpassen:
+const { privateOnly } = require('./_lib/http');
 const FEEDS = [
   { name: 'Tagesschau', url: 'https://www.tagesschau.de/index~rss2.xml' },
   { name: 'MDR Sachsen', url: 'https://www.mdr.de/nachrichten/sachsen/index-rss.xml' },
@@ -47,6 +48,7 @@ function parse(xml, source) {
 }
 
 module.exports = async (req, res) => {
+  if (privateOnly(res)) return; // Schlagzeilen nur im privaten Betrieb (Strategie: keine Nutzerdaten, keine Nachrichten)
   const results = await Promise.all(FEEDS.map(async f => {
     try {
       const r = await fetch(f.url, {
