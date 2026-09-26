@@ -1,0 +1,225 @@
+/* DAILY – Stylesheet
+   Aufbau: 1 Schriften · 2 Farben/Tokens · 3 Grundlayout · 4 Leiste · 5 Raster & Kacheln
+           6 Aktive Kachel & Inhalte · 7 Dialoge · 8 Mobil · 9 Bewegung */
+
+/* 1 Schriften (selbst gehostet) */
+@font-face{font-family:"Bricolage Grotesque";src:url(/fonts/bricolage-grotesque.woff2) format("woff2");font-weight:200 800;font-display:swap}
+@font-face{font-family:"Figtree";src:url(/fonts/figtree-400.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Figtree";src:url(/fonts/figtree-500.woff2) format("woff2");font-weight:500;font-display:swap}
+@font-face{font-family:"Figtree";src:url(/fonts/figtree-600.woff2) format("woff2");font-weight:600;font-display:swap}
+
+/* 2 Farben – hell als Basis, dunkel über Systemeinstellung oder data-theme */
+:root{
+  --ground:#E8ECEA; --surface:#F7F9F7; --line:#D3DAD6; --ink:#16201C; --muted:#526059;
+  --accent:#2C5A8A; --active-bg:#1D3553; --active-ink:#F2F6FA; --active-muted:#B8C8DA; --active-line:#34507A;
+  --up:#2F7A4B; --down:#B3452F; --ok:#2F7A4B; --warn:#B7791F;
+  --active-up:#9FD8B2; --active-down:#F2A99A;
+  --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --body:"Figtree","Segoe UI",system-ui,sans-serif;
+  --ease:cubic-bezier(.2,.8,.2,1);
+  --radius:12px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#101513; --surface:#1A201D; --line:#2B3430; --ink:#E6ECE8; --muted:#9AA8A1;
+    --accent:#8DB5E6; --active-bg:#1F3552; --active-ink:#EEF3F9; --active-muted:#A9BCD3; --active-line:#34507A;
+    --up:#7CCB98; --down:#F08C77; --ok:#7CCB98; --warn:#E7B45A;
+    --active-up:#9FD8B2; --active-down:#F2A99A;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#101513; --surface:#1A201D; --line:#2B3430; --ink:#E6ECE8; --muted:#9AA8A1;
+  --accent:#8DB5E6; --active-bg:#1F3552; --active-ink:#EEF3F9; --active-muted:#A9BCD3; --active-line:#34507A;
+  --up:#7CCB98; --down:#F08C77; --ok:#7CCB98; --warn:#E7B45A;
+  --active-up:#9FD8B2; --active-down:#F2A99A;
+}
+
+/* 3 Grundlayout: Raster oben, Antwort darüber-liegend, Leiste unten; die Seite scrollt nie */
+html,body{height:100%}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);font-size:15px;overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none !important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.app{height:100%;box-sizing:border-box;padding-block:16px 14px;padding-inline:clamp(16px,2vw,28px);display:flex;flex-direction:column;gap:14px}
+.grid{order:1}.answer{order:2}.bar{order:3}
+
+/* 4 Leiste */
+.bar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;min-height:48px}
+.brand{font-family:var(--display);font-weight:700;font-size:28px;letter-spacing:.08em}
+.date{color:var(--muted);font-size:15px}
+.clock{font-family:var(--display);font-weight:500;font-size:22px;font-variant-numeric:tabular-nums}
+.spacer{flex:1}
+.ask{flex:1 1 280px;max-width:460px;display:flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border-radius:var(--radius);border:1px solid var(--line);background:var(--surface)}
+.ask:focus-within{border-color:var(--accent)}
+.ask .ico{width:18px;height:18px}
+.ask input{flex:1;min-width:0;border:0;background:transparent;font:inherit;font-size:15px;color:var(--ink);outline:none}
+.ask input::placeholder{color:var(--muted)}
+.status{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--muted);padding:5px 10px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
+.status i{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.status[data-level="ok"] i{background:var(--ok)}
+.status[data-level="warn"] i{background:var(--warn)}
+.gear{display:flex;align-items:center;gap:6px;min-height:36px;padding:0 10px;border-radius:10px;border:1px solid var(--line);color:var(--muted);font-size:13px}
+.gear:hover{color:var(--ink);border-color:var(--accent)}
+.gear svg{width:16px;height:16px}
+.legal{display:flex;gap:14px;font-size:13px}
+.legal button{color:var(--muted);text-decoration:underline;text-underline-offset:3px;min-height:32px}
+.legal button:hover{color:var(--ink)}
+.answer{display:flex;align-items:flex-start;gap:14px;padding:14px 18px;border-radius:var(--radius);background:var(--active-bg);color:var(--active-ink);font-size:15px;line-height:1.45}
+.answer p{margin:0;flex:1}
+.answer .q{color:var(--active-muted);display:block;font-size:13px;margin-bottom:2px}
+
+/* 5 Raster & Kacheln */
+.grid{flex:1;min-height:0;display:grid;gap:10px;
+  grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:repeat(4,minmax(0,1fr));
+  transition:grid-template-columns .5s var(--ease),grid-template-rows .5s var(--ease)}
+.tile{position:relative;min-width:0;min-height:0;overflow:hidden;border-radius:var(--radius);background:var(--surface);border:1px solid var(--line);
+  display:grid;grid-template-columns:minmax(0,1fr);transition:background .35s,border-color .35s,color .35s}
+.tile:hover:not([data-mode="active"]){border-color:var(--accent)}
+.head{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;padding:18px 20px;min-width:0;min-height:0;overflow:hidden;transition:padding .35s var(--ease)}
+.label{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;max-width:100%}
+.label span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.label .short{display:none}
+.ico{width:18px;height:18px;flex:none;color:var(--accent)}
+.metric{display:flex;align-items:center;gap:8px;font-family:var(--display);font-weight:700;font-size:28px;line-height:1.1;max-width:100%;font-variant-numeric:tabular-nums}
+.metric .m-long,.metric .m-short{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.metric .m-short{display:none}
+.metric[data-len="long"]{font-size:23px;line-height:1.12}
+.metric[data-len="long"] .m-long{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.tile[data-mode="lane"] .metric[data-len="long"] .m-long,.tile[data-mode="small"] .metric[data-len="long"] .m-long{white-space:nowrap;display:block}
+.glyph{flex:none;width:1.05em;height:1.05em;color:var(--accent)}
+.glyph:empty{display:none}
+.glyph svg{width:100%;height:100%;display:block}
+.teaser{color:var(--muted);font-size:14px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.trend-up{color:var(--up)}.trend-down{color:var(--down)}
+.body{display:none}
+.tag{flex:none;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+
+/* Zustände: lädt · nicht verbunden · frei */
+.tile[data-state="loading"] .metric,.tile[data-state="loading"] .teaser{opacity:.45}
+.tile[data-state="off"]{background:transparent;border-style:dashed}
+.tile[data-state="off"]:not([data-mode="active"]) .metric{color:var(--muted);font-weight:600}
+.tile.free{background:transparent;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px}
+.tile.free:hover{border-color:var(--line)}
+.tile.free[data-mode="small"] span{display:none}
+
+/* Kleine und mitwachsende Kacheln */
+.tile[data-mode="small"] .head,.tile[data-mode="lane"] .head{padding:10px 12px;gap:3px}
+.tile[data-mode="small"] .label,.tile[data-mode="lane"] .label{font-size:13px}
+.tile[data-mode="small"] .metric{font-size:16px}
+.tile[data-mode="lane"] .metric{font-size:19px}
+.tile[data-mode="small"] .teaser{display:none}
+.tile[data-mode="small"] .tag{display:none}
+.tile[data-mode="lane"] .teaser{font-size:13px;-webkit-line-clamp:2}
+
+/* 6 Aktive Kachel */
+.tile[data-mode="active"]{background:var(--active-bg);border-color:var(--active-bg);border-style:solid;color:var(--active-ink);
+  grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);grid-template-rows:minmax(0,1fr)}
+.tile[data-mode="active"] .head{padding:28px 30px;gap:12px;cursor:default}
+.tile[data-mode="active"] .ico,.tile[data-mode="active"] .glyph{color:var(--active-muted)}
+.tile[data-mode="active"] .label{font-size:14px;letter-spacing:.06em;text-transform:uppercase}
+.tile[data-mode="active"] .tag{border-color:var(--active-line);color:var(--active-muted)}
+.tile[data-mode="active"] .metric{font-size:clamp(28px,2.8vw,46px)}
+.tile[data-mode="active"] .metric .m-long{white-space:normal;overflow:visible;overflow-wrap:anywhere;hyphens:auto}
+.tile[data-mode="active"] .teaser{color:var(--active-muted);font-size:17px;-webkit-line-clamp:6}
+.tile[data-mode="active"] .trend-up{color:var(--active-up)}.tile[data-mode="active"] .trend-down{color:var(--active-down)}
+.tile[data-mode="active"] .body{display:flex;flex-direction:column;min-height:0;padding:22px 26px 22px 0;gap:10px;animation:fadein .4s var(--ease)}
+.close{align-self:flex-end;min-height:40px;padding:0 14px;border-radius:10px;border:1px solid var(--active-line);color:var(--active-ink);font-size:14px}
+.content{min-height:0;overflow:auto;display:flex;flex-direction:column;gap:10px;padding-bottom:18px;scrollbar-width:thin;scrollbar-color:var(--active-line) transparent;
+  -webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 22px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 22px),transparent)}
+@keyframes fadein{from{opacity:.4}to{opacity:1}}
+
+/* Inhalte im aufgeklappten Zustand (Kachel und Handy-Vollbild) */
+dl{margin:0}
+.row{display:grid;grid-template-columns:minmax(110px,34%) minmax(0,1fr);gap:14px;padding:8px 0;border-bottom:1px solid var(--active-line);font-size:15px;line-height:1.35}
+.row dt{color:var(--active-muted)}
+.row dd{margin:0}
+.content a{color:inherit;text-decoration:underline;text-underline-offset:3px}
+.content h4{margin:6px 0 0;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--active-muted)}
+.content p{margin:0;font-size:15px;line-height:1.5}
+.blist{margin:0;padding-left:18px;font-size:15px;line-height:1.55}
+.reveal summary{cursor:pointer;min-height:40px;display:inline-flex;align-items:center;padding:0 14px;border-radius:10px;border:1px solid var(--active-line);font-size:14px;list-style:none}
+.reveal summary::-webkit-details-marker{display:none}
+.reveal[open] summary{margin-bottom:8px}
+.note{font-size:13px;color:var(--active-muted);line-height:1.45}
+.tasks-form{display:flex;gap:8px}
+.tasks-form input{flex:1;min-width:0;font:inherit;font-size:15px;padding:10px 12px;border-radius:10px;border:1px solid var(--active-line);background:transparent;color:inherit}
+.tasks-form input::placeholder{color:var(--active-muted)}
+.tasks-form button,.task-del{min-height:40px;padding:0 14px;border-radius:10px;border:1px solid var(--active-line);font-size:14px}
+.task-list{list-style:none;margin:0;padding:0}
+.task-list li{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--active-line)}
+.task-list label{flex:1;display:flex;align-items:center;gap:10px;min-height:32px;cursor:pointer;line-height:1.35}
+.task-list input[type=checkbox]{width:18px;height:18px;accent-color:currentColor;flex:none}
+.task-list li.done label span{text-decoration:line-through;opacity:.6}
+.task-del{min-height:32px;padding:0 10px;font-size:13px}
+
+/* 7 Dialoge (Impressum, Datenschutz, Einstellungen) */
+dialog.doc{width:min(640px,calc(100vw - 32px));max-height:calc(100vh - 48px);box-sizing:border-box;padding:0;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);overflow:hidden}
+dialog.doc::backdrop{background:rgba(10,20,16,.45)}
+.doc-in{display:flex;flex-direction:column;max-height:calc(100vh - 48px)}
+.doc-head{display:flex;align-items:center;gap:12px;padding:18px 22px;border-bottom:1px solid var(--line)}
+.doc-head h2{margin:0;font-family:var(--display);font-size:22px;flex:1}
+.doc-head .x{min-height:40px;padding:0 14px;border-radius:10px;border:1px solid var(--line);font-size:14px}
+.doc-body{overflow:auto;padding:6px 22px 22px;font-size:15px;line-height:1.55}
+.doc-body h3{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:18px 0 4px}
+.doc-body p{margin:0 0 6px;max-width:62ch}
+.ph{background:color-mix(in srgb,var(--accent) 14%,transparent);border-radius:4px;padding:0 4px}
+.draft{margin-top:14px;font-size:13px;color:var(--muted)}
+.set-row{display:flex;gap:8px}
+.field{flex:1;min-width:0;box-sizing:border-box;font:inherit;font-size:15px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--ground);color:var(--ink)}
+textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monospace;resize:vertical}
+.btn{min-height:42px;padding:0 16px;border-radius:10px;border:1px solid var(--line);font-size:14px;font-weight:600}
+.btn.primary{background:var(--active-bg);color:var(--active-ink);border-color:var(--active-bg)}
+.set-results{display:flex;flex-direction:column;gap:2px;margin:8px 0}
+.set-results label{display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:8px;cursor:pointer}
+.set-results label:hover{background:var(--ground)}
+.set-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+
+/* 8 Mobil: Kompaktraster 4 × 5, Vollbild pro Kachel */
+.sheet{display:none}
+@media (max-width:760px),(max-height:520px){
+  .bar{gap:10px 12px;min-height:0}
+  .brand{font-size:24px}
+  .clock{font-size:19px;margin-left:auto}
+  .gear{order:2}.gear span{display:none}
+  .date{order:3;flex:1 1 auto;min-width:0;font-size:14px}
+  .status{order:4;padding:3px 8px}
+  .legal{order:5;flex-basis:100%;gap:12px;font-size:12px}
+  .ask{order:6;flex-basis:100%;max-width:none}
+  .spacer{display:none}
+  .grid{gap:7px;grid-template-columns:repeat(4,minmax(0,1fr)) !important;grid-template-rows:repeat(5,minmax(0,1fr)) !important}
+  .tile.free span{display:none}
+  .tile .head{padding:9px 8px !important;justify-content:space-between;height:100%;box-sizing:border-box}
+  .tile .label{font-family:var(--display);font-size:14px !important;font-weight:700;flex-direction:column;align-items:flex-start;gap:6px}
+  .tile .label .long{display:none}
+  .tile .label .short{display:block;white-space:normal}
+  .tile .tag{display:none}
+  .tile .metric{font-family:var(--body);font-size:12px !important;font-weight:600;color:var(--muted)}
+  .tile .glyph{display:none}
+  .tile .teaser{display:none}
+  .tile .metric .m-long{display:none}
+  .tile .metric .m-short{display:inline}
+  .sheet{position:fixed;inset:0;z-index:5;background:var(--active-bg);color:var(--active-ink);
+    box-sizing:border-box;padding:calc(16px + env(safe-area-inset-top,0px)) 18px calc(18px + env(safe-area-inset-bottom,0px));
+    flex-direction:column;gap:16px}
+  .sheet.open{display:flex}
+  .sheet .content{flex:1}
+  .sheet .row{grid-template-columns:1fr;gap:2px}
+  .sheet .row dt{font-size:12px}
+}
+.s-top{display:flex;align-items:center;gap:10px}
+.s-btn{min-height:44px;padding:0 14px;border-radius:10px;border:1px solid var(--active-line);color:var(--active-ink);font-size:14px}
+.s-pos{margin-left:auto;color:var(--active-muted);font-size:13px;font-variant-numeric:tabular-nums}
+.s-label{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--active-muted)}
+.s-label .ico{color:var(--active-muted)}
+.s-metric{font-family:var(--display);font-weight:700;font-size:38px;line-height:1.08}
+.s-teaser{color:var(--active-muted);font-size:17px;line-height:1.45}
+.s-nav{display:flex;gap:10px}
+.s-nav .s-btn{flex:1;min-height:48px}
+.s-hint{text-align:center;font-size:12px;color:var(--active-muted)}
+
+/* 9 Bewegung reduzieren */
+@media (prefers-reduced-motion:reduce){.grid,.tile,.head{transition:none}.tile[data-mode="active"] .body{animation:none}}

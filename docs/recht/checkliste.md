@@ -6,6 +6,10 @@ Kein Impressum, keine Datenschutzerklärung, keine Medienpflichten nötig. Aktue
 ## Öffentliche Website
 - Impressum nach § 5 DDG (Name, ladungsfähige Anschrift, E-Mail, schnelle Kontaktmöglichkeit, ggf. USt-IdNr.); leicht erkennbar, unmittelbar erreichbar, ständig verfügbar (BGH: max. 2 Klicks als Faustregel).
 - DSGVO-Datenschutzerklärung; jede externe Anfrage (Wetter-API, Kurse) überträgt die IP → nennen oder serverseitig bündeln.
+  - Stand: Direkt aus dem Browser nur Open-Meteo (Wetter, Luft, Ortssuche). Über eigene Server-Funktionen (IP bleibt beim Hoster): Schlagzeilen, Kalender, Kurse (Yahoo), Fußball (OpenLigaDB), Abfahrten (VVO), „An diesem Tag“ (Wikimedia). Entwurf in der App (Dialog „Datenschutz“) listet das bereits.
+- Wikipedia-Inhalte (CC BY-SA 4.0): Quelle + Lizenz + Link nennen (umgesetzt in der Kachel Wissen).
+- KI-erstellte Service-Texte (Rezept, Rätsel, Tipps …) sind keine Nachrichten; im Impressum-Entwurf als „mit KI erstellt“ vermerkt.
+- Gesundheit/Sparen: nur allgemeine Anregungen mit Hinweis „keine Beratung“.
 - Schriften selbst hosten (erledigt).
 - § 25 TDDDG: localStorage für Funktionen, die der Nutzer will (Aufgaben, Klickzähler lokal), ohne Einwilligung ok; Analyse/Tracking an Server → Einwilligung.
 - Affiliate später: klar als Werbung kennzeichnen.

@@ -8,9 +8,8 @@ fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(path.join(OUT, 'fonts'), { recursive: true });
 fs.mkdirSync(path.join(OUT, 'icons'), { recursive: true });
 
-for (const f of ['index.html', 'sw.js', 'manifest.webmanifest']) {
-  fs.copyFileSync(path.join(__dirname, 'src', f), path.join(OUT, f));
-}
+// App-Dateien (HTML, CSS, JS-Module, Inhalte) 1:1 übernehmen; das Icon wird unten gerendert
+fs.cpSync(path.join(__dirname, 'src'), OUT, { recursive: true, filter: src => !src.endsWith('icon.svg') });
 
 const nm = p => require.resolve(p);
 const fonts = {

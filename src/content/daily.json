@@ -1,0 +1,1786 @@
+{
+ "version": 1,
+ "von": "2026-09-26",
+ "bis": "2026-10-26",
+ "tage": [
+  {
+   "datum": "2026-09-26",
+   "raetsel": {
+    "frage": "Was hat Zähne, kann aber nicht beißen?",
+    "loesung": "Ein Kamm."
+   },
+   "witz": "Treffen sich zwei Magnete. Sagt der eine: „Was soll ich heute bloß anziehen?“",
+   "wort": {
+    "wort": "Kairos",
+    "bedeutung": "der richtige, günstige Augenblick, den man ergreifen sollte",
+    "herkunft": "Altgriechisch"
+   },
+   "sprichwort": "Aller Anfang ist schwer.",
+   "rezept": {
+    "name": "Ofengemüse mit Feta",
+    "minuten": 35,
+    "vegetarisch": true,
+    "zutaten": [
+     "2 Paprika",
+     "1 Zucchini",
+     "1 rote Zwiebel",
+     "200 g Feta",
+     "2 EL Olivenöl",
+     "Oregano, Salz, Pfeffer"
+    ],
+    "zubereitung": "Gemüse würfeln, mit Öl und Gewürzen mischen und bei 200 °C etwa 20 Minuten backen. Feta zerbröseln, darüberstreuen und weitere 10 Minuten backen."
+   },
+   "land": {
+    "name": "Portugal",
+    "hauptstadt": "Lissabon",
+    "sprache": "Portugiesisch",
+    "waehrung": "Euro",
+    "gericht": "Bacalhau (Stockfisch)",
+    "fakt": "Portugal ist der größte Korkproduzent der Welt."
+   },
+   "tech": {
+    "kategorie": "Tastenkürzel",
+    "text": "Win + V öffnet unter Windows den Verlauf der Zwischenablage – so lassen sich auch ältere Kopien wieder einfügen."
+   },
+   "beziehung": {
+    "kurz": "Handyfrei kochen",
+    "text": "Heute Abend gemeinsam kochen – das Handy bleibt in einem anderen Raum."
+   },
+   "spartipp": {
+    "kurz": "Deckel auf den Topf",
+    "text": "Deckel auf den Topf: Beim Kochen spart das viel Energie."
+   },
+   "gesundheit": {
+    "kurz": "Wasser zuerst",
+    "text": "Heute ein Glas Wasser direkt nach dem Aufstehen trinken."
+   },
+   "film": {
+    "titel": "Das Leben der Anderen",
+    "jahr": 2006,
+    "genre": "Drama",
+    "text": "Ein Stasi-Hauptmann überwacht ein Künstlerpaar in Ost-Berlin – und beginnt zu zweifeln."
+   }
+  },
+  {
+   "datum": "2026-09-27",
+   "raetsel": {
+    "frage": "Je mehr man davon wegnimmt, desto größer wird es. Was ist es?",
+    "loesung": "Ein Loch."
+   },
+   "witz": "Was macht ein Pirat am Computer? – Er drückt die Enter-Taste.",
+   "wort": {
+    "wort": "Fernweh",
+    "bedeutung": "Sehnsucht nach fernen Orten – das Gegenstück zum Heimweh",
+    "herkunft": "Deutsch"
+   },
+   "sprichwort": "Übung macht den Meister.",
+   "rezept": {
+    "name": "Kürbissuppe mit Ingwer",
+    "minuten": 35,
+    "vegetarisch": true,
+    "zutaten": [
+     "1 kleiner Hokkaido (ca. 800 g)",
+     "1 Zwiebel",
+     "1 Stück Ingwer (2 cm)",
+     "600 ml Gemüsebrühe",
+     "100 ml Kokosmilch",
+     "Salz, Pfeffer"
+    ],
+    "zubereitung": "Kürbis mit Schale würfeln, mit Zwiebel und Ingwer andünsten, mit Brühe 20 Minuten köcheln. Kokosmilch dazu, fein pürieren und abschmecken."
+   },
+   "land": {
+    "name": "Norwegen",
+    "hauptstadt": "Oslo",
+    "sprache": "Norwegisch",
+    "waehrung": "Norwegische Krone",
+    "gericht": "Fårikål (Lamm mit Kohl)",
+    "fakt": "Mit Fjorden und Inseln ist die Küstenlinie über 100.000 km lang."
+   },
+   "tech": {
+    "kategorie": "Tastenkürzel",
+    "text": "Win + Umschalt + S startet das Screenshot-Werkzeug für einen frei wählbaren Bereich."
+   },
+   "beziehung": {
+    "kurz": "Kurze Nachricht",
+    "text": "Eine kurze Nachricht mitten am Tag schicken: „Ich denk an dich.“"
+   },
+   "spartipp": {
+    "kurz": "Mit Liste einkaufen",
+    "text": "Einkaufsliste schreiben und hungrig nicht einkaufen gehen."
+   },
+   "gesundheit": {
+    "kurz": "Stündlich strecken",
+    "text": "Jede Stunde kurz aufstehen und sich strecken."
+   },
+   "film": {
+    "titel": "Der Club der toten Dichter",
+    "jahr": 1989,
+    "genre": "Drama",
+    "text": "Ein unkonventioneller Lehrer weckt in seinen Schülern die Liebe zur Poesie."
+   }
+  },
+  {
+   "datum": "2026-09-28",
+   "raetsel": {
+    "frage": "Was wird nasser, je mehr es trocknet?",
+    "loesung": "Ein Handtuch."
+   },
+   "witz": "Warum können Seeräuber keinen Kreis berechnen? – Weil sie Pi raten.",
+   "wort": {
+    "wort": "Serendipität",
+    "bedeutung": "ein glücklicher Zufallsfund, nach dem man gar nicht gesucht hat",
+    "herkunft": "von engl. serendipity, nach dem Märchen von den drei Prinzen von Serendip"
+   },
+   "sprichwort": "Morgenstund hat Gold im Mund.",
+   "rezept": {
+    "name": "Linsen-Dal",
+    "minuten": 30,
+    "vegetarisch": true,
+    "zutaten": [
+     "150 g rote Linsen",
+     "1 Zwiebel",
+     "1 Knoblauchzehe",
+     "1 Dose Tomaten",
+     "200 ml Kokosmilch",
+     "1 TL Curry, ½ TL Kurkuma"
+    ],
+    "zubereitung": "Zwiebel und Knoblauch anbraten, Gewürze kurz mitrösten. Linsen, Tomaten, Kokosmilch und 200 ml Wasser dazu und 15 Minuten köcheln. Mit Reis oder Brot servieren."
+   },
+   "land": {
+    "name": "Japan",
+    "hauptstadt": "Tokio",
+    "sprache": "Japanisch",
+    "waehrung": "Yen",
+    "gericht": "Sushi",
+    "fakt": "Japan besteht aus über 14.000 Inseln."
+   },
+   "tech": {
+    "kategorie": "Browser",
+    "text": "Strg + Umschalt + T öffnet den zuletzt geschlossenen Tab wieder – auch mehrmals hintereinander."
+   },
+   "beziehung": {
+    "kurz": "Drei Dinge",
+    "text": "Drei Dinge nennen, die du am anderen schätzt – und zwar laut."
+   },
+   "spartipp": {
+    "kurz": "Abos prüfen",
+    "text": "Abos und Verträge einmal im Jahr prüfen – ungenutzte kündigen."
+   },
+   "gesundheit": {
+    "kurz": "Treppe statt Aufzug",
+    "text": "Die Treppe statt des Aufzugs nehmen."
+   },
+   "film": {
+    "titel": "Chihiros Reise ins Zauberland",
+    "jahr": 2001,
+    "genre": "Animation",
+    "text": "Ein Mädchen gerät in eine Welt voller Geister – Meisterwerk von Studio Ghibli."
+   }
+  },
+  {
+   "datum": "2026-09-29",
+   "raetsel": {
+    "frage": "Was hat einen Hals, aber keinen Kopf?",
+    "loesung": "Eine Flasche."
+   },
+   "witz": "Was ist grün und klopft an die Tür? – Ein Klopfsalat.",
+   "wort": {
+    "wort": "Hygge",
+    "bedeutung": "entspannte, warme Gemütlichkeit – etwa mit Kerzen, Tee und guten Leuten",
+    "herkunft": "Dänisch"
+   },
+   "sprichwort": "Wer rastet, der rostet.",
+   "rezept": {
+    "name": "Kartoffel-Lauch-Suppe",
+    "minuten": 30,
+    "vegetarisch": true,
+    "zutaten": [
+     "500 g Kartoffeln",
+     "1 Stange Lauch",
+     "700 ml Gemüsebrühe",
+     "50 ml Sahne",
+     "Muskat, Salz, Pfeffer"
+    ],
+    "zubereitung": "Kartoffeln würfeln, Lauch in Ringe schneiden, beides andünsten. Mit Brühe 20 Minuten garen, teilweise pürieren, Sahne einrühren und würzen."
+   },
+   "land": {
+    "name": "Mexiko",
+    "hauptstadt": "Mexiko-Stadt",
+    "sprache": "Spanisch",
+    "waehrung": "Mexikanischer Peso",
+    "gericht": "Mole poblano",
+    "fakt": "Mais wurde vor rund 9.000 Jahren in Mexiko domestiziert."
+   },
+   "tech": {
+    "kategorie": "Sicherheit",
+    "text": "Ein Passwort-Manager wie KeePassXC oder Bitwarden erzeugt für jeden Dienst ein eigenes, starkes Passwort."
+   },
+   "beziehung": {
+    "kurz": "Zuhör-Spaziergang",
+    "text": "Einen Herbstspaziergang machen und dabei nur zuhören."
+   },
+   "spartipp": {
+    "kurz": "Standby aus",
+    "text": "Standby-Geräte über eine schaltbare Steckdosenleiste ganz ausschalten."
+   },
+   "gesundheit": {
+    "kurz": "Verdauungsspaziergang",
+    "text": "Zehn Minuten Spaziergang nach dem Mittagessen."
+   },
+   "film": {
+    "titel": "Zurück in die Zukunft",
+    "jahr": 1985,
+    "genre": "Abenteuer, Komödie",
+    "text": "Marty McFly landet mit einer Zeitmaschine im Jahr 1955."
+   }
+  },
+  {
+   "datum": "2026-09-30",
+   "raetsel": {
+    "frage": "Was gehört dir, wird aber von anderen viel öfter benutzt als von dir?",
+    "loesung": "Dein Name."
+   },
+   "witz": "Wie nennt man einen Bumerang, der nicht zurückkommt? – Stock.",
+   "wort": {
+    "wort": "Kummerspeck",
+    "bedeutung": "Gewicht, das man sich aus Frust oder Kummer angegessen hat",
+    "herkunft": "Deutsch"
+   },
+   "sprichwort": "Gut Ding will Weile haben.",
+   "rezept": {
+    "name": "Spaghetti aglio e olio",
+    "minuten": 15,
+    "vegetarisch": true,
+    "zutaten": [
+     "200 g Spaghetti",
+     "3 Knoblauchzehen",
+     "4 EL Olivenöl",
+     "1 getrocknete Chili",
+     "Petersilie",
+     "Parmesan nach Wunsch"
+    ],
+    "zubereitung": "Spaghetti kochen. Knoblauch in Scheiben mit Chili sanft im Öl erwärmen, nicht bräunen. Nudeln mit etwas Kochwasser und Petersilie darin schwenken."
+   },
+   "land": {
+    "name": "Italien",
+    "hauptstadt": "Rom",
+    "sprache": "Italienisch",
+    "waehrung": "Euro",
+    "gericht": "Risotto und Pasta",
+    "fakt": "Italien hat die meisten UNESCO-Welterbestätten der Welt."
+   },
+   "tech": {
+    "kategorie": "Sicherheit",
+    "text": "Zwei-Faktor-Anmeldung für E-Mail und Bank einschalten – am besten mit einer Authenticator-App statt SMS."
+   },
+   "beziehung": {
+    "kurz": "Kleine Aufmerksamkeit",
+    "text": "Das Lieblingsgetränk des anderen mitbringen, einfach so."
+   },
+   "spartipp": {
+    "kurz": "Ein Grad weniger",
+    "text": "Heizung: Pro Grad weniger Raumtemperatur sinken die Heizkosten um rund sechs Prozent."
+   },
+   "gesundheit": {
+    "kurz": "Mehr Gemüse",
+    "text": "Eine Portion Gemüse mehr als sonst essen."
+   },
+   "film": {
+    "titel": "Die fabelhafte Welt der Amélie",
+    "jahr": 2001,
+    "genre": "Komödie",
+    "text": "Eine schüchterne Kellnerin in Paris beschließt, anderen heimlich Gutes zu tun."
+   }
+  },
+  {
+   "datum": "2026-10-01",
+   "raetsel": {
+    "frage": "Welcher Monat hat 28 Tage?",
+    "loesung": "Alle Monate."
+   },
+   "witz": "Was sagt der große Stift zum kleinen Stift? – „Wachs mal, Stift!“",
+   "wort": {
+    "wort": "Lagom",
+    "bedeutung": "genau richtig – nicht zu viel und nicht zu wenig",
+    "herkunft": "Schwedisch"
+   },
+   "sprichwort": "Ende gut, alles gut.",
+   "rezept": {
+    "name": "Pilzpfanne mit Semmelknödeln",
+    "minuten": 30,
+    "vegetarisch": true,
+    "zutaten": [
+     "400 g Champignons",
+     "1 Zwiebel",
+     "150 ml Sahne",
+     "Petersilie",
+     "4 Semmelknödel (Fertigprodukt oder vom Vortag)"
+    ],
+    "zubereitung": "Knödel nach Packung garen. Pilze scharf anbraten, Zwiebel dazu, mit Sahne ablöschen, einköcheln lassen und mit Petersilie servieren."
+   },
+   "land": {
+    "name": "Kanada",
+    "hauptstadt": "Ottawa",
+    "sprache": "Englisch und Französisch",
+    "waehrung": "Kanadischer Dollar",
+    "gericht": "Poutine",
+    "fakt": "Kanada hat die längste Küstenlinie aller Länder."
+   },
+   "tech": {
+    "kategorie": "Backup",
+    "text": "Die 3-2-1-Regel: drei Kopien, auf zwei verschiedenen Medien, eine davon außer Haus."
+   },
+   "beziehung": {
+    "kurz": "Fotos von früher",
+    "text": "Gemeinsam ein altes Fotoalbum oder alte Handyfotos anschauen."
+   },
+   "spartipp": {
+    "kurz": "Stoßlüften",
+    "text": "Stoßlüften statt Kippfenster – mehrmals täglich 5 bis 10 Minuten."
+   },
+   "gesundheit": {
+    "kurz": "Früher ins Bett",
+    "text": "Heute eine halbe Stunde früher ins Bett gehen."
+   },
+   "film": {
+    "titel": "Good Bye, Lenin!",
+    "jahr": 2003,
+    "genre": "Tragikomödie",
+    "text": "Ein Sohn lässt die DDR für seine kranke Mutter in der Wohnung weiterleben."
+   }
+  },
+  {
+   "datum": "2026-10-02",
+   "raetsel": {
+    "frage": "Was kann man brechen, ohne es zu berühren?",
+    "loesung": "Ein Versprechen."
+   },
+   "witz": "Was ist orange und läuft durch den Wald? – Eine Wanderine.",
+   "wort": {
+    "wort": "Ikigai",
+    "bedeutung": "das, wofür es sich zu leben lohnt; der Grund, morgens aufzustehen",
+    "herkunft": "Japanisch"
+   },
+   "sprichwort": "Viele Köche verderben den Brei.",
+   "rezept": {
+    "name": "Hähnchen-Gemüse-Curry",
+    "minuten": 30,
+    "vegetarisch": false,
+    "zutaten": [
+     "300 g Hähnchenbrust",
+     "1 Paprika",
+     "1 Handvoll Brokkoli",
+     "200 ml Kokosmilch",
+     "1 EL Currypaste",
+     "Reis"
+    ],
+    "zubereitung": "Hähnchen in Streifen anbraten, Gemüse dazu. Currypaste einrühren, mit Kokosmilch ablöschen und 10 Minuten köcheln. Mit Reis servieren."
+   },
+   "land": {
+    "name": "Marokko",
+    "hauptstadt": "Rabat",
+    "sprache": "Arabisch und Tamazight",
+    "waehrung": "Dirham",
+    "gericht": "Tajine",
+    "fakt": "Die Universität al-Qarawiyyin in Fès (gegründet 859) gilt als älteste noch bestehende Hochschule."
+   },
+   "tech": {
+    "kategorie": "Technikgeschichte",
+    "text": "Konrad Zuse stellte 1941 in Berlin die Z3 vor – den ersten funktionsfähigen programmgesteuerten Digitalrechner."
+   },
+   "beziehung": {
+    "kurz": "Aufgabe abnehmen",
+    "text": "Eine Aufgabe übernehmen, die sonst der andere erledigt."
+   },
+   "spartipp": {
+    "kurz": "Reste-Tag",
+    "text": "Reste einplanen: Einmal pro Woche ein „Kühlschrank-leer“-Essen kochen."
+   },
+   "gesundheit": {
+    "kurz": "Telefonieren im Gehen",
+    "text": "Beim Telefonieren im Gehen sprechen."
+   },
+   "film": {
+    "titel": "Forrest Gump",
+    "jahr": 1994,
+    "genre": "Drama",
+    "text": "Ein einfacher Mann erlebt, fast zufällig, Jahrzehnte amerikanischer Geschichte."
+   }
+  },
+  {
+   "datum": "2026-10-03",
+   "raetsel": {
+    "frage": "Was hat Blätter, ist aber kein Baum?",
+    "loesung": "Ein Buch."
+   },
+   "witz": "Was macht ein Clown im Büro? – Faxen.",
+   "wort": {
+    "wort": "Sisu",
+    "bedeutung": "zähe Ausdauer und innere Stärke, auch wenn es schwierig wird",
+    "herkunft": "Finnisch"
+   },
+   "sprichwort": "Kleinvieh macht auch Mist.",
+   "rezept": {
+    "name": "Flammkuchen mit Apfel und Zwiebel",
+    "minuten": 25,
+    "vegetarisch": true,
+    "zutaten": [
+     "1 Flammkuchenteig",
+     "150 g Schmand",
+     "1 Apfel",
+     "1 rote Zwiebel",
+     "Thymian, Salz, Pfeffer"
+    ],
+    "zubereitung": "Teig mit gewürztem Schmand bestreichen, mit dünnen Apfel- und Zwiebelscheiben belegen. Bei 220 °C etwa 12 Minuten backen, mit Thymian bestreuen."
+   },
+   "land": {
+    "name": "Island",
+    "hauptstadt": "Reykjavík",
+    "sprache": "Isländisch",
+    "waehrung": "Isländische Krone",
+    "gericht": "Plokkfiskur (Fischeintopf)",
+    "fakt": "Island hat keine eigene Armee."
+   },
+   "tech": {
+    "kategorie": "Tastenkürzel",
+    "text": "Win + Pfeiltasten dockt Fenster an den Bildschirmrand an – praktisch für zwei Fenster nebeneinander."
+   },
+   "beziehung": {
+    "kurz": "Du wählst den Film",
+    "text": "Einen Filmabend planen, bei dem der andere den Film aussucht."
+   },
+   "spartipp": {
+    "kurz": "Leitungswasser",
+    "text": "Leitungswasser statt Flaschenwasser trinken."
+   },
+   "gesundheit": {
+    "kurz": "Ruhig atmen",
+    "text": "Fünf Minuten bewusst atmen: 4 Sekunden ein, 6 Sekunden aus."
+   },
+   "film": {
+    "titel": "Ziemlich beste Freunde",
+    "jahr": 2011,
+    "genre": "Komödie",
+    "text": "Ein querschnittsgelähmter Millionär und sein unkonventioneller Pfleger werden Freunde."
+   }
+  },
+  {
+   "datum": "2026-10-04",
+   "raetsel": {
+    "frage": "Was steht genau in der Mitte von Paris?",
+    "loesung": "Der Buchstabe R."
+   },
+   "witz": "Welcher Bus hat den Atlantik überquert? – Kolumbus.",
+   "wort": {
+    "wort": "Schadenfreude",
+    "bedeutung": "Freude über das Missgeschick anderer",
+    "herkunft": "Deutsch, als Lehnwort auch im Englischen"
+   },
+   "sprichwort": "Wer A sagt, muss auch B sagen.",
+   "rezept": {
+    "name": "Rote-Bete-Salat mit Walnüssen",
+    "minuten": 20,
+    "vegetarisch": true,
+    "zutaten": [
+     "2 gekochte Rote Bete",
+     "1 Apfel",
+     "1 Handvoll Walnüsse",
+     "Feldsalat",
+     "Essig, Öl, Senf, Honig"
+    ],
+    "zubereitung": "Rote Bete und Apfel in Stücke schneiden, Walnüsse kurz rösten. Aus Essig, Öl, Senf und Honig ein Dressing rühren und alles auf dem Feldsalat anrichten."
+   },
+   "land": {
+    "name": "Griechenland",
+    "hauptstadt": "Athen",
+    "sprache": "Griechisch",
+    "waehrung": "Euro",
+    "gericht": "Moussaka",
+    "fakt": "Zu Griechenland gehören rund 6.000 Inseln, von denen nur etwa 200 bewohnt sind."
+   },
+   "tech": {
+    "kategorie": "Tastenkürzel",
+    "text": "Strg + Rücktaste löscht in den meisten Programmen das ganze vorherige Wort statt nur eines Zeichens."
+   },
+   "beziehung": {
+    "kurz": "Etwas Neues",
+    "text": "Zusammen etwas Neues ausprobieren: ein Rezept, ein Spiel oder einen Ort."
+   },
+   "spartipp": {
+    "kurz": "30 statt 60 Grad",
+    "text": "Wäsche bei 30 °C statt 60 °C waschen, wenn sie nicht stark verschmutzt ist."
+   },
+   "gesundheit": {
+    "kurz": "Bildschirm weg",
+    "text": "Den Bildschirm eine Stunde vor dem Schlafen weglegen."
+   },
+   "film": {
+    "titel": "Casablanca",
+    "jahr": 1942,
+    "genre": "Klassiker",
+    "text": "Ein Barbesitzer in Marokko trifft seine alte Liebe wieder – zur Zeit des Zweiten Weltkriegs."
+   }
+  },
+  {
+   "datum": "2026-10-05",
+   "raetsel": {
+    "frage": "Was hat viele Tasten, öffnet aber keine einzige Tür?",
+    "loesung": "Ein Klavier."
+   },
+   "witz": "Was sitzt auf dem Baum und ruft „Aha“? – Ein Uhu mit Sprachfehler.",
+   "wort": {
+    "wort": "Wanderlust",
+    "bedeutung": "Lust aufs Unterwegssein; im Englischen als Lehnwort gebräuchlich",
+    "herkunft": "Deutsch"
+   },
+   "sprichwort": "Stille Wasser sind tief.",
+   "rezept": {
+    "name": "Kartoffelpuffer mit Apfelmus",
+    "minuten": 35,
+    "vegetarisch": true,
+    "zutaten": [
+     "600 g Kartoffeln",
+     "1 Zwiebel",
+     "1 Ei",
+     "2 EL Mehl",
+     "Öl zum Braten",
+     "Apfelmus"
+    ],
+    "zubereitung": "Kartoffeln und Zwiebel reiben, gut ausdrücken, mit Ei, Mehl und Salz mischen. Flache Puffer in heißem Öl goldbraun braten. Mit Apfelmus servieren."
+   },
+   "land": {
+    "name": "Vietnam",
+    "hauptstadt": "Hanoi",
+    "sprache": "Vietnamesisch",
+    "waehrung": "Đồng",
+    "gericht": "Phở (Nudelsuppe)",
+    "fakt": "Vietnam ist der zweitgrößte Kaffeeproduzent der Welt."
+   },
+   "tech": {
+    "kategorie": "Heimnetz",
+    "text": "Ein eigenes Gast-WLAN hält Besucher- und Smart-Home-Geräte vom Hauptnetz mit PC und NAS fern."
+   },
+   "beziehung": {
+    "kurz": "Schönster Moment",
+    "text": "Beim Abendessen fragen: „Was war heute dein schönster Moment?“"
+   },
+   "spartipp": {
+    "kurz": "Grundpreis vergleichen",
+    "text": "Preise pro Kilo oder Liter vergleichen, nicht pro Packung."
+   },
+   "gesundheit": {
+    "kurz": "Nüsse statt Süßes",
+    "text": "Eine Handvoll Nüsse statt Süßigkeiten als Snack."
+   },
+   "film": {
+    "titel": "Das Boot",
+    "jahr": 1981,
+    "genre": "Kriegsfilm",
+    "text": "Beklemmendes Porträt einer U-Boot-Besatzung im Zweiten Weltkrieg."
+   }
+  },
+  {
+   "datum": "2026-10-06",
+   "raetsel": {
+    "frage": "Was kommt einmal im Monat vor, zweimal im Moment, aber nie in einer Stunde?",
+    "loesung": "Der Buchstabe M."
+   },
+   "witz": "Wie heißt der Bruder von Elvis? – Zwölfis.",
+   "wort": {
+    "wort": "Fingerspitzengefühl",
+    "bedeutung": "feines Gespür für eine heikle Situation",
+    "herkunft": "Deutsch"
+   },
+   "sprichwort": "Der Apfel fällt nicht weit vom Stamm.",
+   "rezept": {
+    "name": "Gnocchi mit Salbeibutter",
+    "minuten": 15,
+    "vegetarisch": true,
+    "zutaten": [
+     "500 g Gnocchi",
+     "50 g Butter",
+     "8 Salbeiblätter",
+     "Parmesan"
+    ],
+    "zubereitung": "Gnocchi garen, bis sie oben schwimmen. Butter mit Salbei aufschäumen, Gnocchi darin schwenken und mit Parmesan bestreuen."
+   },
+   "land": {
+    "name": "Peru",
+    "hauptstadt": "Lima",
+    "sprache": "Spanisch und Quechua",
+    "waehrung": "Sol",
+    "gericht": "Ceviche",
+    "fakt": "In Peru gibt es mehrere Tausend Kartoffelsorten."
+   },
+   "tech": {
+    "kategorie": "Heimnetz",
+    "text": "Die Router-Firmware regelmäßig aktualisieren – viele Router können das automatisch."
+   },
+   "beziehung": {
+    "kurz": "Versteckter Zettel",
+    "text": "Einen kleinen Zettel mit einem Kompliment verstecken."
+   },
+   "spartipp": {
+    "kurz": "Bibliothek nutzen",
+    "text": "Bücher, Filme und Spiele in der Stadtbibliothek ausleihen."
+   },
+   "gesundheit": {
+    "kurz": "Tageslicht tanken",
+    "text": "Tageslicht tanken: 20 Minuten nach draußen gehen."
+   },
+   "film": {
+    "titel": "Toy Story",
+    "jahr": 1995,
+    "genre": "Animation",
+    "text": "Spielzeuge, die lebendig werden, sobald niemand hinsieht – der erste vollständig computeranimierte Kinofilm."
+   }
+  },
+  {
+   "datum": "2026-10-07",
+   "raetsel": {
+    "frage": "Was hat ein Auge, kann aber nicht sehen?",
+    "loesung": "Eine Nadel."
+   },
+   "witz": "Was liegt am Strand und spricht undeutlich? – Eine Nuschel.",
+   "wort": {
+    "wort": "Zeitgeist",
+    "bedeutung": "die typische Denk- und Lebensweise einer Epoche",
+    "herkunft": "Deutsch, weltweit übernommen"
+   },
+   "sprichwort": "Was du heute kannst besorgen, das verschiebe nicht auf morgen.",
+   "rezept": {
+    "name": "Chili sin Carne",
+    "minuten": 40,
+    "vegetarisch": true,
+    "zutaten": [
+     "1 Dose Kidneybohnen",
+     "1 Dose Mais",
+     "1 Dose Tomaten",
+     "1 Paprika",
+     "1 Zwiebel",
+     "Kreuzkümmel, Paprikapulver, Chili"
+    ],
+    "zubereitung": "Zwiebel und Paprika anbraten, Gewürze kurz mitrösten. Tomaten, Bohnen und Mais dazu und 25 Minuten köcheln. Mit Brot oder Reis servieren."
+   },
+   "land": {
+    "name": "Schweden",
+    "hauptstadt": "Stockholm",
+    "sprache": "Schwedisch",
+    "waehrung": "Schwedische Krone",
+    "gericht": "Köttbullar",
+    "fakt": "Das Jedermannsrecht erlaubt, fast überall in der Natur zu wandern und für eine Nacht zu zelten."
+   },
+   "tech": {
+    "kategorie": "Technikgeschichte",
+    "text": "Linus Torvalds kündigte im August 1991 ein kleines Hobby-Betriebssystem an: den Linux-Kernel."
+   },
+   "beziehung": {
+    "kurz": "Freies Wochenende",
+    "text": "Gemeinsam das nächste Wochenende planen – ohne Pflichttermine."
+   },
+   "spartipp": {
+    "kurz": "Eigener Kaffeebecher",
+    "text": "Kaffee für unterwegs in einer eigenen Thermotasse mitnehmen."
+   },
+   "gesundheit": {
+    "kurz": "Schultern kreisen",
+    "text": "Schultern kreisen lassen – zehnmal vorwärts, zehnmal rückwärts."
+   },
+   "film": {
+    "titel": "Der Pate",
+    "jahr": 1972,
+    "genre": "Drama",
+    "text": "Die Geschichte der Mafia-Familie Corleone."
+   }
+  },
+  {
+   "datum": "2026-10-08",
+   "raetsel": {
+    "frage": "Was fällt, ohne sich jemals wehzutun?",
+    "loesung": "Regen."
+   },
+   "witz": "Was ist ein Keks unter einem Baum? – Ein schattiges Plätzchen.",
+   "wort": {
+    "wort": "Weltschmerz",
+    "bedeutung": "Traurigkeit über die Unvollkommenheit der Welt",
+    "herkunft": "Deutsch, geprägt durch Jean Paul"
+   },
+   "sprichwort": "Ohne Fleiß kein Preis.",
+   "rezept": {
+    "name": "Lachs mit Ofenkartoffeln",
+    "minuten": 40,
+    "vegetarisch": false,
+    "zutaten": [
+     "2 Lachsfilets",
+     "500 g kleine Kartoffeln",
+     "1 Zitrone",
+     "Dill",
+     "Olivenöl"
+    ],
+    "zubereitung": "Kartoffeln halbieren, mit Öl und Salz 25 Minuten bei 200 °C backen. Lachs dazulegen, mit Zitrone beträufeln und 12 Minuten mitgaren. Mit Dill servieren."
+   },
+   "land": {
+    "name": "Indien",
+    "hauptstadt": "Neu-Delhi",
+    "sprache": "Hindi, Englisch und viele weitere",
+    "waehrung": "Indische Rupie",
+    "gericht": "Dal und Biryani",
+    "fakt": "Seit 2023 ist Indien das bevölkerungsreichste Land der Erde."
+   },
+   "tech": {
+    "kategorie": "Smartphone",
+    "text": "Offline-Karten in Google Maps oder OsmAnd herunterladen – hilft im Funkloch und spart Datenvolumen im Ausland."
+   },
+   "beziehung": {
+    "kurz": "Lange Umarmung",
+    "text": "Eine Umarmung von 20 Sekunden – bewusst länger als sonst."
+   },
+   "spartipp": {
+    "kurz": "Tarife vergleichen",
+    "text": "Strom- und Gastarife vergleichen – ein Wechsel ist meist in wenigen Minuten erledigt."
+   },
+   "gesundheit": {
+    "kurz": "Langsam essen",
+    "text": "Heute bewusst langsam essen und das Besteck zwischendurch ablegen."
+   },
+   "film": {
+    "titel": "Die Verurteilten",
+    "jahr": 1994,
+    "genre": "Drama",
+    "text": "Freundschaft und Hoffnung hinter Gefängnismauern."
+   }
+  },
+  {
+   "datum": "2026-10-09",
+   "raetsel": {
+    "frage": "Was ist leichter als eine Feder, und doch kann es selbst der Stärkste nicht lange halten?",
+    "loesung": "Der Atem."
+   },
+   "witz": "Wo wohnen Katzen am liebsten? – Im Miezhaus.",
+   "wort": {
+    "wort": "Ohrwurm",
+    "bedeutung": "eine Melodie, die einem nicht mehr aus dem Kopf geht",
+    "herkunft": "Deutsch"
+   },
+   "sprichwort": "Reden ist Silber, Schweigen ist Gold.",
+   "rezept": {
+    "name": "Käsespätzle",
+    "minuten": 30,
+    "vegetarisch": true,
+    "zutaten": [
+     "400 g Spätzle",
+     "150 g Bergkäse",
+     "2 Zwiebeln",
+     "Butter",
+     "Schnittlauch"
+    ],
+    "zubereitung": "Zwiebeln in Ringen in Butter goldbraun braten. Spätzle erhitzen und abwechselnd mit geriebenem Käse schichten. Mit Röstzwiebeln und Schnittlauch servieren."
+   },
+   "land": {
+    "name": "Irland",
+    "hauptstadt": "Dublin",
+    "sprache": "Irisch und Englisch",
+    "waehrung": "Euro",
+    "gericht": "Irish Stew",
+    "fakt": "Die Harfe ist das Staatswappen Irlands."
+   },
+   "tech": {
+    "kategorie": "Smartphone",
+    "text": "Das WLAN-Passwort lässt sich per QR-Code teilen: Android und iOS zeigen ihn in den WLAN-Einstellungen an."
+   },
+   "beziehung": {
+    "kurz": "Gemeinsames Frühstück",
+    "text": "Zusammen frühstücken, auch wenn es nur 15 Minuten sind."
+   },
+   "spartipp": {
+    "kurz": "Kühlschrank auf 7 °C",
+    "text": "Den Kühlschrank auf 7 °C einstellen – kälter kostet nur mehr Strom."
+   },
+   "gesundheit": {
+    "kurz": "Kniebeugen-Pause",
+    "text": "Eine Kniebeugen-Pause: 3 × 10 langsame Kniebeugen."
+   },
+   "film": {
+    "titel": "Lola rennt",
+    "jahr": 1998,
+    "genre": "Thriller",
+    "text": "Lola hat 20 Minuten, um 100.000 Mark zu besorgen – dreimal."
+   }
+  },
+  {
+   "datum": "2026-10-10",
+   "raetsel": {
+    "frage": "Was geht durch Glas, ohne es zu zerbrechen?",
+    "loesung": "Licht."
+   },
+   "witz": "Was ist weiß und stört beim Essen? – Eine Lawine.",
+   "wort": {
+    "wort": "Torschlusspanik",
+    "bedeutung": "Angst, eine Gelegenheit endgültig zu verpassen",
+    "herkunft": "Deutsch – ursprünglich die Eile vor dem Schließen der Stadttore"
+   },
+   "sprichwort": "Wo ein Wille ist, ist auch ein Weg.",
+   "rezept": {
+    "name": "Gemüse-Frittata",
+    "minuten": 25,
+    "vegetarisch": true,
+    "zutaten": [
+     "5 Eier",
+     "1 Zucchini",
+     "1 Handvoll Spinat",
+     "50 g Parmesan",
+     "Salz, Pfeffer"
+    ],
+    "zubereitung": "Gemüse in einer ofenfesten Pfanne anbraten. Verquirlte Eier mit Käse darübergießen, stocken lassen und 8 Minuten bei 180 °C im Ofen fertig garen."
+   },
+   "land": {
+    "name": "Argentinien",
+    "hauptstadt": "Buenos Aires",
+    "sprache": "Spanisch",
+    "waehrung": "Argentinischer Peso",
+    "gericht": "Asado (Grillfleisch)",
+    "fakt": "Der Aconcagua ist mit rund 6.960 m der höchste Berg Amerikas."
+   },
+   "tech": {
+    "kategorie": "Tastenkürzel",
+    "text": "Win + . (Punkt) öffnet das Emoji- und Sonderzeichen-Feld in jedem Textfeld."
+   },
+   "beziehung": {
+    "kurz": "Nach Träumen fragen",
+    "text": "Den anderen nach einem Traum oder Wunsch fragen, den er schon lange hat."
+   },
+   "spartipp": {
+    "kurz": "Wasserkocher nutzen",
+    "text": "Wasserkocher statt Herdplatte zum Wasser-Erhitzen verwenden."
+   },
+   "gesundheit": {
+    "kurz": "Zu Fuß einkaufen",
+    "text": "Zum Einkaufen zu Fuß oder mit dem Rad fahren."
+   },
+   "film": {
+    "titel": "Paddington 2",
+    "jahr": 2017,
+    "genre": "Familie",
+    "text": "Der höfliche Bär aus Peru gerät in London in Schwierigkeiten."
+   }
+  },
+  {
+   "datum": "2026-10-11",
+   "raetsel": {
+    "frage": "Was hat Zeiger, kann aber nichts zeigen außer der Zeit?",
+    "loesung": "Eine Uhr."
+   },
+   "witz": "Was macht ein Mathematiker im Garten? – Er zieht Wurzeln.",
+   "wort": {
+    "wort": "verschlimmbessern",
+    "bedeutung": "etwas verbessern wollen und es dabei schlimmer machen",
+    "herkunft": "Deutsch"
+   },
+   "sprichwort": "Eile mit Weile.",
+   "rezept": {
+    "name": "Kürbis-Risotto",
+    "minuten": 40,
+    "vegetarisch": true,
+    "zutaten": [
+     "200 g Risottoreis",
+     "300 g Kürbis",
+     "1 Zwiebel",
+     "800 ml Brühe",
+     "50 g Parmesan",
+     "Butter"
+    ],
+    "zubereitung": "Zwiebel und Kürbiswürfel andünsten, Reis glasig werden lassen. Nach und nach Brühe zugeben und rühren, bis der Reis cremig ist. Butter und Parmesan unterziehen."
+   },
+   "land": {
+    "name": "Österreich",
+    "hauptstadt": "Wien",
+    "sprache": "Deutsch",
+    "waehrung": "Euro",
+    "gericht": "Wiener Schnitzel",
+    "fakt": "Rund 60 Prozent der Fläche liegen in den Alpen."
+   },
+   "tech": {
+    "kategorie": "Browser",
+    "text": "Strg + L springt direkt in die Adressleiste – schneller als mit der Maus."
+   },
+   "beziehung": {
+    "kurz": "Euer Song",
+    "text": "Einen gemeinsamen Song aussuchen und laut mitsingen."
+   },
+   "spartipp": {
+    "kurz": "Gebraucht kaufen",
+    "text": "Gebrauchtes kaufen: Elektronik, Möbel und Kleidung gibt es oft wie neu."
+   },
+   "gesundheit": {
+    "kurz": "20-20-20-Regel",
+    "text": "Die 20-20-20-Regel für die Augen: alle 20 Minuten 20 Sekunden in 20 Fuß (6 m) Entfernung schauen."
+   },
+   "film": {
+    "titel": "Inception",
+    "jahr": 2010,
+    "genre": "Science-Fiction",
+    "text": "Ein Dieb stiehlt Ideen aus Träumen – und soll nun eine einpflanzen."
+   }
+  },
+  {
+   "datum": "2026-10-12",
+   "raetsel": {
+    "frage": "Was geht morgens auf vier, mittags auf zwei und abends auf drei Beinen?",
+    "loesung": "Der Mensch: als Baby krabbelnd, als Erwachsener aufrecht, im Alter mit Gehstock."
+   },
+   "witz": "Wie nennt man einen Schneemann mit Sonnenbrand? – Pfütze.",
+   "wort": {
+    "wort": "Luftschloss",
+    "bedeutung": "ein schöner, aber unrealistischer Plan",
+    "herkunft": "Deutsch"
+   },
+   "sprichwort": "Lügen haben kurze Beine.",
+   "rezept": {
+    "name": "Ofenlachs-Bowl mit Reis",
+    "minuten": 30,
+    "vegetarisch": false,
+    "zutaten": [
+     "2 Lachsfilets",
+     "150 g Reis",
+     "1 Avocado",
+     "1 Karotte",
+     "Sojasauce, Sesam"
+    ],
+    "zubereitung": "Reis kochen, Lachs 12 Minuten bei 200 °C backen. Mit Avocado, geraspelter Karotte, Sojasauce und Sesam in Schalen anrichten."
+   },
+   "land": {
+    "name": "Thailand",
+    "hauptstadt": "Bangkok",
+    "sprache": "Thai",
+    "waehrung": "Baht",
+    "gericht": "Pad Thai",
+    "fakt": "Thailand wurde nie von einer europäischen Macht kolonisiert."
+   },
+   "tech": {
+    "kategorie": "Werkzeug",
+    "text": "Microsoft PowerToys ergänzt Windows um nützliche Helfer, z. B. Farbwähler, Fenster-Layouts und Text-Erkennung."
+   },
+   "beziehung": {
+    "kurz": "Spieleabend",
+    "text": "Ein Brettspiel oder Kartenspiel hervorholen."
+   },
+   "spartipp": {
+    "kurz": "30-Tage-Regel",
+    "text": "Die 30-Tage-Regel: Nicht-notwendige Käufe einen Monat aufschieben."
+   },
+   "gesundheit": {
+    "kurz": "Ohne Zuckergetränke",
+    "text": "Einen Tag ohne zuckerhaltige Getränke."
+   },
+   "film": {
+    "titel": "Der Herr der Ringe: Die Gefährten",
+    "jahr": 2001,
+    "genre": "Fantasy",
+    "text": "Ein Hobbit bricht auf, um einen gefährlichen Ring zu vernichten."
+   }
+  },
+  {
+   "datum": "2026-10-13",
+   "raetsel": {
+    "frage": "Was ist voller Löcher und hält trotzdem Wasser?",
+    "loesung": "Ein Schwamm."
+   },
+   "witz": "Was ist klein, braun und rund und sitzt hinter Gittern? – Eine Knastanie.",
+   "wort": {
+    "wort": "Treppenwitz",
+    "bedeutung": "die schlagfertige Antwort, die einem erst zu spät einfällt",
+    "herkunft": "Deutsch, nach frz. „esprit de l’escalier“"
+   },
+   "sprichwort": "Geteilte Freude ist doppelte Freude.",
+   "rezept": {
+    "name": "Tomatensuppe mit Grilled Cheese",
+    "minuten": 25,
+    "vegetarisch": true,
+    "zutaten": [
+     "2 Dosen Tomaten",
+     "1 Zwiebel",
+     "400 ml Brühe",
+     "4 Scheiben Toast",
+     "Käse, Butter"
+    ],
+    "zubereitung": "Zwiebel andünsten, Tomaten und Brühe 15 Minuten köcheln, pürieren. Toast mit Käse belegen, zuklappen und in Butter goldbraun braten."
+   },
+   "land": {
+    "name": "Kroatien",
+    "hauptstadt": "Zagreb",
+    "sprache": "Kroatisch",
+    "waehrung": "Euro",
+    "gericht": "Pašticada (Schmorbraten)",
+    "fakt": "Die Krawatte geht auf die Halstücher kroatischer Soldaten zurück."
+   },
+   "tech": {
+    "kategorie": "Technikgeschichte",
+    "text": "Am 3. Dezember 1992 wurde die erste SMS verschickt: „Merry Christmas“."
+   },
+   "beziehung": {
+    "kurz": "Sonnenuntergang",
+    "text": "Zusammen einen Sonnenuntergang anschauen."
+   },
+   "spartipp": {
+    "kurz": "Handytarif prüfen",
+    "text": "Handytarif prüfen – oft reicht ein kleineres Datenvolumen."
+   },
+   "gesundheit": {
+    "kurz": "Abends dehnen",
+    "text": "Abends ein kurzes Dehnprogramm für Rücken und Beine."
+   },
+   "film": {
+    "titel": "Oben",
+    "jahr": 2009,
+    "genre": "Animation",
+    "text": "Ein alter Mann lässt sein Haus mit Luftballons nach Südamerika fliegen."
+   }
+  },
+  {
+   "datum": "2026-10-14",
+   "raetsel": {
+    "frage": "Was reist um die ganze Welt und bleibt dabei immer in seiner Ecke?",
+    "loesung": "Eine Briefmarke."
+   },
+   "witz": "Was ist ein Cowboy ohne Pferd? – Ein Sattelschlepper.",
+   "wort": {
+    "wort": "Feierabend",
+    "bedeutung": "das Ende des Arbeitstags und die freie Zeit danach",
+    "herkunft": "Deutsch"
+   },
+   "sprichwort": "Hunger ist der beste Koch.",
+   "rezept": {
+    "name": "Zwiebelkuchen vom Blech (klein)",
+    "minuten": 50,
+    "vegetarisch": false,
+    "zutaten": [
+     "1 Pizzateig",
+     "3 Zwiebeln",
+     "50 g Speckwürfel",
+     "150 g Schmand",
+     "1 Ei",
+     "Kümmel"
+    ],
+    "zubereitung": "Zwiebeln und Speck andünsten, mit Schmand und Ei mischen. Auf dem Teig verteilen, mit Kümmel bestreuen und bei 200 °C 25 Minuten backen."
+   },
+   "land": {
+    "name": "Neuseeland",
+    "hauptstadt": "Wellington",
+    "sprache": "Englisch, Māori und Gebärdensprache",
+    "waehrung": "Neuseeland-Dollar",
+    "gericht": "Hāngī (im Erdofen gegart)",
+    "fakt": "1893 führte Neuseeland als erstes Land das Frauenwahlrecht auf nationaler Ebene ein."
+   },
+   "tech": {
+    "kategorie": "Smartphone",
+    "text": "Dokumente mit der Kamera-App oder der Notizen-App scannen – das ergibt saubere PDFs ohne Scanner."
+   },
+   "beziehung": {
+    "kurz": "Danke sagen",
+    "text": "Danke sagen für etwas Alltägliches, das sonst selbstverständlich scheint."
+   },
+   "spartipp": {
+    "kurz": "Saisonal kaufen",
+    "text": "Saisonales Obst und Gemüse ist meist günstiger und schmeckt besser."
+   },
+   "gesundheit": {
+    "kurz": "Wasser in Sichtweite",
+    "text": "Wasserflasche auf den Schreibtisch stellen – als Erinnerung."
+   },
+   "film": {
+    "titel": "Das Wunder von Bern",
+    "jahr": 2003,
+    "genre": "Drama",
+    "text": "Die Fußball-WM 1954 aus Sicht einer Familie im Ruhrgebiet."
+   }
+  },
+  {
+   "datum": "2026-10-15",
+   "raetsel": {
+    "frage": "Was wird größer, wenn man es auf den Kopf stellt?",
+    "loesung": "Die Zahl 6 – sie wird zur 9."
+   },
+   "witz": "Warum sind Fische so schlau? – Weil sie in Schulen gehen.",
+   "wort": {
+    "wort": "Geborgenheit",
+    "bedeutung": "das Gefühl, sicher und gut aufgehoben zu sein",
+    "herkunft": "Deutsch"
+   },
+   "sprichwort": "Wer zuletzt lacht, lacht am besten.",
+   "rezept": {
+    "name": "Couscous-Salat",
+    "minuten": 20,
+    "vegetarisch": true,
+    "zutaten": [
+     "150 g Couscous",
+     "1 Gurke",
+     "10 Kirschtomaten",
+     "Minze und Petersilie",
+     "Zitrone, Olivenöl"
+    ],
+    "zubereitung": "Couscous mit heißem Wasser übergießen und quellen lassen. Gemüse würfeln, Kräuter hacken und alles mit Zitrone, Öl und Salz mischen."
+   },
+   "land": {
+    "name": "Georgien",
+    "hauptstadt": "Tiflis",
+    "sprache": "Georgisch",
+    "waehrung": "Lari",
+    "gericht": "Chatschapuri (Käsebrot)",
+    "fakt": "In Georgien wird seit rund 8.000 Jahren Wein gemacht."
+   },
+   "tech": {
+    "kategorie": "Arbeitsplatz",
+    "text": "Die Oberkante des Monitors etwa auf Augenhöhe stellen – das entlastet Nacken und Schultern."
+   },
+   "beziehung": {
+    "kurz": "Wohnzimmer-Picknick",
+    "text": "Ein Picknick im Wohnzimmer machen, wenn es draußen regnet."
+   },
+   "spartipp": {
+    "kurz": "Tiefkühlgemüse",
+    "text": "Tiefkühlgemüse ist preiswert und hält lange."
+   },
+   "gesundheit": {
+    "kurz": "Haferflocken-Frühstück",
+    "text": "Zum Frühstück Haferflocken mit Obst."
+   },
+   "film": {
+    "titel": "Ratatouille",
+    "jahr": 2007,
+    "genre": "Animation",
+    "text": "Eine Ratte mit großem Talent will in Paris Koch werden."
+   }
+  },
+  {
+   "datum": "2026-10-16",
+   "raetsel": {
+    "frage": "Was hat ein Kopfende und ein Fußende, aber keinen Körper?",
+    "loesung": "Ein Bett."
+   },
+   "witz": "Was ist groß, grau und telefoniert? – Ein Telefant.",
+   "wort": {
+    "wort": "Wabi-Sabi",
+    "bedeutung": "die Schönheit des Unvollkommenen und Vergänglichen",
+    "herkunft": "Japanisch"
+   },
+   "sprichwort": "Es ist noch kein Meister vom Himmel gefallen.",
+   "rezept": {
+    "name": "Rinderhack-Pfanne mit Paprika",
+    "minuten": 25,
+    "vegetarisch": false,
+    "zutaten": [
+     "300 g Rinderhack",
+     "2 Paprika",
+     "1 Zwiebel",
+     "1 Dose Tomaten",
+     "Paprikapulver",
+     "Reis oder Brot"
+    ],
+    "zubereitung": "Hack krümelig anbraten, Zwiebel und Paprika mitbraten. Tomaten und Gewürze dazu und 10 Minuten köcheln."
+   },
+   "land": {
+    "name": "Finnland",
+    "hauptstadt": "Helsinki",
+    "sprache": "Finnisch und Schwedisch",
+    "waehrung": "Euro",
+    "gericht": "Karelische Piroggen",
+    "fakt": "Finnland hat rund 188.000 Seen."
+   },
+   "tech": {
+    "kategorie": "Tastenkürzel",
+    "text": "Win + L sperrt den PC sofort, wenn man den Platz verlässt."
+   },
+   "beziehung": {
+    "kurz": "Bildschirmfreier Abend",
+    "text": "Einen Abend ohne Bildschirme verbringen."
+   },
+   "spartipp": {
+    "kurz": "Duschen statt baden",
+    "text": "Duschen statt baden und einen Sparduschkopf verwenden."
+   },
+   "gesundheit": {
+    "kurz": "Freunde anrufen",
+    "text": "Ein kurzes Telefonat mit einem Freund – soziale Kontakte tun gut."
+   },
+   "film": {
+    "titel": "Die Truman Show",
+    "jahr": 1998,
+    "genre": "Drama, Satire",
+    "text": "Ein Mann entdeckt, dass sein ganzes Leben eine Fernsehshow ist."
+   }
+  },
+  {
+   "datum": "2026-10-17",
+   "raetsel": {
+    "frage": "Schwarz beim Kauf, rot beim Benutzen, grau beim Wegwerfen. Was ist es?",
+    "loesung": "Holzkohle."
+   },
+   "witz": "Warum können Gespenster so schlecht lügen? – Weil man durch sie hindurchsieht.",
+   "wort": {
+    "wort": "Saudade",
+    "bedeutung": "wehmütige Sehnsucht nach etwas, das fehlt",
+    "herkunft": "Portugiesisch"
+   },
+   "sprichwort": "Einem geschenkten Gaul schaut man nicht ins Maul.",
+   "rezept": {
+    "name": "Ofenkürbis mit Kichererbsen",
+    "minuten": 40,
+    "vegetarisch": true,
+    "zutaten": [
+     "½ Butternut-Kürbis",
+     "1 Dose Kichererbsen",
+     "1 rote Zwiebel",
+     "Joghurt",
+     "Kreuzkümmel, Paprika"
+    ],
+    "zubereitung": "Kürbis würfeln, mit Kichererbsen, Zwiebel, Öl und Gewürzen 30 Minuten bei 200 °C backen. Mit einem Klecks Joghurt servieren."
+   },
+   "land": {
+    "name": "Südkorea",
+    "hauptstadt": "Seoul",
+    "sprache": "Koreanisch",
+    "waehrung": "Won",
+    "gericht": "Bibimbap und Kimchi",
+    "fakt": "Das Hangeul-Alphabet wurde im 15. Jahrhundert unter König Sejong geschaffen."
+   },
+   "tech": {
+    "kategorie": "Speicher",
+    "text": "Unter Windows zeigt „Einstellungen → System → Speicher“, welche Ordner den meisten Platz belegen."
+   },
+   "beziehung": {
+    "kurz": "Gemeinsames Monatsziel",
+    "text": "Gemeinsam ein Ziel für den Monat festlegen, das beiden Freude macht."
+   },
+   "spartipp": {
+    "kurz": "Reparieren lassen",
+    "text": "Geräte reparieren lassen statt neu kaufen – Repair-Cafés helfen oft kostenlos."
+   },
+   "gesundheit": {
+    "kurz": "1.000 Schritte mehr",
+    "text": "Heute die Schritte zählen und 1.000 mehr als gestern schaffen."
+   },
+   "film": {
+    "titel": "Jurassic Park",
+    "jahr": 1993,
+    "genre": "Abenteuer",
+    "text": "In einem Freizeitpark leben wieder Dinosaurier – was soll schon schiefgehen?"
+   }
+  },
+  {
+   "datum": "2026-10-18",
+   "raetsel": {
+    "frage": "Was hat einen Daumen und vier Finger, lebt aber nicht?",
+    "loesung": "Ein Handschuh."
+   },
+   "witz": "Was sagt die Null zur Acht? – „Schicker Gürtel!“",
+   "wort": {
+    "wort": "Ubuntu",
+    "bedeutung": "Menschlichkeit und Gemeinschaftssinn: „Ich bin, weil wir sind“",
+    "herkunft": "aus den Nguni-Bantusprachen"
+   },
+   "sprichwort": "Steter Tropfen höhlt den Stein.",
+   "rezept": {
+    "name": "Pasta mit Brokkoli und Zitrone",
+    "minuten": 20,
+    "vegetarisch": true,
+    "zutaten": [
+     "200 g Pasta",
+     "1 Brokkoli",
+     "1 Knoblauchzehe",
+     "1 Zitrone (Abrieb und Saft)",
+     "Parmesan"
+    ],
+    "zubereitung": "Brokkoliröschen die letzten 4 Minuten mit der Pasta kochen. Mit angebratenem Knoblauch, Zitrone, etwas Kochwasser und Parmesan mischen."
+   },
+   "land": {
+    "name": "Spanien",
+    "hauptstadt": "Madrid",
+    "sprache": "Spanisch",
+    "waehrung": "Euro",
+    "gericht": "Paella",
+    "fakt": "Spanien ist der größte Olivenölproduzent der Welt."
+   },
+   "tech": {
+    "kategorie": "Akku",
+    "text": "Viele Smartphones können das Laden bei 80 Prozent stoppen – das schont den Akku auf Dauer."
+   },
+   "beziehung": {
+    "kurz": "Eure Playlist",
+    "text": "Eine Playlist mit Liedern erstellen, die euch verbinden."
+   },
+   "spartipp": {
+    "kurz": "Ausgaben-Check",
+    "text": "Einmal im Monat alle Ausgaben durchgehen – das schafft Überblick."
+   },
+   "gesundheit": {
+    "kurz": "Eine Minute Planke",
+    "text": "Eine Minute Planke (Unterarmstütz) – auch in Etappen."
+   },
+   "film": {
+    "titel": "Soul Kitchen",
+    "jahr": 2009,
+    "genre": "Komödie",
+    "text": "Ein Hamburger Restaurantbesitzer kämpft um seinen Laden."
+   }
+  },
+  {
+   "datum": "2026-10-19",
+   "raetsel": {
+    "frage": "Was kann man sich einfangen, aber nicht werfen?",
+    "loesung": "Eine Erkältung."
+   },
+   "witz": "Was trinkt ein Vampir am liebsten zum Frühstück? – Blutorangensaft.",
+   "wort": {
+    "wort": "Sitzfleisch",
+    "bedeutung": "die Ausdauer, lange bei einer Sache zu bleiben",
+    "herkunft": "Deutsch"
+   },
+   "sprichwort": "Wie man in den Wald hineinruft, so schallt es heraus.",
+   "rezept": {
+    "name": "Shakshuka",
+    "minuten": 25,
+    "vegetarisch": true,
+    "zutaten": [
+     "1 Dose Tomaten",
+     "1 Paprika",
+     "1 Zwiebel",
+     "4 Eier",
+     "Kreuzkümmel, Paprikapulver",
+     "Brot"
+    ],
+    "zubereitung": "Zwiebel und Paprika anbraten, Tomaten und Gewürze 10 Minuten köcheln. Mulden formen, Eier hineinschlagen und zugedeckt stocken lassen."
+   },
+   "land": {
+    "name": "Chile",
+    "hauptstadt": "Santiago de Chile",
+    "sprache": "Spanisch",
+    "waehrung": "Chilenischer Peso",
+    "gericht": "Pastel de choclo (Maisauflauf)",
+    "fakt": "Chile ist über 4.000 km lang, im Schnitt aber nur rund 180 km breit."
+   },
+   "tech": {
+    "kategorie": "Technikgeschichte",
+    "text": "1969 wurde die erste Nachricht über das ARPANET, den Vorläufer des Internets, gesendet."
+   },
+   "beziehung": {
+    "kurz": "Kaffee ans Bett",
+    "text": "Den anderen morgens mit Kaffee oder Tee im Bett überraschen."
+   },
+   "spartipp": {
+    "kurz": "Brotzeit mitnehmen",
+    "text": "Eigene Brotzeit für die Arbeit mitnehmen."
+   },
+   "gesundheit": {
+    "kurz": "Kein Koffein am Abend",
+    "text": "Kaffee nach 15 Uhr durch Tee ohne Koffein ersetzen."
+   },
+   "film": {
+    "titel": "Interstellar",
+    "jahr": 2014,
+    "genre": "Science-Fiction",
+    "text": "Eine Crew sucht im All nach einer neuen Heimat für die Menschheit."
+   }
+  },
+  {
+   "datum": "2026-10-20",
+   "raetsel": {
+    "frage": "Was ist immer vor dir, und doch kannst du es nie sehen?",
+    "loesung": "Die Zukunft."
+   },
+   "witz": "Warum wurde die Tomate rot? – Sie hat das Salatdressing gesehen.",
+   "wort": {
+    "wort": "Eselsbrücke",
+    "bedeutung": "eine Merkhilfe für etwas, das man sich schwer merken kann",
+    "herkunft": "Deutsch"
+   },
+   "sprichwort": "Man soll den Tag nicht vor dem Abend loben.",
+   "rezept": {
+    "name": "Bratkartoffeln mit Spiegelei",
+    "minuten": 30,
+    "vegetarisch": true,
+    "zutaten": [
+     "600 g gekochte Kartoffeln vom Vortag",
+     "1 Zwiebel",
+     "4 Eier",
+     "Butterschmalz",
+     "Schnittlauch"
+    ],
+    "zubereitung": "Kartoffeln in Scheiben knusprig braten, Zwiebel dazu. Spiegeleier braten und mit Schnittlauch servieren."
+   },
+   "land": {
+    "name": "Niederlande",
+    "hauptstadt": "Amsterdam (Regierungssitz: Den Haag)",
+    "sprache": "Niederländisch",
+    "waehrung": "Euro",
+    "gericht": "Stamppot",
+    "fakt": "Rund ein Viertel des Landes liegt unter dem Meeresspiegel."
+   },
+   "tech": {
+    "kategorie": "Browser",
+    "text": "Mit der Leseansicht (in Firefox und Edge eingebaut) werden Artikel ohne Werbung und Ablenkung angezeigt."
+   },
+   "beziehung": {
+    "kurz": "Erst zuhören",
+    "text": "Bei einem Streit zuerst zuhören und das Gehörte in eigenen Worten wiederholen."
+   },
+   "spartipp": {
+    "kurz": "Restwärme nutzen",
+    "text": "Beim Backofen die Restwärme nutzen und ihn früher ausschalten."
+   },
+   "gesundheit": {
+    "kurz": "Balance beim Zähneputzen",
+    "text": "Beim Zähneputzen auf einem Bein stehen – trainiert das Gleichgewicht."
+   },
+   "film": {
+    "titel": "Ghostbusters",
+    "jahr": 1984,
+    "genre": "Komödie",
+    "text": "Drei Wissenschaftler gründen in New York einen Geisterjäger-Service."
+   }
+  },
+  {
+   "datum": "2026-10-21",
+   "raetsel": {
+    "frage": "Was brennt, ist aber kein Feuer?",
+    "loesung": "Die Brennnessel."
+   },
+   "witz": "Was macht ein Schaf beim Sport? – Määärathon.",
+   "wort": {
+    "wort": "Lampenfieber",
+    "bedeutung": "Aufregung vor einem Auftritt",
+    "herkunft": "Deutsch – nach den Lampen der Bühne"
+   },
+   "sprichwort": "Doppelt genäht hält besser.",
+   "rezept": {
+    "name": "Gemüsesuppe mit Graupen",
+    "minuten": 45,
+    "vegetarisch": true,
+    "zutaten": [
+     "80 g Graupen",
+     "2 Karotten",
+     "1 Stück Sellerie",
+     "1 Stange Lauch",
+     "1 l Brühe",
+     "Petersilie"
+    ],
+    "zubereitung": "Gemüse würfeln und andünsten, Graupen und Brühe dazu und 35 Minuten köcheln. Mit Petersilie servieren."
+   },
+   "land": {
+    "name": "Türkei",
+    "hauptstadt": "Ankara",
+    "sprache": "Türkisch",
+    "waehrung": "Türkische Lira",
+    "gericht": "Mercimek çorbası (Linsensuppe)",
+    "fakt": "Istanbul liegt auf zwei Kontinenten, in Europa und in Asien."
+   },
+   "tech": {
+    "kategorie": "Tastenkürzel",
+    "text": "Alt + Tab wechselt zwischen offenen Fenstern; Win + Tab zeigt alle Fenster und virtuellen Desktops."
+   },
+   "beziehung": {
+    "kurz": "Alter Lieblingsort",
+    "text": "Einen Ort besuchen, an dem ihr früher gern wart."
+   },
+   "spartipp": {
+    "kurz": "Heizkörper frei",
+    "text": "Heizkörper nicht mit Möbeln oder Vorhängen verdecken."
+   },
+   "gesundheit": {
+    "kurz": "Essen ohne Bildschirm",
+    "text": "Eine Mahlzeit heute komplett ohne Bildschirm essen."
+   },
+   "film": {
+    "titel": "E.T. – Der Außerirdische",
+    "jahr": 1982,
+    "genre": "Familie",
+    "text": "Ein Junge versteckt einen gestrandeten Außerirdischen."
+   }
+  },
+  {
+   "datum": "2026-10-22",
+   "raetsel": {
+    "frage": "Man hört es, sieht es nie, und es antwortet nur, wenn man es anspricht. Was ist es?",
+    "loesung": "Ein Echo."
+   },
+   "witz": "Welche Stadt hat keine Häuser? – Die Werkstatt.",
+   "wort": {
+    "wort": "Kopfkino",
+    "bedeutung": "Bilder und Szenen, die sich in der Vorstellung abspielen",
+    "herkunft": "Deutsch"
+   },
+   "sprichwort": "Kommt Zeit, kommt Rat.",
+   "rezept": {
+    "name": "Wraps mit Hähnchen und Salat",
+    "minuten": 20,
+    "vegetarisch": false,
+    "zutaten": [
+     "4 Tortillas",
+     "250 g Hähnchenbrust",
+     "Salat, Tomate, Gurke",
+     "Joghurt-Dip"
+    ],
+    "zubereitung": "Hähnchen würzen und in Streifen braten. Tortillas kurz erwärmen, mit Salat, Gemüse, Hähnchen und Dip füllen und einrollen."
+   },
+   "land": {
+    "name": "Kenia",
+    "hauptstadt": "Nairobi",
+    "sprache": "Swahili und Englisch",
+    "waehrung": "Kenia-Schilling",
+    "gericht": "Ugali mit Sukuma wiki",
+    "fakt": "Nairobi hat einen Nationalpark direkt am Stadtrand."
+   },
+   "tech": {
+    "kategorie": "Sicherheit",
+    "text": "Auf haveibeenpwned.com prüfen, ob die eigene E-Mail-Adresse in bekannten Datenlecks vorkommt."
+   },
+   "beziehung": {
+    "kurz": "Zusammen Sport",
+    "text": "Zusammen Sport machen – ein Lauf, eine Radtour oder Yoga."
+   },
+   "spartipp": {
+    "kurz": "Rabatte mit Maß",
+    "text": "Rabatte der Bank- oder Kundenkarten nur nutzen, wenn man ohnehin etwas braucht."
+   },
+   "gesundheit": {
+    "kurz": "Vor dem Schlafen lüften",
+    "text": "Das Schlafzimmer vor dem Schlafen kurz lüften."
+   },
+   "film": {
+    "titel": "Das Dschungelbuch",
+    "jahr": 1967,
+    "genre": "Animation",
+    "text": "Mogli wächst im Dschungel bei Balu und Baghira auf."
+   }
+  },
+  {
+   "datum": "2026-10-23",
+   "raetsel": {
+    "frage": "Was wird umso kürzer, je länger es brennt?",
+    "loesung": "Eine Kerze."
+   },
+   "witz": "Was ist braun und sitzt im Wald auf dem Klavier? – Ein Brummbär mit Lampenfieber.",
+   "wort": {
+    "wort": "Waldeinsamkeit",
+    "bedeutung": "das Gefühl, allein und im Einklang mit dem Wald zu sein",
+    "herkunft": "Deutsch, geprägt in der Romantik (Ludwig Tieck)"
+   },
+   "sprichwort": "Probieren geht über Studieren.",
+   "rezept": {
+    "name": "Apfel-Pfannkuchen",
+    "minuten": 25,
+    "vegetarisch": true,
+    "zutaten": [
+     "150 g Mehl",
+     "250 ml Milch",
+     "2 Eier",
+     "2 Äpfel",
+     "Zimt und Zucker"
+    ],
+    "zubereitung": "Teig aus Mehl, Milch und Eiern rühren. Apfelscheiben in der Pfanne anbraten, Teig darübergießen und von beiden Seiten backen. Mit Zimtzucker bestreuen."
+   },
+   "land": {
+    "name": "Tschechien",
+    "hauptstadt": "Prag",
+    "sprache": "Tschechisch",
+    "waehrung": "Tschechische Krone",
+    "gericht": "Svíčková (Lendenbraten in Rahmsoße)",
+    "fakt": "Tschechien hat den höchsten Bierkonsum pro Kopf der Welt."
+   },
+   "tech": {
+    "kategorie": "Technikgeschichte",
+    "text": "Die erste Website ging 1991 am CERN online – erstellt von Tim Berners-Lee."
+   },
+   "beziehung": {
+    "kurz": "Ein echter Brief",
+    "text": "Einen Brief schreiben – ganz altmodisch, auf Papier."
+   },
+   "spartipp": {
+    "kurz": "Gratis-Freizeit",
+    "text": "Kostenlose Freizeitangebote in der Stadt nutzen: Parks, Museumstage, Führungen."
+   },
+   "gesundheit": {
+    "kurz": "Aktiv aufräumen",
+    "text": "Zehn Minuten Aufräumen oder Gartenarbeit – Bewegung zählt."
+   },
+   "film": {
+    "titel": "Sing Street",
+    "jahr": 2016,
+    "genre": "Musikfilm",
+    "text": "Ein Schüler im Dublin der 1980er gründet eine Band, um ein Mädchen zu beeindrucken."
+   }
+  },
+  {
+   "datum": "2026-10-24",
+   "raetsel": {
+    "frage": "Welches Tier trägt eine große Zahl im Namen, hat aber längst nicht so viele Beine?",
+    "loesung": "Der Tausendfüßer."
+   },
+   "witz": "Was ist gelb und schießt? – Eine Banone.",
+   "wort": {
+    "wort": "Muße",
+    "bedeutung": "freie Zeit ohne Zweck und Druck",
+    "herkunft": "Deutsch, von althochdeutsch „muoza“"
+   },
+   "sprichwort": "In der Ruhe liegt die Kraft.",
+   "rezept": {
+    "name": "Blumenkohl-Curry",
+    "minuten": 35,
+    "vegetarisch": true,
+    "zutaten": [
+     "1 Blumenkohl",
+     "1 Dose Kichererbsen",
+     "200 ml Kokosmilch",
+     "1 Dose Tomaten",
+     "Currypulver",
+     "Reis"
+    ],
+    "zubereitung": "Blumenkohlröschen mit Curry anbraten, Tomaten, Kokosmilch und Kichererbsen dazu und 20 Minuten köcheln. Mit Reis servieren."
+   },
+   "land": {
+    "name": "Polen",
+    "hauptstadt": "Warschau",
+    "sprache": "Polnisch",
+    "waehrung": "Złoty",
+    "gericht": "Pierogi",
+    "fakt": "Marie Curie wurde 1867 in Warschau geboren."
+   },
+   "tech": {
+    "kategorie": "Werkzeug",
+    "text": "Mit „Strg + F“ auf jeder Webseite und in fast jedem Programm nach einem Wort suchen."
+   },
+   "beziehung": {
+    "kurz": "Gemeinsam ausmisten",
+    "text": "Gemeinsam etwas ausmisten und das Ergebnis feiern."
+   },
+   "spartipp": {
+    "kurz": "LED statt Halogen",
+    "text": "LED-Lampen statt alter Glüh- oder Halogenlampen verwenden."
+   },
+   "gesundheit": {
+    "kurz": "Tee statt Snack",
+    "text": "Eine Tasse Kräutertee statt eines Abend-Snacks."
+   },
+   "film": {
+    "titel": "Die Feuerzangenbowle",
+    "jahr": 1944,
+    "genre": "Komödie",
+    "text": "Ein Schriftsteller drückt verkleidet noch einmal die Schulbank."
+   }
+  },
+  {
+   "datum": "2026-10-25",
+   "raetsel": {
+    "frage": "Was ist schwerer: ein Kilo Federn oder ein Kilo Eisen?",
+    "loesung": "Keins – beide wiegen ein Kilo."
+   },
+   "witz": "Was steht auf dem Grabstein eines Mathematikers? – „Damit hat er nicht gerechnet.“",
+   "wort": {
+    "wort": "Kaizen",
+    "bedeutung": "ständige Verbesserung in vielen kleinen Schritten",
+    "herkunft": "Japanisch"
+   },
+   "sprichwort": "Wer nicht wagt, der nicht gewinnt.",
+   "rezept": {
+    "name": "Kartoffelgratin",
+    "minuten": 60,
+    "vegetarisch": true,
+    "zutaten": [
+     "800 g Kartoffeln",
+     "200 ml Sahne",
+     "100 ml Milch",
+     "1 Knoblauchzehe",
+     "80 g Käse",
+     "Muskat"
+    ],
+    "zubereitung": "Kartoffeln in dünne Scheiben schneiden und in eine gefettete Form schichten. Mit gewürzter Sahne-Milch übergießen, Käse darüber und bei 180 °C 45 Minuten backen."
+   },
+   "land": {
+    "name": "Australien",
+    "hauptstadt": "Canberra",
+    "sprache": "Englisch",
+    "waehrung": "Australischer Dollar",
+    "gericht": "Meat Pie",
+    "fakt": "Das Great Barrier Reef ist das größte Korallenriffsystem der Erde."
+   },
+   "tech": {
+    "kategorie": "Smartphone",
+    "text": "Im Fokus- bzw. Bitte-nicht-stören-Modus nur die wichtigsten Kontakte durchlassen – für ruhige Abende."
+   },
+   "beziehung": {
+    "kurz": "Dein Abend, meine Wahl",
+    "text": "Einen Abend lang nur Dinge tun, die der andere vorschlägt."
+   },
+   "spartipp": {
+    "kurz": "Erst sparen, dann ausgeben",
+    "text": "Automatisch einen festen Betrag am Monatsanfang zurücklegen."
+   },
+   "gesundheit": {
+    "kurz": "Handypause",
+    "text": "Heute bewusst eine Pause ohne Handy machen."
+   },
+   "film": {
+    "titel": "Arrival",
+    "jahr": 2016,
+    "genre": "Science-Fiction",
+    "text": "Eine Sprachwissenschaftlerin versucht, mit Außerirdischen zu kommunizieren."
+   }
+  },
+  {
+   "datum": "2026-10-26",
+   "raetsel": {
+    "frage": "Was hat vier Beine, kann aber nicht laufen?",
+    "loesung": "Ein Tisch."
+   },
+   "witz": "Was ist ein Keller voller Kekse? – Ein Krümelkeller.",
+   "wort": {
+    "wort": "Hüftgold",
+    "bedeutung": "scherzhaft für ein kleines Fettpölsterchen an der Hüfte",
+    "herkunft": "Deutsch, umgangssprachlich"
+   },
+   "sprichwort": "Auf Regen folgt Sonnenschein.",
+   "rezept": {
+    "name": "Kürbis-Pasta",
+    "minuten": 25,
+    "vegetarisch": true,
+    "zutaten": [
+     "200 g Pasta",
+     "300 g Kürbis",
+     "1 Knoblauchzehe",
+     "100 ml Sahne",
+     "Parmesan, Salbei"
+    ],
+    "zubereitung": "Kürbiswürfel mit Knoblauch weich dünsten, mit Sahne pürieren. Mit der Pasta, etwas Kochwasser und Parmesan mischen, mit Salbei servieren."
+   },
+   "land": {
+    "name": "Frankreich",
+    "hauptstadt": "Paris",
+    "sprache": "Französisch",
+    "waehrung": "Euro",
+    "gericht": "Ratatouille",
+    "fakt": "Frankreich ist das meistbesuchte Reiseland der Welt."
+   },
+   "tech": {
+    "kategorie": "Technikgeschichte",
+    "text": "Der USB-Standard erschien 1996 und ersetzte nach und nach viele unterschiedliche Anschlüsse."
+   },
+   "beziehung": {
+    "kurz": "Wie geht es dir?",
+    "text": "Einfach mal fragen: „Wie geht es dir wirklich?“"
+   },
+   "spartipp": {
+    "kurz": "Doppelt kochen",
+    "text": "Doppelt kochen und die Hälfte einfrieren – spart Zeit und Geld."
+   },
+   "gesundheit": {
+    "kurz": "Fünf am Tag",
+    "text": "Einen Obst- oder Gemüsetag: fünf Portionen schaffen."
+   },
+   "film": {
+    "titel": "Der Name der Rose",
+    "jahr": 1986,
+    "genre": "Krimi",
+    "text": "Ein Mönch untersucht rätselhafte Todesfälle in einer Abtei."
+   }
+  }
+ ]
+}

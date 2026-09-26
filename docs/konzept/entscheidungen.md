@@ -6,37 +6,46 @@ Ergebnis der Durchsicht von `daily-konzept.html`, ergänzt um die Nutzungsrecher
 Erst für Roger selbst bauen und testen, aber so planen, dass DAILY später öffentlich werden kann.
 
 ## 2. Inhaltsquelle „des Tages“
-KI-generiert + freie APIs. Fakten (Wetter, Kurse, Sport, „An diesem Tag“ …) aus APIs; Service-Texte (Rezept, Land, Buchtipp, Witz, Rätsel …) erzeugt eine KI jeden Morgen automatisch, Roger kann nachschärfen. Keine eigenen Texte zu aktuellen Ereignissen (siehe 7).
+KI-generiert + freie APIs. Fakten (Wetter, Kurse, Sport, Abfahrten, „An diesem Tag“ …) aus APIs; Service-Texte (Rezept, Land, Film, Witz, Rätsel, Wort, Sprichwort, Tipps …) von einer KI vorbereitet.
+**Umsetzung jetzt:** `src/content/daily.json` enthält 31 Tage (26.09.–26.10.2026), erzeugt mit `tools/content_2026_10.py`. Nach dem letzten Tag läuft der Vorrat im Kreis weiter (Tag im Jahr), die Seite bleibt also nie leer. Nachschub: Skript um den nächsten Monat erweitern, neu erzeugen, hochladen. Keine eigenen Texte zu aktuellen Ereignissen (siehe 7).
 
-## 3. Raster 5 × 4 – Reihenfolge nach Priorität (jedes Thema nur in einer Kachel)
+## 3. Raster 5 × 4 – Reihenfolge nach Priorität (Stand der Umsetzung)
 Reihe 1 – täglicher Kern:
-1. Wetter [Ort] – Wetter, Sonne, Mond, Luftqualität, Pollen (LIVE über Open-Meteo). Der gewählte Ort steht in der Überschrift („Wetter Dresden“), nicht im Kurztext.
-2. Kalender – Termine, Geburtstage, Jahrestage, Feiertage. LIVE über Vercel-Funktion `api/calendar.js` (Bibliothek node-ical, auch Serientermine); private iCal-Links werden im Konfigurator eingetragen (siehe Einstellungen), ersatzweise Vercel-Umgebungsvariable `CALENDAR_ICS_URL`; nie im Code. Zeigt heute bis +7 Tage.
-3. Mail – Zähler ungelesen/wichtig (Anbindung Google/IMAP, Stufe 2)
-4. Schlagzeilen – Originalüberschriften + Link, chronologisch, ohne eigene Auswahl/Zusammenfassung. LIVE über Vercel-Funktion `api/headlines.js` (Quellen dort in `FEEDS`: Tagesschau, MDR Sachsen, heise; Cache 10 min). Kennzahl = Meldungen der letzten 12 Stunden.
-5. Mein Daily – Aufgaben, Ziele, Notizen
+1. **Wetter [Ort]** – LIVE (Open-Meteo): Wetter, Symbol Tag/Nacht, Regenstunde, Sonne, Luftqualität, Pollen. Ort in der Überschrift.
+2. **Kalender** – LIVE (`api/calendar.js`, node-ical, iCal-Links aus den Einstellungen oder `CALENDAR_ICS_URL`). Ohne Link: Kachel „Einrichten“.
+3. **Mail** – vorerst ausgesetzt (Kachel „später“, gestrichelt).
+4. **Schlagzeilen** – LIVE (`api/headlines.js`: Tagesschau, MDR Sachsen, heise).
+5. **Mein Daily** – Aufgaben lokal: hinzufügen, abhaken, löschen.
 
-Reihe 2 – Version 1:
-6. Sport – Mein Verein, Ergebnisse, Live heute, Tabelle (nur Daten, z. B. OpenLigaDB; keine Spielberichte)
-7. Geld – LIVE über Vercel-Funktion `api/markets.js` (Yahoo-Finance-Chartdaten, nur private Nutzung; Cache 5 min): DAX, S&P 500, MSCI World (ETF IWDA), Bitcoin, Ethereum (in €), Euro/US-Dollar, Gold. Nur Kurse + Veränderung zum Vortag, keine Kauf-/Verkaufsempfehlungen; eigene Aktien später über die Einstellungen; Konten später. Für öffentlichen Betrieb lizenzierte Kursquelle nötig.
-8. Spielen – Rätsel, Quiz, Wortspiel, Witz
-9. Essen – Rezept, Discounter, Familie, International
-10. Wissen – Wort, Buch, Lexikon-Fakten „An diesem Tag“, Zitat
+Reihe 2:
+6. **Sport** – LIVE (`api/sport.js`, OpenLigaDB, 1.–3. Liga): Verein aus den Einstellungen (Standard Dynamo Dresden), Platz, letztes/nächstes Spiel, Tabellenausschnitt, Spieltag. Überschrift = Vereinsname.
+7. **Geld** – LIVE (`api/markets.js`, Yahoo-Finance-Chartdaten, nur privat): DAX, S&P 500, MSCI World (IWDA), Bitcoin, Ethereum, EUR/USD, Gold. Nur Kurse, keine Empfehlungen.
+8. **Rätsel & Witz** – Tagesinhalt, Lösung zum Aufklappen.
+9. **Essen** – Rezept des Tages (Zeit, vegetarisch, Zutaten, Zubereitung).
+10. **Wissen** – Wort des Tages, Sprichwort, „An diesem Tag“ LIVE aus Wikipedia (`api/onthisday.js`, CC BY-SA 4.0 mit Quellenhinweis und Link).
 
-Reihe 3 – später (braucht Anbindung):
-11. Mobilität · 12. Gesundheit · 13. Reisen & Länder · 14. Entertainment (TV-Daten nur aus lizenzierter Quelle) · 15. Tech (Tool, Gadget, Tipp, Technikgeschichte – keine Tech-News-Texte)
+Reihe 3:
+11. **Abfahrten** – LIVE (`api/transit.js`, VVO-Schnittstelle, Echtzeit): Haltestelle aus den Einstellungen (Standard Postplatz), Kennzahl „Tram 1 in 2 min“, Aktualisierung jede Minute.
+12. **Gesundheit** – allgemeiner Tagestipp (keine medizinische Beratung); Smartwatch später.
+13. **Land des Tages** – Hauptstadt, Sprache, Währung, Gericht, Fakt.
+14. **Filmtipp** – Film mit Jahr, Genre, Kurzbeschreibung; keine TV-Programmdaten.
+15. **Tech** – Tipp/Tastenkürzel/Technikgeschichte, keine Tech-News.
 
 Reihe 4:
-16. Shopping · 17. Beziehung · 18. Pakete (Stufe 2) · 1 freier Platz · 19. Deine Nutzung (lokaler Klickzähler)
+16. **Sparen** – Spartipp (allgemein, keine Finanzberatung) · 17. **Beziehung** – Idee für heute · 18. **Pakete** (später) · freier Platz · 19. **Deine Nutzung** (lokaler Klickzähler mit Zurücksetzen).
+
+Tipp-Kacheln zeigen eine kurze Überschrift als Kennzahl („Deckel auf den Topf“), nicht „Tipp des Tages“. Lange Kennzahlen dürfen zweizeilig umbrechen.
 
 Leiste am unteren Rand (früher Kopfzeile): DAILY, Datum, Uhrzeit, Suchfeld „Frag DAILY“, Links „Impressum“ und „Datenschutz“ (1 Klick, Entwürfe mit Platzhaltern). Antworten von „Frag DAILY“ erscheinen direkt über der Leiste.
 
 Geschätzte Abdeckung der täglichen Info-Abfragen: V1 ≈ 40 %; mit Sport, Mail-Zähler, Suchfeld und Paketstatus ≈ 65–70 %.
 
 ## 3a. Einstellungen (Konfigurator)
-Zahnrad-Button „Einstellungen“ in der unteren Leiste. Start mit zwei Punkten:
+Zahnrad-Button „Einstellungen“ in der unteren Leiste:
 - Ort für das Wetter (Ortssuche über Open-Meteo Geocoding, Auswahl aus Treffern; Standard Dresden)
 - Kalender: iCal-Links, einer pro Zeile
+- Haltestelle für Abfahrten (Standard Postplatz, VVO-Gebiet)
+- Fußballverein (Standard Dynamo Dresden, 1.–3. Liga)
 Speicherung nur lokal im Browser (localStorage `daily-settings`), also pro Gerät neu einzutragen. Weitere Einstellungen folgen (z. B. Schlagzeilen-Quellen, Sportverein, Aktien). Späterer Ausbau: Einstellungen geräteübergreifend synchronisieren.
 
 ## 3b. Mehrere Nutzer – Stufenplan
@@ -77,6 +86,17 @@ Der Prototyp zählt lokal, welche Kacheln geöffnet werden (Kachel „Deine Nutz
 - Zugriff nur Roger: Vercel Authentication „All Deployments“ aktiv → noch kein ausgefülltes Impressum nötig.
 - Schriften selbst gehostet (kein Google Fonts).
 
+## 11. Technischer Aufbau (seit 26.09.2026)
+- Frontend ohne Bundler: `src/index.html` (nur Gerüst), `src/app.css` (Design-Tokens, Hell/Dunkel), ES-Module unter `src/js/`:
+  - `core/` – `tiles.js` (Kachelliste = Rasterreihenfolge), `board.js` (Raster, Aktivierung, Mobil-Vollbild), `store.js` (Einstellungen, Aufgaben, Klickzähler in localStorage), `ask.js` („Frag DAILY“: jede Datenquelle meldet eigene Antworten an), `status.js` (Statusanzeige), `util.js`.
+  - `providers/` – je Datenquelle ein Modul mit `load()` und Intervall (`every`). `main.js` lädt alle, aktualisiert nur bei sichtbarem Tab und meldet Fehler an die Statusanzeige.
+  - Neue Kachel = Eintrag in `tiles.js` + Provider-Modul + Eintrag in `main.js`.
+- Statusanzeige in der Leiste: „Live · HH:MM“ oder „N Quellen gestört“.
+- Server-Funktionen in `api/` (Vercel, Region fra1 = Frankfurt), gemeinsame Helfer in `api/_lib/http.js`. Server-Funktionen verbergen die IP der Nutzer vor den Anbietern und setzen CDN-Cache-Zeiten.
+- Service Worker `daily-v2`: App-Dateien network-first, Schriften/Icons cache-first, `/api/` nie aus dem Cache.
+- Tests: `npm test` (node:test, ohne Netz) prüft Schlagzeilen, Sport, Abfahrten, Wikipedia-Umwandlung und die Vollständigkeit der 31 Tagesinhalte.
+- Lokaler Testserver: `node tools/mock-server.js` (nach `npm run build`), liefert Beispieldaten aus `tools/fixtures.js` statt echter Dienste.
+
 ## Design
 Grau-grüner Grund, dunkelblaue aktive Kachel, Schriften Bricolage Grotesque + Figtree, Hell- und Dunkelmodus. App-Icon: Raster mit großer „D“-Kachel. Beispieltermin: „Geburtstag von Claude“.
 Prototyp: `../prototyp/daily-prototyp.html`.
@@ -84,4 +104,6 @@ Prototyp: `../prototyp/daily-prototyp.html`.
 ## Offen
 - Domain daily.craibotics.org bei GoDaddy einrichten
 - Belegung des letzten freien Platzes (nach Klickzähler entscheiden)
-- Reihenfolge der Datenanbindung nach Nutzung, Mail ans Ende: Schlagzeilen (erledigt) → Kalender (erledigt) → Geld (erledigt) → Verkehr → Sport (Verein) → … → Mail (vorerst ausgesetzt)
+- Datenanbindung: Schlagzeilen, Kalender, Geld, Abfahrten, Sport, Wikipedia, Tagesinhalte (31 Tage) erledigt → Mail und Pakete (Stufe 2, vorerst ausgesetzt)
+- Live-Prüfung durch Roger: Abfahrten (VVO) und Sport (OpenLigaDB) wurden nur mit Beispieldaten getestet
+- Tagesinhalte ab 27.10.2026 nachlegen (sonst Wiederholung im Kreis)

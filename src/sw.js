@@ -1,7 +1,11 @@
-// DAILY Service Worker: App-Hülle offline verfügbar, Daten immer frisch.
-const CACHE = 'daily-v1';
+// DAILY Service Worker: App offline startbar, Daten und Code immer frisch aus dem Netz.
+const CACHE = 'daily-v2';
 const SHELL = [
-  '/', '/manifest.webmanifest',
+  '/', '/app.css', '/manifest.webmanifest', '/content/daily.json',
+  '/js/main.js', '/js/core/util.js', '/js/core/store.js', '/js/core/tiles.js', '/js/core/board.js',
+  '/js/core/ask.js', '/js/core/status.js', '/js/ui/dialogs.js',
+  '/js/providers/weather.js', '/js/providers/calendar.js', '/js/providers/news.js', '/js/providers/markets.js',
+  '/js/providers/sport.js', '/js/providers/transit.js', '/js/providers/content.js', '/js/providers/knowledge.js', '/js/providers/local.js',
   '/fonts/bricolage-grotesque.woff2', '/fonts/figtree-400.woff2', '/fonts/figtree-500.woff2', '/fonts/figtree-600.woff2',
   '/icons/icon-192.png', '/icons/icon-512.png'
 ];
@@ -13,13 +17,15 @@ self.addEventListener('activate', e => {
 });
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
-  if (e.request.method !== 'GET' || url.origin !== location.origin) return; // Wetter-API usw. nie cachen
-  // Seite: erst Netz (damit Updates sofort da sind), offline aus dem Cache
-  if (e.request.mode === 'navigate') {
-    e.respondWith(fetch(e.request).then(r => { const copy = r.clone(); caches.open(CACHE).then(c => c.put('/', copy)); return r; })
-      .catch(() => caches.match('/')));
+  if (e.request.method !== 'GET' || url.origin !== location.origin || url.pathname.startsWith('/api/')) return; // Live-Daten nie cachen
+  // Schriften und Icons ändern sich nie: zuerst aus dem Cache
+  if (url.pathname.startsWith('/fonts/') || url.pathname.startsWith('/icons/')) {
+    e.respondWith(caches.match(e.request).then(hit => hit || fetch(e.request)));
     return;
   }
-  // Schriften, Icons: aus dem Cache, sonst Netz
-  e.respondWith(caches.match(e.request).then(hit => hit || fetch(e.request)));
+  // Seite, Code, Inhalte: zuerst Netz (Updates sofort sichtbar), offline aus dem Cache
+  e.respondWith(fetch(e.request).then(r => {
+    if (r.ok) { const copy = r.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); }
+    return r;
+  }).catch(() => caches.match(e.request).then(hit => hit || (e.request.mode === 'navigate' ? caches.match('/') : Response.error()))));
 });
