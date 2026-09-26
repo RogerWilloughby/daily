@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DAILY</title>
+<meta name="description" content="Dein Tag auf einer Seite.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#E8ECEA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#101513" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
+<link rel="icon" href="/icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="DAILY">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<style>
+@font-face{font-family:"Bricolage Grotesque";src:url(/fonts/bricolage-grotesque.woff2) format("woff2");font-weight:200 800;font-display:swap}
+@font-face{font-family:"Figtree";src:url(/fonts/figtree-400.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Figtree";src:url(/fonts/figtree-500.woff2) format("woff2");font-weight:500;font-display:swap}
+@font-face{font-family:"Figtree";src:url(/fonts/figtree-600.woff2) format("woff2");font-weight:600;font-display:swap}
+:root{
+  --ground:#E8ECEA; --surface:#F7F9F7; --line:#D3DAD6; --ink:#16201C; --muted:#526059;
+  --accent:#2C5A8A; --active-bg:#1D3553; --active-ink:#F2F6FA; --active-muted:#B8C8DA; --active-line:#34507A;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Figtree", "Segoe UI", system-ui, sans-serif;
+  --ease:cubic-bezier(.2,.8,.2,1);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#101513; --surface:#1A201D; --line:#2B3430; --ink:#E6ECE8; --muted:#9AA8A1;
+    --accent:#8DB5E6; --active-bg:#DCE7F3; --active-ink:#10213A; --active-muted:#3E5676; --active-line:#B3C6DD;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#101513; --surface:#1A201D; --line:#2B3430; --ink:#E6ECE8; --muted:#9AA8A1;
+  --accent:#8DB5E6; --active-bg:#DCE7F3; --active-ink:#10213A; --active-muted:#3E5676; --active-line:#B3C6DD;
+}
+html,body{height:100%}
+body{margin:0}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:15px;overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.app{height:100%;box-sizing:border-box;padding-block:16px 20px;padding-inline:clamp(16px,2vw,28px);display:flex;flex-direction:column;gap:14px}
+
+/* header */
+.top{display:flex;align-items:center;gap:20px;flex-wrap:wrap;min-height:48px}
+.brand{font-family:var(--display);font-weight:700;font-size:28px;letter-spacing:.08em}
+.date{color:var(--muted);font-size:15px}
+.clock{font-family:var(--display);font-weight:500;font-size:22px;font-variant-numeric:tabular-nums}
+.spacer{flex:1}
+.hint{color:var(--muted);font-size:13px}
+.chip{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:5px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+
+/* desktop grid */
+.grid{flex:1;min-height:0;display:grid;gap:10px;
+  grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:repeat(4,minmax(0,1fr));
+  transition:grid-template-columns .5s var(--ease),grid-template-rows .5s var(--ease)}
+.tile{min-width:0;min-height:0;overflow:hidden;border-radius:12px;background:var(--surface);border:1px solid var(--line);
+  display:grid;grid-template-columns:minmax(0,1fr);transition:background .35s,border-color .35s,color .35s}
+.tile:hover:not([data-mode="active"]){border-color:var(--accent)}
+.head{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;padding:18px 20px;min-width:0;min-height:0;overflow:hidden;transition:padding .35s var(--ease)}
+.label{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;max-width:100%}
+.label span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ico{width:18px;height:18px;flex:none;color:var(--accent)}
+.metric{font-family:var(--display);font-weight:700;font-size:28px;line-height:1.1;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.teaser{color:var(--muted);font-size:14px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.body{display:none}
+.tag{flex:none;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.tile[data-mode="small"] .tag{display:none}
+.tile[data-mode="active"] .tag{border-color:var(--active-line);color:var(--active-muted)}
+.tile.later:not([data-mode="active"]) .metric{color:var(--muted)}
+.close.reset{align-self:flex-start}
+.tile.free{background:transparent;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px}
+.tile.free:hover{border-color:var(--line)}
+.tile.free[data-mode="small"] span{display:none}
+.ask{flex:1 1 320px;max-width:520px;display:flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface)}
+.ask:focus-within{border-color:var(--accent)}
+.ask .ico{width:18px;height:18px}
+.ask input{flex:1;min-width:0;border:0;background:transparent;font:inherit;font-size:15px;color:var(--ink);outline:none}
+.ask input::placeholder{color:var(--muted)}
+.answer{display:flex;align-items:flex-start;gap:14px;padding:14px 18px;border-radius:12px;background:var(--active-bg);color:var(--active-ink);font-size:15px;line-height:1.45}
+.answer[hidden],[hidden]{display:none !important}
+.answer b{font-weight:600}
+.answer p{margin:0;flex:1}
+.answer .q{color:var(--active-muted);display:block;font-size:13px;margin-bottom:2px}
+
+.tile[data-mode="small"] .head,.tile[data-mode="lane"] .head{padding:10px 12px;gap:3px}
+.tile[data-mode="small"] .label,.tile[data-mode="lane"] .label{font-size:13px}
+.tile[data-mode="small"] .metric{font-size:16px}
+.tile[data-mode="lane"] .metric{font-size:19px}
+.tile[data-mode="small"] .teaser{display:none}
+.tile[data-mode="lane"] .teaser{font-size:13px;-webkit-line-clamp:2}
+
+.tile[data-mode="active"]{background:var(--active-bg);border-color:var(--active-bg);color:var(--active-ink);
+  grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);grid-template-rows:minmax(0,1fr)}
+.tile[data-mode="active"] .head{padding:28px 30px;gap:12px;cursor:default}
+.tile[data-mode="active"] .ico{color:var(--active-muted)}
+.tile[data-mode="active"] .label{font-size:14px;letter-spacing:.06em;text-transform:uppercase}
+.tile[data-mode="active"] .metric{font-size:clamp(28px,2.8vw,46px);white-space:normal;overflow:visible;overflow-wrap:anywhere;hyphens:auto}
+.tile[data-mode="active"] .teaser{color:var(--active-muted);font-size:17px;-webkit-line-clamp:6}
+.tile[data-mode="active"] .body{display:flex;flex-direction:column;min-height:0;padding:22px 26px 22px 0;gap:10px}
+.close{align-self:flex-end;min-height:40px;padding:0 14px;border-radius:10px;border:1px solid var(--active-line);color:var(--active-ink);font-size:14px}
+dl{margin:0;overflow:auto;min-height:0}
+.row{display:grid;grid-template-columns:minmax(110px,34%) minmax(0,1fr);gap:14px;padding:8px 0;border-bottom:1px solid var(--active-line);font-size:15px;line-height:1.35}
+.row dt{color:var(--active-muted)}
+.row dd{margin:0}
+@keyframes fadein{from{opacity:.4}to{opacity:1}}
+.tile[data-mode="active"] .body{animation:fadein .4s var(--ease)}
+
+/* mobile */
+.sheet{display:none}
+@media (max-width:760px), (max-height:520px){
+  .hint,.top .chip{display:none}
+  .legal{order:2;margin-left:auto;gap:10px;font-size:12px}
+  .legal + .spacer{display:none}
+  .top{gap:12px;min-height:0}
+  .brand{font-size:24px}
+  .date{order:3;width:100%;margin-top:-6px;font-size:14px}
+  .clock{font-size:19px;margin-left:auto}
+  .spacer{display:none}
+  .grid{gap:7px;grid-template-columns:repeat(4,minmax(0,1fr)) !important;grid-template-rows:repeat(5,minmax(0,1fr)) !important}
+  .ask{order:4;flex-basis:100%;max-width:none}
+  .tile.free span{display:none}
+  .tile .head{padding:9px 8px !important;justify-content:space-between;height:100%;box-sizing:border-box}
+  .tile .label{font-family:var(--display);font-size:14px !important;font-weight:700;flex-direction:column;align-items:flex-start;gap:6px}
+  .tile .label .long{display:none}
+  .tile .label .short{display:block;white-space:normal}
+  .tile .tag{display:none}
+  .tile .metric{font-family:var(--body);font-size:12px !important;font-weight:600;color:var(--muted)}
+  .tile .teaser{display:none}
+  .tile .metric .m-long{display:none}
+  .sheet{position:fixed;inset:0;z-index:5;background:var(--active-bg);color:var(--active-ink);
+    box-sizing:border-box;padding:calc(16px + env(safe-area-inset-top,0px)) 18px calc(18px + env(safe-area-inset-bottom,0px));
+    flex-direction:column;gap:16px}
+  .sheet.open{display:flex}
+}
+.label .short{display:none}
+.metric .m-short{display:none}
+@media (max-width:760px), (max-height:520px){ .metric .m-short{display:inline} }
+.s-top{display:flex;align-items:center;gap:10px}
+.s-btn{min-height:44px;padding:0 14px;border-radius:10px;border:1px solid var(--active-line);color:var(--active-ink);font-size:14px}
+.s-pos{margin-left:auto;color:var(--active-muted);font-size:13px;font-variant-numeric:tabular-nums}
+.s-label{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--active-muted)}
+.s-metric{font-family:var(--display);font-weight:700;font-size:38px;line-height:1.08}
+.s-teaser{color:var(--active-muted);font-size:17px;line-height:1.45}
+.sheet dl{flex:1}
+.sheet .row{grid-template-columns:1fr;gap:2px}
+.sheet .row dt{font-size:12px}
+.s-nav{display:flex;gap:10px}
+.s-nav .s-btn{flex:1;min-height:48px}
+.s-hint{text-align:center;font-size:12px;color:var(--active-muted)}
+.legal{display:flex;gap:14px;font-size:13px}
+.legal button{color:var(--muted);text-decoration:underline;text-underline-offset:3px;min-height:32px}
+.legal button:hover{color:var(--ink)}
+dialog.doc{width:min(640px,calc(100vw - 32px));max-height:calc(100vh - 48px);box-sizing:border-box;padding:0;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);overflow:hidden}
+dialog.doc::backdrop{background:rgba(10,20,16,.45)}
+.doc-in{display:flex;flex-direction:column;max-height:calc(100vh - 48px)}
+.doc-head{display:flex;align-items:center;gap:12px;padding:18px 22px;border-bottom:1px solid var(--line)}
+.doc-head h2{margin:0;font-family:var(--display);font-size:22px;flex:1}
+.doc-head .x{min-height:40px;padding:0 14px;border-radius:10px;border:1px solid var(--line);font-size:14px}
+.doc-body{overflow:auto;padding:6px 22px 22px;font-size:15px;line-height:1.55}
+.doc-body h3{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:18px 0 4px}
+.doc-body p{margin:0 0 6px;max-width:62ch}
+.ph{background:color-mix(in srgb,var(--accent) 14%,transparent);border-radius:4px;padding:0 4px}
+.draft{margin-top:14px;font-size:13px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.grid,.tile,.head{transition:none}.tile[data-mode="active"] .body{animation:none}}
+</style>
+</head>
+<body>
+
+
+<div class="app">
+  <header class="top">
+    <div class="brand">DAILY</div>
+    <div class="date" id="date"></div>
+    <div class="clock" id="clock"></div>
+    <div class="spacer"></div>
+    <form class="ask" id="ask" role="search">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+      <input id="q" type="search" placeholder="Frag DAILY … (z. B. Schirm heute?)" aria-label="Frage an DAILY" autocomplete="off">
+    </form>
+    <div class="spacer"></div>
+    <div class="hint">Esc schließt</div>
+    <div class="chip" id="chip">Beispieldaten</div>
+    <nav class="legal" aria-label="Rechtliches">
+      <button type="button" data-doc="impressum">Impressum</button>
+      <button type="button" data-doc="datenschutz">Datenschutz</button>
+    </nav>
+  </header>
+  <div class="answer" id="answer" hidden>
+    <p id="answer-text"></p>
+    <button class="close" type="button" id="answer-close">Schließen</button>
+  </div>
+  <main class="grid" id="grid" aria-label="Tageskacheln"></main>
+</div>
+
+<section class="sheet" id="sheet" aria-label="Kachel im Vollbild">
+  <div class="s-top">
+    <button class="s-btn" id="s-back" type="button">‹ Übersicht</button>
+    <span class="s-pos" id="s-pos"></span>
+  </div>
+  <div class="s-label" id="s-label"></div>
+  <div class="s-metric" id="s-metric"></div>
+  <div class="s-teaser" id="s-teaser"></div>
+  <dl id="s-details"></dl>
+  <div class="s-nav">
+    <button class="s-btn" id="s-prev" type="button"></button>
+    <button class="s-btn" id="s-next" type="button"></button>
+  </div>
+  <div class="s-hint">Wischen wechselt zur nächsten Kachel</div>
+</section>
+
+<dialog class="doc" id="doc-impressum" aria-labelledby="h-imp">
+  <div class="doc-in">
+    <div class="doc-head"><h2 id="h-imp">Impressum</h2><button class="x" type="button" data-doc-close>Schließen</button></div>
+    <div class="doc-body">
+      <h3>Angaben gemäß § 5 DDG</h3>
+      <p><span class="ph">[Vorname Nachname]</span><br><span class="ph">[Straße Hausnummer]</span><br><span class="ph">[PLZ]</span> Dresden<br>Deutschland</p>
+      <h3>Kontakt</h3>
+      <p>E-Mail: <span class="ph">[kontakt@daily-domain.de]</span><br>Telefon oder Kontaktformular: <span class="ph">[Nummer oder Link]</span></p>
+      <h3>Umsatzsteuer</h3>
+      <p><span class="ph">[USt-IdNr. – nur falls vorhanden, sonst Abschnitt entfernen]</span></p>
+      <h3>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV</h3>
+      <p><span class="ph">[Vorname Nachname]</span>, Anschrift wie oben</p>
+      <h3>Hinweis zu KI-Inhalten</h3>
+      <p>Texte in den Bereichen Nachrichten, Politik-Thema und Faktencheck werden mit Unterstützung von KI erstellt und als solche gekennzeichnet. <span class="ph">[Oder: Sie werden vor Veröffentlichung redaktionell geprüft von …]</span></p>
+      <h3>Datenquellen</h3>
+      <p>Wetter, Luftqualität und Pollen: Open-Meteo.com (CC BY 4.0).</p>
+      <p class="draft">Entwurf mit Platzhaltern. Vor der Veröffentlichung ausfüllen und prüfen lassen.</p>
+    </div>
+  </div>
+</dialog>
+<dialog class="doc" id="doc-datenschutz" aria-labelledby="h-ds">
+  <div class="doc-in">
+    <div class="doc-head"><h2 id="h-ds">Datenschutz</h2><button class="x" type="button" data-doc-close>Schließen</button></div>
+    <div class="doc-body">
+      <h3>Verantwortlicher</h3>
+      <p><span class="ph">[Vorname Nachname]</span>, <span class="ph">[Anschrift]</span>, Dresden · <span class="ph">[E-Mail]</span></p>
+      <h3>Was DAILY auf deinem Gerät speichert</h3>
+      <p>Der Klickzähler („Deine Nutzung“) und später deine Aufgaben und Notizen werden nur lokal in deinem Browser gespeichert. Sie werden nicht an uns übertragen. Du kannst sie jederzeit in der Kachel „Deine Nutzung“ zurücksetzen oder über die Browser-Einstellungen löschen.</p>
+      <h3>Externe Dienste</h3>
+      <p><b>Open-Meteo</b> (Wetter, Luftqualität, Pollen): Beim Laden der Wetterdaten ruft dein Browser die Server von Open-Meteo auf. Dabei wird deine IP-Adresse übertragen. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (Bereitstellung der Wetteranzeige).</p>
+      <p><b>Schriftarten</b> werden direkt von diesem Server geladen, nicht von Google.</p>
+      <p><b>Hosting</b>: Vercel Inc., USA. Beim Aufruf verarbeitet Vercel technisch notwendige Daten wie deine IP-Adresse. <span class="ph">[Vor Veröffentlichung: Auftragsverarbeitung und Drittlandübermittlung (EU-US Data Privacy Framework) ergänzen]</span></p>
+      <h3>Keine Analyse, kein Tracking</h3>
+      <p>DAILY verwendet keine Analyse- oder Werbe-Tracker und setzt keine Cookies.</p>
+      <h3>Deine Rechte</h3>
+      <p>Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Widerspruch und Datenübertragbarkeit sowie auf Beschwerde bei einer Aufsichtsbehörde, zum Beispiel beim Sächsischen Datenschutz- und Transparenzbeauftragten.</p>
+      <p class="draft">Entwurf mit Platzhaltern. Vor der Veröffentlichung vervollständigen und prüfen lassen.</p>
+    </div>
+  </div>
+</dialog>
+
+<script>
+const ICONS = {
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  news:'<path d="M4 5h13v14H6a2 2 0 0 1-2-2zM17 9h3v8a2 2 0 0 1-2 2M8 9h5M8 13h5M8 17h3"/>',
+  money:'<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>',
+  heart:'<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
+  pair:'<circle cx="9" cy="8" r="3"/><circle cx="17" cy="8" r="3"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5M15 15c3 0 6 2 6 5"/>',
+  food:'<path d="M6 3v8a2 2 0 0 0 4 0V3M8 11v10M16 3c-2 2-2 6 0 8v10"/>',
+  globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>',
+  book:'<path d="M4 19V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM19 19v2H6"/>',
+  tv:'<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M8 2l4 4 4-4"/>',
+  bag:'<path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2"/>',
+  chip:'<rect x="7" y="7" width="10" height="10" rx="1"/><path d="M9 3v4M15 3v4M9 17v4M15 17v4M3 9h4M3 15h4M17 9h4M17 15h4"/>',
+  car:'<path d="M5 16v-5l2-5h10l2 5v5M3 16h18v3H3zM5 11h14"/>',
+  dice:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 9h.01M15 15h.01M15 9h.01M9 15h.01" stroke-width="3"/>',
+  leaf:'<path d="M5 19c0-8 6-14 15-14 0 9-6 15-14 15zM5 19l7-7"/>',
+  bars:'<path d="M5 20V11M12 20V4M19 20v-7"/>',
+  mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
+  ball:'<circle cx="12" cy="12" r="9"/><path d="M12 7l4 3-1.5 4.5h-5L8 10zM12 3v4M16 10l4.5-1.5M14.5 14.5l2.5 4M9.5 14.5l-2.5 4M8 10L3.5 8.5"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
+  box:'<path d="M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10M7.5 5l9 4"/>',
+  list:'<path d="M10 6h10M10 12h10M10 18h10M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/>'
+};
+const TILES = [
+  // Reihe 1 – täglicher Kern
+  {t:'Heute & Wetter',s:'Wetter',i:'sun',m:'17°',ms:'17°',x:'Leicht bewölkt, ab Mittag sonnig. Luft gut, Pollen gering.',d:[['Heute','11° bis 19°'],['Regenrisiko','10 %'],['Sonne','07:12 bis 19:03'],['Mond','zunehmender Halbmond'],['Luftqualität','gut'],['Pollen','gering (Gräser)']]},
+  {t:'Kalender',s:'Termine',i:'cal',m:'3 Termine',ms:'3 heute',x:'Als Nächstes: 10:00 Geburtstag von Claude',d:[['10:00','Geburtstag von Claude – Kuchen mitbringen'],['14:30','Wocheneinkauf'],['19:00','Abendessen bei Freunden'],['Geburtstag','Anna (morgen)'],['Feiertag','keiner']]},
+  {t:'Mail',s:'Mail',i:'mail',m:'3 neu',ms:'3 neu',x:'1 wichtig: Stadtwerke, Abschlagsrechnung',d:[['Ungelesen','3'],['Wichtig','Stadtwerke – Abschlagsrechnung'],['Newsletter','2'],['Versand','Paket kommt morgen'],['Anbindung','Google oder IMAP · Stufe 2']]},
+  {t:'Nachrichten',s:'News',i:'news',m:'5 Meldungen',ms:'5 neu',x:'[Wichtigste Meldung des Tages]',d:[['Top','[Meldung 1]'],['Welt','[Meldung 2]'],['Region','[Meldung aus deiner Region]'],['Politik-Thema','[Thema, neutral zusammengefasst]'],['Faktencheck','[Behauptung und Einordnung]']]},
+  {t:'Mein Daily',s:'Mein Daily',i:'list',m:'4 Aufgaben',ms:'4 offen',x:'Steuerunterlagen sortieren, Geschenk für Anna …',d:[['Aufgabe','Steuerunterlagen sortieren'],['Aufgabe','Geschenk für Anna besorgen'],['Aufgabe','DAILY-Prototyp testen'],['Tagesziel','30 min lesen'],['Notiz','[eigene Notiz]']]},
+  // Reihe 2 – Version 1
+  {t:'Sport',s:'Sport',i:'ball',m:'[Ergebnis]',ms:'[Spiel]',x:'Ergebnisse von gestern und die Spiele von heute',d:[['Mein Verein','[Ergebnis · Tabellenplatz]'],['Gestern','[Ergebnisse Bundesliga]'],['Heute live','[Anstoß · Sender]'],['Tabelle','[Top 3]'],['Andere Sportarten','[Formel 1, Handball …]']]},
+  {t:'Geld',s:'Geld',i:'money',m:'DAX [Kurs]',ms:'[Kurs]',x:'Märkte und Crypto im Überblick. Konten folgen später.',d:[['DAX','[Kurs · Veränderung]'],['S&P 500','[Kurs · Veränderung]'],['Bitcoin','[Kurs · Veränderung]'],['Depot','[Wert] · später'],['Finanz-Tipp','[Tipp des Tages]']]},
+  {t:'Spielen',s:'Spiele',i:'dice',m:'Rätsel',ms:'Rätsel',x:'Was hat Zähne, kann aber nicht beißen?',d:[['Lösung','ab 18 Uhr'],['Wortspiel','[Wortspiel des Tages]'],['Quiz','5 Fragen zu Portugal'],['Witz','[Witz des Tages]']]},
+  {t:'Essen',s:'Essen',i:'food',m:'Ofengemüse',ms:'30 min',x:'Ofengemüse mit Feta · 30 Minuten · vegetarisch · günstig',d:[['Zeit','30 Minuten'],['Portionen','2'],['Aus dem Angebot','Paprika, Zucchini, Feta'],['Für die Familie','mit Kartoffeln als Beilage'],['Morgen','Linsen-Dal']]},
+  {t:'Wissen',s:'Wissen',i:'book',m:'Kairos',ms:'Kairos',x:'Wort des Tages: der richtige, günstige Augenblick.',d:[['Herkunft','Altgriechisch'],['Buch des Tages','[Titel · Autor]'],['An diesem Tag','[historisches Ereignis]'],['Wissenschaft','[Entdeckung des Tages]'],['Zitat','[Zitat des Tages]']]},
+  // Reihe 3 – später (braucht Anbindung)
+  {t:'Mobilität',s:'Mobil',i:'car',m:'24 min',ms:'24 min',x:'Pendelzeit zur Arbeit, Verkehr normal',later:true,d:[['Pendelzeit','24 Minuten'],['Verkehr','keine Störungen'],['Benzinpreis','[Preis E10]'],['Auto des Tages','[Modell]'],['E-Auto','[Reichweite · Preis]']]},
+  {t:'Gesundheit',s:'Fitness',i:'heart',m:'6.240 Schritte',ms:'6.240',x:'Noch 3.760 bis zum Tagesziel',later:true,d:[['Tagesziel','10.000 Schritte'],['Gestern','45 min Radfahren'],['Wasser','1,2 von 2 Litern'],['Schlaf','7 h 10 min'],['Sporttipp','10 Minuten Mobility am Morgen']]},
+  {t:'Reisen & Länder',s:'Reisen',i:'globe',m:'Portugal',ms:'Portugal',x:'Land des Tages: vom Atlantik bis ins Douro-Tal.',later:true,d:[['Hauptstadt','Lissabon'],['Reiseziel','Porto'],['Gericht','Bacalhau'],['Sprache','Portugiesisch'],['Quiz','Welcher Fluss fließt durch Porto?']]},
+  {t:'Entertainment',s:'TV',i:'tv',m:'20:15 Uhr',ms:'20:15',x:'TV-Tipp und Streaming-Empfehlung für heute Abend',later:true,d:[['TV-Tipp','[Sendung · Sender]'],['Film','[Filmtitel]'],['Serie','[Serientitel · Dienst]'],['Doku','[Dokumentation]']]},
+  {t:'Tech',s:'Tech',i:'chip',m:'[KI-Tool]',ms:'[Tool]',x:'Tech des Tages und die wichtigsten Tech-News',later:true,d:[['Tool des Tages','[Name · wofür]'],['Gadget','[Gerät]'],['KI','[Meldung]'],['Raumfahrt','[Meldung]']]},
+  // Reihe 4 – Inspiration (später), freie Plätze, eigene Nutzung
+  {t:'Shopping',s:'Deals',i:'bag',m:'[Angebot]',ms:'[Deal]',x:'Schnäppchen des Tages und Angebote aus dem Prospekt',later:true,d:[['Angebot des Tages','[Produkt · Preis]'],['Discounter','[Angebote der Woche]'],['Geschenkidee','[Idee für Anna]'],['Hinweis','Keine Partnerlinks in Version 1']]},
+  {t:'Beziehung',s:'Paar',i:'pair',m:'Tipp des Tages',ms:'Tipp',x:'Heute Abend gemeinsam kochen, ohne Handy am Tisch.',later:true,d:[['Paar-Challenge','Drei Dinge nennen, die ihr am anderen schätzt'],['Date-Idee','Sonntagsspaziergang mit Picknick'],['Überraschung','Lieblingskaffee mitbringen'],['Jahrestag','in 12 Tagen']]},
+  {t:'Pakete',s:'Pakete',i:'box',m:'2 unterwegs',ms:'1 heute',x:'DHL kommt heute zwischen 14 und 16 Uhr',later:true,d:[['DHL','Zustellung heute, 14–16 Uhr'],['Hermes','Zustellung morgen'],['Zugestellt','gestern 1 Paket'],['Quelle','Sendungsnummern aus deinen Mails · Stufe 2']]},
+  {t:'Deine Nutzung',s:'Nutzung',i:'bars',stats:true,m:'0 Klicks',ms:'0',x:'',d:[]}
+];
+const COLS = 5, ROWS = 4;
+// Rasterbelegung: Kachel-Index oder null für einen freien Platz
+const CELLS = [0,1,2,3,4, 5,6,7,8,9, 10,11,12,13,14, 15,16,17,null,18];
+const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const icon = k => `<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>`;
+const rows = d => d.map(([k,v]) => `<div class="row"><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('');
+
+const grid = document.getElementById('grid');
+const WEIGHT = 4;
+let active = null;
+const mobileMQ = window.matchMedia('(max-width:760px), (max-height:520px)');
+
+const tileHTML = (d,i) => `
+  <article class="tile${d.later?' later':''}" data-mode="rest" id="tile-${i}">
+    <button class="head" type="button" data-i="${i}" aria-expanded="false">
+      <span class="label">${icon(d.i)}<span class="long">${esc(d.t)}</span><span class="short">${esc(d.s)}</span>${d.later?'<span class="tag">später</span>':''}</span>
+      <span class="metric"><span class="m-long">${esc(d.m)}</span><span class="m-short">${esc(d.ms)}</span></span>
+      <span class="teaser">${esc(d.x)}</span>
+    </button>
+    <div class="body">
+      <button class="close" type="button" data-close>Schließen</button>
+      <dl>${rows(d.d)}</dl>
+      ${d.stats?'<button class="close reset" type="button" data-reset>Zähler zurücksetzen</button>':''}
+    </div>
+  </article>`;
+grid.innerHTML = CELLS.map((i,c) => i === null
+  ? `<div class="tile free" data-mode="rest" id="cell-${c}" aria-hidden="true"><span>Freier Platz</span></div>`
+  : tileHTML(TILES[i], i)).join('');
+
+// Klickzähler – nur lokal in diesem Browser
+const STORE='daily-clicks';
+function loadStats(){ try{ const v=JSON.parse(localStorage.getItem(STORE)); if(v&&v.counts) return v; }catch(e){} return {start:new Date().toISOString(),counts:{}}; }
+function saveStats(v){ try{ localStorage.setItem(STORE, JSON.stringify(v)); }catch(e){} }
+let stats = loadStats();
+const STATS_I = TILES.findIndex(d => d.stats);
+function statsView(){
+  const list = Object.entries(stats.counts).sort((a,b) => b[1]-a[1]);
+  const total = list.reduce((n,[,c]) => n+c, 0);
+  const since = new Date(stats.start).toLocaleDateString('de-DE',{day:'numeric',month:'long'});
+  const d = TILES[STATS_I];
+  d.m = total + (total === 1 ? ' Klick' : ' Klicks'); d.ms = String(total);
+  d.x = total ? `Seit ${since} · am häufigsten: ${list[0][0]}` : 'Öffne Kacheln. DAILY zählt hier mit, was du wirklich nutzt.';
+  d.d = total ? list.slice(0,6).map(([k,c]) => [k, c + '×']) : [['Hinweis','Noch keine Klicks gezählt'],['Speicher','nur in diesem Browser']];
+  const el = document.getElementById('tile-'+STATS_I);
+  el.querySelector('.m-long').textContent = d.m; el.querySelector('.m-short').textContent = d.ms;
+  el.querySelector('.teaser').textContent = d.x; el.querySelector('dl').innerHTML = rows(d.d);
+}
+function count(i){ if (TILES[i].stats) return; stats.counts[TILES[i].t] = (stats.counts[TILES[i].t]||0) + 1; saveStats(stats); statsView(); }
+
+function layout(){
+  const pos = active === null ? -1 : CELLS.indexOf(active);
+  const ar = pos < 0 ? -1 : Math.floor(pos/COLS), ac = pos < 0 ? -1 : pos % COLS;
+  const tr = (n,a) => Array.from({length:n}, (_,k) => `minmax(0,${k===a?WEIGHT:1}fr)`).join(' ');
+  grid.style.gridTemplateColumns = tr(COLS, ac);
+  grid.style.gridTemplateRows = tr(ROWS, ar);
+  CELLS.forEach((i,c) => {
+    const r = Math.floor(c/COLS), col = c%COLS;
+    const mode = pos < 0 ? 'rest' : c === pos ? 'active' : (r === ar || col === ac) ? 'lane' : 'small';
+    const el = i === null ? document.getElementById('cell-'+c) : document.getElementById('tile-'+i);
+    el.dataset.mode = mode;
+    const h = el.querySelector('.head'); if (h) h.setAttribute('aria-expanded', String(mode === 'active'));
+  });
+}
+
+// mobile sheet
+const sheet = document.getElementById('sheet');
+let open = null;
+function showSheet(i){
+  open = (i + TILES.length) % TILES.length;
+  const d = TILES[open];
+  document.getElementById('s-label').innerHTML = icon(d.i) + esc(d.t);
+  document.getElementById('s-metric').textContent = d.m;
+  document.getElementById('s-teaser').textContent = d.x;
+  document.getElementById('s-details').innerHTML = rows(d.d);
+  document.getElementById('s-pos').textContent = (open+1) + ' / ' + TILES.length;
+  document.getElementById('s-prev').textContent = '‹ ' + TILES[(open-1+TILES.length)%TILES.length].s;
+  document.getElementById('s-next').textContent = TILES[(open+1)%TILES.length].s + ' ›';
+  sheet.classList.add('open');
+}
+function hideSheet(){ open = null; sheet.classList.remove('open'); }
+document.getElementById('s-back').onclick = hideSheet;
+document.getElementById('s-prev').onclick = () => showSheet(open-1);
+document.getElementById('s-next').onclick = () => showSheet(open+1);
+let tx = null;
+sheet.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, {passive:true});
+sheet.addEventListener('touchend', e => {
+  if (tx === null) return;
+  const dx = e.changedTouches[0].clientX - tx; tx = null;
+  if (dx < -50) showSheet(open+1); else if (dx > 50) showSheet(open-1);
+});
+
+grid.addEventListener('click', e => {
+  const rb = e.target.closest('[data-reset]');
+  if (rb) {
+    if (rb.dataset.armed) { stats = {start:new Date().toISOString(),counts:{}}; saveStats(stats); statsView(); delete rb.dataset.armed; rb.textContent = 'Zähler zurücksetzen'; }
+    else { rb.dataset.armed = '1'; rb.textContent = 'Wirklich zurücksetzen?'; }
+    return;
+  }
+  if (e.target.closest('[data-close]')) { active = null; layout(); return; }
+  const head = e.target.closest('.head'); if (!head) return;
+  const i = +head.dataset.i;
+  if (mobileMQ.matches) { count(i); showSheet(i); return; }
+  if (active === i) return;
+  count(i); active = i; layout();
+});
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape' || document.querySelector('dialog[open]')) return;
+  if (open !== null) hideSheet(); else if (!ansBox.hidden) ansBox.hidden = true; else if (active !== null) { active = null; layout(); }
+});
+mobileMQ.addEventListener('change', () => { if (!mobileMQ.matches) hideSheet(); });
+
+// Frag DAILY – im Prototyp einfache Antworten aus den Beispieldaten
+const ANSWERS = [
+  [/schirm|regen|wetter|warm|kalt|grad|sonne|pollen|luft/i, () => weatherAnswer()],
+  [/termin|kalender|heute|geburtstag|claude/i, 'Heute: 10:00 Geburtstag von Claude, 14:30 Wocheneinkauf, 19:00 Abendessen bei Freunden. Morgen hat Anna Geburtstag.'],
+  [/mail|nachricht/i, '3 ungelesene Mails. Wichtig: Stadtwerke, Abschlagsrechnung.'],
+  [/essen|koch|rezept|abend/i, 'Vorschlag für heute: Ofengemüse mit Feta, 30 Minuten, vegetarisch.'],
+  [/aufgab|to-?do|erledig/i, 'Offen: Steuerunterlagen sortieren, Geschenk für Anna besorgen, DAILY-Prototyp testen.'],
+  [/paket|sendung|lieferung|dhl|hermes/i, '2 Pakete unterwegs: DHL kommt heute zwischen 14 und 16 Uhr, Hermes morgen.'],
+  [/sport|fußball|fussball|bundesliga|spiel/i, 'Sportdaten kommen mit der Sport-Anbindung (z. B. OpenLigaDB für die Bundesliga).']
+];
+const ansBox = document.getElementById('answer');
+document.getElementById('ask').addEventListener('submit', e => {
+  e.preventDefault();
+  const q = document.getElementById('q').value.trim(); if (!q) return;
+  const hit = ANSWERS.find(([re]) => re.test(q));
+  const txt = hit ? (typeof hit[1] === 'function' ? hit[1]() : hit[1]) : 'Im Prototyp gibt es darauf noch keine Antwort. Später beantwortet hier die KI deine Frage mit den Daten aus deinen Kacheln.';
+  document.getElementById('answer-text').innerHTML = `<span class="q">${esc(q)}</span>${esc(txt)}`;
+  ansBox.hidden = false;
+});
+document.getElementById('answer-close').onclick = () => { ansBox.hidden = true; };
+
+// ---------- Echtes Wetter für Dresden (Open-Meteo, ohne Schlüssel) ----------
+const PLACE = {name:'Dresden', lat:51.05, lon:13.74};
+const WMO = {0:'Klar',1:'Überwiegend klar',2:'Teilweise bewölkt',3:'Bedeckt',45:'Nebel',48:'Nebel mit Reif',
+  51:'Leichter Nieselregen',53:'Nieselregen',55:'Starker Nieselregen',56:'Gefrierender Nieselregen',57:'Gefrierender Nieselregen',
+  61:'Leichter Regen',63:'Regen',65:'Starker Regen',66:'Gefrierender Regen',67:'Gefrierender Regen',
+  71:'Leichter Schneefall',73:'Schneefall',75:'Starker Schneefall',77:'Schneegriesel',
+  80:'Leichte Regenschauer',81:'Regenschauer',82:'Heftige Regenschauer',85:'Schneeschauer',86:'Starke Schneeschauer',
+  95:'Gewitter',96:'Gewitter mit Hagel',99:'Gewitter mit Hagel'};
+const WX = {live:false};
+const r0 = n => Math.round(n);
+const hhmm = iso => iso.slice(11,16);
+function moonPhase(d){
+  const syn = 29.530588853, ref = Date.UTC(2000,0,6,18,14);
+  const age = (((d - ref)/864e5) % syn + syn) % syn;
+  const names = ['Neumond','zunehmende Sichel','erstes Viertel','zunehmender Mond','Vollmond','abnehmender Mond','letztes Viertel','abnehmende Sichel'];
+  return names[Math.floor((age/syn)*8 + 0.5) % 8];
+}
+function aqiText(v){ if (v==null) return null; return v<20?'sehr gut':v<40?'gut':v<60?'mäßig':v<80?'schlecht':v<100?'sehr schlecht':'extrem schlecht'; }
+function pollenText(c){
+  const kinds = {birch_pollen:'Birke',grass_pollen:'Gräser',alder_pollen:'Erle',mugwort_pollen:'Beifuß',ragweed_pollen:'Ambrosia'};
+  let top = null, v = 0;
+  for (const k in kinds) if (c[k] != null && c[k] > v) { v = c[k]; top = kinds[k]; }
+  if (top === null) return 'keine';
+  return (v<20?'gering':v<50?'mittel':'hoch') + ' (' + top + ')';
+}
+function paintTile(i){
+  const d = TILES[i], el = document.getElementById('tile-'+i); if (!el) return;
+  el.querySelector('.m-long').textContent = d.m; el.querySelector('.m-short').textContent = d.ms;
+  el.querySelector('.teaser').textContent = d.x; el.querySelector('dl').innerHTML = rows(d.d);
+  if (open === i) showSheet(i);
+}
+function weatherAnswer(){
+  if (!WX.live) return 'Die Live-Wetterdaten sind gerade nicht erreichbar. Laut Beispieldaten: Regenrisiko 10 %, kein Schirm nötig.';
+  const p = WX.rainMax, when = WX.rainAt ? ` (am ehesten gegen ${WX.rainAt} Uhr)` : '';
+  const schirm = p >= 50 ? `Ja, nimm einen Schirm mit: Regenrisiko bis ${p} %${when}.`
+    : p >= 25 ? `Vielleicht. Das Regenrisiko liegt bei bis zu ${p} %${when}.`
+    : `Nein, eher nicht. Das Regenrisiko bleibt heute bei höchstens ${p} %.`;
+  return `${PLACE.name}: jetzt ${WX.now}°, ${WX.text}. Heute ${WX.min}° bis ${WX.max}°. ${schirm}`;
+}
+async function loadWeather(){
+  const f = 'https://api.open-meteo.com/v1/forecast?latitude='+PLACE.lat+'&longitude='+PLACE.lon+
+    '&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m'+
+    '&hourly=precipitation_probability'+
+    '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset'+
+    '&timezone=Europe%2FBerlin&forecast_days=2';
+  const a = 'https://air-quality-api.open-meteo.com/v1/air-quality?latitude='+PLACE.lat+'&longitude='+PLACE.lon+
+    '&current=european_aqi,birch_pollen,grass_pollen,alder_pollen,mugwort_pollen,ragweed_pollen&timezone=Europe%2FBerlin';
+  try {
+    const [w, q] = await Promise.all([
+      fetch(f).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }),
+      fetch(a).then(r => r.ok ? r.json() : null).catch(() => null)
+    ]);
+    const c = w.current, dy = w.daily;
+    // Regenrisiko für den Rest des heutigen Tages
+    const today = dy.time[0], nowH = c.time.slice(0,13);
+    let rainMax = 0, rainAt = null;
+    w.hourly.time.forEach((t,k) => {
+      if (t.slice(0,10) !== today || t.slice(0,13) < nowH) return;
+      const pp = w.hourly.precipitation_probability[k];
+      if (pp != null && pp > rainMax) { rainMax = pp; rainAt = t.slice(11,13); }
+    });
+    Object.assign(WX, {live:true, now:r0(c.temperature_2m), text:WMO[c.weather_code]||'—', min:r0(dy.temperature_2m_min[0]), max:r0(dy.temperature_2m_max[0]), rainMax, rainAt: rainMax >= 25 ? rainAt : null});
+    const qc = q && q.current ? q.current : {};
+    const air = aqiText(qc.european_aqi), pol = q && q.current ? pollenText(qc) : null;
+    const rainTxt = rainMax >= 25 ? `Regen möglich, am ehesten gegen ${rainAt} Uhr.` : 'Kein Regen zu erwarten.';
+    const d = TILES[0];
+    d.m = WX.now + '°'; d.ms = WX.now + '°';
+    d.x = `${PLACE.name} · ${WX.text}, gefühlt ${r0(c.apparent_temperature)}°. ${rainTxt}`;
+    d.d = [
+      ['Heute', `${WX.min}° bis ${WX.max}° · ${WMO[dy.weather_code[0]]||''}`],
+      ['Regenrisiko', `bis ${rainMax} % (restlicher Tag)`],
+      ['Wind', `${r0(c.wind_speed_10m)} km/h`],
+      ['Sonne', `${hhmm(dy.sunrise[0])} bis ${hhmm(dy.sunset[0])}`],
+      ['Mond', moonPhase(new Date())],
+      ...(air ? [['Luftqualität', `${air} (EAQI ${r0(qc.european_aqi)})`]] : []),
+      ...(pol ? [['Pollen', pol]] : []),
+      ['Morgen', `${r0(dy.temperature_2m_min[1])}° bis ${r0(dy.temperature_2m_max[1])}° · ${WMO[dy.weather_code[1]]||''} · Regen bis ${dy.precipitation_probability_max[1] ?? 0} %`],
+      ['Stand', `${hhmm(c.time)} Uhr · Open-Meteo`]
+    ];
+    paintTile(0);
+    document.getElementById('chip').textContent = 'Wetter live · sonst Beispieldaten';
+  } catch (e) {
+    WX.live = false;
+    const d = TILES[0];
+    d.x = 'Live-Wetter gerade nicht erreichbar. Beispieldaten: leicht bewölkt, ab Mittag sonnig.';
+    paintTile(0);
+  }
+}
+loadWeather();
+setInterval(loadWeather, 30*60*1000);
+
+// Impressum & Datenschutz – ein Klick aus der Kopfzeile
+document.querySelectorAll('[data-doc]').forEach(b => b.addEventListener('click', () => {
+  const d = document.getElementById('doc-' + b.dataset.doc);
+  if (d && typeof d.showModal === 'function') d.showModal();
+}));
+document.querySelectorAll('dialog.doc').forEach(d => {
+  d.addEventListener('click', e => { if (e.target === d || e.target.closest('[data-doc-close]')) d.close(); });
+});
+
+function tick(){
+  const now = new Date();
+  document.getElementById('date').textContent = now.toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('clock').textContent = now.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+}
+tick(); setInterval(tick, 15000);
+statsView();
+layout();
+
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+}
+</script>
+
+</body>
+</html>
