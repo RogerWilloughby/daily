@@ -5,6 +5,9 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const F = require('./fixtures');
+// Testbetrieb: Tankerkönig-Schlüssel vortäuschen; privat nur mit MOCK_PRIVATE=1
+process.env.TANKERKOENIG_API_KEY = process.env.TANKERKOENIG_API_KEY || 'test';
+if (process.env.MOCK_PRIVATE === '1') process.env.DAILY_PRIVATE = '1';
 
 const ROOT = path.join(__dirname, '..', 'public');
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.woff2': 'font/woff2', '.png': 'image/png', '.webmanifest': 'application/manifest+json' };
@@ -26,6 +29,9 @@ global.fetch = async (url, opts = {}) => {
   if (u.includes('vvo-online.de/tr/pointfinder')) return reply(F.pointfinder(JSON.parse(opts.body || '{}').query));
   if (u.includes('vvo-online.de/dm')) return reply(F.departures());
   if (u.includes('onthisday')) return reply(F.onthisday());
+  if (u.includes('brightsky.dev/alerts')) return reply(F.alerts(process.env.MOCK_ALERTS !== '0'));
+  if (u.includes('openholidaysapi.org/SchoolHolidays')) return reply(F.school());
+  if (u.includes('tankerkoenig.de')) return reply(F.fuel());
   if (u.includes('calendar.test')) return reply(F.ics(), 'text/calendar');
   return new Response('not mocked: ' + u, { status: 404 });
 };
