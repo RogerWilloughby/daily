@@ -328,7 +328,7 @@ const TILES = [
   {t:'Mein Daily',s:'Mein Daily',i:'list',m:'4 Aufgaben',ms:'4 offen',x:'Steuerunterlagen sortieren, Geschenk für Anna …',d:[['Aufgabe','Steuerunterlagen sortieren'],['Aufgabe','Geschenk für Anna besorgen'],['Aufgabe','DAILY-Prototyp testen'],['Tagesziel','30 min lesen'],['Notiz','[eigene Notiz]']]},
   // Reihe 2 – Version 1
   {t:'Sport',s:'Sport',i:'ball',m:'[Ergebnis]',ms:'[Spiel]',x:'Ergebnisse von gestern und die Spiele von heute',d:[['Mein Verein','[Ergebnis · Tabellenplatz]'],['Gestern','[Ergebnisse Bundesliga]'],['Heute live','[Anstoß · Sender]'],['Tabelle','[Top 3]'],['Andere Sportarten','[Formel 1, Handball …]']]},
-  {t:'Geld',s:'Geld',i:'money',m:'DAX [Kurs]',ms:'[Kurs]',x:'Märkte und Crypto im Überblick. Konten folgen später.',d:[['DAX','[Kurs · Veränderung]'],['S&P 500','[Kurs · Veränderung]'],['Bitcoin','[Kurs · Veränderung]'],['Depot','[Wert] · später'],['Spartipp','[allgemeiner Spartipp]']]},
+  {t:'Geld',s:'Geld',i:'money',m:'DAX [Kurs]',ms:'[Kurs]',x:'Indizes, Krypto, Währung und Gold im Überblick',d:[['DAX','[Kurs · Veränderung]'],['S&P 500','[Kurs · Veränderung]'],['MSCI World (ETF)','[Kurs · Veränderung]'],['Bitcoin','[Kurs · Veränderung]'],['Ethereum','[Kurs · Veränderung]'],['Euro/US-Dollar','[Kurs · Veränderung]'],['Gold (Unze)','[Kurs · Veränderung]']]},
   {t:'Spielen',s:'Spiele',i:'dice',m:'Rätsel',ms:'Rätsel',x:'Was hat Zähne, kann aber nicht beißen?',d:[['Lösung','ab 18 Uhr'],['Wortspiel','[Wortspiel des Tages]'],['Quiz','5 Fragen zu Portugal'],['Witz','[Witz des Tages]']]},
   {t:'Essen',s:'Essen',i:'food',m:'Ofengemüse',ms:'30 min',x:'Ofengemüse mit Feta · 30 Minuten · vegetarisch · günstig',d:[['Zeit','30 Minuten'],['Portionen','2'],['Aus dem Angebot','Paprika, Zucchini, Feta'],['Für die Familie','mit Kartoffeln als Beilage'],['Morgen','Linsen-Dal']]},
   {t:'Wissen',s:'Wissen',i:'book',m:'Kairos',ms:'Kairos',x:'Wort des Tages: der richtige, günstige Augenblick.',d:[['Herkunft','Altgriechisch'],['Buch des Tages','[Titel · Autor]'],['An diesem Tag','[historisches Ereignis]'],['Wissenschaft','[Entdeckung des Tages]'],['Zitat','[Zitat des Tages]']]},
@@ -460,6 +460,7 @@ const ANSWERS = [
   [/schirm|regen|wetter|warm|kalt|grad|sonne|pollen|luft/i, () => weatherAnswer()],
   [/termin|kalender|heute|morgen|geburtstag|claude/i, () => calAnswer() || 'Heute: 10:00 Geburtstag von Claude, 14:30 Wocheneinkauf, 19:00 Abendessen bei Freunden. Morgen hat Anna Geburtstag.'],
   [/news|schlagzeil|nachrichten|neuigkeit/i, () => newsAnswer()],
+  [/dax|börse|boerse|aktie|index|bitcoin|krypto|ethereum|kurs|gold|dollar|geld|markt/i, () => marketsAnswer()],
   [/mail|e-mail|posteingang/i, '3 ungelesene Mails. Wichtig: Stadtwerke, Abschlagsrechnung.'],
   [/essen|koch|rezept|abend/i, 'Vorschlag für heute: Ofengemüse mit Feta, 30 Minuten, vegetarisch.'],
   [/aufgab|to-?do|erledig/i, 'Offen: Steuerunterlagen sortieren, Geschenk für Anna besorgen, DAILY-Prototyp testen.'],
@@ -601,6 +602,39 @@ async function loadHeadlines(){
 loadHeadlines();
 setInterval(loadHeadlines, 15*60*1000);
 
+// ---------- Geld (Vercel-Funktion /api/markets) – nur Kurse, keine Empfehlungen ----------
+const MONEY_I = TILES.findIndex(d => d.t === 'Geld');
+const MKT = {live:false, items:[]};
+const fmtNum = (v, unit) => {
+  const digits = unit === 'USD' && v < 10 ? 4 : (v >= 1000 ? 0 : 2);
+  return v.toLocaleString('de-DE', {minimumFractionDigits:digits, maximumFractionDigits:digits});
+};
+const fmtChg = c => c == null ? '' : (c > 0 ? '▲ +' : c < 0 ? '▼ ' : '± ') + c.toLocaleString('de-DE', {minimumFractionDigits:1, maximumFractionDigits:1}) + ' %';
+const fmtItem = i => `${fmtNum(i.price, i.unit)} ${i.unit === 'Pkt' ? 'Pkt' : i.unit === 'USD' ? '$' : '€'}${i.change == null ? '' : ' · ' + fmtChg(i.change)}`;
+function marketsAnswer(){
+  if (!MKT.live) return 'Die Kurse sind gerade nicht erreichbar.';
+  return MKT.items.filter(i => i.ok).map(i => `${i.name} ${fmtItem(i)}`).join(' · ') + ' (reine Kursangaben, keine Anlageempfehlung).';
+}
+async function loadMarkets(){
+  if (location.protocol !== 'https:') return; // lokal als Datei: Beispieldaten
+  try {
+    const r = await fetch('/api/markets'); if (!r.ok) throw new Error(r.status);
+    const j = await r.json(), d = TILES[MONEY_I];
+    MKT.items = j.items || []; MKT.live = MKT.items.some(i => i.ok);
+    if (!MKT.live) return;
+    const ok = MKT.items.filter(i => i.ok), lead = ok.find(i => i.id === 'dax') || ok[0];
+    d.m = `${lead.name} ${fmtNum(lead.price, lead.unit)}`;
+    d.ms = lead.change == null ? lead.name : `${lead.name} ${lead.change > 0 ? '+' : ''}${lead.change.toLocaleString('de-DE',{maximumFractionDigits:1})} %`;
+    d.x = ok.filter(i => i.change != null).slice(0, 4).map(i => `${i.name} ${fmtChg(i.change)}`).join(' · ');
+    d.d = MKT.items.map(i => [i.name, i.ok ? fmtItem(i) : 'gerade nicht verfügbar']);
+    const t = ok.map(i => i.time).filter(Boolean).sort().pop();
+    d.d.push(['Hinweis', 'Veränderung zum Vortag · reine Kursangaben, keine Anlageempfehlung' + (t ? ' · Stand ' + hm(t) : '')]);
+    paintTile(MONEY_I);
+  } catch (e) { /* Beispieldaten bleiben stehen */ }
+}
+loadMarkets();
+setInterval(loadMarkets, 5*60*1000);
+
 // ---------- Kalender (Vercel-Funktion /api/calendar; ICS-Link liegt nur in Vercel als CALENDAR_ICS_URL) ----------
 const CAL_I = TILES.findIndex(d => d.t === 'Kalender');
 const CAL = {live:false, events:[], today:null};
@@ -645,7 +679,8 @@ async function loadCalendar(){
                : (todays.length ? 'Heute: ' + todays.map(e => e.title).join(', ') : 'Heute keine Termine.');
     d.d = CAL.events.slice(0, 12).map(e => [`${dayLabel(e.day)} · ${evTime(e)}`, e.title]);
     if (!d.d.length) d.d = [['Nächste 7 Tage', 'keine Termine']];
-    if (j.failed) d.d.push(['Hinweis', j.failed + ' Kalender nicht erreichbar']);
+    if (j.failed) (j.errors && j.errors.length ? j.errors : [{kalender:'', fehler:j.failed + ' Kalender nicht erreichbar'}])
+      .forEach(er => d.d.push([`Problem Kalender ${er.kalender}`.trim(), er.fehler]));
     paintTile(CAL_I);
   } catch (e) { /* Beispieldaten bleiben stehen */ }
 }

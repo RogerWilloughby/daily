@@ -18,7 +18,7 @@ Reihe 1 – täglicher Kern:
 
 Reihe 2 – Version 1:
 6. Sport – Mein Verein, Ergebnisse, Live heute, Tabelle (nur Daten, z. B. OpenLigaDB; keine Spielberichte)
-7. Geld – Märkte, Crypto als Zahlen, allgemeiner Spartipp (keine Kauf-/Verkaufsempfehlungen); Konten später
+7. Geld – LIVE über Vercel-Funktion `api/markets.js` (Yahoo-Finance-Chartdaten, nur private Nutzung; Cache 5 min): DAX, S&P 500, MSCI World (ETF IWDA), Bitcoin, Ethereum (in €), Euro/US-Dollar, Gold. Nur Kurse + Veränderung zum Vortag, keine Kauf-/Verkaufsempfehlungen; eigene Aktien später über die Einstellungen; Konten später. Für öffentlichen Betrieb lizenzierte Kursquelle nötig.
 8. Spielen – Rätsel, Quiz, Wortspiel, Witz
 9. Essen – Rezept, Discounter, Familie, International
 10. Wissen – Wort, Buch, Lexikon-Fakten „An diesem Tag“, Zitat
@@ -38,6 +38,13 @@ Zahnrad-Button „Einstellungen“ in der unteren Leiste. Start mit zwei Punkten
 - Ort für das Wetter (Ortssuche über Open-Meteo Geocoding, Auswahl aus Treffern; Standard Dresden)
 - Kalender: iCal-Links, einer pro Zeile
 Speicherung nur lokal im Browser (localStorage `daily-settings`), also pro Gerät neu einzutragen. Weitere Einstellungen folgen (z. B. Schlagzeilen-Quellen, Sportverein, Aktien). Späterer Ausbau: Einstellungen geräteübergreifend synchronisieren.
+
+## 3b. Mehrere Nutzer – Stufenplan
+- **Stufe 1 (jetzt):** Nutzung ohne Konto. Einstellungen nur lokal im Browser (pro Gerät). Beim ersten Start später: Ort über Browser-Standort oder Ortssuche abfragen. Kalender per iCal-Link (für Fortgeschrittene).
+- **Stufe 2:** Optionales Konto („Mit Google anmelden“ oder Anmeldelink per E-Mail) über einen fertigen Anmeldedienst. Einstellungen serverseitig in einer Datenbank, geräteübergreifend synchron. Geheime Werte (iCal-Links, Zugangstoken) verschlüsselt speichern.
+- **Stufe 3:** Kalender per Knopfdruck verbinden (Google / Microsoft, nur Lesezugriff über OAuth). Google-Prüfung der App vor öffentlicher Freigabe einplanen (mehrere Wochen). iCal-Link bleibt als Alternative.
+- **Voraussetzungen ab Stufe 2 (öffentlich):** ausgefülltes Impressum, vollständige Datenschutzerklärung, Auftragsverarbeitungsverträge mit Anbietern (Hosting, Datenbank, Anmeldedienst), Konto- und Datenlöschung durch den Nutzer, ggf. Datenexport. Vercel Pro statt Hobby, sobald Einnahmen entstehen.
+- Die heutige Lösung (Stufe 1) bleibt als Modus ohne Konto erhalten; Stufe 2 und 3 setzen darauf auf, ohne Umbau der App.
 
 ## 4. Interaktion Desktop
 „Raster wächst mit“: Zeile und Spalte der aktiven Kachel werden breiter (Faktor 4), die anderen schrumpfen, bleiben sichtbar.
@@ -77,4 +84,4 @@ Prototyp: `../prototyp/daily-prototyp.html`.
 ## Offen
 - Domain daily.craibotics.org bei GoDaddy einrichten
 - Belegung des letzten freien Platzes (nach Klickzähler entscheiden)
-- Reihenfolge der Datenanbindung nach Nutzung, Mail ans Ende: Schlagzeilen (erledigt) → Kalender (erledigt, Link eintragen) → Geld → Verkehr → Sport (Verein) → … → Mail (vorerst ausgesetzt)
+- Reihenfolge der Datenanbindung nach Nutzung, Mail ans Ende: Schlagzeilen (erledigt) → Kalender (erledigt) → Geld (erledigt) → Verkehr → Sport (Verein) → … → Mail (vorerst ausgesetzt)

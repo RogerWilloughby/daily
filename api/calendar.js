@@ -30,12 +30,23 @@ module.exports = async (req, res) => {
   const to = new Date(now.getTime() + 8 * 24 * 3600e3);
   const events = [];
   let failed = 0;
+  const errors = []; // verständliche Fehlermeldung je Kalender (ohne den Link selbst)
 
-  await Promise.all(urls.map(async url => {
+  await Promise.all(urls.map(async (url, idx) => {
     try {
-      const r = await fetch(url, { signal: AbortSignal.timeout(10000) });
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      const data = ical.sync.parseICS(await r.text());
+      let r;
+      try {
+        r = await fetch(url, { signal: AbortSignal.timeout(10000), headers: { 'user-agent': 'DAILY/0.1 (privater Kalender-Abruf)' } });
+      } catch (e) {
+        throw new Error(e && e.name === 'TimeoutError' ? 'keine Antwort innerhalb von 10 Sekunden' : 'Server nicht erreichbar');
+      }
+      if (r.status === 404) throw new Error('Link nicht gefunden (404) – ist es die „Privatadresse im iCal-Format“?');
+      if (r.status === 401 || r.status === 403) throw new Error('Zugriff verweigert (' + r.status + ') – Link evtl. zurückgesetzt oder nicht öffentlich');
+      if (!r.ok) throw new Error('Fehler vom Kalender-Server (HTTP ' + r.status + ')');
+      const text = await r.text();
+      if (!/BEGIN:VCALENDAR/i.test(text)) throw new Error('Der Link liefert keine Kalenderdatei, sondern eine Webseite – bitte den iCal-Link (endet meist auf .ics) nehmen');
+      let data;
+      try { data = ical.sync.parseICS(text); } catch (e) { throw new Error('Kalenderdatei konnte nicht gelesen werden'); }
       for (const ev of Object.values(data)) {
         if (!ev || ev.type !== 'VEVENT' || ev.recurrenceid) continue;
         if (ev.status === 'CANCELLED') continue;
@@ -54,9 +65,10 @@ module.exports = async (req, res) => {
           });
         }
       }
-    } catch (e) { failed++; }
+    } catch (e) { failed++; errors.push({ kalender: idx + 1, fehler: String((e && e.message) || e) }); }
   }));
 
   events.sort((a, b) => a.day.localeCompare(b.day) || (a.allDay === b.allDay ? a.start.localeCompare(b.start) : a.allDay ? -1 : 1));
-  res.status(200).json({ configured: true, failed, today, events: events.slice(0, 60) });
+  errors.sort((a, b) => a.kalender - b.kalender);
+  res.status(200).json({ configured: true, failed, errors, today, events: events.slice(0, 60) });
 };
