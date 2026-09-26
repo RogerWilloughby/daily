@@ -224,12 +224,9 @@ dialog.doc::backdrop{background:rgba(10,20,16,.45)}
       <p>E-Mail: <span class="ph">[kontakt@daily-domain.de]</span><br>Telefon oder Kontaktformular: <span class="ph">[Nummer oder Link]</span></p>
       <h3>Umsatzsteuer</h3>
       <p><span class="ph">[USt-IdNr. – nur falls vorhanden, sonst Abschnitt entfernen]</span></p>
-      <h3>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV</h3>
-      <p><span class="ph">[Vorname Nachname]</span>, Anschrift wie oben</p>
-      <h3>Hinweis zu KI-Inhalten</h3>
-      <p>Texte in den Bereichen Nachrichten, Politik-Thema und Faktencheck werden mit Unterstützung von KI erstellt und als solche gekennzeichnet. <span class="ph">[Oder: Sie werden vor Veröffentlichung redaktionell geprüft von …]</span></p>
       <h3>Datenquellen</h3>
       <p>Wetter, Luftqualität und Pollen: Open-Meteo.com (CC BY 4.0).</p>
+      <p>Schlagzeilen: Originalüberschriften und Links der jeweiligen Anbieter. Für deren Inhalte sind die Anbieter verantwortlich.</p>
       <p class="draft">Entwurf mit Platzhaltern. Vor der Veröffentlichung ausfüllen und prüfen lassen.</p>
     </div>
   </div>
@@ -284,11 +281,11 @@ const TILES = [
   {t:'Heute & Wetter',s:'Wetter',i:'sun',m:'17°',ms:'17°',x:'Leicht bewölkt, ab Mittag sonnig. Luft gut, Pollen gering.',d:[['Heute','11° bis 19°'],['Regenrisiko','10 %'],['Sonne','07:12 bis 19:03'],['Mond','zunehmender Halbmond'],['Luftqualität','gut'],['Pollen','gering (Gräser)']]},
   {t:'Kalender',s:'Termine',i:'cal',m:'3 Termine',ms:'3 heute',x:'Als Nächstes: 10:00 Geburtstag von Claude',d:[['10:00','Geburtstag von Claude – Kuchen mitbringen'],['14:30','Wocheneinkauf'],['19:00','Abendessen bei Freunden'],['Geburtstag','Anna (morgen)'],['Feiertag','keiner']]},
   {t:'Mail',s:'Mail',i:'mail',m:'3 neu',ms:'3 neu',x:'1 wichtig: Stadtwerke, Abschlagsrechnung',d:[['Ungelesen','3'],['Wichtig','Stadtwerke – Abschlagsrechnung'],['Newsletter','2'],['Versand','Paket kommt morgen'],['Anbindung','Google oder IMAP · Stufe 2']]},
-  {t:'Nachrichten',s:'News',i:'news',m:'5 Meldungen',ms:'5 neu',x:'[Wichtigste Meldung des Tages]',d:[['Top','[Meldung 1]'],['Welt','[Meldung 2]'],['Region','[Meldung aus deiner Region]'],['Politik-Thema','[Thema, neutral zusammengefasst]'],['Faktencheck','[Behauptung und Einordnung]']]},
+  {t:'Schlagzeilen',s:'News',i:'news',m:'12 neu',ms:'12 neu',x:'Aus deinen Quellen: Tagesschau, MDR Sachsen, heise',d:[['Tagesschau','[Originalüberschrift] · Link'],['MDR Sachsen','[Originalüberschrift] · Link'],['heise','[Originalüberschrift] · Link'],['Quellen','von dir ausgewählt, chronologisch'],['Hinweis','Originalüberschriften der Anbieter, keine eigene Auswahl oder Zusammenfassung']]},
   {t:'Mein Daily',s:'Mein Daily',i:'list',m:'4 Aufgaben',ms:'4 offen',x:'Steuerunterlagen sortieren, Geschenk für Anna …',d:[['Aufgabe','Steuerunterlagen sortieren'],['Aufgabe','Geschenk für Anna besorgen'],['Aufgabe','DAILY-Prototyp testen'],['Tagesziel','30 min lesen'],['Notiz','[eigene Notiz]']]},
   // Reihe 2 – Version 1
   {t:'Sport',s:'Sport',i:'ball',m:'[Ergebnis]',ms:'[Spiel]',x:'Ergebnisse von gestern und die Spiele von heute',d:[['Mein Verein','[Ergebnis · Tabellenplatz]'],['Gestern','[Ergebnisse Bundesliga]'],['Heute live','[Anstoß · Sender]'],['Tabelle','[Top 3]'],['Andere Sportarten','[Formel 1, Handball …]']]},
-  {t:'Geld',s:'Geld',i:'money',m:'DAX [Kurs]',ms:'[Kurs]',x:'Märkte und Crypto im Überblick. Konten folgen später.',d:[['DAX','[Kurs · Veränderung]'],['S&P 500','[Kurs · Veränderung]'],['Bitcoin','[Kurs · Veränderung]'],['Depot','[Wert] · später'],['Finanz-Tipp','[Tipp des Tages]']]},
+  {t:'Geld',s:'Geld',i:'money',m:'DAX [Kurs]',ms:'[Kurs]',x:'Märkte und Crypto im Überblick. Konten folgen später.',d:[['DAX','[Kurs · Veränderung]'],['S&P 500','[Kurs · Veränderung]'],['Bitcoin','[Kurs · Veränderung]'],['Depot','[Wert] · später'],['Spartipp','[allgemeiner Spartipp]']]},
   {t:'Spielen',s:'Spiele',i:'dice',m:'Rätsel',ms:'Rätsel',x:'Was hat Zähne, kann aber nicht beißen?',d:[['Lösung','ab 18 Uhr'],['Wortspiel','[Wortspiel des Tages]'],['Quiz','5 Fragen zu Portugal'],['Witz','[Witz des Tages]']]},
   {t:'Essen',s:'Essen',i:'food',m:'Ofengemüse',ms:'30 min',x:'Ofengemüse mit Feta · 30 Minuten · vegetarisch · günstig',d:[['Zeit','30 Minuten'],['Portionen','2'],['Aus dem Angebot','Paprika, Zucchini, Feta'],['Für die Familie','mit Kartoffeln als Beilage'],['Morgen','Linsen-Dal']]},
   {t:'Wissen',s:'Wissen',i:'book',m:'Kairos',ms:'Kairos',x:'Wort des Tages: der richtige, günstige Augenblick.',d:[['Herkunft','Altgriechisch'],['Buch des Tages','[Titel · Autor]'],['An diesem Tag','[historisches Ereignis]'],['Wissenschaft','[Entdeckung des Tages]'],['Zitat','[Zitat des Tages]']]},
@@ -297,7 +294,7 @@ const TILES = [
   {t:'Gesundheit',s:'Fitness',i:'heart',m:'6.240 Schritte',ms:'6.240',x:'Noch 3.760 bis zum Tagesziel',later:true,d:[['Tagesziel','10.000 Schritte'],['Gestern','45 min Radfahren'],['Wasser','1,2 von 2 Litern'],['Schlaf','7 h 10 min'],['Sporttipp','10 Minuten Mobility am Morgen']]},
   {t:'Reisen & Länder',s:'Reisen',i:'globe',m:'Portugal',ms:'Portugal',x:'Land des Tages: vom Atlantik bis ins Douro-Tal.',later:true,d:[['Hauptstadt','Lissabon'],['Reiseziel','Porto'],['Gericht','Bacalhau'],['Sprache','Portugiesisch'],['Quiz','Welcher Fluss fließt durch Porto?']]},
   {t:'Entertainment',s:'TV',i:'tv',m:'20:15 Uhr',ms:'20:15',x:'TV-Tipp und Streaming-Empfehlung für heute Abend',later:true,d:[['TV-Tipp','[Sendung · Sender]'],['Film','[Filmtitel]'],['Serie','[Serientitel · Dienst]'],['Doku','[Dokumentation]']]},
-  {t:'Tech',s:'Tech',i:'chip',m:'[KI-Tool]',ms:'[Tool]',x:'Tech des Tages und die wichtigsten Tech-News',later:true,d:[['Tool des Tages','[Name · wofür]'],['Gadget','[Gerät]'],['KI','[Meldung]'],['Raumfahrt','[Meldung]']]},
+  {t:'Tech',s:'Tech',i:'chip',m:'[KI-Tool]',ms:'[Tool]',x:'Tech des Tages: Tool, Gadget und Tipp',later:true,d:[['Tool des Tages','[Name · wofür]'],['Gadget','[Gerät]'],['Tipp','[Tech-Tipp]'],['Technikgeschichte','[Erfindung des Tages]']]},
   // Reihe 4 – Inspiration (später), freie Plätze, eigene Nutzung
   {t:'Shopping',s:'Deals',i:'bag',m:'[Angebot]',ms:'[Deal]',x:'Schnäppchen des Tages und Angebote aus dem Prospekt',later:true,d:[['Angebot des Tages','[Produkt · Preis]'],['Discounter','[Angebote der Woche]'],['Geschenkidee','[Idee für Anna]'],['Hinweis','Keine Partnerlinks in Version 1']]},
   {t:'Beziehung',s:'Paar',i:'pair',m:'Tipp des Tages',ms:'Tipp',x:'Heute Abend gemeinsam kochen, ohne Handy am Tisch.',later:true,d:[['Paar-Challenge','Drei Dinge nennen, die ihr am anderen schätzt'],['Date-Idee','Sonntagsspaziergang mit Picknick'],['Überraschung','Lieblingskaffee mitbringen'],['Jahrestag','in 12 Tagen']]},
