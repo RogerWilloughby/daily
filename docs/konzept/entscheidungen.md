@@ -10,7 +10,7 @@ KI-generiert + freie APIs. Fakten (Wetter, Kurse, Sport, „An diesem Tag“ …
 
 ## 3. Raster 5 × 4 – Reihenfolge nach Priorität (jedes Thema nur in einer Kachel)
 Reihe 1 – täglicher Kern:
-1. Heute & Wetter – Wetter, Sonne, Mond, Luftqualität, Pollen (LIVE für Dresden über Open-Meteo)
+1. Wetter [Ort] – Wetter, Sonne, Mond, Luftqualität, Pollen (LIVE über Open-Meteo). Der gewählte Ort steht in der Überschrift („Wetter Dresden“), nicht im Kurztext.
 2. Kalender – Termine, Geburtstage, Jahrestage, Feiertage. LIVE über Vercel-Funktion `api/calendar.js` (Bibliothek node-ical, auch Serientermine); private iCal-Links werden im Konfigurator eingetragen (siehe Einstellungen), ersatzweise Vercel-Umgebungsvariable `CALENDAR_ICS_URL`; nie im Code. Zeigt heute bis +7 Tage.
 3. Mail – Zähler ungelesen/wichtig (Anbindung Google/IMAP, Stufe 2)
 4. Schlagzeilen – Originalüberschriften + Link, chronologisch, ohne eigene Auswahl/Zusammenfassung. LIVE über Vercel-Funktion `api/headlines.js` (Quellen dort in `FEEDS`: Tagesschau, MDR Sachsen, heise; Cache 10 min). Kennzahl = Meldungen der letzten 12 Stunden.

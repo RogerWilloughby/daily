@@ -414,7 +414,7 @@ let open = null;
 function showSheet(i){
   open = (i + TILES.length) % TILES.length;
   const d = TILES[open];
-  document.getElementById('s-label').innerHTML = icon(d.i) + esc(d.t);
+  document.getElementById('s-label').innerHTML = icon(d.i) + esc(tileTitle(d));
   document.getElementById('s-metric').textContent = d.m;
   document.getElementById('s-teaser').textContent = d.x;
   document.getElementById('s-details').innerHTML = rows(d.d);
@@ -486,6 +486,8 @@ let SETTINGS = loadSettings();
 
 // ---------- Echtes Wetter (Open-Meteo, ohne Schlüssel; Ort aus den Einstellungen, Standard Dresden) ----------
 let PLACE = (SETTINGS.place && typeof SETTINGS.place.lat === 'number') ? SETTINGS.place : {name:'Dresden', admin:'Sachsen', lat:51.05, lon:13.74};
+// Überschrift einer Kachel; beim Wetter mit dem gewählten Ort
+const tileTitle = d => d.i === 'sun' ? 'Wetter ' + PLACE.name : d.t;
 const WMO = {0:'Klar',1:'Überwiegend klar',2:'Teilweise bewölkt',3:'Bedeckt',45:'Nebel',48:'Nebel mit Reif',
   51:'Leichter Nieselregen',53:'Nieselregen',55:'Starker Nieselregen',56:'Gefrierender Nieselregen',57:'Gefrierender Nieselregen',
   61:'Leichter Regen',63:'Regen',65:'Starker Regen',66:'Gefrierender Regen',67:'Gefrierender Regen',
@@ -511,6 +513,7 @@ function pollenText(c){
 }
 function paintTile(i){
   const d = TILES[i], el = document.getElementById('tile-'+i); if (!el) return;
+  el.querySelector('.label .long').textContent = tileTitle(d);
   el.querySelector('.m-long').textContent = d.m; el.querySelector('.m-short').textContent = d.ms;
   el.querySelector('.teaser').textContent = d.x; el.querySelector('dl').innerHTML = rows(d.d);
   if (open === i) showSheet(i);
@@ -551,7 +554,7 @@ async function loadWeather(){
     const rainTxt = rainMax >= 25 ? `Regen möglich, am ehesten gegen ${rainAt} Uhr.` : 'Kein Regen zu erwarten.';
     const d = TILES[0];
     d.m = WX.now + '°'; d.ms = WX.now + '°';
-    d.x = `${PLACE.name} · ${WX.text}, gefühlt ${r0(c.apparent_temperature)}°. ${rainTxt}`;
+    d.x = `${WX.text}, gefühlt ${r0(c.apparent_temperature)}°. ${rainTxt}`;
     d.d = [
       ['Heute', `${WX.min}° bis ${WX.max}° · ${WMO[dy.weather_code[0]]||''}`],
       ['Regenrisiko', `bis ${rainMax} % (restlicher Tag)`],
