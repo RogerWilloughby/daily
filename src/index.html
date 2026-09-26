@@ -113,6 +113,7 @@ dl{margin:0;overflow:auto;min-height:0}
 .row{display:grid;grid-template-columns:minmax(110px,34%) minmax(0,1fr);gap:14px;padding:8px 0;border-bottom:1px solid var(--active-line);font-size:15px;line-height:1.35}
 .row dt{color:var(--active-muted)}
 .row dd{margin:0}
+.row a{color:inherit;text-decoration:underline;text-underline-offset:3px}
 @keyframes fadein{from{opacity:.4}to{opacity:1}}
 .tile[data-mode="active"] .body{animation:fadein .4s var(--ease)}
 
@@ -311,7 +312,7 @@ const COLS = 5, ROWS = 4;
 const CELLS = [0,1,2,3,4, 5,6,7,8,9, 10,11,12,13,14, 15,16,17,null,18];
 const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const icon = k => `<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>`;
-const rows = d => d.map(([k,v]) => `<div class="row"><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('');
+const rows = d => d.map(([k,v]) => `<div class="row"><dt>${esc(k)}</dt><dd>${v && typeof v === 'object' ? `<a href="${esc(v.href)}" target="_blank" rel="noopener">${esc(v.text)}</a>` : esc(v)}</dd></div>`).join('');
 
 const grid = document.getElementById('grid');
 const WEIGHT = 4;
@@ -421,7 +422,8 @@ mobileMQ.addEventListener('change', () => { if (!mobileMQ.matches) hideSheet(); 
 const ANSWERS = [
   [/schirm|regen|wetter|warm|kalt|grad|sonne|pollen|luft/i, () => weatherAnswer()],
   [/termin|kalender|heute|geburtstag|claude/i, 'Heute: 10:00 Geburtstag von Claude, 14:30 Wocheneinkauf, 19:00 Abendessen bei Freunden. Morgen hat Anna Geburtstag.'],
-  [/mail|nachricht/i, '3 ungelesene Mails. Wichtig: Stadtwerke, Abschlagsrechnung.'],
+  [/news|schlagzeil|nachrichten|neuigkeit/i, () => newsAnswer()],
+  [/mail|e-mail|posteingang/i, '3 ungelesene Mails. Wichtig: Stadtwerke, Abschlagsrechnung.'],
   [/essen|koch|rezept|abend/i, 'Vorschlag für heute: Ofengemüse mit Feta, 30 Minuten, vegetarisch.'],
   [/aufgab|to-?do|erledig/i, 'Offen: Steuerunterlagen sortieren, Geschenk für Anna besorgen, DAILY-Prototyp testen.'],
   [/paket|sendung|lieferung|dhl|hermes/i, '2 Pakete unterwegs: DHL kommt heute zwischen 14 und 16 Uhr, Hermes morgen.'],
@@ -528,6 +530,33 @@ async function loadWeather(){
 }
 loadWeather();
 setInterval(loadWeather, 30*60*1000);
+
+// ---------- Schlagzeilen (eigene Vercel-Funktion /api/headlines) ----------
+const NEWS_I = TILES.findIndex(d => d.t === 'Schlagzeilen');
+const NEWS = {live:false, items:[]};
+const hm = iso => new Date(iso).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+function newsAnswer(){
+  if (!NEWS.live || !NEWS.items.length) return 'Die Schlagzeilen sind gerade nicht erreichbar.';
+  return 'Neueste Schlagzeilen: ' + NEWS.items.slice(0,3).map(i => `${i.source}: ${i.title}`).join(' · ');
+}
+async function loadHeadlines(){
+  if (location.protocol !== 'https:') return; // lokal als Datei: Beispieldaten
+  try {
+    const r = await fetch('/api/headlines'); if (!r.ok) throw new Error(r.status);
+    const j = await r.json(), d = TILES[NEWS_I];
+    NEWS.live = true; NEWS.items = j.items || [];
+    const since = Date.now() - 12*3600e3;
+    const fresh = NEWS.items.filter(i => i.date && Date.parse(i.date) > since).length;
+    d.m = fresh + ' neu'; d.ms = d.m;
+    d.x = NEWS.items[0] ? `${NEWS.items[0].source}: ${NEWS.items[0].title}` : 'Gerade keine Schlagzeilen.';
+    d.d = NEWS.items.slice(0,10).map(i => [`${i.date ? hm(i.date) : '–'} · ${i.source}`, {text:i.title, href:i.link}]);
+    d.d.push(['Quellen', j.sources.map(s => s.name + (s.ok ? '' : ' (nicht erreichbar)')).join(', ')]);
+    d.d.push(['Hinweis', 'Originalüberschriften der Anbieter, neueste zuerst']);
+    paintTile(NEWS_I);
+  } catch (e) { /* Beispieldaten bleiben stehen */ }
+}
+loadHeadlines();
+setInterval(loadHeadlines, 15*60*1000);
 
 // Impressum & Datenschutz – ein Klick aus der Kopfzeile
 document.querySelectorAll('[data-doc]').forEach(b => b.addEventListener('click', () => {

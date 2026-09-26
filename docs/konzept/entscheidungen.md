@@ -13,7 +13,7 @@ Reihe 1 – täglicher Kern:
 1. Heute & Wetter – Wetter, Sonne, Mond, Luftqualität, Pollen (LIVE für Dresden über Open-Meteo)
 2. Kalender – Termine, Geburtstage, Jahrestage, Feiertage
 3. Mail – Zähler ungelesen/wichtig (Anbindung Google/IMAP, Stufe 2)
-4. Schlagzeilen – Originalüberschriften + Link aus von Roger gewählten Quellen (z. B. Tagesschau, MDR Sachsen, heise), chronologisch, ohne eigene Auswahl/Zusammenfassung
+4. Schlagzeilen – Originalüberschriften + Link, chronologisch, ohne eigene Auswahl/Zusammenfassung. LIVE über Vercel-Funktion `api/headlines.js` (Quellen dort in `FEEDS`: Tagesschau, MDR Sachsen, heise; Cache 10 min). Kennzahl = Meldungen der letzten 12 Stunden.
 5. Mein Daily – Aufgaben, Ziele, Notizen
 
 Reihe 2 – Version 1:
@@ -71,4 +71,4 @@ Prototyp: `../prototyp/daily-prototyp.html`.
 ## Offen
 - Domain daily.craibotics.org bei GoDaddy einrichten
 - Belegung des letzten freien Platzes (nach Klickzähler entscheiden)
-- Nächste Datenquellen: Schlagzeilen (RSS-Quellen wählen), Sport (Verein), Kalender (ICS-Link)
+- Reihenfolge der Datenanbindung nach Nutzung, Mail ans Ende: Schlagzeilen (erledigt) → Kalender (ICS-Link) → Geld → Verkehr → Sport (Verein) → … → Mail (vorerst ausgesetzt)
