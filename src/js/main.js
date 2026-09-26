@@ -2,7 +2,9 @@
 import { initBoard, closeAll } from './core/board.js';
 import { initAsk, answerOpen, closeAnswer } from './core/ask.js';
 import { report, demo } from './core/status.js';
-import { ONLINE } from './core/util.js';
+import { ONLINE, getJson } from './core/util.js';
+import { chooseLayout } from './core/tiles.js';
+import { settings } from './core/store.js';
 import { initDialogs } from './ui/dialogs.js';
 import weather from './providers/weather.js';
 import calendar from './providers/calendar.js';
@@ -13,9 +15,20 @@ import transit from './providers/transit.js';
 import content from './providers/content.js';
 import knowledge from './providers/knowledge.js';
 import local from './providers/local.js';
+import links from './providers/links.js';
+import holidays from './providers/holidays.js';
+import alerts from './providers/alerts.js';
+import fuel from './providers/fuel.js';
+import sky from './providers/sky.js';
+
+// Betriebsart vom Server: privat nur mit Vercel-Variable DAILY_PRIVATE=1 (Kalender, Schlagzeilen)
+let isPrivate = false;
+if (ONLINE) { try { isPrivate = !!(await getJson('/api/config', { timeout: 2500 })).private; } catch (e) { /* öffentlich */ } }
+chooseLayout(isPrivate, settings.layout);
 
 // Reihenfolge = Priorität: was am häufigsten gebraucht wird, lädt zuerst
-const PROVIDERS = [local, weather, calendar, news, content, transit, markets, sport, knowledge];
+const PROVIDERS = [local, links, sky, weather, calendar, news, holidays, content, transit, markets, sport, knowledge, alerts, fuel]
+  .filter(p => isPrivate || !p.private);
 const lastRun = new Map();
 
 async function run(p) {
@@ -44,7 +57,7 @@ function tick() {
 
 initBoard();
 initAsk();
-initDialogs(() => PROVIDERS.forEach(run));
+initDialogs(() => PROVIDERS.forEach(run), isPrivate);
 tick(); setInterval(tick, 15e3);
 
 document.addEventListener('keydown', e => {
