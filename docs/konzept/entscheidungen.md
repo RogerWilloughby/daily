@@ -29,7 +29,7 @@ Reihe 3 – später (braucht Anbindung):
 Reihe 4:
 16. Shopping · 17. Beziehung · 18. Pakete (Stufe 2) · 1 freier Platz · 19. Deine Nutzung (lokaler Klickzähler)
 
-Kopfzeile: DAILY, Datum, Uhrzeit, Suchfeld „Frag DAILY“, Links „Impressum“ und „Datenschutz“ (1 Klick, Entwürfe mit Platzhaltern).
+Leiste am unteren Rand (früher Kopfzeile): DAILY, Datum, Uhrzeit, Suchfeld „Frag DAILY“, Links „Impressum“ und „Datenschutz“ (1 Klick, Entwürfe mit Platzhaltern). Antworten von „Frag DAILY“ erscheinen direkt über der Leiste.
 
 Geschätzte Abdeckung der täglichen Info-Abfragen: V1 ≈ 40 %; mit Sport, Mail-Zähler, Suchfeld und Paketstatus ≈ 65–70 %.
 
