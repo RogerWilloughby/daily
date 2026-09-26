@@ -6,13 +6,21 @@ Kein Impressum, keine Datenschutzerklärung, keine Medienpflichten nötig. Aktue
 ## Öffentliche Website
 - Impressum nach § 5 DDG (Name, ladungsfähige Anschrift, E-Mail, schnelle Kontaktmöglichkeit, ggf. USt-IdNr.); leicht erkennbar, unmittelbar erreichbar, ständig verfügbar (BGH: max. 2 Klicks als Faustregel).
 - DSGVO-Datenschutzerklärung; jede externe Anfrage (Wetter-API, Kurse) überträgt die IP → nennen oder serverseitig bündeln.
-  - Stand: Direkt aus dem Browser nur Open-Meteo (Wetter, Luft, Ortssuche). Über eigene Server-Funktionen (IP bleibt beim Hoster): Schlagzeilen, Kalender, Kurse (Yahoo), Fußball (OpenLigaDB), Abfahrten (VVO), „An diesem Tag“ (Wikimedia). Entwurf in der App (Dialog „Datenschutz“) listet das bereits.
+  - Stand: Direkt aus dem Browser nur Open-Meteo (Wetter, Luft, Ortssuche). Über eigene Server-Funktionen (IP bleibt beim Hoster): Kurse (Yahoo), Fußball (OpenLigaDB), Abfahrten (VVO), „An diesem Tag“ (Wikimedia), Schulferien (OpenHolidays), Warnungen (Bright Sky/DWD), Tankpreise (Tankerkönig); privat zusätzlich Schlagzeilen und Kalender. Für Warnungen und Tanken nur auf ~1 km gerundete Koordinaten. Entwurf in der App (Dialog „Datenschutz“) listet das bereits.
 - Wikipedia-Inhalte (CC BY-SA 4.0): Quelle + Lizenz + Link nennen (umgesetzt in der Kachel Wissen).
 - KI-erstellte Service-Texte (Rezept, Rätsel, Tipps …) sind keine Nachrichten; im Impressum-Entwurf als „mit KI erstellt“ vermerkt.
 - Gesundheit/Sparen: nur allgemeine Anregungen mit Hinweis „keine Beratung“.
 - Schriften selbst hosten (erledigt).
 - § 25 TDDDG: localStorage für Funktionen, die der Nutzer will (Aufgaben, Klickzähler lokal), ohne Einwilligung ok; Analyse/Tracking an Server → Einwilligung.
 - Affiliate später: klar als Werbung kennzeichnen.
+
+## Strategie seit 26.09.2026
+Öffentlich: keine Nutzerdaten außer dem Ort, keine Nachrichten. Kalender und Schlagzeilen nur im privaten Betrieb (`DAILY_PRIVATE=1`). Damit entfallen Medienpflichten (MStV) und Konto-Pflichten (Löschung, Auftragsverarbeitung für Datenbank/Anmeldedienst). Es bleiben: Impressum, kurze Datenschutzerklärung (Hosting, Open-Meteo im Browser, Server-Abrufe), Quellenangaben.
+- DWD-Warnungen: Quelle „Deutscher Wetterdienst“ nennen (GeoNutzV) – umgesetzt.
+- Tankerkönig: CC BY 4.0, Quelle nennen – umgesetzt; Nutzungsbedingungen (Abfragehäufigkeit) beachten, Cache 5 min.
+- OpenHolidays: frei nutzbar, Quelle genannt.
+- „Meine Seiten“: nur vom Nutzer selbst angelegte Links, keine fremden Inhalte.
+- Geld: Yahoo-Daten nur privat; öffentlich andere Quelle.
 
 ## Nachrichten & Co. – Entscheidung: kein journalistisches Angebot
 Ein journalistisch-redaktionelles Angebot (eigene Auswahl, Gewichtung, Zusammenfassung oder Bewertung meinungsbildender Themen) würde auslösen:
