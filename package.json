@@ -1,0 +1,13 @@
+{
+  "name": "daily",
+  "private": true,
+  "version": "0.1.0",
+  "description": "DAILY – Dein Tag auf einer Seite (PWA)",
+  "scripts": { "build": "node build.js" },
+  "devDependencies": {
+    "@fontsource-variable/bricolage-grotesque": "^5.2.0",
+    "@fontsource/figtree": "^5.2.0",
+    "sharp": "^0.34.0"
+  },
+  "engines": { "node": ">=20" }
+}

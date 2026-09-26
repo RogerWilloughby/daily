@@ -1,0 +1,17 @@
+{
+  "name": "DAILY – Dein Tag auf einer Seite",
+  "short_name": "DAILY",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "lang": "de",
+  "background_color": "#E8ECEA",
+  "theme_color": "#1D3553",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
