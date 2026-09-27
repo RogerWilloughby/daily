@@ -117,10 +117,18 @@ function einwohnerAus(datei) {
   };
 }
 
+// Postleitzahlgebiete über die Landesgrenze: GeoNames führt „Hamburg Bergedorf“ zusätzlich unter Kreisen in Schleswig-Holstein.
+// Orte der Stadtstaaten gehören immer zum Stadtstaat.
+const STADTSTAAT = { Hamburg: '02000', Berlin: '11000', Bremen: '04011' };
+function stadtstaat(z) {
+  const stadt = Object.keys(STADTSTAAT).find(s => z.ort === s || z.ort.startsWith(s + ' '));
+  return stadt ? { ...z, kreisSchluessel: STADTSTAAT[stadt], land: LAND[STADTSTAAT[stadt].slice(0, 2)] } : z;
+}
+
 function erzeuge(datei, ortsdatei) {
   const ew = einwohnerAus(ortsdatei);
   const alle = lies(datei).filter(z => /^\d{5}$/.test(z.plz) && z.ort && Number.isFinite(z.lat) && Number.isFinite(z.lon))
-    .map(z => ({ ...z, land: LAND[String(z.kreisSchluessel || '').slice(0, 2)] || z.land }));
+    .map(z => stadtstaat({ ...z, land: LAND[String(z.kreisSchluessel || '').slice(0, 2)] || z.land }));
   const zeilen = alle.filter(z => !istFirma(z.ort));
   const kreise = kreisNamen(zeilen);
   const laender = [...new Set(zeilen.map(z => z.land))].sort();

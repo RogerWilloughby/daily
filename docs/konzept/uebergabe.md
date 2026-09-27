@@ -30,7 +30,7 @@ Stand 27.09.2026. Für neue Chats: hier steht, woran gerade gearbeitet wird und 
 App-Seite „Woher kommen die Daten?“ (Fußzeile → Datenquellen) zeigt die Dienstblätter aus dem Katalog `/api/v1/dienste`.
 
 ## Zuletzt offen (27.09.2026)
-1. Roger lädt die letzte Änderung hoch (Doppelte, Filter, Alias nur bei Städten) und startet die Action „Ortsbestand erneuern“ erneut; danach die Daten prüfen: keine „Erzbistum/Stadtreinigung/hkk/rhenag“ mehr, Ahlsdorf ohne Einwohner von Allstedt, `node --test test/dienste.test.js` grün.
+1. Geprüft 27.09.: Firmennamen raus, Einwohner stimmen (München, Halle (Saale), Freiburg …), Doppelte zusammengefasst. Noch einmal Action laufen lassen für die Stadtstaaten-Korrektur („Hamburg Bergedorf“ stand unter Schleswig-Holstein).
 2. Roger testet die Ortssuche in der App mit eigenen Schreibweisen – Fehlfälle als Tests aufnehmen.
 3. Bekannte Kleinigkeiten: 130 Kreisnamen ohne Typ („Zwickau“ statt „Landkreis Zwickau“); Stadtteilnamen der Quelle teils doppelt („Stuttgart Stuttgart-Mitte“); Warnung Node.js 20 in der Action (bei nächster Änderung `actions/checkout@v5`, `actions/setup-node@v5`, Node 22 – Datei muss Roger dann wieder verschieben).
 
