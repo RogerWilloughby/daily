@@ -1,0 +1,27 @@
+// DAILY – ein Einstiegspunkt für alle Dienste: GET /api/v1/<dienst>?…
+// /api/v1/dienste liefert den Katalog. Jede Antwort hat den Rahmen daily/1 (services/_lib/rahmen.js).
+// Eine Funktion für alle Dienste hält uns unter der Funktionsgrenze des Vercel-Hobby-Tarifs.
+const { ausfuehren, katalog, byId } = require('../../services');
+const { fehlerAntwort, DienstFehler, antwort } = require('../../services/_lib/rahmen');
+const { send } = require('../../services/_lib/http');
+
+module.exports = async (req, res) => {
+  const q = { ...(req.query || {}) };
+  const id = String(q.dienst || '').toLowerCase();
+  delete q.dienst;
+  const privat = byId[id] && byId[id].klasse === 'privat';
+  // Öffentliche Daten ohne Nutzerbezug dürfen auch andere Oberflächen lesen; private nie (und nie im CDN-Cache)
+  if (!privat) res.setHeader('Access-Control-Allow-Origin', '*');
+  if (req.method !== 'GET') return send(res, fehlerAntwort(id, new DienstFehler('eingabe_ungueltig', 'Nur GET')), 0, 405);
+  try {
+    if (id === 'dienste') {
+      return send(res, antwort({ id: 'dienste', version: 1, ttl: 300, quellen: [] }, { daten: { dienste: katalog() } }), 300);
+    }
+    const r = await ausfuehren(id, q);
+    send(res, r, privat ? 0 : byId[id].ttl);
+  } catch (e) {
+    const f = e instanceof DienstFehler ? e : new DienstFehler('intern');
+    if (!(e instanceof DienstFehler)) console.error('[daily]', id, e);
+    send(res, fehlerAntwort(id, f), 0, f.status);
+  }
+};
