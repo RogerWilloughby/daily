@@ -146,6 +146,7 @@ Daraus entstehen der Katalog `/api/v1/dienste`, die Dateien `docs/dienste/<id>.m
 |---|---|
 | `ort` | ✅ daily/1 – eigener Ortsbestand (Name, Postleitzahl, Gerätestandort), Ausland über Open-Meteo; Einstellungen nutzen ihn |
 | `wetter` | ✅ daily/1 – Referenz; Kachel über Adapter |
+| `regen` | ✅ daily/1 – DWD-Radar über Bright Sky; erscheint in der Wetterkachel (Hinweis + Reiter „Radar“) |
 | Feiertage & Ferien, Himmel, Warnungen, Tanken, Abfahrten, Sport, Geld, Wissen, Tagesinhalte | ⏳ noch alte Einzelfunktionen bzw. im Browser berechnet |
 | Kalender, Schlagzeilen (privat) | ⏳ |
 

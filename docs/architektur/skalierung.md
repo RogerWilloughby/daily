@@ -37,4 +37,6 @@ Hinweis: Vercel Hobby und das freie Open-Meteo sind nur für **nicht kommerziell
 | `ort` | D | Deutschland: keine externe Quelle (eigener Bestand) | erledigt: eigener GeoNames-Bestand, monatliche Aktualisierung; Ausland nur ohne deutschen Treffer | ✅ Stufe 4 |
 | `wetter` | C | Open-Meteo frei (10.000/Tag, nicht kommerziell) reicht nicht | jetzt: nur auf Anfrage, Takt :00/:30 (≈ 100 Orte/Tag im freien Kontingent). Bei Wachstum: DWD MOSMIX (Abrufe unabhängig von Nutzern), gröberes Raster oder bezahlter Tarif | Stufe 1–2 |
 
+| `regen` | C | Bright Sky ohne veröffentlichte Grenze, ohne Zusage | nur auf Anfrage, Takt 5 min (≤ 288 Abrufe je 1-km-Zelle und Tag). Bei Wachstum: Bright Sky selbst betreiben oder DWD-RV-Datei zentral alle 5 min laden (288 Abrufe/Tag gesamt) | Stufe 1–2 |
+
 Weitere Dienste werden beim Umzug auf daily/1 hier eingetragen.

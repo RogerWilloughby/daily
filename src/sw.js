@@ -8,7 +8,7 @@ const SHELL = [
   '/js/providers/sport.js', '/js/providers/transit.js', '/js/providers/content.js', '/js/providers/knowledge.js', '/js/providers/local.js',
   '/js/providers/links.js', '/js/providers/holidays.js', '/js/providers/alerts.js', '/js/providers/fuel.js', '/js/providers/sky.js',
   '/js/lib/feiertage.js', '/js/lib/astro.js', '/js/lib/url.js',
-  '/js/dienste/client.js', '/js/adapter/wetter.js', '/js/adapter/diagramm.js', '/js/adapter/katalog.js',
+  '/js/dienste/client.js', '/js/adapter/wetter.js', '/js/adapter/diagramm.js', '/js/adapter/regen.js', '/js/adapter/katalog.js',
   '/fonts/bricolage-grotesque.woff2', '/fonts/figtree-400.woff2', '/fonts/figtree-500.woff2', '/fonts/figtree-600.woff2',
   '/icons/icon-192.png', '/icons/icon-512.png'
 ];

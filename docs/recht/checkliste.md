@@ -21,6 +21,7 @@ Kein Impressum, keine Datenschutzerklärung, keine Medienpflichten nötig. Aktue
 - OpenHolidays: frei nutzbar, Quelle genannt.
 - GeoNames (Postleitzahlen und Orte Deutschland, CC BY 4.0): eigener Ortsbestand `services/daten/orte-de.json`, Quelle in Impressum, Katalog und Seite „Woher kommen die Daten?“ genannt. CC BY verlangt Namensnennung und Hinweis auf Änderungen (wir filtern und fassen zusammen – steht im Dienstblatt `docs/dienste/ort.md`).
 - Open-Meteo Geocoding (nur Ortssuche im Ausland, CC BY 4.0): kostenlos nur nicht kommerziell – vor kommerziellem Betrieb Tarif prüfen.
+- Deutscher Wetterdienst, Radar RV (Dienst `regen`): Open Data nach GeoNutzV – Quellenvermerk „Deutscher Wetterdienst“ in Impressum, Katalog und Datenquellen-Seite; abgerufen über Bright Sky (Open Source, MIT). Der Abruf läuft über unseren Server, Nutzer-IPs gehen nicht an Bright Sky.
 - OpenPLZ und Nominatim werden nicht mehr genutzt (seit Umstellung auf den eigenen Ortsbestand).
 - Gerätestandort: nur nach Knopfdruck und Browser-Erlaubnis, auf ~1 km gerundet; die Suche nach dem nächsten Ort läuft im eigenen Bestand (keine Weitergabe an Dritte); gespeichert wird nur der gefundene Ort (im Browser). Im Datenschutz-Entwurf beschrieben.
 - „Meine Seiten“: nur vom Nutzer selbst angelegte Links, keine fremden Inhalte.

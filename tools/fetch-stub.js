@@ -21,6 +21,7 @@ module.exports = async function fetchStub(url, opts = {}) {
   if (u.includes('tankerkoenig.de')) return reply(F.fuel());
   if (u.includes('api.open-meteo.com/v1/forecast')) return reply(F.forecast());
   if (u.includes('air-quality-api.open-meteo.com')) return reply(F.airQuality());
+  if (u.includes('api.brightsky.dev/radar')) return reply(F.radar());
   if (u.includes('geocoding-api.open-meteo.com')) return reply(F.geocoding(new URL(u).searchParams.get('name')));
   if (u.includes('calendar.test')) return reply(F.ics(), 'text/calendar');
   return new Response('not mocked: ' + u, { status: 404 });

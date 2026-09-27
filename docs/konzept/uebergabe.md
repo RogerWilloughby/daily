@@ -25,6 +25,7 @@ Stand 27.09.2026. Für neue Chats: hier steht, woran gerade gearbeitet wird und 
 | Dienst | Stand |
 |---|---|
 | `ort` | ✅ fertig bis auf Rogers Test. Eigener Ortsbestand aus GeoNames (`services/daten/orte-de.json`, ≈ 14.700 Orte, Einwohnerzahlen, Großkunden gefiltert), monatlich per Action „Ortsbestand erneuern“. Suche wie eine Suchmaschine (Wörter einzeln, Kürzel Sa./Thür./Westf./Opf., Umlaute, Tippfehler, Doppelte zusammengefasst), Vorschläge beim Tippen (`land=DE`), Ausland über Open-Meteo nur, wenn kein deutscher Ort genau passt oder nur ein kleiner. Umkehrsuche (Gerätestandort) im eigenen Bestand. Ort hat seit 27.09. einen eigenen Knopf in der unteren Leiste mit eigenem Dialog (Standort ermitteln, Suche, Klick übernimmt sofort). |
+| `regen` | ✅ neu 27.09.: DWD-Radar über Bright Sky, 2 h Verlauf, Nähe, Karte; in der Wetterkachel. Wartet auf Rogers Test. |
 | `wetter` | ✅ überarbeitet 27.09. (siehe unten): Open-Meteo, 16 Tage (ab Tag 8 Trend), Zusatzwerte, Cache-Takt :00/:30. Wartet auf Rogers Test. |
 | alle anderen | noch alte Schnittstelle (`api/*.js`), Reihenfolge in `dienste-katalog.md` |
 
@@ -44,7 +45,8 @@ App-Seite „Woher kommen die Daten?“ (Fußzeile → Datenquellen) zeigt die D
 2. Bekannte Kleinigkeiten Ort: 130 Kreisnamen ohne Typ („Zwickau“ statt „Landkreis Zwickau“); Stadtteilnamen der Quelle teils doppelt („Stuttgart Stuttgart-Mitte“); Warnung Node.js 20 in der Action (bei nächster Änderung `actions/checkout@v5`, `actions/setup-node@v5`, Node 22 – Datei muss Roger dann wieder verschieben).
 
 ## Nächste Schritte (in dieser Reihenfolge)
-1. **Dienst `regen`** Punkt für Punkt (DWD-Radar, „Regen in X Minuten“), dann in die Wetterkachel einbinden. Danach Luftqualität/Pollen prüfen (DWD-Pollenflug-Gefahrenindex, Umweltbundesamt).
-2. **Vercel oder AWS** bei 10 Mio. Nutzern (Vercel Hobby nur nicht kommerziell; Pro 20 $/Monat, 1 Mio. Aufrufe inklusive, dann 0,60 $/Mio.).
-3. Übrige Dienste auf daily/1 umziehen (Reihenfolge `dienste-katalog.md`), je mit Dienstblatt.
-4. Neue Dienst-Ideen von Roger aufnehmen.
+1. Roger testet den Dienst `regen` (Radar-Reiter, Hinweis „Regen in X Min.“). Offen: Luftqualität/Pollen prüfen (DWD-Pollenflug-Gefahrenindex, Umweltbundesamt); Radarkarte ohne Landkarte darunter – ggf. später Umrisse/Orte.
+2. **Mehrere Standorte** (Thema 4 vom 27.09.): reines Oberflächenthema – Liste von Orten mit aktivem Ort, Ort-Knopf, ggf. Ort je Kachel; zusammen mit der Kachelauswahl in den Einstellungen.
+3. **Vercel oder AWS** bei 10 Mio. Nutzern (Vercel Hobby nur nicht kommerziell; Pro 20 $/Monat, 1 Mio. Aufrufe inklusive, dann 0,60 $/Mio.).
+4. Übrige Dienste auf daily/1 umziehen (Reihenfolge `dienste-katalog.md`), je mit Dienstblatt.
+5. Neue Dienst-Ideen von Roger aufnehmen.

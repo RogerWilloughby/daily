@@ -103,9 +103,30 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--wd-max:#D9773A;--wd-min:#5B8FE0;--wd-regen:#1FA08C;--wd-sonne:#A6841E;--wd-max-text:#F0A06A;--wd-min-text:#8FB5F0;--wd-regen-text:#5CCBB6;--wd-sonne-text:#E0C060}}
 :root[data-theme="dark"]{--wd-max:#D9773A;--wd-min:#5B8FE0;--wd-regen:#1FA08C;--wd-sonne:#A6841E;--wd-max-text:#F0A06A;--wd-min-text:#8FB5F0;--wd-regen-text:#5CCBB6;--wd-sonne-text:#E0C060}
 .tile[data-mode="active"],.sheet{--wd-max:#D9773A;--wd-min:#5B8FE0;--wd-regen:#1FA08C;--wd-sonne:#A6841E;--wd-max-text:#F0A06A;--wd-min-text:#8FB5F0;--wd-regen-text:#5CCBB6;--wd-sonne-text:#E0C060}
+/* Regenradar: Stufen einer Farbe (hell → kräftig), Karte animiert ohne Skript */
+:root{--rs1:#9ED9CF;--rs2:#4FB3A5;--rs3:#0F8A7A;--rs4:#07564C}
+.tile[data-mode="active"],.sheet{--rs1:#2E6F66;--rs2:#1FA08C;--rs3:#4CC7B4;--rs4:#B5F0E6}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--rs1:#2E6F66;--rs2:#1FA08C;--rs3:#4CC7B4;--rs4:#B5F0E6}}
+.rs1{fill:var(--rs1);background:var(--rs1)}.rs2{fill:var(--rs2);background:var(--rs2)}.rs3{fill:var(--rs3);background:var(--rs3)}.rs4{fill:var(--rs4);background:var(--rs4)}
+.rk-feld{display:grid;grid-template-columns:116px minmax(0,1fr);gap:6px 12px;align-items:start}
+.rk-rechts{min-width:0}
+.rk-werte{grid-column:1/-1;margin:0;display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;font-size:13px;line-height:1.3}
+.rk-werte div{border-top:1px solid var(--active-line);padding-top:4px}
+.rk-werte dt{color:var(--active-muted);font-size:11px}
+.rk-werte dd{margin:0}
+.rk{display:block;width:116px;height:116px;border-radius:8px}
+.rk .rk-grund{fill:currentColor;opacity:.06}
+.rk .rk-ring{fill:none;stroke:currentColor;stroke-width:.12;stroke-dasharray:.4 .4;opacity:.55}
+.rk .rk-ort{fill:currentColor;stroke:var(--active-bg);stroke-width:.25}
+.rk .rk-n,.rk .rk-zeit{font-size:1.25px;fill:currentColor;opacity:.75;font-family:var(--body)}
+.rk .rk-zeit{font-weight:700;opacity:.9}
+.wd-legende.rk-legende{font-size:11px;gap:4px 10px}
+.rk-legende i{height:8px!important;width:10px!important}
+.rk-verlauf{margin-bottom:6px}
+@media (max-width:760px){.rk-feld{grid-template-columns:1fr}.rk{width:100%;height:auto;aspect-ratio:1}}
 /* Reiter in aufgeklappten Kacheln */
 .reiter{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--active-line);padding-bottom:6px}
-.reiter button{padding:6px 12px;border-radius:999px;font-size:13px;font-weight:600;color:var(--active-muted);border:1px solid transparent}
+.reiter button{padding:5px 11px;border-radius:999px;font-size:13px;font-weight:600;color:var(--active-muted);border:1px solid transparent}
 .reiter button:hover{color:var(--active-ink);border-color:var(--active-line)}
 .reiter button[aria-selected="true"]{color:var(--active-bg);background:var(--active-ink)}
 .reiterfeld[hidden]{display:none}

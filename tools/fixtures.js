@@ -146,4 +146,20 @@ const GEO = {
 };
 const geocoding = q => ({ results: GEO[String(q || '').toLowerCase()] });
 
-module.exports = { rss, atom, yahoo, table1, table2, matches2, pointfinder, departures, onthisday, ics, alerts, school, fuel, forecast, airQuality, geocoding };
+// Bright Sky /radar (format=compressed): 53 × 53 Pixel um den Ort, 1 h zurück bis 2 h voraus.
+// Eine Regenzelle zieht von Westen heran (am Ort ab +20 min); vor 45 bis 30 min hat es am Ort leicht geregnet.
+function radar(jetzt = now) {
+  const zlib = require('zlib');
+  const N = 53, M = 26, t0 = Math.floor(jetzt / 300e3) * 300e3, radar = [];
+  for (let k = -12; k <= 24; k++) {
+    const t = t0 + k * 300e3, feld = Buffer.alloc(N * N * 2);
+    const setze = (x, y, v) => { if (x >= 0 && y >= 0 && x < N && y < N) feld.writeUInt16LE(Math.max(v, feld.readUInt16LE(2 * (y * N + x))), 2 * (y * N + x)); };
+    if (k >= 0) { const cx = M - 10 + k; for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) { const d = Math.hypot(x - cx, y - M); if (d <= 6) setze(x, y, Math.round(30 - d * 2.5)); } }
+    if (k >= -9 && k <= -6) for (let y = M - 2; y <= M + 2; y++) for (let x = M - 2; x <= M + 2; x++) setze(x, y, 10);
+    const lauf = k <= 0 ? t : t0;
+    radar.push({ timestamp: new Date(t).toISOString(), source: 'RADOLAN::RV::' + new Date(lauf).toISOString(), precipitation_5: zlib.deflateSync(feld).toString('base64') });
+  }
+  return { radar, geometry: { type: 'Polygon', coordinates: [] }, bbox: [400, 500, 452, 552], latlon_position: { x: 26.2, y: 25.9 } };
+}
+
+module.exports = { rss, atom, yahoo, table1, table2, matches2, pointfinder, departures, onthisday, ics, alerts, school, fuel, forecast, airQuality, geocoding, radar };

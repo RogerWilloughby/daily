@@ -3,6 +3,7 @@
 // Ohne DOM – daher auch in Node testbar.
 import { glyph, esc } from '../core/util.js';
 import { miniDiagramm, tageDiagramm, stundenDiagramm } from './diagramm.js';
+import { hinweis as regenHinweis, radarReiter } from './regen.js';
 
 export const TEXT = {
   klar: 'Klar', ueberwiegend_klar: 'Überwiegend klar', teilweise_bewoelkt: 'Teilweise bewölkt', bedeckt: 'Bedeckt',
@@ -128,7 +129,8 @@ function trendText(tage) {
 }
 
 // Darstellung als Kachel (Felder wie in core/board.js erwartet)
-export function kachel(env) {
+// regenEnv (optional): Antwort des Dienstes „regen“ – liefert „Regen in 20 Min.“ und den Reiter „Radar“
+export function kachel(env, regenEnv = null) {
   const d = env.daten, a = d.aktuell, { z, heute, regenMax, regenUm, pollen } = auswerten(env);
   const regenText = regenMax >= 25 ? `Regen möglich gegen ${regenUm} Uhr.` : 'Kein Regen zu erwarten.';
   const wind = `${r0(a.windKmh)} km/h${a.windRichtung ? ' aus ' + a.windRichtung : ''}${a.boeenKmh ? `, Böen ${r0(a.boeenKmh)} km/h` : ''}`;
@@ -155,27 +157,29 @@ export function kachel(env) {
   // Aufgeklappt: Reiter statt langer Liste – alles ohne Scrollen sichtbar
   const tabs = [
     { id: 'heute', name: 'Heute', html: zeilen(heuteZeilen(env, z, heute, regenMax, regenUm, wind, sonne)) },
+    ...(regenEnv && regenEnv.daten ? [{ id: 'radar', name: 'Radar', html: radarReiter(regenEnv, z.hm) }] : []),
     { id: 'tage', name: `${d.tage.length} Tage`, html: tageDiagramm(d.tage, z.wtag, t => zustandText(t.zustand, t.code)) },
-    { id: 'stunden', name: `${d.stunden.length} Stunden`, html: stundenDiagramm(d.stunden, iso => ({ h: z.h(iso), tag: z.wtagKurz(iso) })) },
-    { id: 'mehr', name: 'Luft & mehr', html: zeilen(mehrZeilen(env, pollen)) }
+    { id: 'stunden', name: `${d.stunden.length} Std.`, html: stundenDiagramm(d.stunden, iso => ({ h: z.h(iso), tag: z.wtagKurz(iso) })) },
+    { id: 'mehr', name: 'Mehr', html: zeilen(mehrZeilen(env, pollen)) }
   ];
   // Kopfzeile: Ort, jetzt, Tiefst/Höchst von heute – alles in einer Zeile
   return {
     state: 'live', title: kopfzeile(env), titleHtml: kopfzeileHtml(env), tabs,
     lglyph: glyph(bild(a.zustand, a.tag)), lglyphTip: zustandText(a.zustand, a.code),   // Symbol in der Kopfzeile, Erklärung beim Überfahren
     glyph: '', m: '', ms: r0(a.tempC) + '°',                                               // keine große Zeile – Platz fürs Diagramm
-    x: `${zustandText(a.zustand, a.code)}, gefühlt ${r0(a.gefuehltC)}°. ${regenText}`,
+    x: `${zustandText(a.zustand, a.code)}, gefühlt ${r0(a.gefuehltC)}°. ${regenHinweis(regenEnv) || regenText}`,   // Radar geht vor der Stundenvorhersage
     chart: miniDiagramm(d.tage),
     rows
   };
 }
 
 // Antwort für „Frag DAILY“
-export function antwort(env) {
+export function antwort(env, regenEnv = null) {
   const a = env.daten.aktuell, { heute, regenMax: p, regenUm } = auswerten(env);
+  const radar = regenHinweis(regenEnv);
   const wann = regenUm ? ` (am ehesten gegen ${regenUm} Uhr)` : '';
   const schirm = p >= 50 ? `Ja, nimm einen Schirm mit: Regenrisiko bis ${p} %${wann}.`
     : p >= 25 ? `Vielleicht. Das Regenrisiko liegt bei bis zu ${p} %${wann}.`
     : `Nein, eher nicht. Das Regenrisiko bleibt heute bei höchstens ${p} %.`;
-  return `${env.ort.name || 'Hier'}: jetzt ${r0(a.tempC)}°, ${zustandText(a.zustand, a.code)}. Heute ${r0(heute.minC)}° bis ${r0(heute.maxC)}°. ${schirm}`;
+  return `${env.ort.name || 'Hier'}: jetzt ${r0(a.tempC)}°, ${zustandText(a.zustand, a.code)}. Heute ${r0(heute.minC)}° bis ${r0(heute.maxC)}°. ${schirm}${radar ? ' Radar: ' + radar : ''}`;
 }

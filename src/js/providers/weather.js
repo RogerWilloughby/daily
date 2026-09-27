@@ -6,15 +6,20 @@ import { addAnswer } from '../core/ask.js';
 import { dienst, ortParams } from '../dienste/client.js';
 import { kachel, antwort } from '../adapter/wetter.js';
 
-let env = null;
+let env = null, regen = null;
 
+// Wetter (Takt 30 min) und Regenradar (Takt 5 min) zusammen; der Client holt nur, was abgelaufen ist.
+// Radar ist optional: außerhalb Deutschlands oder bei Störung zeigt die Kachel das Wetter ohne Radar.
 export async function load() {
   set('weather', { title: settings.place.name });
-  env = await dienst('wetter', ortParams(settings.place));
-  set('weather', kachel(env));
+  const p = ortParams(settings.place);
+  const [w, r] = await Promise.allSettled([dienst('wetter', p), dienst('regen', p)]);
+  if (w.status === 'rejected') throw w.reason;
+  env = w.value; regen = r.status === 'fulfilled' ? r.value : null;
+  set('weather', kachel(env, regen));
 }
 
-addAnswer(/schirm|regen|wetter|warm|kalt|grad|pollen|luft|jacke/i, () =>
-  env ? antwort(env) : 'Die Wetterdaten sind gerade nicht erreichbar.');
+addAnswer(/schirm|regen|wetter|warm|kalt|grad|pollen|luft|jacke|radar/i, () =>
+  env ? antwort(env, regen) : 'Die Wetterdaten sind gerade nicht erreichbar.');
 
-export default { id: 'weather', name: 'Wetter', every: 15 * 60e3, load };
+export default { id: 'weather', name: 'Wetter', every: 5 * 60e3, load };

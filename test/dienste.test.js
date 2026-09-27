@@ -228,7 +228,7 @@ test('Adapter Wetter: Kachel und Antwort aus dem Vertrag', async () => {
   // Kopfzeile mit farbigen Zahlen
   assert.equal(k.titleHtml, 'Berlin 15° · <b class="wd-t-min">9°</b>/<b class="wd-t-max">16°</b>');
   // Aufgeklappt: Reiter
-  assert.deepEqual(k.tabs.map(t => t.name), ['Heute', '16 Tage', '48 Stunden', 'Luft & mehr']);
+  assert.deepEqual(k.tabs.map(t => t.name), ['Heute', '16 Tage', '48 Std.', 'Mehr']);
   const tab = id => k.tabs.find(t => t.id === id).html;
   assert.equal((tab('tage').match(/data-tip=/g) || []).length, 16);          // 16 Tagesspalten mit Hinweis
   assert.equal((tab('stunden').match(/data-tip=/g) || []).length, 48);       // 48 Stundenspalten
@@ -340,4 +340,38 @@ test('Versionen: App-Nummer gleich in package.json und Oberfläche, Programmvers
   }
   const { seite } = await esm('src/js/adapter/katalog.js');
   assert.match(seite({ daten: k }, 'DAILY 0.6.0'), /DAILY 0\.6\.0.*wetter 1\.\d+\.\d+/s);
+});
+
+test('Regen: Radar über Bright Sky – jetzt, Beginn, letzte Stunde, Nähe, Karte, Takt 5 Minuten', async () => {
+  const r = await rufe('regen', { lat: '52.52', lon: '13.41', name: 'Berlin' });
+  assert.equal(r.code, 200);
+  gueltig(r.body, dienste.byId.regen.schema);
+  const d = r.body.daten;
+  assert.deepEqual([d.regnet, d.jetzt.stufe, d.beginnt.inMinuten, d.endet], [false, 'kein', 20, null]);
+  assert.equal(d.verlauf.length, 25);                        // jetzt bis +2 h in 5-Minuten-Schritten
+  assert.equal(d.verlauf[0].gemessen, true); assert.equal(d.verlauf[1].gemessen, false);
+  assert.deepEqual(d.letzteStunde, { summeMm: 0.4, aufgehoertVorMinuten: 30 });
+  assert.deepEqual([d.naehe.richtung, d.naehe.entfernungKm], ['W', 4]);   // Zelle zieht von Westen heran
+  assert.equal(d.karte.bilder.length, 9);                    // alle 15 Minuten bis +2 h
+  assert.equal(d.karte.bilder[0].stufen.length, d.karte.breite * d.karte.hoehe);
+  assert.equal(new Date(r.body.gueltigBis).getUTCMinutes() % 5, 0);
+  assert.deepEqual(r.body.quellen.map(q => q.name), ['Deutscher Wetterdienst (Radar RV)', 'Bright Sky']);
+});
+
+test('Adapter Regen: Hinweis in der Wetterkachel und Reiter „Radar“', async () => {
+  const { hinweis, radarReiter } = await esm('src/js/adapter/regen.js');
+  const { kachel, antwort: text } = await esm('src/js/adapter/wetter.js');
+  const regen = (await rufe('regen', { lat: '52.52', lon: '13.41' })).body;
+  assert.equal(hinweis(regen), 'Regen in 20 Min. (leicht).');
+  assert.equal(hinweis(null), null);
+  const html = radarReiter(regen, iso => iso.slice(11, 16));
+  assert.match(html, /<svg class="rk".*@keyframes/s);          // animierte Karte
+  assert.match(html, /4 km westlich/);
+  assert.match(html, /0,4 mm, aufgehört vor 30 Min\./);
+  const wetter = (await rufe('wetter', { ort: 'Berlin' })).body;
+  const k = kachel(wetter, regen);
+  assert.deepEqual(k.tabs.map(t => t.id), ['heute', 'radar', 'tage', 'stunden', 'mehr']);
+  assert.match(k.x, /Regen in 20 Min\./);
+  assert.deepEqual(kachel(wetter, null).tabs.map(t => t.id), ['heute', 'tage', 'stunden', 'mehr']);   // ohne Radar
+  assert.match(text(wetter, regen), /Radar: Regen in 20 Min\./);
 });
