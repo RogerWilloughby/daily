@@ -22,8 +22,6 @@ module.exports = async function fetchStub(url, opts = {}) {
   if (u.includes('api.open-meteo.com/v1/forecast')) return reply(F.forecast());
   if (u.includes('air-quality-api.open-meteo.com')) return reply(F.airQuality());
   if (u.includes('geocoding-api.open-meteo.com')) return reply(F.geocoding(new URL(u).searchParams.get('name')));
-  if (u.includes('openplzapi.org')) return reply(F.openplz(new URL(u).searchParams.get('postalCode')));
-  if (u.includes('nominatim.openstreetmap.org/reverse')) return reply(F.nominatim());
   if (u.includes('calendar.test')) return reply(F.ics(), 'text/calendar');
   return new Response('not mocked: ' + u, { status: 404 });
 };

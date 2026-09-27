@@ -71,9 +71,11 @@ Jede Antwort – auch jeder Fehler – hat diese Form:
 
 ## Dienst „ort“ (Standort) und das Ort-Objekt
 Der Dienst `ort` findet Orte
-- nach **Name**: `/api/v1/ort?q=Neustadt` – Open-Meteo Geocoding; Deutschland zuerst, Stadtteile nach hinten, dann nach Einwohnern; bis zu 6 Treffer,
-- nach **Postleitzahl** (Deutschland): `/api/v1/ort?q=01844` – OpenPLZ API liefert Ort, Landkreis, Bundesland; die Koordinaten kommen von Open-Meteo,
-- nach **Koordinaten** (Gerätestandort): `/api/v1/ort?lat=51.05&lon=13.74` – Umkehrsuche über Nominatim/OpenStreetMap (höchstens 1 Anfrage/s, daher nur beim Einrichten).
+- nach **Name**: `/api/v1/ort?q=Neustadt` – eigener Ortsbestand (GeoNames); ganzes Wort vor Wortanfang, Orte vor Stadtteilen, größere Orte vorn; bis zu 6 Treffer. Heißt kein deutscher Ort genau so („Wien“), wird zusätzlich im Ausland gesucht (Open-Meteo Geocoding),
+- nach **Postleitzahl** (Deutschland): `/api/v1/ort?q=01844` – eigener Ortsbestand,
+- nach **Koordinaten** (Gerätestandort): `/api/v1/ort?lat=51.05&lon=13.74` – nächster Postleitzahl-Punkt im eigenen Bestand (bis 25 km, nur Deutschland; sonst leer mit Hinweis `ausserhalb`).
+
+Der Ortsbestand `services/daten/orte-de.json` (≈ 15.000 Orte, 1,3 MB) wird mit `tools/orte-daten.js` aus den GeoNames-Downloads erzeugt – monatlich und auf Knopfdruck durch die GitHub Action „Ortsbestand erneuern“ (`.github/workflows/orte-daten.yml`). Details: Dienstblatt `../dienste/ort.md`.
 
 Ort-Objekt (Pflicht: `name`, `lat`, `lon`; der Dienst `ort` liefert immer alle Felder, ggf. `null`/leer):
 
@@ -82,7 +84,8 @@ Ort-Objekt (Pflicht: `name`, `lat`, `lon`; der Dienst `ort` liefert immer alle F
 | `name` | `Neustadt in Sachsen` | Ortsname |
 | `region` | `Sachsen` | Bundesland bzw. Region |
 | `land` | `DE` | Ländercode (ISO 3166-1) |
-| `kreis` | `Sächsische Schweiz-Osterzgebirge` | Landkreis (in Deutschland) |
+| `kreis` | `Landkreis Sächsische Schweiz-Osterzgebirge` | Landkreis bzw. kreisfreie Stadt |
+| `kreisSchluessel` | `14628` | amtlicher Kreisschlüssel (nur Deutschland) |
 | `plz` | `["01844"]` | Postleitzahlen (Liste) |
 | `einwohner` | `12460` | Einwohnerzahl, falls bekannt |
 | `typ` | `ort` / `stadtteil` | Stadtteile werden nachrangig sortiert |
@@ -106,12 +109,16 @@ Jeder Dienst gibt im Katalog an, wo er funktioniert: `laender: "alle"` oder eine
 | `privat` | nur mit `DAILY_PRIVATE=1`, nie gecacht, kein CORS (z. B. Kalender, Schlagzeilen) |
 | `schluessel` (geplant) | braucht einen Betreiber-Schlüssel, sonst `schluessel_fehlt` |
 
+## Dienstblatt (Transparenz)
+Jeder Dienst beschreibt sich selbst im Feld `blatt`: Zweck, Herkunft der Daten, Verarbeitung, jedes Ausgabefeld, Hinweise und Skalierung (Klasse A–D, Grenzen der Quelle, Kosten, Cache, Verhalten bei 10 Mio. Aufrufen/Tag – Rahmen in `skalierung.md`).
+Daraus entstehen der Katalog `/api/v1/dienste`, die Dateien `docs/dienste/<id>.md` (`npm run doku`) und die App-Seite „Woher kommen die Daten?“ (Fußzeile → Datenquellen). Ein Test bricht ab, wenn ein Blatt unvollständig ist, ein Ausgabefeld fehlt oder `docs/dienste` veraltet ist.
+
 ## Einen Dienst bauen
-1. `services/<id>.js` mit `id, version, titel, beschreibung, eingaben, laender, klasse, ttl, quellen, schema` und `run(eingabe) → { daten, ort?, hinweise? }`.
+1. `services/<id>.js` mit `id, version, titel, beschreibung, eingaben, laender, klasse, ttl, quellen, schema, blatt` und `run(eingabe) → { daten, ort?, hinweise?, quellen? }`.
    Die Umwandlung der Quelle als eigene, reine Funktion `umwandeln()` exportieren (testbar ohne Netz).
 2. In `services/index.js` eintragen.
 3. Beispieldaten der Quelle in `tools/fixtures.js`, Umleitung in `tools/fetch-stub.js`.
-4. Tests in `test/dienste.test.js`: Vertrag (Schema), Router, Fehlerfälle.
+4. Tests in `test/dienste.test.js`: Vertrag (Schema), Router, Fehlerfälle. Danach `npm run doku`.
 5. Adapter `src/js/adapter/<id>.js` mit mindestens `kachel(env)`; Kachel-Anbindung in `src/js/providers/`.
 
 ## Bausteine
@@ -120,6 +127,8 @@ Jeder Dienst gibt im Katalog an, wo er funktioniert: `laender: "alle"` oder eine
 | `services/_lib/rahmen.js` | Rahmen daily/1, Fehlerklasse, Zeit- und Rundungshilfen |
 | `services/_lib/schema.js` | Schema-Prüfer (Teilmenge von JSON Schema) und Bausteine `S.*`, Rahmen-Schema |
 | `services/_lib/ort.js` | Ort-Eingabe auflösen und runden |
+| `services/_lib/orte.js` | eigener Ortsbestand: Name, Postleitzahl, Umkehrsuche |
+| `services/_lib/blatt.js` | Dienstblatt prüfen und als Markdown ausgeben |
 | `services/_lib/http.js` | `getJson`, `postJson`, `send` (Cache-Header), Betriebsart |
 | `services/index.js` | Verzeichnis, `ausfuehren()`, `katalog()` |
 | `api/v1/[dienst].js` | HTTP-Einstieg |
@@ -129,7 +138,7 @@ Jeder Dienst gibt im Katalog an, wo er funktioniert: `laender: "alle"` oder eine
 ## Stand der Umstellung
 | Dienst | Status |
 |---|---|
-| `ort` | ✅ daily/1 – Name, Postleitzahl, Gerätestandort; Einstellungen nutzen ihn |
+| `ort` | ✅ daily/1 – eigener Ortsbestand (Name, Postleitzahl, Gerätestandort), Ausland über Open-Meteo; Einstellungen nutzen ihn |
 | `wetter` | ✅ daily/1 – Referenz; Kachel über Adapter |
 | Feiertage & Ferien, Himmel, Warnungen, Tanken, Abfahrten, Sport, Geld, Wissen, Tagesinhalte | ⏳ noch alte Einzelfunktionen bzw. im Browser berechnet |
 | Kalender, Schlagzeilen (privat) | ⏳ |

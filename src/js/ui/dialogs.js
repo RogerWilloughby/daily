@@ -2,11 +2,17 @@
 import { settings, saveSettings } from '../core/store.js';
 import { esc } from '../core/util.js';
 import { dienst } from '../dienste/client.js';
+import { seite as quellenSeite } from '../adapter/katalog.js';
 
 export function initDialogs(onSaved, isPrivate = false) {
   document.querySelectorAll('[data-doc]').forEach(b => b.addEventListener('click', () => {
     const d = document.getElementById('doc-' + b.dataset.doc);
     if (d && typeof d.showModal === 'function') d.showModal();
+    if (b.dataset.doc === 'quellen') {           // Katalog der Dienste: Herkunft und Verarbeitung je Dienst
+      const box = document.getElementById('quellen-body');
+      dienst('dienste').then(env => { box.innerHTML = quellenSeite(env); })
+        .catch(() => { box.textContent = 'Die Angaben sind gerade nicht abrufbar. Die Quellen stehen auch im Impressum.'; });
+    }
   }));
   document.querySelectorAll('dialog.doc').forEach(d => {
     d.addEventListener('click', e => { if (e.target === d || e.target.closest('[data-doc-close]')) d.close(); });
@@ -31,7 +37,8 @@ export function initDialogs(onSaved, isPrivate = false) {
 
   // Treffer des Dienstes „ort“ als Auswahl anzeigen: „Name, Landkreis (PLZ) · Bundesland“
   const beschrift = p => {
-    const kreis = p.kreis && p.kreis !== p.name ? ', ' + p.kreis.replace(/^Landkreis /, 'Lkr. ') : '';
+    const k = (p.kreis || '').replace(/^Landkreis /, 'Lkr. ').replace(/^(Kreisfreie Stadt|Stadtkreis) /, '');
+    const kreis = k && k !== p.name && !p.name.startsWith(k + ' ') ? ', ' + k : '';
     const plz = p.plz && p.plz.length ? ` (${p.plz[0]}${p.plz.length > 1 ? ' …' : ''})` : '';
     const wo = [p.region, p.land && p.land !== 'DE' ? p.land : null].filter(Boolean).join(', ');
     return `${esc(p.name)}${esc(kreis)}${esc(plz)}${p.typ === 'stadtteil' ? ' <small>Stadtteil</small>' : ''}${wo ? ` <small>· ${esc(wo)}</small>` : ''}`;
@@ -39,7 +46,7 @@ export function initDialogs(onSaved, isPrivate = false) {
   function zeige(res, box) {
     if (!res.length) { box.textContent = 'Kein Ort gefunden. Anders schreiben oder Postleitzahl versuchen?'; return; }
     box.innerHTML = res.map((p, k) => `<label><input type="radio" name="place" value="${k}"${k === 0 ? ' checked' : ''}> <span>${beschrift(p)}</span></label>`).join('');
-    const pick = k => { const p = res[k]; placeChoice = { name: p.name, admin: p.region || '', land: p.land, kreis: p.kreis, plz: p.plz, lat: p.lat, lon: p.lon, zeitzone: p.zeitzone }; };
+    const pick = k => { const p = res[k]; placeChoice = { name: p.name, admin: p.region || '', land: p.land, kreis: p.kreis, kreisSchluessel: p.kreisSchluessel || null, plz: p.plz, lat: p.lat, lon: p.lon, zeitzone: p.zeitzone }; };
     pick(0);
     box.querySelectorAll('input').forEach(i => i.addEventListener('change', () => pick(+i.value)));
   }
@@ -59,8 +66,12 @@ export function initDialogs(onSaved, isPrivate = false) {
     box.textContent = 'Standort wird ermittelt …';
     navigator.geolocation.getCurrentPosition(async pos => {
       const r = v => Math.round(v * 100) / 100;
-      try { zeige((await dienst('ort', { lat: r(pos.coords.latitude), lon: r(pos.coords.longitude) })).daten.orte, box); }
-      catch (e) { box.textContent = 'Zu diesem Standort wurde kein Ort gefunden.'; }
+      try {
+        const env = await dienst('ort', { lat: r(pos.coords.latitude), lon: r(pos.coords.longitude) });
+        if (!env.daten.orte.length) box.textContent = (env.hinweise || []).includes('ausserhalb')
+          ? 'Dein Standort liegt außerhalb Deutschlands. Bitte tippe den Ort ein.' : 'Zu diesem Standort wurde kein Ort gefunden.';
+        else zeige(env.daten.orte, box);
+      } catch (e) { box.textContent = 'Die Ortssuche ist gerade nicht erreichbar.'; }
     }, () => { box.textContent = 'Standort nicht freigegeben. Du kannst den Ort auch eintippen.'; }, { timeout: 15000, maximumAge: 600000 });
   });
   $('set-place-search').addEventListener('click', searchPlace);

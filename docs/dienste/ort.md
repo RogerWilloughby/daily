@@ -1,0 +1,70 @@
+# Dienst `ort` – Standort
+
+> Erzeugt aus `services/ort.js` mit `npm run doku` – nicht von Hand bearbeiten.
+
+Findet Orte nach Name, Postleitzahl oder Koordinaten – mit Landkreis, Bundesland, Postleitzahlen und Zeitzone. Deutschland aus eigenem Bestand, Ausland nach Name.
+
+| | |
+|---|---|
+| Aufruf | `GET /api/v1/ort` |
+| Version | 1 |
+| Klasse | oeffentlich |
+| Länder | weltweit |
+| Gültigkeit (TTL) | 86400 s |
+
+## Zweck
+Grundlage aller ortsbezogenen Dienste: macht aus einer Eingabe des Nutzers (Name, Postleitzahl oder Gerätestandort) einen eindeutigen Ort mit Koordinaten.
+
+## Herkunft der Daten
+- Deutschland: eigener Ortsbestand aus den GeoNames-Postleitzahldaten, Einwohnerzahlen aus dem GeoNames-Ortsverzeichnis (beide CC BY 4.0). Monatlich neu erzeugt (tools/orte-daten.js, GitHub Action „Ortsbestand erneuern“). Liegt als Datei beim Dienst – keine externe Anfrage.
+- Ausland: Open-Meteo Geocoding (Datenbasis GeoNames), nur Namenssuche und nur, wenn kein deutscher Ort genau so heißt.
+
+Quellen mit Lizenz:
+- GeoNames Postal Codes (eigener Ortsbestand) (CC BY 4.0) – https://www.geonames.org
+- Open-Meteo Geocoding (GeoNames) (CC BY 4.0) – https://open-meteo.com/en/docs/geocoding-api
+
+## Eingabe
+| Parameter | Bedeutung |
+|---|---|
+| `q` | Ortsname oder Postleitzahl (mind. 2 Zeichen) – oder – |
+| `lat` | Breitengrad (Umkehrsuche, nur Deutschland) |
+| `lon` | Längengrad (Umkehrsuche, nur Deutschland) |
+
+## Verarbeitung
+- Großkunden-Postleitzahlen (Firmen, Behörden, Kassen) werden beim Erzeugen herausgefiltert.
+- Bundesland aus dem amtlichen Kreisschlüssel; Stadtteile („Dresden Innere Altstadt“) werden als solche markiert.
+- Namenssuche: exakter Name bzw. Name mit Zusatz („Neustadt an der Weinstraße“) vor Wortanfängen; Orte vor Stadtteilen; größere Orte vorn (nach Einwohnern, ersatzweise nach Anzahl der Postleitzahlen).
+- Umkehrsuche: nächster Postleitzahl-Punkt im Umkreis von 25 km; ein Stadtteil wird dem zugehörigen Ort zugeordnet. Zurück kommen die gerundeten Koordinaten des Nutzers.
+- Koordinaten werden auf 2 Nachkommastellen (≈ 1 km) gerundet.
+
+## Ausgabe (`daten`)
+| Feld | Bedeutung |
+|---|---|
+| `orte` | Treffer, beste zuerst (höchstens 6; Umkehrsuche höchstens 1) |
+| `orte[].name` | Ortsname |
+| `orte[].region` | Bundesland bzw. Region |
+| `orte[].land` | Ländercode ISO 3166-1 (DE, AT …) |
+| `orte[].kreis` | Landkreis bzw. kreisfreie Stadt |
+| `orte[].kreisSchluessel` | amtlicher Kreisschlüssel (5 Stellen, nur Deutschland) |
+| `orte[].plz` | Postleitzahlen des Orts (bei PLZ- und Umkehrsuche nur die passende) |
+| `orte[].einwohner` | Einwohnerzahl laut GeoNames, soweit bekannt, sonst null |
+| `orte[].typ` | ort oder stadtteil |
+| `orte[].lat` | Breitengrad, 2 Nachkommastellen |
+| `orte[].lon` | Längengrad, 2 Nachkommastellen |
+| `orte[].zeitzone` | IANA-Zeitzone |
+
+Hinweise (`hinweise`):
+- `ausland`: Ergebnis enthält Orte aus der Auslandssuche
+- `ausland_nicht_verfuegbar`: Auslandssuche gerade nicht erreichbar, nur deutsche Treffer
+- `ausserhalb`: Koordinaten liegen außerhalb Deutschlands (Umkehrsuche nur in Deutschland)
+
+## Skalierung
+| | |
+|---|---|
+| Klasse | D – je Eingabe – jede Eingabe ist eigen (Suche, Liste) |
+| Quelle | Deutschland ohne externe Quelle – unbegrenzt. Ausland: Open-Meteo frei bis 10.000 Aufrufe/Tag (nicht kommerziell), danach ab 29 $/Monat; betrifft nur Suchen ohne passenden deutschen Ort. |
+| Kosten | Rechenzeit der Funktion: Laden des Bestands ≈ 60 ms je Kaltstart, Suche < 5 ms. Keine Gebühren an Dritte (Deutschland). |
+| Cache | CDN 24 h je Suchbegriff bzw. gerundeter Koordinate; der Browser speichert den gewählten Ort dauerhaft – die Suche fällt nur beim Einrichten an. |
+| Bei 10 Mio. Aufrufen/Tag | Unkritisch: Ortssuche passiert beim Einrichten, nicht bei jedem Aufruf. Andere Dienste bekommen lat/lon direkt. Ausland ggf. eigener Bestand (GeoNames allCountries) statt Open-Meteo. |
+
+Rahmen und Stufen: `../architektur/skalierung.md`

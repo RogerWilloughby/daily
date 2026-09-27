@@ -54,7 +54,7 @@ const S = {
 // Schema des gemeinsamen Rahmens (daily/1); „daten“ prüft der jeweilige Dienst
 // Ort-Objekt: name, lat, lon Pflicht; weitere Angaben, soweit bekannt
 const ORT_FELDER = {
-  name: S.text(), region: S.text(), land: S.text(), kreis: S.text(), plz: S.liste({ type: 'string' }),
+  name: S.text(), region: S.text(), land: S.text(), kreis: S.text(), kreisSchluessel: S.text(), plz: S.liste({ type: 'string' }),
   einwohner: S.ganz({ minimum: 0 }), typ: { type: ['string', 'null'], enum: ['ort', 'stadtteil', null] },
   lat: { type: 'number' }, lon: { type: 'number' }, zeitzone: S.text()
 };

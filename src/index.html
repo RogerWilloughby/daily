@@ -41,6 +41,7 @@
     <div class="status" id="status" data-level="idle" title="Datenquellen"><i aria-hidden="true"></i><span id="status-text">Beispieldaten</span></div>
     <button class="gear" type="button" id="open-settings" aria-label="Einstellungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Einstellungen</span></button>
     <nav class="legal" aria-label="Rechtliches">
+      <button type="button" data-doc="quellen">Datenquellen</button>
       <button type="button" data-doc="impressum">Impressum</button>
       <button type="button" data-doc="datenschutz">Datenschutz</button>
     </nav>
@@ -63,6 +64,16 @@
   <div class="s-hint">Wischen wechselt zur nächsten Kachel</div>
 </section>
 
+<dialog class="doc" id="doc-quellen" aria-labelledby="h-quellen">
+  <div class="doc-in">
+    <div class="doc-head"><h2 id="h-quellen">Woher kommen die Daten?</h2><button class="x" type="button" data-doc-close>Schließen</button></div>
+    <div class="doc-body">
+      <p>Jeder Baustein von DAILY ist ein eigener Dienst. Hier steht für jeden, woher er seine Daten bekommt und was DAILY damit macht.</p>
+      <div id="quellen-body"><p>Wird geladen …</p></div>
+    </div>
+  </div>
+</dialog>
+
 <dialog class="doc" id="doc-impressum" aria-labelledby="h-imp">
   <div class="doc-in">
     <div class="doc-head"><h2 id="h-imp">Impressum</h2><button class="x" type="button" data-doc-close>Schließen</button></div>
@@ -74,7 +85,7 @@
       <h3>Umsatzsteuer</h3>
       <p><span class="ph">[USt-IdNr. – nur falls vorhanden, sonst Abschnitt entfernen]</span></p>
       <h3>Datenquellen</h3>
-      <p>Wetter, Luftqualität, Pollen und Ortssuche: Open-Meteo.com (CC BY 4.0). Postleitzahlen: OpenPLZ API (ODbL). Standort zu Ort: Nominatim, © OpenStreetMap-Mitwirkende (ODbL). „An diesem Tag“: Wikipedia (CC BY-SA 4.0). Fußballdaten: OpenLigaDB. Abfahrten: Verkehrsverbund Oberelbe (VVO). Kurse: Yahoo Finance (ohne Gewähr). Wetterwarnungen: Deutscher Wetterdienst, abgerufen über Bright Sky. Schulferien: OpenHolidays API. Tankpreise: Tankerkönig (CC BY 4.0), Daten der Markttransparenzstelle für Kraftstoffe. Feiertage, Sonne und Mond werden von DAILY berechnet.</p>
+      <p>Wetter, Luftqualität und Pollen: Open-Meteo.com (CC BY 4.0). Orte und Postleitzahlen in Deutschland: GeoNames (CC BY 4.0), als eigener Bestand bei DAILY; Orte im Ausland: Open-Meteo.com Geocoding (CC BY 4.0). „An diesem Tag“: Wikipedia (CC BY-SA 4.0). Fußballdaten: OpenLigaDB. Abfahrten: Verkehrsverbund Oberelbe (VVO). Kurse: Yahoo Finance (ohne Gewähr). Wetterwarnungen: Deutscher Wetterdienst, abgerufen über Bright Sky. Schulferien: OpenHolidays API. Tankpreise: Tankerkönig (CC BY 4.0), Daten der Markttransparenzstelle für Kraftstoffe. Feiertage, Sonne und Mond werden von DAILY berechnet.</p>
       <p>DAILY ist kein Nachrichtenangebot. „Meine Seiten“ enthält nur Links, die du selbst angelegt hast; für die verlinkten Inhalte sind deren Anbieter verantwortlich.</p>
       <p>Tagesinhalte wie Rätsel, Rezepte, Tipps und das Land des Tages sind eigene Service-Texte, die mit Unterstützung von KI erstellt wurden.</p>
       <p class="draft">Entwurf mit Platzhaltern. Vor der Veröffentlichung ausfüllen und prüfen lassen.</p>
@@ -95,7 +106,7 @@
       <p><b>Schriftarten</b> werden direkt von diesem Server geladen, nicht von Google.</p>
       <p><b>Hosting</b>: Vercel Inc., USA. Beim Aufruf verarbeitet Vercel technisch notwendige Daten wie deine IP-Adresse. <span class="ph">[Vor Veröffentlichung: Auftragsverarbeitung und Drittlandübermittlung (EU-US Data Privacy Framework) ergänzen]</span></p>
       <h3>Gerätestandort</h3>
-      <p>Nur wenn du „Meinen Standort verwenden“ drückst, fragt dein Browser um Erlaubnis und ermittelt deine Position. DAILY rundet sie auf etwa 1 km, ermittelt daraus einmalig den Ortsnamen (über Nominatim/OpenStreetMap, ohne deine IP-Adresse) und speichert nur den gefundenen Ort in deinem Browser.</p>
+      <p>Nur wenn du „Meinen Standort ermitteln“ drückst, fragt dein Browser um Erlaubnis und ermittelt deine Position. DAILY rundet sie auf etwa 1 km, sucht daraus einmalig den nächsten Ort im eigenen Ortsverzeichnis von DAILY (es wird kein anderer Dienst gefragt) und speichert nur den gefundenen Ort in deinem Browser.</p>
       <h3>Keine Analyse, kein Tracking</h3>
       <p>DAILY verwendet keine Analyse- oder Werbe-Tracker und setzt keine Cookies.</p>
       <h3>Deine Rechte</h3>
@@ -112,12 +123,13 @@
       <h3>Ort</h3>
       <p>Für Wetter, Warnungen, Feiertage, Tankpreise und Himmel.</p>
       <p>Aktuell: <b id="set-place-current"></b></p>
+      <button type="button" class="btn primary wide" id="set-place-here"><span aria-hidden="true">&#x2316;</span> Meinen Standort ermitteln</button>
+      <p class="set-oder">oder Ort eintippen:</p>
       <div class="set-row">
         <label for="set-place" class="sr">Ort suchen</label>
         <input class="field" id="set-place" type="text" placeholder="Ort oder Postleitzahl, z. B. Radebeul oder 01445" autocomplete="off">
         <button type="button" class="btn" id="set-place-search">Suchen</button>
       </div>
-      <button type="button" class="btn link" id="set-place-here">Meinen Standort verwenden</button>
       <div id="set-place-results" class="set-results" role="radiogroup" aria-label="Gefundene Orte"></div>
 
       <div id="set-private" hidden>

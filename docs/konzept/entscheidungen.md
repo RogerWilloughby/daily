@@ -44,7 +44,7 @@ Kacheln und Quellen:
 
 ## 3a. Einstellungen (Konfigurator)
 Zahnrad-Button „Einstellungen“ in der unteren Leiste:
-- Ort für das Wetter (Ortssuche über Open-Meteo Geocoding, Auswahl aus Treffern; Standard Dresden)
+- Ort: oben der Knopf „Meinen Standort ermitteln“, darunter Suche nach Name oder Postleitzahl (Dienst `ort`, eigener Ortsbestand), Auswahl aus Treffern; Standard Dresden
 - Kalender: iCal-Links, einer pro Zeile (nur im privaten Betrieb sichtbar)
 - Haltestelle für Abfahrten (Standard Postplatz, VVO-Gebiet)
 - Fußballverein (Standard Dynamo Dresden, 1.–3. Liga)
@@ -92,14 +92,16 @@ Der Prototyp zählt lokal, welche Kacheln geöffnet werden (Kachel „Deine Nutz
 
 ## 11. Technischer Aufbau (seit 26.09.2026)
 - **Seit 27.09.2026: headless.** Dienste liefern reine Daten im Austauschformat daily/1 über `GET /api/v1/<dienst>`, Adapter machen daraus Kacheln, Listen oder Dashboards. Verbindliche Beschreibung: `../architektur/dienste.md`. Referenz-Dienst: `wetter`.
+- **Transparenz:** Jeder Dienst hat ein Dienstblatt (Herkunft, Zweck, Eingabe, Ausgabe, Verarbeitung, Skalierung) – im Code, im Katalog `/api/v1/dienste`, in `docs/dienste/` (`npm run doku`) und in der App unter „Datenquellen“. Skalierungsrahmen: `../architektur/skalierung.md`.
+- **Eigene Daten, wo es geht:** Orte und Postleitzahlen Deutschland kommen aus dem eigenen Bestand (GeoNames, monatlich per GitHub Action), nicht mehr von OpenPLZ/Nominatim.
 - Frontend ohne Bundler: `src/index.html` (nur Gerüst), `src/app.css` (Design-Tokens, Hell/Dunkel), ES-Module unter `src/js/`:
   - `core/` – `tiles.js` (Kachel-Katalog, Layouts öffentlich/privat, `chooseLayout`), `board.js` (Raster, Aktivierung, Mobil-Vollbild), `store.js` (Einstellungen, Aufgaben, Klickzähler in localStorage), `ask.js` („Frag DAILY“: jede Datenquelle meldet eigene Antworten an), `status.js` (Statusanzeige), `util.js`.
   - `providers/` – je Datenquelle ein Modul mit `load()` und Intervall (`every`). `main.js` lädt alle, aktualisiert nur bei sichtbarem Tab und meldet Fehler an die Statusanzeige.
   - Neue Kachel = Eintrag in `tiles.js` + Provider-Modul + Eintrag in `main.js`.
 - Statusanzeige in der Leiste: „Live · HH:MM“ oder „N Quellen gestört“.
 - Server-Funktionen in `api/` (Vercel, Region fra1 = Frankfurt), gemeinsame Helfer in `api/_lib/http.js`. Server-Funktionen verbergen die IP der Nutzer vor den Anbietern und setzen CDN-Cache-Zeiten.
-- Service Worker `daily-v3`: App-Dateien network-first, Schriften/Icons cache-first, `/api/` nie aus dem Cache.
-- Tests: `npm test` (node:test, ohne Netz, 16 Prüfungen): Schlagzeilen, Sport, Abfahrten, Wikipedia, Tagesinhalte, Feiertage, Himmel, Warnungen, Tanken, Schulferien, Koordinaten-Rundung, Betriebsart, Layouts, Links, Service-Worker-Liste.
+- Service Worker `daily-v5`: App-Dateien network-first, Schriften/Icons cache-first, `/api/` nie aus dem Cache.
+- Tests: `npm test` (node:test, ohne Netz, 31 Prüfungen): `test/daily.test.js` (alte Kacheln) und `test/dienste.test.js` (daily/1: Rahmen, Schema, Ort, Wetter, Router, Katalog, Dienstblätter, Adapter).
 - Lokaler Testserver: `node tools/mock-server.js` (nach `npm run build`), liefert Beispieldaten aus `tools/fixtures.js` statt echter Dienste; `MOCK_PRIVATE=1` für den privaten Betrieb.
 - Betriebsart: `api/config.js` meldet `private` (aus `DAILY_PRIVATE`). `main.js` wählt damit das Layout (`chooseLayout` in `core/tiles.js`) und startet nur die passenden Anbieter. Ein eigenes Layout aus `settings.layout` (Liste von Kachel-IDs) wird geprüft und mit der Standardbelegung auf 20 Plätze aufgefüllt – Grundlage für die Kachelauswahl in den Einstellungen.
 - Reine Rechenmodule ohne DOM liegen in `src/js/lib/` (Feiertage, Astronomie, Adressprüfung) und sind so mit `npm test` prüfbar.
@@ -110,6 +112,8 @@ Prototyp: `../prototyp/daily-prototyp.html`.
 
 ## Offen
 - **Roger, einmalig in Vercel (Settings → Environment Variables):** `DAILY_PRIVATE` = `1` (damit Kalender und Schlagzeilen für dich bleiben) und `TANKERKOENIG_API_KEY` (kostenlos beantragen). Danach neu veröffentlichen.
+- **Roger, einmalig nach dem Hochladen:** GitHub → Actions → „Ortsbestand erneuern“ → „Run workflow“. Erst dieser Lauf holt die Original-GeoNames-Daten mit Einwohnerzahlen (bessere Reihenfolge, z. B. Neustadt in Sachsen vor Hohwald bei 01844).
+- Wetterdienst überarbeiten (DWD direkt/Bright Sky vs. Open-Meteo, Raster, TTL), danach Vercel vs. AWS bei 10 Mio. Nutzern
 - Alle Dienste auf daily/1 umstellen und neue Dienste bauen (Reihenfolge in `dienste-katalog.md`)
 - Kachelauswahl in den Einstellungen: weitere Kacheln definieren (Katalog in `core/tiles.js`), Auswahl-Oberfläche bauen
 - Geld für die öffentliche Version auf frei nutzbare Quellen umstellen

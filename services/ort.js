@@ -1,26 +1,24 @@
 // Dienst „ort“ (Standort): findet Orte
-//  – nach Name (q=Neustadt): Open-Meteo Geocoding (GeoNames), Deutschland zuerst, Stadtteile nach hinten, größere Orte vorn
-//  – nach Postleitzahl (q=01844): OpenPLZ API (Ort, Landkreis, Bundesland) + Open-Meteo für die Koordinaten
-//  – nach Koordinaten (lat, lon – z. B. Gerätestandort): Nominatim/OpenStreetMap (Umkehrsuche)
+//  – in Deutschland aus dem eigenen Ortsbestand (services/daten/orte-de.json, GeoNames, monatlich erneuert) – ohne externe Anfrage:
+//    nach Name (q=Neustadt), nach Postleitzahl (q=01844) und nach Koordinaten (lat, lon – Gerätestandort)
+//  – im Ausland nur nach Name, und nur wenn es in Deutschland keinen Treffer gibt: Open-Meteo Geocoding
 // Das Ort-Objekt ist die Eingabe fast aller anderen Dienste.
 const { getJson } = require('./_lib/http');
 const { DienstFehler, runde, text } = require('./_lib/rahmen');
 const { S, ORT_VOLL } = require('./_lib/schema');
+const orte = require('./_lib/orte');
 
 const Q = {
-  geo: { name: 'Open-Meteo Geocoding (GeoNames)', lizenz: 'CC BY 4.0', url: 'https://open-meteo.com/en/docs/geocoding-api' },
-  plz: { name: 'OpenPLZ API', lizenz: 'ODbL', url: 'https://www.openplzapi.org' },
-  osm: { name: 'Nominatim / OpenStreetMap-Mitwirkende', lizenz: 'ODbL', url: 'https://www.openstreetmap.org/copyright' }
+  gn: { name: 'GeoNames Postal Codes (eigener Ortsbestand)', lizenz: 'CC BY 4.0', url: 'https://www.geonames.org' },
+  geo: { name: 'Open-Meteo Geocoding (GeoNames)', lizenz: 'CC BY 4.0', url: 'https://open-meteo.com/en/docs/geocoding-api' }
 };
 const GEO = 'https://geocoding-api.open-meteo.com/v1/search?language=de&format=json';
-const quelleFehler = name => e => { throw new DienstFehler('quelle_fehler', `${name}: ${e.message}`); };
 
-// Treffer von Open-Meteo → Ort-Objekt. Bei deutschen Orten steht der Landkreis meist in admin3 (admin2 = Regierungsbezirk).
+// Treffer von Open-Meteo → Ort-Objekt (nur Ausland)
 function ausGeo(r) {
   const land = r.country_code || null;
   return {
-    name: r.name, region: r.admin1 || null, land,
-    kreis: (land === 'DE' ? (r.admin3 || r.admin2) : r.admin2) || null,
+    name: r.name, region: r.admin1 || null, land, kreis: r.admin2 || null, kreisSchluessel: null,
     plz: Array.isArray(r.postcodes) ? r.postcodes.slice(0, 10) : [],
     einwohner: r.population || null,
     typ: /^PPLX/.test(r.feature_code || '') ? 'stadtteil' : 'ort',
@@ -28,75 +26,93 @@ function ausGeo(r) {
   };
 }
 
-// Deutschland zuerst, Stadtteile nach hinten, dann nach Einwohnern (unbekannt zuletzt); sonst Reihenfolge der Quelle
-function sortiere(orte) {
-  return orte.map((o, i) => ({ o, i })).sort((a, b) =>
-    (a.o.land === 'DE' ? 0 : 1) - (b.o.land === 'DE' ? 0 : 1) ||
-    (a.o.typ === 'stadtteil' ? 1 : 0) - (b.o.typ === 'stadtteil' ? 1 : 0) ||
-    (b.o.einwohner || 0) - (a.o.einwohner || 0) || a.i - b.i
-  ).map(x => x.o);
+// Ausland: Orte vor Stadtteilen, dann nach Einwohnern; deutsche Treffer der Quelle entfallen (die kennt der eigene Bestand besser)
+async function auslandSuche(q, anzahl) {
+  const j = await getJson(`${GEO}&count=20&name=${encodeURIComponent(q)}`)
+    .catch(e => { throw new DienstFehler('quelle_fehler', `Ortssuche Ausland: ${e.message}`); });
+  return (j.results || []).filter(r => r.country_code !== 'DE').map(ausGeo)
+    .map((o, i) => ({ o, i }))
+    .sort((a, b) => (a.o.typ === 'stadtteil') - (b.o.typ === 'stadtteil') || (b.o.einwohner || 0) - (a.o.einwohner || 0) || a.i - b.i)
+    .slice(0, anzahl).map(x => x.o);
 }
 
-async function nameSuche(q, anzahl) {
-  const j = await getJson(`${GEO}&count=30&name=${encodeURIComponent(q)}`).catch(quelleFehler('Ortssuche'));
-  return sortiere((j.results || []).map(ausGeo)).slice(0, anzahl);
-}
-
-// Postleitzahl (nur Deutschland): OpenPLZ nennt Ort, Kreis und Land; die Koordinaten kommen von Open-Meteo
-async function plzSuche(plz, anzahl) {
-  const orte = await getJson(`https://openplzapi.org/de/Localities?postalCode=${plz}`).catch(quelleFehler('Postleitzahl'));
-  const ergebnis = [];
-  for (const o of (orte || []).slice(0, anzahl)) {
-    const land = o.federalState && o.federalState.name, kreis = o.district && o.district.name;
-    const j = await getJson(`${GEO}&count=10&countryCode=DE&name=${encodeURIComponent(o.name)}`).catch(() => ({}));
-    const kandidaten = (j.results || []).map(ausGeo).filter(g => g.region === land);
-    const passend = kandidaten.find(g => g.plz.includes(plz)) || kandidaten.find(g => kreis && g.kreis && g.kreis.includes(kreis)) || kandidaten[0];
-    if (!passend) continue;
-    ergebnis.push({ ...passend, name: o.name, region: land, kreis: kreis || passend.kreis, plz: [plz], typ: 'ort' });
+// Suche nach Name oder Postleitzahl → { orte, quellen, hinweise }
+// Passt ein deutscher Ort als ganzes Wort („Neustadt“), bleibt es bei Deutschland. Sonst („Wien“, „Paris“) wird zusätzlich
+// im Ausland gesucht: exakte Auslandstreffer zuerst, dann deutsche Orte, die nur mit dem Suchwort beginnen („Wiendorf“).
+async function finde(q, anzahl = 6) {
+  if (/^\d{5}$/.test(q)) return { orte: orte.suchePlz(q, anzahl), quellen: [Q.gn], hinweise: [] };
+  const de = orte.sucheName(q, anzahl);
+  if (de.some(orte.exakt)) return { orte: de, quellen: [Q.gn], hinweise: [] };
+  let aus;
+  try { aus = await auslandSuche(q, anzahl); } catch (e) {
+    if (de.length) return { orte: de, quellen: [Q.gn], hinweise: ['ausland_nicht_verfuegbar'] };
+    throw e;
   }
-  return ergebnis;
+  const n = orte.norm(q), gleich = aus.filter(o => orte.norm(o.name) === n);
+  const liste = [...gleich, ...de, ...aus.filter(o => !gleich.includes(o))].slice(0, anzahl);
+  const quellen = [liste.some(o => o.land === 'DE') && Q.gn, liste.some(o => o.land !== 'DE') && Q.geo].filter(Boolean);
+  return { orte: liste, quellen: quellen.length ? quellen : [Q.gn], hinweise: liste.some(o => o.land !== 'DE') ? ['ausland'] : [] };
 }
-
-// Umkehrsuche: Koordinaten → Ort (Nominatim erlaubt höchstens 1 Anfrage/Sekunde – DAILY fragt nur beim Einrichten)
-async function rueckwaerts(lat, lon) {
-  const j = await getJson(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=10&addressdetails=1&accept-language=de&lat=${lat}&lon=${lon}`)
-    .catch(quelleFehler('Umkehrsuche'));
-  const a = (j && j.address) || {};
-  const name = a.city || a.town || a.village || a.municipality || a.county;
-  if (!name) return [];
-  const land = a.country_code ? a.country_code.toUpperCase() : null;
-  return [{
-    name, region: a.state || null, land, kreis: a.county || (a.city ? a.city : null),
-    plz: a.postcode ? [String(a.postcode)] : [], einwohner: null, typ: 'ort',
-    lat, lon, zeitzone: land === 'DE' ? 'Europe/Berlin' : null
-  }];
-}
-
-async function suche(q, anzahl = 6) {
-  return /^\d{5}$/.test(q) ? plzSuche(q, anzahl) : nameSuche(q, anzahl);
-}
+const suche = async (q, anzahl = 6) => (await finde(q, anzahl)).orte;
 
 module.exports = {
   id: 'ort',
   version: 1,
   titel: 'Standort',
-  beschreibung: 'Findet Orte nach Name, Postleitzahl (Deutschland) oder Koordinaten – mit Landkreis, Bundesland, Land, Postleitzahlen, Einwohnern und Zeitzone.',
-  eingaben: { q: 'Ortsname oder Postleitzahl (mind. 2 Zeichen) – oder –', lat: 'Breitengrad (Umkehrsuche)', lon: 'Längengrad (Umkehrsuche)' },
+  beschreibung: 'Findet Orte nach Name, Postleitzahl oder Koordinaten – mit Landkreis, Bundesland, Postleitzahlen und Zeitzone. Deutschland aus eigenem Bestand, Ausland nach Name.',
+  eingaben: { q: 'Ortsname oder Postleitzahl (mind. 2 Zeichen) – oder –', lat: 'Breitengrad (Umkehrsuche, nur Deutschland)', lon: 'Längengrad (Umkehrsuche, nur Deutschland)' },
   laender: 'alle',
   klasse: 'oeffentlich',
   ttl: 86400,
-  quellen: [Q.geo],
+  quellen: [Q.gn, Q.geo],
   schema: S.obj({ orte: S.liste(ORT_VOLL) }),
+  blatt: {
+    zweck: 'Grundlage aller ortsbezogenen Dienste: macht aus einer Eingabe des Nutzers (Name, Postleitzahl oder Gerätestandort) einen eindeutigen Ort mit Koordinaten.',
+    herkunft: [
+      'Deutschland: eigener Ortsbestand aus den GeoNames-Postleitzahldaten, Einwohnerzahlen aus dem GeoNames-Ortsverzeichnis (beide CC BY 4.0). Monatlich neu erzeugt (tools/orte-daten.js, GitHub Action „Ortsbestand erneuern“). Liegt als Datei beim Dienst – keine externe Anfrage.',
+      'Ausland: Open-Meteo Geocoding (Datenbasis GeoNames), nur Namenssuche und nur, wenn kein deutscher Ort genau so heißt.'
+    ],
+    verarbeitung: [
+      'Großkunden-Postleitzahlen (Firmen, Behörden, Kassen) werden beim Erzeugen herausgefiltert.',
+      'Bundesland aus dem amtlichen Kreisschlüssel; Stadtteile („Dresden Innere Altstadt“) werden als solche markiert.',
+      'Namenssuche: exakter Name bzw. Name mit Zusatz („Neustadt an der Weinstraße“) vor Wortanfängen; Orte vor Stadtteilen; größere Orte vorn (nach Einwohnern, ersatzweise nach Anzahl der Postleitzahlen).',
+      'Umkehrsuche: nächster Postleitzahl-Punkt im Umkreis von 25 km; ein Stadtteil wird dem zugehörigen Ort zugeordnet. Zurück kommen die gerundeten Koordinaten des Nutzers.',
+      'Koordinaten werden auf 2 Nachkommastellen (≈ 1 km) gerundet.'
+    ],
+    ausgabe: {
+      orte: 'Treffer, beste zuerst (höchstens 6; Umkehrsuche höchstens 1)',
+      'orte[].name': 'Ortsname',
+      'orte[].region': 'Bundesland bzw. Region',
+      'orte[].land': 'Ländercode ISO 3166-1 (DE, AT …)',
+      'orte[].kreis': 'Landkreis bzw. kreisfreie Stadt',
+      'orte[].kreisSchluessel': 'amtlicher Kreisschlüssel (5 Stellen, nur Deutschland)',
+      'orte[].plz': 'Postleitzahlen des Orts (bei PLZ- und Umkehrsuche nur die passende)',
+      'orte[].einwohner': 'Einwohnerzahl laut GeoNames, soweit bekannt, sonst null',
+      'orte[].typ': 'ort oder stadtteil',
+      'orte[].lat': 'Breitengrad, 2 Nachkommastellen',
+      'orte[].lon': 'Längengrad, 2 Nachkommastellen',
+      'orte[].zeitzone': 'IANA-Zeitzone'
+    },
+    hinweise: { ausland: 'Ergebnis enthält Orte aus der Auslandssuche', ausland_nicht_verfuegbar: 'Auslandssuche gerade nicht erreichbar, nur deutsche Treffer', ausserhalb: 'Koordinaten liegen außerhalb Deutschlands (Umkehrsuche nur in Deutschland)' },
+    skalierung: {
+      klasse: 'D',
+      quelle: 'Deutschland ohne externe Quelle – unbegrenzt. Ausland: Open-Meteo frei bis 10.000 Aufrufe/Tag (nicht kommerziell), danach ab 29 $/Monat; betrifft nur Suchen ohne passenden deutschen Ort.',
+      kosten: 'Rechenzeit der Funktion: Laden des Bestands ≈ 60 ms je Kaltstart, Suche < 5 ms. Keine Gebühren an Dritte (Deutschland).',
+      cache: 'CDN 24 h je Suchbegriff bzw. gerundeter Koordinate; der Browser speichert den gewählten Ort dauerhaft – die Suche fällt nur beim Einrichten an.',
+      bei10Mio: 'Unkritisch: Ortssuche passiert beim Einrichten, nicht bei jedem Aufruf. Andere Dienste bekommen lat/lon direkt. Ausland ggf. eigener Bestand (GeoNames allCountries) statt Open-Meteo.'
+    }
+  },
   async run(eingabe) {
     if (eingabe.lat != null && eingabe.lon != null) {
-      const lat = runde(eingabe.lat, 2), lon = runde(eingabe.lon, 2);
-      if (lat == null || lon == null || Math.abs(lat) > 90 || Math.abs(lon) > 180) throw new DienstFehler('eingabe_ungueltig', 'lat/lon ungültig');
-      return { daten: { orte: await rueckwaerts(lat, lon) }, quellen: [Q.osm] };
+      const lat = Number(eingabe.lat), lon = Number(eingabe.lon);
+      if (!Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) throw new DienstFehler('eingabe_ungueltig', 'lat/lon ungültig');
+      const o = orte.naechster(lat, lon);
+      return { daten: { orte: o ? [o] : [] }, quellen: [Q.gn], hinweise: o ? [] : ['ausserhalb'] };
     }
     const q = text(eingabe.q, 60);
     if (!q || q.length < 2) throw new DienstFehler('eingabe_fehlt', 'Parameter q (Ortsname oder Postleitzahl) oder lat/lon fehlt');
-    const plz = /^\d{5}$/.test(q);
-    return { daten: { orte: await suche(q) }, quellen: plz ? [Q.plz, Q.geo] : [Q.geo] };
+    const r = await finde(q);
+    return { daten: { orte: r.orte }, quellen: r.quellen, hinweise: r.hinweise };
   },
-  suche, sortiere, ausGeo
+  suche, ausGeo
 };

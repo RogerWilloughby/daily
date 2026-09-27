@@ -1,0 +1,40 @@
+# Erneuert den eigenen Ortsbestand services/daten/orte-de.json aus GeoNames (CC BY 4.0).
+# Läuft monatlich und auf Knopfdruck (GitHub → Actions → „Ortsbestand erneuern“ → Run workflow).
+# Ändert sich etwas, wird die Datei direkt auf main committet; hochladen.cmd holt sie beim nächsten Mal mit ab.
+name: Ortsbestand erneuern
+
+on:
+  schedule:
+    - cron: '17 3 2 * *'   # am 2. jedes Monats, 03:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  orte:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: GeoNames laden
+        run: |
+          mkdir -p /tmp/geo/plz /tmp/geo/orte
+          curl -sSfL -o /tmp/geo/plz.zip https://download.geonames.org/export/zip/DE.zip
+          curl -sSfL -o /tmp/geo/orte.zip https://download.geonames.org/export/dump/DE.zip
+          unzip -o -q /tmp/geo/plz.zip -d /tmp/geo/plz
+          unzip -o -q /tmp/geo/orte.zip -d /tmp/geo/orte
+      - name: Ortsbestand erzeugen
+        run: node tools/orte-daten.js /tmp/geo/plz/DE.txt /tmp/geo/orte/DE.txt
+      - name: Prüfen
+        run: node --test test/dienste.test.js
+      - name: Committen, falls geändert
+        run: |
+          if git diff --quiet -- services/daten/orte-de.json; then echo "keine Änderung"; exit 0; fi
+          git config user.name "daily-bot"
+          git config user.email "daily-bot@users.noreply.github.com"
+          git add services/daten/orte-de.json
+          git commit -m "Ortsbestand aus GeoNames erneuert"
+          git push
