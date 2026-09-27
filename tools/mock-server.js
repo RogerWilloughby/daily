@@ -4,7 +4,6 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const F = require('./fixtures');
 // Testbetrieb: Tankerkönig-Schlüssel vortäuschen; privat nur mit MOCK_PRIVATE=1
 process.env.TANKERKOENIG_API_KEY = process.env.TANKERKOENIG_API_KEY || 'test';
 if (process.env.MOCK_PRIVATE === '1') process.env.DAILY_PRIVATE = '1';
@@ -12,29 +11,9 @@ if (process.env.MOCK_PRIVATE === '1') process.env.DAILY_PRIVATE = '1';
 const ROOT = path.join(__dirname, '..', 'public');
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.woff2': 'font/woff2', '.png': 'image/png', '.webmanifest': 'application/manifest+json' };
 
-// Externe Aufrufe der Funktionen abfangen
+// Externe Aufrufe der Funktionen abfangen (dieselben Beispieldaten wie in den Tests)
 const realFetch = global.fetch;
-global.fetch = async (url, opts = {}) => {
-  const u = String(url);
-  const reply = (body, type = 'application/json') => new Response(typeof body === 'string' ? body : JSON.stringify(body), { status: 200, headers: { 'content-type': type } });
-  if (u.includes('tagesschau.de')) return reply(F.rss('Tagesschau'), 'application/rss+xml');
-  if (u.includes('mdr.de')) return reply(F.rss('MDR Sachsen'), 'application/rss+xml');
-  if (u.includes('heise.de')) return reply(F.atom('heise'), 'application/atom+xml');
-  if (u.includes('finance.yahoo.com')) return reply(F.yahoo(u));
-  if (u.includes('openligadb.de/getbltable/bl1')) return reply(F.table1());
-  if (u.includes('openligadb.de/getbltable/bl2')) return reply(F.table2());
-  if (u.includes('openligadb.de/getbltable/bl3')) return reply([]);
-  if (u.includes('openligadb.de/getmatchdata/bl2')) return reply(F.matches2());
-  if (u.includes('openligadb.de/getmatchdata')) return reply([]);
-  if (u.includes('vvo-online.de/tr/pointfinder')) return reply(F.pointfinder(JSON.parse(opts.body || '{}').query));
-  if (u.includes('vvo-online.de/dm')) return reply(F.departures());
-  if (u.includes('onthisday')) return reply(F.onthisday());
-  if (u.includes('brightsky.dev/alerts')) return reply(F.alerts(process.env.MOCK_ALERTS !== '0'));
-  if (u.includes('openholidaysapi.org/SchoolHolidays')) return reply(F.school());
-  if (u.includes('tankerkoenig.de')) return reply(F.fuel());
-  if (u.includes('calendar.test')) return reply(F.ics(), 'text/calendar');
-  return new Response('not mocked: ' + u, { status: 404 });
-};
+global.fetch = require('./fetch-stub');
 
 function shim(req, res, body) {
   const u = new URL(req.url, 'http://x');
@@ -51,7 +30,10 @@ http.createServer((req, res) => {
     req.on('data', c => { body += c; });
     req.on('end', async () => {
       try {
-        const h = require(path.join(__dirname, '..', 'api', u.pathname.slice(5) + '.js'));
+        // /api/v1/<dienst> → eine Funktion für alle Dienste (wie bei Vercel: api/v1/[dienst].js)
+        const v1 = /^\/api\/v1\/([a-z0-9-]+)$/.exec(u.pathname);
+        const h = require(path.join(__dirname, '..', 'api', v1 ? 'v1/[dienst].js' : u.pathname.slice(5) + '.js'));
+        if (v1) req.url += (req.url.includes('?') ? '&' : '?') + 'dienst=' + v1[1];
         shim(req, res, body); await h(req, res);
       } catch (e) { res.statusCode = 500; res.end(String(e.stack)); }
     });
