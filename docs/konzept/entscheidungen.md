@@ -8,7 +8,7 @@ DAILY verarbeitet für die öffentliche Version **außer dem Ort keine Nutzerdat
 - **Nur privat** (Vercel-Variable `DAILY_PRIVATE=1`, sonst liefern `api/calendar` und `api/headlines` 404 und die Kacheln fehlen): Kalender (iCal-Link = Nutzerdatum), Schlagzeilen (Nachrichten, Grauzone MStV).
 - **Neu, nur mit dem Ort:** Feiertage & Ferien, Warnungen (DWD), Tanken, Himmel; dazu „Meine Seiten“ (nur Links, lokal gespeichert).
 - Folgen: kein Konto, keine Datenbank, keine OAuth-Prüfung, kurze Datenschutzerklärung, keine Medienpflichten. Stufen 2 und 3 des Stufenplans (3b) sind damit für die öffentliche Version nicht nötig.
-- Nächster Schritt: weitere Kacheln definieren, die Nutzer in den Einstellungen auswählen (Technik vorbereitet: `settings.layout`, siehe Abschnitt 11).
+- Nächster Schritt: Dienste aus der Ideenliste umsetzen – Übersicht und Reihenfolge in `dienste-katalog.md`. Danach entscheiden, welche Dienste zu Kacheln/Oberflächen zusammengefasst werden (Technik für eigene Kachelauswahl vorbereitet: `settings.layout`).
 
 ## 1. Zielgruppe
 Erst für Roger selbst bauen und testen, aber so planen, dass DAILY später öffentlich werden kann.
@@ -82,9 +82,9 @@ Der Prototyp zählt lokal, welche Kacheln geöffnet werden (Kachel „Deine Nutz
 - Progressive Web App (Manifest, Service Worker, Icons), installierbar auf Desktop und Handy.
 - Code: privates GitHub-Repo **github.com/RogerWilloughby/daily** (Branch main). Claude kann über den GitHub-Connector hineinschreiben.
 - Lokales Repo bei Roger: `C:\Users\Roger\Documents\Projekte\Roger\Craibotics\Daily` (Ordnerfreigabe in der Desktop-App nötig). Alter Ordner Downloads\daily ist überholt.
-- **Arbeitsablauf (Standard seit 26.09.2026): über GitHub.** Claude schreibt Änderungen über den GitHub-Connector in einen Branch, öffnet einen Pull Request und führt ihn in `main` zusammen; Vercel veröffentlicht automatisch. Roger holt den Stand lokal mit `hochladen.cmd` (macht zuerst `git pull --rebase --autostash`).
-- **Ausweichweg (lokal):** Claude schreibt geänderte Dateien in das lokale Repo und dazu eine Datei `.commit-msg.txt` mit dem Commit-Kommentar (1. Zeile Titel, dann Stichpunkte; per .gitignore ausgeschlossen). Roger startet `hochladen.cmd` per Doppelklick: zeigt Claudes Kommentar, Enter übernimmt ihn (`git commit -F`), sonst eigener Text; danach `git push` und Löschen der Kommentardatei. Vercel veröffentlicht automatisch.
-- Claude führt im lokalen Repo selbst keine git-Befehle aus (die Desktop-VM kann .git/index.lock nicht zuverlässig entfernen).
+- **Arbeitsablauf (verbindlich, Rogers Vorgabe vom 27.09.2026): immer über `hochladen.cmd`.** Claude schreibt geänderte Dateien in das lokale Repo und dazu eine Datei `.commit-msg.txt` mit dem Commit-Kommentar (1. Zeile Titel, dann Stichpunkte; per .gitignore ausgeschlossen). Roger startet `hochladen.cmd` per Doppelklick: holt zuerst den Stand von GitHub (`git pull --rebase --autostash`), zeigt Claudes Kommentar, Enter übernimmt ihn (`git commit -F`), sonst eigener Text; danach `git push` und Löschen der Kommentardatei. Vercel veröffentlicht automatisch.
+- **Nicht** direkt über den GitHub-Connector schreiben (keine Branches, Pull Requests oder push_files): der Connector ist langsam und kostet viele Tokens. Er dient nur zum Lesen.
+- Claude führt im lokalen Repo selbst keine git-Befehle aus, auch kein `git status` (jeder Aufruf in der Desktop-VM hinterlässt `.git/index.lock`, die hochladen.cmd blockiert).
 - Das Konto Craibotics ist ein separates GitHub-Konto; der Claude-Connector hat dort keinen Zugriff → Repo bewusst unter RogerWilloughby.
 - Hosting: Vercel (Hobby), läuft unter der vercel.app-Adresse. Domain daily.craibotics.org (GoDaddy, CNAME „daily“) folgt später.
 - Zugriff nur Roger: Vercel Authentication „All Deployments“ aktiv → noch kein ausgefülltes Impressum nötig.
@@ -110,7 +110,7 @@ Prototyp: `../prototyp/daily-prototyp.html`.
 
 ## Offen
 - **Roger, einmalig in Vercel (Settings → Environment Variables):** `DAILY_PRIVATE` = `1` (damit Kalender und Schlagzeilen für dich bleiben) und `TANKERKOENIG_API_KEY` (kostenlos beantragen). Danach neu veröffentlichen.
-- Alle Dienste auf daily/1 umstellen (siehe `../architektur/dienste.md`, Stand der Umstellung)
+- Alle Dienste auf daily/1 umstellen und neue Dienste bauen (Reihenfolge in `dienste-katalog.md`)
 - Kachelauswahl in den Einstellungen: weitere Kacheln definieren (Katalog in `core/tiles.js`), Auswahl-Oberfläche bauen
 - Geld für die öffentliche Version auf frei nutzbare Quellen umstellen
 - Abfahrten bundesweit (andere Datenquelle) oder als Kachel nur für den VVO-Raum kennzeichnen
