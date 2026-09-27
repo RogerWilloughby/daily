@@ -117,9 +117,18 @@ function sucheName(q, anzahl = 6) {
     const schon = new Set(treffer.map(t => t.i));
     treffer = treffer.concat(durchsuche(ws, nurZahlen, true).filter(t => !schon.has(t.i)));
   }
-  return treffer.sort((a, b) => a.schlechtester - b.schlechtester || a.imUmfeld - b.imUmfeld ||
-      D.orte[a.i][6] - D.orte[b.i][6] || groesse(b.i) - groesse(a.i) || a.rest - b.rest || a.i - b.i)
-    .slice(0, anzahl).map(x => Object.defineProperty(alsOrt(x.i), EXAKT, { value: x.schlechtester === 0 }));
+  treffer.sort((a, b) => a.schlechtester - b.schlechtester || a.imUmfeld - b.imUmfeld ||
+      D.orte[a.i][6] - D.orte[b.i][6] || groesse(b.i) - groesse(a.i) || a.rest - b.rest || a.i - b.i);
+  // derselbe Ort doppelt im Bestand (Hamburg auch im Kreis Stormarn, „Chemnitz, Sachsen“) → nur der erste
+  const km = (x, y) => Math.hypot((x[3] - y[3]) * 111, (x[4] - y[4]) * 70);
+  const kern = n => n.split(', ')[0];
+  const einmal = [];
+  for (const t of treffer) {
+    const o = D.orte[t.i];
+    if (!einmal.some(e => kern(D.orte[e.i][0]) === kern(o[0]) && km(D.orte[e.i], o) < 15)) einmal.push(t);
+    if (einmal.length === anzahl) break;
+  }
+  return einmal.map(x => Object.defineProperty(alsOrt(x.i), EXAKT, { value: x.schlechtester === 0 }));
 }
 
 function durchsuche(ws, nurZahlen, tippfehler) {
