@@ -20,15 +20,8 @@ jobs:
         with:
           node-version: 22
       - run: npm ci --omit=dev
-      - name: Wikidata abfragen
-        run: |
-          curl -sSf --retry 3 --max-time 300 -X POST \
-            -H 'Accept: application/sparql-results+json' \
-            -H 'User-Agent: DAILY-Namenstage/1.0 (https://github.com/RogerWilloughby/daily)' \
-            --data-urlencode query@tools/namenstage/abfrage.rq \
-            -o /tmp/namenstage.json https://query.wikidata.org/sparql
-      - name: Namenstage erzeugen
-        run: node tools/namenstage-daten.js /tmp/namenstage.json
+      - name: Namenstage aus Wikidata erzeugen
+        run: node tools/namenstage-daten.js
       - name: Prüfen
         run: node --test test/dienste.test.js
       - name: Committen, falls geändert
