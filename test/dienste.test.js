@@ -228,7 +228,7 @@ test('Adapter Wetter: Kachel und Antwort aus dem Vertrag', async () => {
   // Kopfzeile mit farbigen Zahlen
   assert.equal(k.titleHtml, 'Berlin 15° · <b class="wd-t-min">9°</b>/<b class="wd-t-max">16°</b>');
   // Aufgeklappt: Reiter
-  assert.deepEqual(k.tabs.map(t => t.name), ['Heute', '16 Tage', '48 Std.', 'Mehr']);
+  assert.deepEqual(k.tabs.map(t => t.name), ['Heute', '16 Tage', '48 Std.', 'Hinweise', 'Mehr']);
   const tab = id => k.tabs.find(t => t.id === id).html;
   assert.equal((tab('tage').match(/data-tip=/g) || []).length, 16);          // 16 Tagesspalten mit Hinweis
   assert.equal((tab('stunden').match(/data-tip=/g) || []).length, 48);       // 48 Stundenspalten
@@ -370,9 +370,9 @@ test('Adapter Regen: Hinweis in der Wetterkachel und Reiter „Radar“', async 
   assert.match(html, /0,4 mm, aufgehört vor 30 Min\./);
   const wetter = (await rufe('wetter', { ort: 'Berlin' })).body;
   const k = kachel(wetter, regen);
-  assert.deepEqual(k.tabs.map(t => t.id), ['heute', 'radar', 'tage', 'stunden', 'mehr']);
+  assert.deepEqual(k.tabs.map(t => t.id), ['heute', 'radar', 'tage', 'stunden', 'hinweise', 'mehr']);
   assert.match(k.x, /Regen in 20 Min\./);
-  assert.deepEqual(kachel(wetter, null).tabs.map(t => t.id), ['heute', 'tage', 'stunden', 'mehr']);   // ohne Radar
+  assert.deepEqual(kachel(wetter, null).tabs.map(t => t.id), ['heute', 'tage', 'stunden', 'hinweise', 'mehr']);   // ohne Radar
   assert.match(text(wetter, regen), /Radar: Regen in 20 Min\./);
 });
 
@@ -480,10 +480,13 @@ test('Adapter Wetterhinweise: Abzeichen, kurzer Hinweis und Reiter in der Wetter
   assert.match(k.titleHtml, /wh-badge/);
   assert.match(k.x, /gefühlt .*°\. Sturmböen ab/);
   assert.deepEqual(k.tabs.map(t => t.id), ['heute', 'tage', 'stunden', 'hinweise', 'mehr']);
-  // ohne Hinweis: nichts davon
-  const leer = kachel(wetter, null, { daten: { gebiet: '', hoechsteStufe: 0, hinweise: [] } });
+  // ohne Hinweis: kein Abzeichen, kein Hinweis im Text – der Reiter sagt ruhig „keine“
+  const leer = kachel(wetter, null, { erstellt: new Date().toISOString(), daten: { gebiet: 'Berlin', hoechsteStufe: 0, hinweise: [] } });
   assert.doesNotMatch(leer.titleHtml, /wh-badge/);
-  assert.ok(!leer.tabs.some(t => t.id === 'hinweise'));
+  assert.doesNotMatch(leer.x, /Sturm/);
+  assert.match(leer.tabs.find(t => t.id === 'hinweise').html, /Keine amtlichen Wetterhinweise für Berlin\..*Stand .*Deutscher Wetterdienst/s);
+  assert.match(kachel(wetter, null, null).tabs.find(t => t.id === 'hinweise').html, /gerade nicht erreichbar/);
+  assert.match(h.reiter(null, 'Europe/Rome', Date.now(), { name: 'Rom', land: 'IT' }), /nur für Orte in Deutschland/);
   // Unwetter (Stufe 3–4): deutlich, zuerst, nicht verharmlost
   const u = { daten: { gebiet: 'Dresden', hoechsteStufe: 4, hinweise: [{ art: 'wind', stufe: 4, stufeName: 'extrem', ereignis: 'ORKANBÖEN', titel: 'Amtliche WARNUNG vor ORKANBÖEN',
     beginn: new Date().toISOString(), ende: new Date(Date.now() + 36e5).toISOString(), aktiv: true, beschreibung: 'Orkanböen bis 130 km/h.', empfehlung: 'Aufenthalt im Freien vermeiden!', tipp: 'x' }] } };

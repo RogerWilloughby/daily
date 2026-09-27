@@ -52,9 +52,20 @@ export function kurz(env, zone = 'Europe/Berlin', jetzt = Date.now()) {
 
 // Reiter „Hinweise“: je Hinweis Stufe, amtliche Überschrift, Zeitraum, amtlicher Text unverändert, darunter der Tipp
 // (gleicher Tipp wie beim vorigen Hinweis wird nicht wiederholt – so bleibt alles ohne Scrollen sichtbar)
-export function reiter(env, zone = 'Europe/Berlin', jetzt = Date.now()) {
+// Der Reiter ist immer da: ohne Hinweis sagt er ruhig „keine Hinweise“ (mit Stand und Quelle).
+// ort: { name, land } des gewählten Orts – für den Text, wenn nichts vorliegt oder der Dienst fehlt
+export function reiter(env, zone = 'Europe/Berlin', jetzt = Date.now(), ort = {}) {
   const l = liste(env);
-  if (!l.length) return '';
+  if (!env || !env.daten) {
+    const text = ort.land && ort.land !== 'DE' ? 'Amtliche Wetterhinweise gibt es bei DAILY bisher nur für Orte in Deutschland.'
+      : 'Die Wetterhinweise sind gerade nicht erreichbar.';
+    return `<div class="wh-feld wh-ruhig"><p>${esc(text)}</p></div>`;
+  }
+  if (!l.length) {
+    const wo = env.daten.gebiet || ort.name || 'deinen Ort', stand = env.erstellt ? uhrzeit(env.erstellt, zone, jetzt) : '';
+    return `<div class="wh-feld wh-ruhig"><p class="wh-keine">✓ Keine amtlichen Wetterhinweise für ${esc(wo)}.</p>` +
+      `<p class="wh-quelle">${stand ? `Stand ${esc(stand)} · ` : ''}Quelle: Deutscher Wetterdienst. Liegt etwas vor, steht es hier – mit Zeitraum, amtlichem Text und einem Tipp.</p></div>`;
+  }
   const karten = l.slice(0, 4).map((h, i) => `<article class="wh-karte wh-s${h.stufe}">` +
     `<header><span class="wh-stufe">${esc(STUFE_TEXT[h.stufe])}</span> <b class="wh-titel">${esc(h.titel || ereignisText(h.ereignis))}</b> <small>${esc(zeitraum(h, zone, jetzt, true))}</small></header>` +
     (h.beschreibung ? `<p>${esc(h.beschreibung)}</p>` : '') +

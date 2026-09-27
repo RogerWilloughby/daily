@@ -131,7 +131,7 @@ function trendText(tage) {
 
 // Darstellung als Kachel (Felder wie in core/board.js erwartet)
 // regenEnv (optional): Antwort des Dienstes „regen“ – liefert „Regen in 20 Min.“ und den Reiter „Radar“
-// hinweisEnv (optional): Antwort des Dienstes „wetterhinweise“ – Abzeichen, kurzer Hinweis und Reiter „Hinweise“, nur wenn es etwas gibt
+// hinweisEnv (optional): Antwort des Dienstes „wetterhinweise“ – Abzeichen und kurzer Hinweis nur, wenn es etwas gibt; Reiter „Hinweise“ immer
 export function kachel(env, regenEnv = null, hinweisEnv = null) {
   const d = env.daten, a = d.aktuell, { z, heute, regenMax, regenUm, pollen } = auswerten(env);
   const regenText = regenMax >= 25 ? `Regen möglich gegen ${regenUm} Uhr.` : 'Kein Regen zu erwarten.';
@@ -160,13 +160,14 @@ export function kachel(env, regenEnv = null, hinweisEnv = null) {
   const zone = env.ort.zeitzone || 'Europe/Berlin', hTop = (hinweisEnv && hinweisEnv.daten && hinweisEnv.daten.hinweise[0]) || null;
   const hKurz = hinweisKurz(hinweisEnv, zone);
   if (hKurz) rows.unshift(['Hinweis', hKurz]);
+  const hReiter = { id: 'hinweise', name: 'Hinweise', html: hinweisReiter(hinweisEnv, zone, Date.now(), env.ort) };
   const tabs = [
-    ...(hTop && hTop.stufe >= 3 ? [{ id: 'hinweise', name: 'Hinweise', html: hinweisReiter(hinweisEnv, zone) }] : []),   // Unwetter: zuerst
+    ...(hTop && hTop.stufe >= 3 ? [hReiter] : []),   // Unwetter: zuerst
     { id: 'heute', name: 'Heute', html: zeilen(heuteZeilen(env, z, heute, regenMax, regenUm, wind, sonne)) },
     ...(regenEnv && regenEnv.daten ? [{ id: 'radar', name: 'Radar', html: radarReiter(regenEnv, z.hm) }] : []),
     { id: 'tage', name: `${d.tage.length} Tage`, html: tageDiagramm(d.tage, z.wtag, t => zustandText(t.zustand, t.code)) },
     { id: 'stunden', name: `${d.stunden.length} Std.`, html: stundenDiagramm(d.stunden, iso => ({ h: z.h(iso), tag: z.wtagKurz(iso) })) },
-    ...(hTop && hTop.stufe < 3 ? [{ id: 'hinweise', name: 'Hinweise', html: hinweisReiter(hinweisEnv, zone) }] : []),
+    ...(hTop && hTop.stufe >= 3 ? [] : [hReiter]),
     { id: 'mehr', name: 'Mehr', html: zeilen(mehrZeilen(env, pollen)) }
   ];
   const wetterText = `${zustandText(a.zustand, a.code)}, gefühlt ${r0(a.gefuehltC)}°.`, regenZeile = regenHinweis(regenEnv) || regenText;

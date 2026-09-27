@@ -369,3 +369,5 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
 
 .set-check{display:flex;align-items:center;gap:8px;font-size:15px;cursor:pointer}
 .set-check input{width:18px;height:18px;accent-color:var(--accent)}
+.wh-ruhig{align-content:start}
+.wh-keine{font-size:15px;margin:4px 0}
