@@ -10,7 +10,7 @@ const path = require('path');
 const ZIEL = path.join(__dirname, '..', 'services', 'daten', 'orte-de.json');
 
 // Großkunden-Postleitzahlen (Firmen, Behörden) sind keine Orte
-const FIRMA = /gmbh|\bmbh\b|\bag\b|\bkg\b|\beg\b|\bse\b|e\.\s?v\.|&|\+|postfach|bank|sparkasse|kasse\b|versicherung|verwaltung|deutsche post|stiftung|finanzamt|\bamt\b|ämter|gericht|agentur|behörde|ministerium|landesamt|bundesamt|universit|hochschule|klinik|krankenhaus|gruppe|verein|verlag|zentrale|dienststelle|redaktion|direktion|dezernat|\bsenat|kantine|fabrik|großhandel|vertrieb|service|management|holding|\bpartner|werbeagentur|\bltd\b|\binc\b|\bdr\. |\bbkk\b|\baok\b|genossenschaft|bundesanstalt|zentralamt|handelskammer|handwerkskammer|ärztekammer|landwirtschaftskammer|versorgungskammer|kammertag|förderkreis|staatsanwalt|staatskanzlei|bezirksamt|fachbereich|handelsvertretung|arbeitsgemeinschaft|verband|entsorgung|center|dienstleistungszentrum|rechenzentrum|servicezentrum|\bu\. |\bco\.|\bfür |krankenkasse|landratsamt|stadtwerke|polizei|präsidium|regierung|bundeswehr|kreiswehr|berufsbildung|akademie|institut|schule\b|versand|\bkg\.|\bohg\b|\bgbr\b|hospital|apotheke|rechtsanw|aktiengesellschaft|\bs\.a|\bkirche\b|kirchenkreis|landeskirch|oberkirchenrat|kirchensteuer|diözese|landtag|rundfunk|lotterie|gesundheit|niederlassung|botschaft|justizvollzug|filiale|bezüge|gebr\.|\bev\.|^magistrat|^stadt (?!wehlen)|^landkreis |^gemeinde |bundesbahn|amazon|telekom|\breisen\b|wohnstift|seniorenzentrum|altenzentrum|\bevang|\bdipl|studio|museum|\bteam\b|handelsgesellschaft|investment|anstalt|\bb\.v\.|\bsrl\b|\bllp\b|\be\. ?k\.|arbeitskreis|geschäftsstelle|fraktion|bataillon|kinderdörfer|streitkräfte|vermessungsamt|bürgermeisteramt|bürgeramt|eigenbetrieb|\bdez\.|landesbetrieb|landesentwicklung|organisationskomitee|entschädigung|schadenausgleich|kinderschutz|mineralöl|drahtindustrie|zentrum\b|centre|merchandising|teleshopping|staatsbibliothek|verkehrsbetriebe|wasserbetriebe|blutspende|wirtschaft\b|bundesgeschäft|kinderkanal|\babt\.|\bfd \d|\.(de|fm|at|com)\b|\d{3,}|zeitung|honighaus|mutter und kind|produktion|mc donalds|\be\.on\b|diven|knappschaft|großannahme|kochstudio|feinschmecker|rechtsanwalt|landesfunkhaus|garten und|\Bamt\b|\bbund\b|sportbund|\bbundes|gesellschaft|gemeinschaft|gewerkschaft|landeshauptstadt|\blandes(?!bergen)|\bdeutsche[rs]?\b|deutschland|bibliothek|(förderungs|diakonie|reifen|studenten|-s-)werk|ärzteversorgung|ausschuss|vertretung|\bpatent|konzerthaus|kaufhaus|\bhaus maria|missionshaus|mutterhaus|rotes kreuz|samariter|\bbauhaus\b|radio|ministerpräsident|bevollmächtigte|koordination|computershare|grenzschutz|landeskranken|medizin|ärzteblatt|forschung|olympisch|handelstag|shell\b|mondelez|\bder magistrat|allianz|büro\b|buchhandel|buchhandlung|förderungsdienst|airways|kommunikation|postleit|generali|logistik|mcdonalds|medialog|versorgungsstelle|heimversorgung|^rathaus|rheinenergie|rheinische post|schneefernerhaus|beratungsstelle|^sparte|betriebe\b|^upost|- werke/i;
+const FIRMA = /gmbh|\bmbh\b|\bag\b|\bkg\b|\beg\b|\bse\b|e\.\s?v\.|&|\+|postfach|bank|sparkasse|kasse\b|versicherung|verwaltung|deutsche post|stiftung|finanzamt|\bamt\b|ämter|gericht|agentur|behörde|ministerium|landesamt|bundesamt|universit|hochschule|klinik|krankenhaus|gruppe|verein|verlag|zentrale|dienststelle|redaktion|direktion|dezernat|\bsenat|kantine|fabrik|großhandel|vertrieb|service|management|holding|\bpartner|werbeagentur|\bltd\b|\binc\b|\bdr\. |\bbkk\b|\baok\b|genossenschaft|bundesanstalt|zentralamt|handelskammer|handwerkskammer|ärztekammer|landwirtschaftskammer|versorgungskammer|kammertag|förderkreis|staatsanwalt|staatskanzlei|bezirksamt|fachbereich|handelsvertretung|arbeitsgemeinschaft|verband|entsorgung|center|dienstleistungszentrum|rechenzentrum|servicezentrum|\bu\. |\bco\.|\bfür |krankenkasse|landratsamt|stadtwerke|polizei|präsidium|regierung|bundeswehr|kreiswehr|berufsbildung|akademie|institut|schule\b|versand|\bkg\.|\bohg\b|\bgbr\b|hospital|apotheke|rechtsanw|aktiengesellschaft|\bs\.a|\bkirche\b|kirchenkreis|landeskirch|oberkirchenrat|kirchensteuer|diözese|landtag|rundfunk|lotterie|gesundheit|niederlassung|botschaft|justizvollzug|filiale|bezüge|gebr\.|\bev\.|^magistrat|^stadt (?!wehlen)|^landkreis |^gemeinde |bundesbahn|amazon|telekom|\breisen\b|wohnstift|seniorenzentrum|altenzentrum|\bevang|\bdipl|studio|museum|\bteam\b|handelsgesellschaft|investment|anstalt|\bb\.v\.|\bsrl\b|\bllp\b|\be\. ?k\.|arbeitskreis|geschäftsstelle|fraktion|bataillon|kinderdörfer|streitkräfte|vermessungsamt|bürgermeisteramt|bürgeramt|eigenbetrieb|\bdez\.|landesbetrieb|landesentwicklung|organisationskomitee|entschädigung|schadenausgleich|kinderschutz|mineralöl|drahtindustrie|zentrum\b|centre|merchandising|teleshopping|staatsbibliothek|verkehrsbetriebe|wasserbetriebe|blutspende|wirtschaft\b|bundesgeschäft|kinderkanal|\babt\.|\bfd \d|\.(de|fm|at|com)\b|\d{3,}|zeitung|honighaus|mutter und kind|produktion|mc donalds|\be\.on\b|diven|knappschaft|großannahme|kochstudio|feinschmecker|rechtsanwalt|landesfunkhaus|garten und|\Bamt\b|\bbund\b|sportbund|\bbundes|gesellschaft|gemeinschaft|gewerkschaft|landeshauptstadt|\blandes(?!bergen)|\bdeutsche[rs]?\b|deutschland|bibliothek|(förderungs|diakonie|reifen|studenten|-s-)werk|ärzteversorgung|ausschuss|vertretung|\bpatent|konzerthaus|kaufhaus|\bhaus maria|missionshaus|mutterhaus|rotes kreuz|samariter|\bbauhaus\b|radio|ministerpräsident|bevollmächtigte|koordination|computershare|grenzschutz|landeskranken|medizin|ärzteblatt|forschung|olympisch|handelstag|shell\b|mondelez|\bder magistrat|allianz|alte leipziger|büro\b|buchhandel|buchhandlung|förderungsdienst|airways|kommunikation|postleit|generali|logistik|mcdonalds|medialog|versorgungsstelle|heimversorgung|^rathaus|rheinenergie|rheinische post|schneefernerhaus|beratungsstelle|^sparte|betriebe\b|^upost|- werke/i;
 
 // Abkürzungen in Großbuchstaben (BMW, DAK, IHK …) sind Firmen oder Einrichtungen; römische Zahlen (Wakendorf II) nicht
 const KUERZEL = /(^|[\s(\/-])(?![IVX]+\b)[A-ZÄÖÜ]{2,}/;
@@ -84,24 +84,34 @@ function kreisNamen(zeilen) {
 const grundname = n => String(n).replace(/\s*\(.*\)\s*$/, '').split('/')[0]
   .replace(/ (an der|an den|am|im|in|bei|ob der|vor der|auf der|unter der) .*$/, '').trim();
 
-// Einwohner aus dem GeoNames-Ortsverzeichnis (dump). Spalten: 1 name, 2 asciiname, 6 feature class, 12 admin3 (= Kreisschlüssel),
-// 13 admin4 (= Gemeindeschlüssel), 14 population. Liefert eine Funktion (Name, Kreisschlüssel) → Einwohner:
-// zuerst genauer Name im Kreis, sonst gleicher Grundname im Kreis (größter Wert).
+// Einwohner aus dem GeoNames-Ortsverzeichnis (dump). Spalten: 1 name, 2 asciiname, 3 alternatenames, 4 lat, 5 lon,
+// 6 feature class, 14 population. Große Städte heißen dort oft englisch („Munich“) oder mit Zusatz („Halle (Saale)“),
+// deshalb wird über Name, alternative Namen und Grundname gesucht – und nur Orte in der Nähe zählen.
+// Liefert (Name, lat, lon) → { ew, alias } (alias = Hauptname bei GeoNames, falls anders geschrieben).
 function einwohnerAus(datei) {
-  const genau = new Map(), grund = new Map();
-  const merke = (m, k, ew) => { if (!(m.get(k) >= ew)) m.set(k, ew); };
+  const nachName = new Map();
+  const merke = (k, e) => { if (!nachName.has(k)) nachName.set(k, []); nachName.get(k).push(e); };
   if (datei) for (const z of fs.readFileSync(datei, 'utf8').split(/\r?\n/)) {
     const f = z.split('\t');
     if (f.length < 15 || f[6] !== 'P') continue;
     const ew = +f[14];
     if (!(ew > 0)) continue;
-    const kreis = f[12] || String(f[13] || '').slice(0, 5);
-    for (const name of new Set([f[1], f[2]])) {
-      merke(genau, name + '|' + kreis, ew);
-      merke(grund, grundname(name) + '|' + kreis, ew);
-    }
+    const e = { name: f[1], lat: +f[4], lon: +f[5], ew };
+    const namen = new Set([f[1], f[2], ...String(f[3] || '').split(',').filter(n => /[a-zäöüß]/i.test(n) && n.length < 60)]);
+    for (const n of namen) { merke('n|' + n, e); merke('g|' + grundname(n), e); }
   }
-  return (name, kreis) => genau.get(name + '|' + kreis) || grund.get(grundname(name) + '|' + kreis) || 0;
+  const km = (a, b, c, d) => Math.hypot((a - c) * 111.2, (b - d) * 111.2 * Math.cos(a * Math.PI / 180));
+  return (name, lat, lon) => {
+    // genauer oder alternativer Name: bis 20 km; nur Grundname („Freiburg im Breisgau“ ↔ „Freiburg“): bis 6 km
+    for (const [k, r] of [['n|' + name, 20], ['g|' + grundname(name), 6]]) {
+      const nah = (nachName.get(k) || []).filter(e => km(lat, lon, e.lat, e.lon) <= r);
+      if (nah.length) {
+        const best = nah.reduce((a, b) => (b.ew > a.ew ? b : a));
+        return { ew: best.ew, alias: best.name !== name ? best.name : '' };
+      }
+    }
+    return { ew: 0, alias: '' };
+  };
 }
 
 function erzeuge(datei, ortsdatei) {
@@ -125,7 +135,9 @@ function erzeuge(datei, ortsdatei) {
   for (const o of orte.values()) (namenJeKreis[o.kreis] ||= new Set()).add(o.name);
   const liste = [...orte.values()].map(o => {
     const teil = [...namenJeKreis[o.kreis]].some(n => n !== o.name && o.name.startsWith(n + ' '));
-    return [o.name, laender.indexOf(o.land), o.kreis || '', Math.round(o.lat / o.n * 1e4) / 1e4, Math.round(o.lon / o.n * 1e4) / 1e4, [...o.plz].sort().join(' '), teil ? 1 : 0, teil ? 0 : ew(o.name, o.kreis)];
+    const lat = Math.round(o.lat / o.n * 1e4) / 1e4, lon = Math.round(o.lon / o.n * 1e4) / 1e4;
+    const e = teil ? { ew: 0, alias: '' } : ew(o.name, lat, lon);
+    return [o.name, laender.indexOf(o.land), o.kreis || '', lat, lon, [...o.plz].sort().join(' '), teil ? 1 : 0, e.ew, e.alias];
   }).sort((a, b) => a[0].localeCompare(b[0], 'de'));
   const index = new Map(liste.map((o, i) => [o[0] + '|' + o[2], i]));
   // Postleitzahl-Punkte für die Umkehrsuche: [plz, ortIndex, lat, lon]
@@ -136,7 +148,7 @@ function erzeuge(datei, ortsdatei) {
     stand: new Date().toISOString().slice(0, 10),
     quelle: { name: 'GeoNames Postal Codes', lizenz: 'CC BY 4.0', url: 'https://www.geonames.org' },
     anzahl: { orte: liste.length, mitEinwohnern: liste.filter(o => o[7] > 0).length, plz: new Set(zeilen.map(z => z.plz)).size, punkte: punkte.length, ausgefiltert: alle.length - zeilen.length },
-    felder: { orte: ['name', 'landIndex', 'kreisSchluessel', 'lat', 'lon', 'plz (Leerzeichen-getrennt)', 'stadtteil (0/1)', 'einwohner (0 = unbekannt)'], punkte: ['plz', 'ortIndex', 'lat', 'lon'] },
+    felder: { orte: ['name', 'landIndex', 'kreisSchluessel', 'lat', 'lon', 'plz (Leerzeichen-getrennt)', 'stadtteil (0/1)', 'einwohner (0 = unbekannt)', 'alias: Name bei GeoNames, falls anders (Munich, Halle (Saale))'], punkte: ['plz', 'ortIndex', 'lat', 'lon'] },
     laender, kreise, orte: liste, punkte
   };
 }

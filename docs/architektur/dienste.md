@@ -71,7 +71,7 @@ Jede Antwort – auch jeder Fehler – hat diese Form:
 
 ## Dienst „ort“ (Standort) und das Ort-Objekt
 Der Dienst `ort` findet Orte
-- nach **Name**: `/api/v1/ort?q=Neustadt` – eigener Ortsbestand (GeoNames); ganzes Wort vor Wortanfang, Orte vor Stadtteilen, größere Orte vorn; bis zu 6 Treffer. Heißt kein deutscher Ort genau so („Wien“), wird zusätzlich im Ausland gesucht (Open-Meteo Geocoding),
+- nach **Name**: `/api/v1/ort?q=Neustadt Sachsen` – eigener Ortsbestand (GeoNames), tolerant wie eine Suchmaschine: jedes Suchwort muss im Namen oder im Umfeld (Bundesland mit Kürzeln wie „Sa.“, Regierungsbezirk, Kreis, PLZ) passen; Umlaute, Füllwörter und Satzzeichen egal, Tippfehler als Rückfall; größere Orte vorn; bis zu 6 Treffer. Passt kein deutscher Ort genau oder nur ein kleiner („Wien“, „Rom“), wird zusätzlich im Ausland gesucht (Open-Meteo Geocoding). `land=DE` schaltet das ab (Vorschläge beim Tippen),
 - nach **Postleitzahl** (Deutschland): `/api/v1/ort?q=01844` – eigener Ortsbestand,
 - nach **Koordinaten** (Gerätestandort): `/api/v1/ort?lat=51.05&lon=13.74` – nächster Postleitzahl-Punkt im eigenen Bestand (bis 25 km, nur Deutschland; sonst leer mit Hinweis `ausserhalb`).
 

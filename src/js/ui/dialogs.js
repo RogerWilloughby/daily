@@ -54,6 +54,7 @@ export function initDialogs(onSaved, isPrivate = false) {
   async function searchPlace() {
     const q = $('set-place').value.trim(), box = $('set-place-results');
     if (!q) return;
+    clearTimeout(tippTimer); tippNr++;
     box.textContent = 'Suche …';
     try { zeige((await dienst('ort', { q })).daten.orte, box); } // Dienst „ort“ (daily/1): Name oder Postleitzahl
     catch (e) { box.textContent = 'Die Ortssuche ist gerade nicht erreichbar.'; }
@@ -73,6 +74,20 @@ export function initDialogs(onSaved, isPrivate = false) {
         else zeige(env.daten.orte, box);
       } catch (e) { box.textContent = 'Die Ortssuche ist gerade nicht erreichbar.'; }
     }, () => { box.textContent = 'Standort nicht freigegeben. Du kannst den Ort auch eintippen.'; }, { timeout: 15000, maximumAge: 600000 });
+  });
+  // Vorschläge beim Tippen (nur Deutschland, ohne Auslandsabruf); Enter oder „Suchen“ sucht zusätzlich im Ausland
+  let tippTimer = null, tippNr = 0;
+  $('set-place').addEventListener('input', () => {
+    clearTimeout(tippTimer);
+    const q = $('set-place').value.trim(), box = $('set-place-results'), nr = ++tippNr;
+    if (q.length < 2) { box.innerHTML = ''; placeChoice = null; return; }
+    tippTimer = setTimeout(async () => {
+      try {
+        const orte = (await dienst('ort', { q, land: 'DE' })).daten.orte;
+        if (nr !== tippNr) return;                     // inzwischen weitergetippt
+        if (orte.length) zeige(orte, box); else box.textContent = 'Kein Ort in Deutschland – Enter sucht auch im Ausland.';
+      } catch (e) { /* beim Tippen still bleiben */ }
+    }, 250);
   });
   $('set-place-search').addEventListener('click', searchPlace);
   $('set-place').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); searchPlace(); } });

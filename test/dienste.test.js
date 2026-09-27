@@ -112,13 +112,30 @@ test('Standort: Name – eigener Bestand, ganzes Wort vor Wortanfang, Orte vor S
   gueltig(o.body, dienste.byId.ort.schema);
   const orte = o.body.daten.orte;
   assert.equal(orte.length, 6);
-  assert.ok(orte.every(x => x.land === 'DE' && x.typ === 'ort' && /^Neustadt\b/.test(x.name)), namen(o.body).join());
+  assert.ok(orte.every(x => x.land === 'DE' && x.typ === 'ort' && /\bNeustadt\b/.test(x.name)), namen(o.body).join());
   assert.deepEqual(o.body.quellen.map(q => q.name), ['GeoNames Postal Codes (eigener Ortsbestand)']);
   const dd = (await rufe('ort', { q: 'dresden' })).body.daten.orte;
   assert.equal(dd[0].name, 'Dresden');
   assert.equal(dd[0].kreisSchluessel, '14612');
   assert.ok(dd.slice(1).every(x => x.typ === 'stadtteil'));
-  assert.equal((await rufe('ort', { q: 'Muenchen' })).body.daten.orte[0].name, 'München'); // Umlaute ausgeschrieben
+});
+
+test('Standort: Suche wie eine Suchmaschine – Zusätze, Kürzel, Umlaute, Tippfehler', async () => {
+  const erster = async q => ((await rufe('ort', { q })).body.daten.orte[0] || {}).name;
+  for (const q of ['Neustadt in Sachsen', 'Neustadt Sachsen', 'neustadt sachsen', 'Neustadt i. Sa.', 'Neustadt/Sa.', 'Neustadt 01844', 'Neustadt Osterzgebirge'])
+    assert.equal(await erster(q), 'Neustadt in Sachsen', q);
+  assert.equal(await erster('Neustadt Pfalz'), 'Neustadt an der Weinstraße');
+  assert.equal(await erster('Neustadt Aisch'), 'Neustadt an der Aisch');
+  assert.equal(await erster('Frankfurt Oder'), 'Frankfurt (Oder)');
+  assert.equal(await erster('Freiburg Breisgau'), 'Freiburg im Breisgau');
+  assert.equal(await erster('Weiden Oberpfalz'), 'Weiden');
+  assert.equal(await erster('Garmisch Partenkirchen'), 'Garmisch-Partenkirchen');
+  assert.equal(await erster('St. Wendel'), 'Sankt Wendel');
+  for (const q of ['München', 'Muenchen', 'Munchen']) assert.ok((await rufe('ort', { q })).body.daten.orte.some(x => x.name === 'München'), q);
+  for (const q of ['Dresdn', 'Drseden', 'Dresdne']) assert.equal(await erster(q), 'Dresden', q);  // Tippfehler
+  const nurSa = (await rufe('ort', { q: 'Neustadt Sachsen' })).body.daten.orte;
+  assert.ok(nurSa.every(x => x.region === 'Sachsen'), nurSa.map(x => x.name + '/' + x.region).join());  // nicht Sachsen-Anhalt
+  assert.deepEqual((await rufe('ort', { q: 'Sachsen' })).body.daten.orte.filter(x => !/Sachsen/.test(x.name)), []); // Bundesland allein reicht nicht
 });
 
 test('Standort: Ausland nur, wenn kein deutscher Ort so heißt', async () => {
@@ -129,6 +146,11 @@ test('Standort: Ausland nur, wenn kein deutscher Ort so heißt', async () => {
   assert.ok(o.body.daten.orte.every(x => !(x.land === 'DE' && x.name === 'Wien'))); // deutscher Treffer der Quelle entfällt
   assert.deepEqual(o.body.hinweise, ['ausland']);
   assert.equal(o.body.quellen.length, 2);
+  const rom = (await rufe('ort', { q: 'Rom' })).body;        // „Rom“ gibt es auch in Mecklenburg (klein) – Rom in Italien zuerst
+  assert.deepEqual(rom.daten.orte.slice(0, 2).map(x => [x.name, x.land]), [['Rom', 'IT'], ['Rom', 'DE']]);
+  assert.deepEqual((await rufe('ort', { q: 'Neustadt Sachsen' })).body.hinweise, []);   // große deutsche Treffer: kein Auslandsabruf
+  const nurDe = (await rufe('ort', { q: 'Wien', land: 'DE' })).body;   // Vorschläge beim Tippen: nur Deutschland
+  assert.ok(nurDe.daten.orte.every(x => x.land === 'DE') && nurDe.daten.orte.length > 0);
   const leer = await rufe('ort', { q: 'Atlantis' });
   assert.equal(leer.code, 200); assert.deepEqual(leer.body.daten.orte, []);
 });
@@ -204,7 +226,7 @@ test('Adapter Katalog: Seite „Woher kommen die Daten?“ nennt jeden Dienst mi
   assert.equal(seite(null), '<p>Keine Angaben verfügbar.</p>');
 });
 
-test('Ortsbestand-Erzeugung: Einwohner über genauen Namen oder Grundnamen im selben Kreis', () => {
+test('Ortsbestand-Erzeugung: Einwohner über Name, alternativen Namen oder Grundnamen in der Nähe', () => {
   const fs = require('node:fs'), os = require('node:os');
   const t = require('../tools/orte-daten');
   assert.equal(t.grundname('Freiburg im Breisgau'), 'Freiburg');
@@ -219,12 +241,21 @@ test('Ortsbestand-Erzeugung: Einwohner über genauen Namen oder Grundnamen im se
     ['DE', '33790', 'Halle', 'Nordrhein-Westfalen', 'NW', '', '', 'Gütersloh', '05754', '52.06', '8.36'],
     ['DE', '99999', 'Musterfirma GmbH', 'Sachsen', 'SN', '', '', 'Dresden', '14612', '51.05', '13.74']
   ].map(z => z.join('\t')).join('\n'));
-  // GeoNames-Ortsverzeichnis: 19 Spalten, 6 = Klasse, 12 = Kreis, 13 = Gemeinde, 14 = Einwohner
-  const zeile = (name, kreis, ew) => ['1', name, name, '', '0', '0', 'P', 'PPL', 'DE', '', '', '', kreis, kreis + '000', String(ew), '', '', 'Europe/Berlin', ''].join('\t');
-  fs.writeFileSync(orte, [zeile('Halle (Saale)', '15002', 238762), zeile('Freiburg', '08311', 227590), zeile('Halle', '05754', 21393)].join('\n'));
+  // GeoNames-Ortsverzeichnis: 19 Spalten, 1 Name, 3 alternative Namen, 4/5 lat/lon, 6 Klasse, 14 Einwohner
+  const zeile = (name, alt, lat, lon, ew) => ['1', name, name, alt, lat, lon, 'P', 'PPL', 'DE', '', '', '', '', '', String(ew), '', '', 'Europe/Berlin', ''].join('\t');
+  fs.writeFileSync(orte, [
+    zeile('Halle (Saale)', '', '51.48', '11.97', 238762),
+    zeile('Freiburg', 'Friburgo', '47.99', '7.85', 227590),
+    zeile('Halle', '', '52.06', '8.36', 21393),
+    zeile('Munich', 'München,Monaco di Baviera', '48.14', '11.58', 1260391),
+    zeile('Neustadt an der Weinstraße', '', '49.35', '8.14', 53984)   // gleicher Grundname, aber weit weg: zählt nicht
+  ].join('\n'));
+  fs.appendFileSync(plz, '\n' + [['DE', '80331', 'München', 'Bayern', 'BY', '', '', 'München', '09162', '48.14', '11.57'],
+    ['DE', '99998', 'Neustadt', 'Rheinland-Pfalz', 'RP', '', '', 'Kusel', '07336', '49.55', '7.40']].map(z => z.join('\t')).join('\n'));
   const d = t.erzeuge(plz, orte);
-  const ew = Object.fromEntries(d.orte.map(o => [o[0] + '|' + o[2], o[7]]));
-  assert.deepEqual(ew, { 'Freiburg im Breisgau|08311': 227590, 'Halle|05754': 21393, 'Halle|15002': 238762 });
+  const ew = Object.fromEntries(d.orte.map(o => [o[0] + '|' + o[2], [o[7], o[8]]]));
+  assert.deepEqual(ew, { 'Freiburg im Breisgau|08311': [227590, 'Freiburg'], 'Halle|05754': [21393, ''], 'Halle|15002': [238762, 'Halle (Saale)'],
+    'München|09162': [1260391, 'Munich'], 'Neustadt|07336': [0, ''] });
   assert.equal(d.anzahl.ausgefiltert, 1);
-  assert.equal(d.anzahl.mitEinwohnern, 3);
+  assert.equal(d.anzahl.mitEinwohnern, 4);
 });

@@ -37,19 +37,24 @@ async function auslandSuche(q, anzahl) {
 }
 
 // Suche nach Name oder Postleitzahl → { orte, quellen, hinweise }
-// Passt ein deutscher Ort als ganzes Wort („Neustadt“), bleibt es bei Deutschland. Sonst („Wien“, „Paris“) wird zusätzlich
-// im Ausland gesucht: exakte Auslandstreffer zuerst, dann deutsche Orte, die nur mit dem Suchwort beginnen („Wiendorf“).
-async function finde(q, anzahl = 6) {
+// Deutschland zuerst. Im Ausland wird zusätzlich gesucht, wenn kein deutscher Ort genau passt („Wien“, „Paris“) oder der beste
+// deutsche Treffer ein kleiner Ort ist („Rom“ in Mecklenburg, 571 Einwohner). Dann gilt die Größe: größere Orte zuerst.
+const KLEIN = 5000;
+async function finde(q, anzahl = 6, nurDeutschland = false) {
   if (/^\d{5}$/.test(q)) return { orte: orte.suchePlz(q, anzahl), quellen: [Q.gn], hinweise: [] };
   const de = orte.sucheName(q, anzahl);
-  if (de.some(orte.exakt)) return { orte: de, quellen: [Q.gn], hinweise: [] };
+  const genau = de.filter(orte.exakt);
+  if (nurDeutschland || (genau.length && Math.max(...genau.map(o => o.einwohner || 0)) >= KLEIN)) return { orte: de, quellen: [Q.gn], hinweise: [] };
   let aus;
   try { aus = await auslandSuche(q, anzahl); } catch (e) {
     if (de.length) return { orte: de, quellen: [Q.gn], hinweise: ['ausland_nicht_verfuegbar'] };
     throw e;
   }
-  const n = orte.norm(q), gleich = aus.filter(o => orte.norm(o.name) === n);
-  const liste = [...gleich, ...de, ...aus.filter(o => !gleich.includes(o))].slice(0, anzahl);
+  const w = orte.woerter(q).join(' ');
+  const gleich = aus.filter(o => orte.woerter(o.name).join(' ') === w);           // Auslandsort heißt genau so
+  const vorn = gleich.filter(o => (o.einwohner || 0) > Math.max(0, ...genau.map(g => g.einwohner || 0)));
+  const liste = [...vorn, ...genau, ...gleich.filter(o => !vorn.includes(o)), ...de.filter(o => !genau.includes(o)),
+    ...aus.filter(o => !gleich.includes(o))].slice(0, anzahl);
   const quellen = [liste.some(o => o.land === 'DE') && Q.gn, liste.some(o => o.land !== 'DE') && Q.geo].filter(Boolean);
   return { orte: liste, quellen: quellen.length ? quellen : [Q.gn], hinweise: liste.some(o => o.land !== 'DE') ? ['ausland'] : [] };
 }
@@ -60,7 +65,7 @@ module.exports = {
   version: 1,
   titel: 'Standort',
   beschreibung: 'Findet Orte nach Name, Postleitzahl oder Koordinaten – mit Landkreis, Bundesland, Postleitzahlen und Zeitzone. Deutschland aus eigenem Bestand, Ausland nach Name.',
-  eingaben: { q: 'Ortsname oder Postleitzahl (mind. 2 Zeichen) – oder –', lat: 'Breitengrad (Umkehrsuche, nur Deutschland)', lon: 'Längengrad (Umkehrsuche, nur Deutschland)' },
+  eingaben: { q: 'Ortsname oder Postleitzahl (mind. 2 Zeichen) – oder –', lat: 'Breitengrad (Umkehrsuche, nur Deutschland)', lon: 'Längengrad (Umkehrsuche, nur Deutschland)', land: 'optional „DE“: nur Deutschland (für Vorschläge beim Tippen, ohne Auslandsabruf)' },
   laender: 'alle',
   klasse: 'oeffentlich',
   ttl: 86400,
@@ -70,12 +75,16 @@ module.exports = {
     zweck: 'Grundlage aller ortsbezogenen Dienste: macht aus einer Eingabe des Nutzers (Name, Postleitzahl oder Gerätestandort) einen eindeutigen Ort mit Koordinaten.',
     herkunft: [
       'Deutschland: eigener Ortsbestand aus den GeoNames-Postleitzahldaten, Einwohnerzahlen aus dem GeoNames-Ortsverzeichnis (beide CC BY 4.0). Monatlich neu erzeugt (tools/orte-daten.js, GitHub Action „Ortsbestand erneuern“). Liegt als Datei beim Dienst – keine externe Anfrage.',
-      'Ausland: Open-Meteo Geocoding (Datenbasis GeoNames), nur Namenssuche und nur, wenn kein deutscher Ort genau so heißt.'
+      'Ausland: Open-Meteo Geocoding (Datenbasis GeoNames), nur Namenssuche und nur, wenn kein deutscher Ort genau passt oder der beste deutsche Treffer weniger als 5.000 Einwohner hat.'
     ],
     verarbeitung: [
       'Großkunden-Postleitzahlen (Firmen, Behörden, Kassen) werden beim Erzeugen herausgefiltert.',
       'Bundesland aus dem amtlichen Kreisschlüssel; Stadtteile („Dresden Innere Altstadt“) werden als solche markiert.',
-      'Namenssuche: exakter Name bzw. Name mit Zusatz („Neustadt an der Weinstraße“) vor Wortanfängen; Orte vor Stadtteilen; größere Orte vorn (nach Einwohnern, ersatzweise nach Anzahl der Postleitzahlen).',
+      'Namenssuche wie bei einer Suchmaschine: Groß-/Kleinschreibung, Umlaute (ü/ue/u), Bindestriche, Satzzeichen und Füllwörter („in“, „an der“, „i.“) spielen keine Rolle; „Sankt“ = „St.“.',
+      'Jedes Suchwort muss passen – im Ortsnamen oder im Umfeld: Bundesland mit üblichen Kürzeln (Sa., Thür., Westf., Opf. …), Regierungsbezirk, Landkreis, Postleitzahl. „Neustadt Sachsen“, „Neustadt i. Sa.“ und „Neustadt 01844“ finden Neustadt in Sachsen.',
+      'Tippfehler (ein Fehler ab 4, zwei ab 8 Buchstaben, auch vertauschte Buchstaben) werden nur berücksichtigt, wenn nichts genau passt.',
+      'Reihenfolge: genaue Treffer vor Wortanfängen vor Tippfehlern, Treffer im Namen vor Treffern im Umfeld, Orte vor Stadtteilen, dann nach Einwohnern.',
+      'Große Städte heißen bei GeoNames teils anders („Munich“, „Halle (Saale)“); dieser Name wird mitgespeichert und ist ebenfalls suchbar.',
       'Umkehrsuche: nächster Postleitzahl-Punkt im Umkreis von 25 km; ein Stadtteil wird dem zugehörigen Ort zugeordnet. Zurück kommen die gerundeten Koordinaten des Nutzers.',
       'Koordinaten werden auf 2 Nachkommastellen (≈ 1 km) gerundet.'
     ],
@@ -111,7 +120,7 @@ module.exports = {
     }
     const q = text(eingabe.q, 60);
     if (!q || q.length < 2) throw new DienstFehler('eingabe_fehlt', 'Parameter q (Ortsname oder Postleitzahl) oder lat/lon fehlt');
-    const r = await finde(q);
+    const r = await finde(q, 6, String(eingabe.land || '').toUpperCase() === 'DE');
     return { daten: { orte: r.orte }, quellen: r.quellen, hinweise: r.hinweise };
   },
   suche, ausGeo

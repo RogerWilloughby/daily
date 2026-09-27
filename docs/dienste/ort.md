@@ -17,7 +17,7 @@ Grundlage aller ortsbezogenen Dienste: macht aus einer Eingabe des Nutzers (Name
 
 ## Herkunft der Daten
 - Deutschland: eigener Ortsbestand aus den GeoNames-Postleitzahldaten, Einwohnerzahlen aus dem GeoNames-Ortsverzeichnis (beide CC BY 4.0). Monatlich neu erzeugt (tools/orte-daten.js, GitHub Action „Ortsbestand erneuern“). Liegt als Datei beim Dienst – keine externe Anfrage.
-- Ausland: Open-Meteo Geocoding (Datenbasis GeoNames), nur Namenssuche und nur, wenn kein deutscher Ort genau so heißt.
+- Ausland: Open-Meteo Geocoding (Datenbasis GeoNames), nur Namenssuche und nur, wenn kein deutscher Ort genau passt oder der beste deutsche Treffer weniger als 5.000 Einwohner hat.
 
 Quellen mit Lizenz:
 - GeoNames Postal Codes (eigener Ortsbestand) (CC BY 4.0) – https://www.geonames.org
@@ -29,11 +29,16 @@ Quellen mit Lizenz:
 | `q` | Ortsname oder Postleitzahl (mind. 2 Zeichen) – oder – |
 | `lat` | Breitengrad (Umkehrsuche, nur Deutschland) |
 | `lon` | Längengrad (Umkehrsuche, nur Deutschland) |
+| `land` | optional „DE“: nur Deutschland (für Vorschläge beim Tippen, ohne Auslandsabruf) |
 
 ## Verarbeitung
 - Großkunden-Postleitzahlen (Firmen, Behörden, Kassen) werden beim Erzeugen herausgefiltert.
 - Bundesland aus dem amtlichen Kreisschlüssel; Stadtteile („Dresden Innere Altstadt“) werden als solche markiert.
-- Namenssuche: exakter Name bzw. Name mit Zusatz („Neustadt an der Weinstraße“) vor Wortanfängen; Orte vor Stadtteilen; größere Orte vorn (nach Einwohnern, ersatzweise nach Anzahl der Postleitzahlen).
+- Namenssuche wie bei einer Suchmaschine: Groß-/Kleinschreibung, Umlaute (ü/ue/u), Bindestriche, Satzzeichen und Füllwörter („in“, „an der“, „i.“) spielen keine Rolle; „Sankt“ = „St.“.
+- Jedes Suchwort muss passen – im Ortsnamen oder im Umfeld: Bundesland mit üblichen Kürzeln (Sa., Thür., Westf., Opf. …), Regierungsbezirk, Landkreis, Postleitzahl. „Neustadt Sachsen“, „Neustadt i. Sa.“ und „Neustadt 01844“ finden Neustadt in Sachsen.
+- Tippfehler (ein Fehler ab 4, zwei ab 8 Buchstaben, auch vertauschte Buchstaben) werden nur berücksichtigt, wenn nichts genau passt.
+- Reihenfolge: genaue Treffer vor Wortanfängen vor Tippfehlern, Treffer im Namen vor Treffern im Umfeld, Orte vor Stadtteilen, dann nach Einwohnern.
+- Große Städte heißen bei GeoNames teils anders („Munich“, „Halle (Saale)“); dieser Name wird mitgespeichert und ist ebenfalls suchbar.
 - Umkehrsuche: nächster Postleitzahl-Punkt im Umkreis von 25 km; ein Stadtteil wird dem zugehörigen Ort zugeordnet. Zurück kommen die gerundeten Koordinaten des Nutzers.
 - Koordinaten werden auf 2 Nachkommastellen (≈ 1 km) gerundet.
 

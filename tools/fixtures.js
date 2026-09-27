@@ -131,7 +131,8 @@ const GEO = {
     { id: 2761369, name: 'Wien', latitude: 48.20849, longitude: 16.37208, feature_code: 'PPLC', country_code: 'AT', admin1: 'Wien', admin2: 'Wien Stadt', timezone: 'Europe/Vienna', population: 1691468, postcodes: ['1010'] },
     { id: 7, name: 'Wien', latitude: 44.35, longitude: -89.6, feature_code: 'PPL', country_code: 'US', admin1: 'Wisconsin', admin2: 'Marathon County', timezone: 'America/Chicago', population: 800 },
     { id: 8, name: 'Wien', latitude: 52.0, longitude: 8.0, feature_code: 'PPL', country_code: 'DE', admin1: 'Niedersachsen', timezone: 'Europe/Berlin' }
-  ]
+  ],
+  rom: [{ id: 3169070, name: 'Rom', latitude: 41.89193, longitude: 12.51133, feature_code: 'PPLC', country_code: 'IT', admin1: 'Latium', admin2: 'Rom', timezone: 'Europe/Rome', population: 2318895 }]
 };
 const geocoding = q => ({ results: GEO[String(q || '').toLowerCase()] });
 
