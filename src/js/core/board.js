@@ -28,8 +28,22 @@ function tileHTML(t) {
 
 // Inhalt einer Kachel (aufgeklappt) in ein Element schreiben: eigene Darstellung oder Zeilen
 // t.big: optionale Grafik (HTML/SVG) über den Zeilen; Elemente mit data-tip zeigen beim Überfahren einen Hinweis
+// t.tabs: [{ id, name, html }] – Reiter statt langer Liste; der gewählte Reiter bleibt je Kachel erhalten
+const reiterWahl = {};
 function fillContent(t, el) {
   if (typeof t.render === 'function') { el.innerHTML = ''; t.render(el); }
+  else if (t.tabs && t.tabs.length) {
+    const wahl = t.tabs.some(x => x.id === reiterWahl[t.id]) ? reiterWahl[t.id] : t.tabs[0].id;
+    el.innerHTML = `<div class="reiter" role="tablist">${t.tabs.map(x =>
+      `<button type="button" role="tab" data-tab="${esc(x.id)}" aria-selected="${x.id === wahl}">${esc(x.name)}</button>`).join('')}</div>` +
+      t.tabs.map(x => `<div class="reiterfeld" role="tabpanel" data-feld="${esc(x.id)}"${x.id === wahl ? '' : ' hidden'}>${x.html}</div>`).join('');
+    el.querySelectorAll('[data-tab]').forEach(b => b.addEventListener('click', e => {
+      e.stopPropagation();
+      reiterWahl[t.id] = b.dataset.tab;
+      el.querySelectorAll('[data-tab]').forEach(x => x.setAttribute('aria-selected', String(x === b)));
+      el.querySelectorAll('[data-feld]').forEach(f => { f.hidden = f.dataset.feld !== b.dataset.tab; });
+    }));
+  }
   else el.innerHTML = (t.big || '') + rows(t.rows);
   hinweise(el);
 }
@@ -51,7 +65,7 @@ export function paint(id) {
   const t = byId[id], el = document.getElementById('tile-' + id);
   if (!t || !el) return;
   el.dataset.state = t.state;
-  el.querySelector('.label .long').textContent = t.title;
+  if (t.titleHtml) el.querySelector('.label .long').innerHTML = t.titleHtml; else el.querySelector('.label .long').textContent = t.title;
   const tag = el.querySelector('.tag');
   const tagText = t.tag ?? (t.state === 'off' ? 'einrichten' : ''); tag.hidden = !tagText; tag.textContent = tagText;
   el.querySelector('.glyph').innerHTML = t.glyph || '';
@@ -112,7 +126,7 @@ export function closeAll() {
 function showSheet(id) {
   open = id;
   const t = byId[id], i = ORDER.indexOf(id), n = ORDER.length;
-  document.getElementById('s-label').innerHTML = icon(t.icon) + esc(t.title);
+  document.getElementById('s-label').innerHTML = icon(t.icon) + (t.lglyph ? `<span class="lglyph">${t.lglyph}</span>` : '') + (t.titleHtml || esc(t.title));
   document.getElementById('s-metric').textContent = t.m || t.ms || '';
   document.getElementById('s-teaser').textContent = t.x;
   fillContent(t, document.getElementById('s-content'));

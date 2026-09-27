@@ -221,10 +221,25 @@ test('Adapter Wetter: Kachel und Antwort aus dem Vertrag', async () => {
   assert.equal(k.ms, '15°');                                    // Handy: Kurzform
   assert.equal(k.lglyphTip, 'Teilweise bewölkt');               // Symbol in der Kopfzeile mit Erklärung
   assert.match(k.lglyph, /^<svg/);
-  assert.match(k.chart, /^<svg class="wd wd-mini".*wd-max.*wd-min.*wd-trend/);   // Mini-Diagramm, Trendtage gestrichelt
-  assert.equal((k.big.match(/data-tip=/g) || []).length, 16);           // großes Diagramm: 16 Tagesspalten mit Hinweis
-  assert.ok(!/<path[^>]*d=""/.test(k.big + k.chart), 'leerer Pfad');
-  assert.match(k.big, /Trend/);
+  // Mini-Diagramm beschriftet: Skala in Linienfarbe und Legende
+  assert.match(k.chart, /wd-miniskala"><b class="wd-t-max">21°<\/b><b class="wd-t-min">-3°<\/b>/);
+  assert.match(k.chart, /16 Tage: <b class="wd-t-max">Höchst<\/b> · <b class="wd-t-min">Tiefst<\/b> · <b class="wd-t-regen">Regen<\/b>/);
+  assert.match(k.chart, /wd-max.*wd-min.*wd-trend/);
+  // Kopfzeile mit farbigen Zahlen
+  assert.equal(k.titleHtml, 'Berlin 15° · <b class="wd-t-min">9°</b>/<b class="wd-t-max">16°</b>');
+  // Aufgeklappt: Reiter
+  assert.deepEqual(k.tabs.map(t => t.name), ['Heute', '16 Tage', '48 Stunden', 'Luft & mehr']);
+  const tab = id => k.tabs.find(t => t.id === id).html;
+  assert.equal((tab('tage').match(/data-tip=/g) || []).length, 16);          // 16 Tagesspalten mit Hinweis
+  assert.equal((tab('stunden').match(/data-tip=/g) || []).length, 48);       // 48 Stundenspalten
+  assert.match(tab('tage'), /Teilweise bewölkt|Regen|Bedeckt/);             // Hinweis nennt den Zustand
+  assert.match(tab('heute'), /<b class="wd-t-min">9°<\/b> bis <b class="wd-t-max">16°<\/b>/);
+  assert.match(tab('mehr'), /Luftqualität.*Taupunkt/s);
+  assert.ok(!/<path[^>]*d=""/.test(k.tabs.map(t => t.html).join('') + k.chart), 'leerer Pfad');
+  // Sonne unbekannt ≠ 0 Stunden
+  const { tageDiagramm } = await esm('src/js/adapter/diagramm.js');
+  const ohneSonne = env.daten.tage.map((t, i) => (i === 2 ? { ...t, sonnenstunden: null } : t));
+  assert.match(tageDiagramm(ohneSonne, d => d), /Sonne: keine Angabe/);
   assert.equal(k.x, 'Teilweise bewölkt, gefühlt 14°. Regen möglich gegen 17 Uhr.');
   assert.ok(k.rows.some(([l]) => l === 'Luftqualität'));
   assert.ok(k.rows.some(([l]) => l === 'Morgen'));

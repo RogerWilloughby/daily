@@ -1,8 +1,8 @@
 // Adapter „wetter“: macht aus dem Vertrag wetter v1 (reine Daten) die Darstellung für eine Oberfläche.
 // Heute: kachel() für das Kachelraster und antwort() für „Frag DAILY“. Später z. B. liste(), dashboard().
 // Ohne DOM – daher auch in Node testbar.
-import { glyph } from '../core/util.js';
-import { miniDiagramm, tageDiagramm } from './diagramm.js';
+import { glyph, esc } from '../core/util.js';
+import { miniDiagramm, tageDiagramm, stundenDiagramm } from './diagramm.js';
 
 export const TEXT = {
   klar: 'Klar', ueberwiegend_klar: 'Überwiegend klar', teilweise_bewoelkt: 'Teilweise bewölkt', bedeckt: 'Bedeckt',
@@ -37,7 +37,8 @@ const zeitFmt = zone => ({
   hm: iso => iso ? new Date(iso).toLocaleTimeString('de-DE', { timeZone: zone, hour: '2-digit', minute: '2-digit' }) : '–',
   h: iso => new Date(iso).toLocaleTimeString('de-DE', { timeZone: zone, hour: '2-digit' }).slice(0, 2),
   tag: iso => new Intl.DateTimeFormat('en-CA', { timeZone: zone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(iso)),
-  wtag: datum => new Date(datum + 'T12:00:00Z').toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'numeric', timeZone: 'UTC' })
+  wtag: datum => new Date(datum + 'T12:00:00Z').toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'numeric', timeZone: 'UTC' }),
+  wtagKurz: iso => new Date(iso).toLocaleDateString('de-DE', { timeZone: zone, weekday: 'short' })
 });
 
 // Kennzahlen, die mehrere Darstellungen brauchen
@@ -55,6 +56,53 @@ export function auswerten(env) {
     pollen = !art || wert < 1 ? 'keine' : `${wert < 20 ? 'gering' : wert < 50 ? 'mittel' : 'hoch'} (${POLLEN[art]})`;
   }
   return { z, heute, morgen, regenMax, regenUm: regenMax >= 25 ? regenUm : null, pollen };
+}
+
+// Zahlen in den Farben der Diagrammlinien (Tiefst blau, Höchst orange)
+const tmin = v => `<b class="wd-t-min">${r0(v)}°</b>`, tmax = v => `<b class="wd-t-max">${r0(v)}°</b>`;
+// Zeilen mit fertigem HTML als Wert (Schlüssel wird maskiert)
+const zeilen = liste => '<dl class="kompakt">' + liste.map(([k, v]) => `<div class="row"><dt>${esc(k)}</dt><dd>${v}</dd></div>`).join('') + '</dl>';
+
+function heuteZeilen(env, z, heute, regenMax, regenUm, wind, sonne) {
+  const a = env.daten.aktuell, d = env.daten;
+  const liste = [
+    ['Heute', `${tmin(heute.minC)} bis ${tmax(heute.maxC)} · ${esc(zustandText(heute.zustand, heute.code))}`],
+    ['Regen', `<b class="wd-t-regen">bis ${regenMax} %</b>${regenUm ? `, am ehesten gegen ${regenUm} Uhr` : ''}${heute.niederschlagMm ? ` · ${String(heute.niederschlagMm).replace('.', ',')} mm` : ''}`],
+    ['Wind', esc(wind)],
+    ['Sonne', esc(sonne)]
+  ];
+  if (a.luftdruckHpa != null) liste.push(['Luftdruck', `${r0(a.luftdruckHpa)} hPa${a.druckTendenz ? ', ' + a.druckTendenz : ''}`]);
+  const warn = warnung(d.tage, z);
+  if (warn) liste.push(['Achtung', esc(warn)]);
+  const m = d.tage[1];
+  if (m) liste.push(['Morgen', `${tmin(m.minC)} bis ${tmax(m.maxC)} · ${esc(zustandText(m.zustand, m.code))}`]);
+  return liste;
+}
+
+function mehrZeilen(env, pollen) {
+  const a = env.daten.aktuell, d = env.daten, h = d.tage[0] || {};
+  const liste = [];
+  if (d.luft) liste.push(['Luftqualität', `${LUFT[d.luft.stufe] || '–'} (EAQI ${r0(d.luft.aqi)})`]);
+  if (pollen) {
+    const werte = d.luft && d.luft.pollen ? Object.entries(d.luft.pollen).filter(([, v]) => v != null && v >= 1).map(([k, v]) => `${POLLEN[k]} ${r0(v)}`) : [];
+    liste.push(['Pollen', esc(pollen) + (werte.length ? ` <small>(je m³: ${esc(werte.join(', '))})</small>` : '')]);
+  }
+  if (a.uvIndex != null || h.uvMax != null) liste.push(['UV', `jetzt ${r0(a.uvIndex)}, heute bis ${r0(h.uvMax)}`]);
+  if (a.feuchteProzent != null) liste.push(['Feuchte', `${r0(a.feuchteProzent)} %${a.taupunktC != null ? `, Taupunkt ${r0(a.taupunktC)}°${a.taupunktC >= 16 ? ' (schwül)' : ''}` : ''}`]);
+  const sicht = a.sichtweiteM == null ? null : a.sichtweiteM >= 10000 ? 'Sicht über 10 km' : `Sicht ${String(Math.round(a.sichtweiteM / 100) / 10).replace('.', ',')} km${a.sichtweiteM < 1000 ? ' (Nebel)' : ''}`;
+  const wolken = [a.wolkenProzent != null ? `${r0(a.wolkenProzent)} % bewölkt` : null, sicht].filter(Boolean).join(' · ');
+  if (wolken) liste.push(['Wolken', wolken]);
+  if (h.nullgradgrenzeM != null) liste.push(['Nullgradgrenze', `${r0(h.nullgradgrenzeM)} m`]);
+  if (a.schneehoeheCm) liste.push(['Schnee', `${r0(a.schneehoeheCm)} cm`]);
+  const z = zeitFmt(env.ort.zeitzone || 'Europe/Berlin');
+  const quellen = [...new Set(env.quellen.map(q => q.name.split(' ')[0]))].join(', ');   // „Open-Meteo“ statt aller Teilnamen
+  liste.push(['Stand', `${z.hm(a.zeit)} Uhr · ${esc(quellen)}`]);
+  return liste;
+}
+
+export function kopfzeileHtml(env) {
+  const a = env.daten.aktuell, h = env.daten.tage[0] || {};
+  return `${esc(env.ort.name || 'Wetter')} ${r0(a.tempC)}° · ${tmin(h.minC)}/${tmax(h.maxC)}`;
 }
 
 // „Dresden 15° · 9°/16°“
@@ -104,14 +152,20 @@ export function kachel(env) {
   const trend = d.tage.filter(t => t.trend);
   if (trend.length) rows.push([`Trend bis ${z.wtag(trend[trend.length - 1].datum)}`, trendText(trend)]);
   rows.push(['Stand', `${z.hm(a.zeit)} Uhr · ${env.quellen.map(q => q.name).join(', ')}`]);
+  // Aufgeklappt: Reiter statt langer Liste – alles ohne Scrollen sichtbar
+  const tabs = [
+    { id: 'heute', name: 'Heute', html: zeilen(heuteZeilen(env, z, heute, regenMax, regenUm, wind, sonne)) },
+    { id: 'tage', name: `${d.tage.length} Tage`, html: tageDiagramm(d.tage, z.wtag, t => zustandText(t.zustand, t.code)) },
+    { id: 'stunden', name: `${d.stunden.length} Stunden`, html: stundenDiagramm(d.stunden, iso => ({ h: z.h(iso), tag: z.wtagKurz(iso) })) },
+    { id: 'mehr', name: 'Luft & mehr', html: zeilen(mehrZeilen(env, pollen)) }
+  ];
   // Kopfzeile: Ort, jetzt, Tiefst/Höchst von heute – alles in einer Zeile
   return {
-    state: 'live', title: kopfzeile(env),
+    state: 'live', title: kopfzeile(env), titleHtml: kopfzeileHtml(env), tabs,
     lglyph: glyph(bild(a.zustand, a.tag)), lglyphTip: zustandText(a.zustand, a.code),   // Symbol in der Kopfzeile, Erklärung beim Überfahren
     glyph: '', m: '', ms: r0(a.tempC) + '°',                                               // keine große Zeile – Platz fürs Diagramm
     x: `${zustandText(a.zustand, a.code)}, gefühlt ${r0(a.gefuehltC)}°. ${regenText}`,
     chart: miniDiagramm(d.tage),
-    big: tageDiagramm(d.tage, z.wtag),
     rows
   };
 }

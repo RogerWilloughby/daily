@@ -95,13 +95,32 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .metric[data-len="long"] .m-long{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .tile[data-mode="lane"] .metric[data-len="long"] .m-long,.tile[data-mode="small"] .metric[data-len="long"] .m-long{white-space:nowrap;display:block}
 /* Wetter-Diagramme (Farben geprüft: Höchst/Tiefst/Regen/Sonne je Hell und Dunkel) */
-:root{--wd-max:#C0621C;--wd-min:#1F63B8;--wd-regen:#0F8A7A;--wd-sonne:#B07E0A}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--wd-max:#D9773A;--wd-min:#5B8FE0;--wd-regen:#1FA08C;--wd-sonne:#A6841E}}
-:root[data-theme="dark"]{--wd-max:#D9773A;--wd-min:#5B8FE0;--wd-regen:#1FA08C;--wd-sonne:#A6841E}
-.tile[data-mode="active"],.sheet{--wd-max:#D9773A;--wd-min:#5B8FE0;--wd-regen:#1FA08C;--wd-sonne:#A6841E}
+:root{--wd-max:#C0621C;--wd-min:#1F63B8;--wd-regen:#0F8A7A;--wd-sonne:#B07E0A;--wd-max-text:#A8520F;--wd-min-text:#1A56A3;--wd-regen-text:#0B7466;--wd-sonne-text:#8A6306}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--wd-max:#D9773A;--wd-min:#5B8FE0;--wd-regen:#1FA08C;--wd-sonne:#A6841E;--wd-max-text:#F0A06A;--wd-min-text:#8FB5F0;--wd-regen-text:#5CCBB6;--wd-sonne-text:#E0C060}}
+:root[data-theme="dark"]{--wd-max:#D9773A;--wd-min:#5B8FE0;--wd-regen:#1FA08C;--wd-sonne:#A6841E;--wd-max-text:#F0A06A;--wd-min-text:#8FB5F0;--wd-regen-text:#5CCBB6;--wd-sonne-text:#E0C060}
+.tile[data-mode="active"],.sheet{--wd-max:#D9773A;--wd-min:#5B8FE0;--wd-regen:#1FA08C;--wd-sonne:#A6841E;--wd-max-text:#F0A06A;--wd-min-text:#8FB5F0;--wd-regen-text:#5CCBB6;--wd-sonne-text:#E0C060}
+/* Reiter in aufgeklappten Kacheln */
+.reiter{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--active-line);padding-bottom:6px}
+.reiter button{padding:6px 12px;border-radius:999px;font-size:13px;font-weight:600;color:var(--active-muted);border:1px solid transparent}
+.reiter button:hover{color:var(--active-ink);border-color:var(--active-line)}
+.reiter button[aria-selected="true"]{color:var(--active-bg);background:var(--active-ink)}
+.reiterfeld[hidden]{display:none}
+dl.kompakt .row{padding:4px 0;font-size:14px}
+dl.kompakt dd{margin:0}
+/* farbige Zahlen passend zu den Diagrammlinien */
+.wd-t-max{color:var(--wd-max-text)}.wd-t-min{color:var(--wd-min-text)}.wd-t-regen{color:var(--wd-regen-text)}.wd-t-sonne{color:var(--wd-sonne-text)}
+b.wd-t-max,b.wd-t-min,b.wd-t-regen,b.wd-t-sonne{font-weight:700}
+.wd text.wd-t-max{fill:var(--wd-max-text)}.wd text.wd-t-min{fill:var(--wd-min-text)}
+.wd-minibox{display:flex;gap:6px;align-items:stretch;height:calc(100% - 18px);min-height:28px}
+.wd-miniskala{display:flex;flex-direction:column;justify-content:space-between;font-size:11px;line-height:1;padding:1px 0 8px}
+.wd-minilegende{font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wd-minilegende b{font-weight:600}
+.wd .wd-temp{stroke:currentColor;opacity:.85}
+.wd-l-temp{background:currentColor}
+.wd-gross .wd-fett{font-weight:700;opacity:.9}
 .mini{display:block;align-self:stretch;flex:1 1 auto;min-height:32px;padding-top:6px}
 .mini:empty{display:none}
-.wd-mini{display:block;width:100%;height:100%;min-height:26px;overflow:visible}
+.wd-mini{display:block;flex:1;min-width:0;height:100%;min-height:24px;overflow:visible}
 .tile[data-mode="small"] .mini,.tile[data-mode="active"] .mini{display:none}
 .tile[data-mode="rest"] .head:has(.mini:not(:empty)) .teaser{-webkit-line-clamp:2}
 .tile[data-mode="lane"] .wd-mini{height:22px}
