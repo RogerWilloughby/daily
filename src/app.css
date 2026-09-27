@@ -62,6 +62,10 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .status i{width:8px;height:8px;border-radius:50%;background:var(--muted)}
 .status[data-level="ok"] i{background:var(--ok)}
 .status[data-level="warn"] i{background:var(--warn)}
+.ort-knopf{display:flex;align-items:center;gap:6px;min-height:36px;max-width:26ch;padding:0 12px;border-radius:10px;border:1px solid var(--line);font-size:13px;font-weight:600;color:var(--ink)}
+.ort-knopf:hover{border-color:var(--accent)}
+.ort-knopf svg{width:16px;height:16px;flex:none;color:var(--accent)}
+.ort-knopf span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .gear{display:flex;align-items:center;gap:6px;min-height:36px;padding:0 10px;border-radius:10px;border:1px solid var(--line);color:var(--muted);font-size:13px}
 .gear:hover{color:var(--ink);border-color:var(--accent)}
 .gear svg{width:16px;height:16px}
@@ -192,6 +196,11 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
 .btn.primary{background:var(--active-bg);color:var(--active-ink);border-color:var(--active-bg)}
 .set-results{display:flex;flex-direction:column;gap:2px;margin:8px 0}
 .btn.wide{width:100%;min-height:48px;font-size:15px;display:flex;align-items:center;justify-content:center;gap:8px}
+.ort-liste{display:flex;flex-direction:column;gap:2px;margin:8px 0}
+.ort-treffer{text-align:left;padding:9px 10px;border-radius:8px;font-size:15px;line-height:1.35;color:var(--ink)}
+.ort-treffer:hover,.ort-treffer:focus-visible{background:var(--ground)}
+.ort-treffer small{color:var(--muted)}
+.set-hinweis{margin:4px 0 8px;color:var(--muted)}
 .set-oder{margin:12px 0 4px;color:var(--muted);font-size:13px}
 .set-results small{color:var(--muted)}
 .set-results label{display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:8px;cursor:pointer}
@@ -205,6 +214,7 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
   .brand{font-size:24px}
   .clock{font-size:19px;margin-left:auto}
   .gear{order:2}.gear span{display:none}
+  .ort-knopf{order:2;max-width:19ch;padding:0 10px}
   .date{order:3;flex:1 1 auto;min-width:0;font-size:14px}
   .status{order:4;padding:3px 8px}
   .legal{order:5;flex-basis:100%;gap:12px;font-size:12px}

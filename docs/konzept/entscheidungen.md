@@ -43,8 +43,8 @@ Kacheln und Quellen:
 - Nur privat: **Kalender** (iCal), **Schlagzeilen** (RSS).
 
 ## 3a. Einstellungen (Konfigurator)
-Zahnrad-Button „Einstellungen“ in der unteren Leiste:
-- Ort: oben der Knopf „Meinen Standort ermitteln“, darunter Suche nach Name oder Postleitzahl (Dienst `ort`, eigener Ortsbestand), Auswahl aus Treffern; Standard Dresden
+Zahnrad-Button „Einstellungen“ in der unteren Leiste (der Ort hat seinen eigenen Knopf daneben):
+- **Ort (seit 27.09.2026 eigener Knopf in der unteren Leiste, nicht mehr in den Einstellungen):** Der Knopf zeigt den gewählten Ort bzw. „Ort wählen“ (solange nur der Beispielort Dresden gilt). Er öffnet den Ort-Dialog: oben „Meinen Standort ermitteln“ (übernimmt sofort), darunter Suche mit Vorschlägen beim Tippen; ein Klick auf einen Treffer übernimmt ihn ohne „Speichern“ und lädt alle Kacheln neu (`src/js/ui/ort.js`). Später zu besprechen: „Immer meinen aktuellen Standort verwenden“ (Datenschutz).
 - Kalender: iCal-Links, einer pro Zeile (nur im privaten Betrieb sichtbar)
 - Haltestelle für Abfahrten (Standard Postplatz, VVO-Gebiet)
 - Fußballverein (Standard Dynamo Dresden, 1.–3. Liga)
@@ -100,7 +100,7 @@ Der Prototyp zählt lokal, welche Kacheln geöffnet werden (Kachel „Deine Nutz
   - Neue Kachel = Eintrag in `tiles.js` + Provider-Modul + Eintrag in `main.js`.
 - Statusanzeige in der Leiste: „Live · HH:MM“ oder „N Quellen gestört“.
 - Server-Funktionen in `api/` (Vercel, Region fra1 = Frankfurt), gemeinsame Helfer in `api/_lib/http.js`. Server-Funktionen verbergen die IP der Nutzer vor den Anbietern und setzen CDN-Cache-Zeiten.
-- Service Worker `daily-v5`: App-Dateien network-first, Schriften/Icons cache-first, `/api/` nie aus dem Cache.
+- Service Worker `daily-v6`: App-Dateien network-first, Schriften/Icons cache-first, `/api/` nie aus dem Cache.
 - Tests: `npm test` (node:test, ohne Netz, 31 Prüfungen): `test/daily.test.js` (alte Kacheln) und `test/dienste.test.js` (daily/1: Rahmen, Schema, Ort, Wetter, Router, Katalog, Dienstblätter, Adapter).
 - Lokaler Testserver: `node tools/mock-server.js` (nach `npm run build`), liefert Beispieldaten aus `tools/fixtures.js` statt echter Dienste; `MOCK_PRIVATE=1` für den privaten Betrieb.
 - Betriebsart: `api/config.js` meldet `private` (aus `DAILY_PRIVATE`). `main.js` wählt damit das Layout (`chooseLayout` in `core/tiles.js`) und startet nur die passenden Anbieter. Ein eigenes Layout aus `settings.layout` (Liste von Kachel-IDs) wird geprüft und mit der Standardbelegung auf 20 Plätze aufgefüllt – Grundlage für die Kachelauswahl in den Einstellungen.

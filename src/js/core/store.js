@@ -20,6 +20,9 @@ export const DEFAULTS = {
 const SKEY = 'daily-settings';
 export const settings = Object.assign({}, DEFAULTS, read(SKEY, {}));
 if (!settings.place || typeof settings.place.lat !== 'number') settings.place = DEFAULTS.place;
+// früher gespeicherter eigener Ort (vor dem Merkmal „gewaehlt“): alles außer dem Beispielort Dresden gilt als gewählt
+else if (settings.place.gewaehlt == null && read(SKEY, {}).place && !(settings.place.name === 'Dresden' && settings.place.lat === 51.05))
+  settings.place = { ...settings.place, gewaehlt: true };
 export function saveSettings(patch) { Object.assign(settings, patch); return write(SKEY, settings); }
 
 // ---- Klickzähler „Deine Nutzung“ (Schlüssel: Kachel-ID) ----

@@ -1,6 +1,5 @@
-// Dialoge: Impressum, Datenschutz und Einstellungen.
+// Dialoge: Datenquellen, Impressum, Datenschutz und Einstellungen. Der Ort hat einen eigenen Dialog (ui/ort.js).
 import { settings, saveSettings } from '../core/store.js';
-import { esc } from '../core/util.js';
 import { dienst } from '../dienste/client.js';
 import { seite as quellenSeite } from '../adapter/katalog.js';
 
@@ -20,13 +19,8 @@ export function initDialogs(onSaved, isPrivate = false) {
 
   const dlg = document.getElementById('settings');
   const $ = id => document.getElementById(id);
-  let placeChoice = null;
 
   $('open-settings').addEventListener('click', () => {
-    placeChoice = null;
-    $('set-place').value = '';
-    $('set-place-results').innerHTML = '';
-    $('set-place-current').textContent = settings.place.name + (settings.place.admin ? ', ' + settings.place.admin : '');
     $('set-ics').value = (settings.icsUrls || []).join('\n');
     $('set-stop').value = settings.stop || '';
     $('set-team').value = settings.team || '';
@@ -34,63 +28,6 @@ export function initDialogs(onSaved, isPrivate = false) {
     $('set-private').hidden = !isPrivate;
     if (typeof dlg.showModal === 'function') dlg.showModal();
   });
-
-  // Treffer des Dienstes „ort“ als Auswahl anzeigen: „Name, Landkreis (PLZ) · Bundesland“
-  const beschrift = p => {
-    const k = (p.kreis || '').replace(/^Landkreis /, 'Lkr. ').replace(/^(Kreisfreie Stadt|Stadtkreis) /, '');
-    const kreis = k && k !== p.name && !p.name.startsWith(k + ' ') ? ', ' + k : '';
-    const plz = p.plz && p.plz.length ? ` (${p.plz[0]}${p.plz.length > 1 ? ' …' : ''})` : '';
-    const wo = [p.region, p.land && p.land !== 'DE' ? p.land : null].filter(Boolean).join(', ');
-    return `${esc(p.name)}${esc(kreis)}${esc(plz)}${p.typ === 'stadtteil' ? ' <small>Stadtteil</small>' : ''}${wo ? ` <small>· ${esc(wo)}</small>` : ''}`;
-  };
-  function zeige(res, box) {
-    if (!res.length) { box.textContent = 'Kein Ort gefunden. Anders schreiben oder Postleitzahl versuchen?'; return; }
-    box.innerHTML = res.map((p, k) => `<label><input type="radio" name="place" value="${k}"${k === 0 ? ' checked' : ''}> <span>${beschrift(p)}</span></label>`).join('');
-    const pick = k => { const p = res[k]; placeChoice = { name: p.name, admin: p.region || '', land: p.land, kreis: p.kreis, kreisSchluessel: p.kreisSchluessel || null, plz: p.plz, lat: p.lat, lon: p.lon, zeitzone: p.zeitzone }; };
-    pick(0);
-    box.querySelectorAll('input').forEach(i => i.addEventListener('change', () => pick(+i.value)));
-  }
-
-  async function searchPlace() {
-    const q = $('set-place').value.trim(), box = $('set-place-results');
-    if (!q) return;
-    clearTimeout(tippTimer); tippNr++;
-    box.textContent = 'Suche …';
-    try { zeige((await dienst('ort', { q })).daten.orte, box); } // Dienst „ort“ (daily/1): Name oder Postleitzahl
-    catch (e) { box.textContent = 'Die Ortssuche ist gerade nicht erreichbar.'; }
-  }
-
-  // Gerätestandort → auf ~1 km runden → Dienst „ort“ sucht den Ortsnamen (nur auf Knopfdruck)
-  $('set-place-here').addEventListener('click', () => {
-    const box = $('set-place-results');
-    if (!navigator.geolocation) { box.textContent = 'Dieser Browser kann den Standort nicht ermitteln.'; return; }
-    box.textContent = 'Standort wird ermittelt …';
-    navigator.geolocation.getCurrentPosition(async pos => {
-      const r = v => Math.round(v * 100) / 100;
-      try {
-        const env = await dienst('ort', { lat: r(pos.coords.latitude), lon: r(pos.coords.longitude) });
-        if (!env.daten.orte.length) box.textContent = (env.hinweise || []).includes('ausserhalb')
-          ? 'Dein Standort liegt außerhalb Deutschlands. Bitte tippe den Ort ein.' : 'Zu diesem Standort wurde kein Ort gefunden.';
-        else zeige(env.daten.orte, box);
-      } catch (e) { box.textContent = 'Die Ortssuche ist gerade nicht erreichbar.'; }
-    }, () => { box.textContent = 'Standort nicht freigegeben. Du kannst den Ort auch eintippen.'; }, { timeout: 15000, maximumAge: 600000 });
-  });
-  // Vorschläge beim Tippen (nur Deutschland, ohne Auslandsabruf); Enter oder „Suchen“ sucht zusätzlich im Ausland
-  let tippTimer = null, tippNr = 0;
-  $('set-place').addEventListener('input', () => {
-    clearTimeout(tippTimer);
-    const q = $('set-place').value.trim(), box = $('set-place-results'), nr = ++tippNr;
-    if (q.length < 2) { box.innerHTML = ''; placeChoice = null; return; }
-    tippTimer = setTimeout(async () => {
-      try {
-        const orte = (await dienst('ort', { q, land: 'DE' })).daten.orte;
-        if (nr !== tippNr) return;                     // inzwischen weitergetippt
-        if (orte.length) zeige(orte, box); else box.textContent = 'Kein Ort in Deutschland – Enter sucht auch im Ausland.';
-      } catch (e) { /* beim Tippen still bleiben */ }
-    }, 250);
-  });
-  $('set-place-search').addEventListener('click', searchPlace);
-  $('set-place').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); searchPlace(); } });
 
   $('settings-form').addEventListener('submit', e => {
     e.preventDefault();
@@ -100,7 +37,6 @@ export function initDialogs(onSaved, isPrivate = false) {
       team: $('set-team').value.trim() || 'Dynamo Dresden',
       fuel: $('set-fuel').value
     };
-    if (placeChoice) patch.place = placeChoice;
     saveSettings(patch);
     dlg.close();
     onSaved();

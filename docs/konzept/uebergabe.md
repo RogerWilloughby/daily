@@ -23,7 +23,7 @@ Stand 27.09.2026. Für neue Chats: hier steht, woran gerade gearbeitet wird und 
 ## Stand der Dienste
 | Dienst | Stand |
 |---|---|
-| `ort` | ✅ fertig bis auf Rogers Test. Eigener Ortsbestand aus GeoNames (`services/daten/orte-de.json`, ≈ 14.700 Orte, Einwohnerzahlen, Großkunden gefiltert), monatlich per Action „Ortsbestand erneuern“. Suche wie eine Suchmaschine (Wörter einzeln, Kürzel Sa./Thür./Westf./Opf., Umlaute, Tippfehler, Doppelte zusammengefasst), Vorschläge beim Tippen (`land=DE`), Ausland über Open-Meteo nur, wenn kein deutscher Ort genau passt oder nur ein kleiner. Umkehrsuche (Gerätestandort) im eigenen Bestand. Knopf „Meinen Standort ermitteln“ oben in den Einstellungen. |
+| `ort` | ✅ fertig bis auf Rogers Test. Eigener Ortsbestand aus GeoNames (`services/daten/orte-de.json`, ≈ 14.700 Orte, Einwohnerzahlen, Großkunden gefiltert), monatlich per Action „Ortsbestand erneuern“. Suche wie eine Suchmaschine (Wörter einzeln, Kürzel Sa./Thür./Westf./Opf., Umlaute, Tippfehler, Doppelte zusammengefasst), Vorschläge beim Tippen (`land=DE`), Ausland über Open-Meteo nur, wenn kein deutscher Ort genau passt oder nur ein kleiner. Umkehrsuche (Gerätestandort) im eigenen Bestand. Ort hat seit 27.09. einen eigenen Knopf in der unteren Leiste mit eigenem Dialog (Standort ermitteln, Suche, Klick übernimmt sofort). |
 | `wetter` | ✅ läuft über daily/1 und Open-Meteo, Dienstblatt vorhanden. **Überarbeitung ist der nächste Schritt.** |
 | alle anderen | noch alte Schnittstelle (`api/*.js`), Reihenfolge in `dienste-katalog.md` |
 

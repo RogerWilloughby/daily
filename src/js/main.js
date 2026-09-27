@@ -6,6 +6,7 @@ import { ONLINE, getJson } from './core/util.js';
 import { chooseLayout } from './core/tiles.js';
 import { settings } from './core/store.js';
 import { initDialogs } from './ui/dialogs.js';
+import { initOrt } from './ui/ort.js';
 import weather from './providers/weather.js';
 import calendar from './providers/calendar.js';
 import news from './providers/news.js';
@@ -58,6 +59,7 @@ function tick() {
 initBoard();
 initAsk();
 initDialogs(() => PROVIDERS.forEach(run), isPrivate);
+initOrt(() => PROVIDERS.forEach(run));        // Ort geändert → alle Kacheln neu laden
 tick(); setInterval(tick, 15e3);
 
 document.addEventListener('keydown', e => {

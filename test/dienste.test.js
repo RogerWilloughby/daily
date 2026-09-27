@@ -271,3 +271,14 @@ test('Ortsbestand-Erzeugung: Einwohner über Name, alternativen Namen oder Grund
   assert.equal(d.anzahl.mitEinwohnern, 4);
   assert.ok(!d.orte.some(o => o[2] === '01053'));
 });
+
+test('Ort-Knopf: Beschriftung, gespeicherter Ort, Trefferzeile', async () => {
+  const { knopfText, alsEinstellung, beschrift } = await esm('src/js/ui/ort.js');
+  const p = (await rufe('ort', { q: 'Neustadt Sachsen' })).body.daten.orte[0];
+  const e = alsEinstellung(p);
+  assert.deepEqual([e.name, e.admin, e.land, e.kreisSchluessel, e.gewaehlt], ['Neustadt in Sachsen', 'Sachsen', 'DE', '14628', true]);
+  assert.equal(knopfText(e), 'Neustadt in Sachsen');
+  assert.equal(knopfText({ name: 'Dresden', lat: 51.05 }), 'Ort wählen');           // nur Beispielort
+  assert.equal(beschrift(p), 'Neustadt in Sachsen, Lkr. Sächsische Schweiz-Osterzgebirge (01844) <small>· Sachsen</small>');
+  assert.equal(beschrift({ name: 'Dresden', kreis: 'Kreisfreie Stadt Dresden', plz: ['01067', '01069'], region: 'Sachsen', land: 'DE' }), 'Dresden (01067 …) <small>· Sachsen</small>');
+});

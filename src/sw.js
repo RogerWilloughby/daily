@@ -1,9 +1,9 @@
 // DAILY Service Worker: App offline startbar, Daten und Code immer frisch aus dem Netz.
-const CACHE = 'daily-v5';
+const CACHE = 'daily-v6';
 const SHELL = [
   '/', '/app.css', '/manifest.webmanifest', '/content/daily.json',
   '/js/main.js', '/js/core/util.js', '/js/core/store.js', '/js/core/tiles.js', '/js/core/board.js',
-  '/js/core/ask.js', '/js/core/status.js', '/js/ui/dialogs.js',
+  '/js/core/ask.js', '/js/core/status.js', '/js/ui/dialogs.js', '/js/ui/ort.js',
   '/js/providers/weather.js', '/js/providers/calendar.js', '/js/providers/news.js', '/js/providers/markets.js',
   '/js/providers/sport.js', '/js/providers/transit.js', '/js/providers/content.js', '/js/providers/knowledge.js', '/js/providers/local.js',
   '/js/providers/links.js', '/js/providers/holidays.js', '/js/providers/alerts.js', '/js/providers/fuel.js', '/js/providers/sky.js',
