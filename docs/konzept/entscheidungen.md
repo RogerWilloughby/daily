@@ -112,7 +112,7 @@ Prototyp: `../prototyp/daily-prototyp.html`.
 
 ## Offen
 - **Roger, einmalig in Vercel (Settings → Environment Variables):** `DAILY_PRIVATE` = `1` (damit Kalender und Schlagzeilen für dich bleiben) und `TANKERKOENIG_API_KEY` (kostenlos beantragen). Danach neu veröffentlichen.
-- **Roger, einmalig nach dem Hochladen:** GitHub → Actions → „Ortsbestand erneuern“ → „Run workflow“. Erst dieser Lauf holt die Original-GeoNames-Daten mit Einwohnerzahlen (bessere Reihenfolge, z. B. Neustadt in Sachsen vor Hohwald bei 01844).
+- Aktueller Arbeitsstand und nächste Schritte: `uebergabe.md`
 - Wetterdienst überarbeiten (DWD direkt/Bright Sky vs. Open-Meteo, Raster, TTL), danach Vercel vs. AWS bei 10 Mio. Nutzern
 - Alle Dienste auf daily/1 umstellen und neue Dienste bauen (Reihenfolge in `dienste-katalog.md`)
 - Kachelauswahl in den Einstellungen: weitere Kacheln definieren (Katalog in `core/tiles.js`), Auswahl-Oberfläche bauen
