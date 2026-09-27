@@ -1,0 +1,41 @@
+# Erneuert services/daten/namenstage.json aus Wikidata (CC0).
+# Läuft monatlich und auf Knopfdruck (GitHub → Actions → „Namenstage erneuern“ → Run workflow).
+# Ändert sich etwas, wird die Datei direkt auf main committet; hochladen.cmd holt sie beim nächsten Mal mit ab.
+name: Namenstage erneuern
+
+on:
+  schedule:
+    - cron: '41 3 3 * *'   # am 3. jedes Monats, 03:41 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  namenstage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: npm ci --omit=dev
+      - name: Wikidata abfragen
+        run: |
+          curl -sSf --retry 3 --max-time 300 -X POST \
+            -H 'Accept: application/sparql-results+json' \
+            -H 'User-Agent: DAILY-Namenstage/1.0 (https://github.com/RogerWilloughby/daily)' \
+            --data-urlencode query@tools/namenstage/abfrage.rq \
+            -o /tmp/namenstage.json https://query.wikidata.org/sparql
+      - name: Namenstage erzeugen
+        run: node tools/namenstage-daten.js /tmp/namenstage.json
+      - name: Prüfen
+        run: node --test test/dienste.test.js
+      - name: Committen, falls geändert
+        run: |
+          if git diff --quiet -- services/daten/namenstage.json; then echo "keine Änderung"; exit 0; fi
+          git config user.name "daily-bot"
+          git config user.email "daily-bot@users.noreply.github.com"
+          git add services/daten/namenstage.json
+          git commit -m "Namenstage aus Wikidata erneuert"
+          git push

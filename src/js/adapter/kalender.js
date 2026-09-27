@@ -64,8 +64,18 @@ function himmelReiter(h, heute, zone) {
     '<p class="kl-quelle">Berechnet (Astronomy Engine), Finsternisse nur, wenn am Ort zu sehen. Sonne nur mit Schutzbrille ansehen.</p>';
 }
 
-// Die Kachel. fEnv (feiertage) kann fehlen (Ausland, Störung), hEnv (himmel) ebenso.
-export function kachel(fEnv, hEnv, jetzt = Date.now(), zone = 'Europe/Berlin') {
+// Namen als kurzer Text: „Wenzel, Lioba …“
+export const namenText = (l, max = 3) => !l || !l.length ? '' : l.length <= max ? l.join(', ') : `${l.slice(0, max).join(', ')} …`;
+
+// Reiter „Namenstage“: heute und die nächsten 6 Tage
+function namenReiter(n, heute) {
+  const z = n.woche.map(w => `<li class="kl-z kl-namen${w.datum === heute ? ' kl-wichtig' : ''}"><span class="kl-d">${esc(wtag(w.datum))}<small>${esc(wann(tageBis(heute, w.datum)))}</small></span>` +
+    `<span class="kl-t">${esc(w.namen.join(', ') || '–')}</span></li>`).join('');
+  return `<ul class="kl-liste">${z}</ul><p class="kl-quelle">Namenstage nach Gedenktagen der Heiligen (Wikidata, CC0) – eine Auswahl, Kalender unterscheiden sich je Region und Konfession.</p>`;
+}
+
+// Die Kachel. fEnv (feiertage) kann fehlen (Ausland, Störung), hEnv (himmel) und nEnv (namenstage) ebenso.
+export function kachel(fEnv, hEnv, jetzt = Date.now(), zone = 'Europe/Berlin', nEnv = null) {
   const heute = tagImOrt(new Date(jetzt).toISOString(), zone);
   const f = fEnv && fEnv.daten, h = hEnv && hEnv.daten;
   const alle = termine(fEnv, hEnv, heute, zone);
@@ -88,10 +98,12 @@ export function kachel(fEnv, hEnv, jetzt = Date.now(), zone = 'Europe/Berlin') {
     ...alle.filter(t => t !== naechst && !frei.includes(t) && tageBis(heute, t.datum) <= 7 && !/Welt|Tag der Erde/.test(t.text)).slice(0, 1)
       .map(t => `${t.text} ${tageBis(heute, t.datum) === 0 ? 'heute' : wtag(t.datum)}`)
   ];
-  const x = [lead, ...weitere].filter(Boolean).join(' · ');
+  const heuteNamen = nEnv && nEnv.daten ? nEnv.daten.heute.namen : [];
+  const x = [lead, ...weitere, heuteNamen.length ? `Namenstag: ${namenText(heuteNamen, 2)}` : ''].filter(Boolean).join(' · ');
 
   const tabs = [
-    { id: 'naechste', name: 'Nächste', html: liste(alle.slice(0, 9), heute, 'Keine Termine.') },
+    { id: 'naechste', name: 'Nächste', html: (heuteNamen.length ? `<p class="kl-jetzt">Namenstag heute: <b>${esc(namenText(heuteNamen, 5))}</b></p>` : '') +
+      liste(alle.slice(0, heuteNamen.length ? 8 : 9), heute, 'Keine Termine.') },
     ...(f ? [
       { id: 'feiertage', name: 'Feiertage', html: `<p class="kl-kopf">${esc(f.bundesland)} · landesweite Feiertage</p>` +
         liste(alle.filter(t => t.art === 'feiertag' || t.art === 'brueckentag').slice(0, 8), heute, 'Keine Feiertage.') },
@@ -99,11 +111,24 @@ export function kachel(fEnv, hEnv, jetzt = Date.now(), zone = 'Europe/Berlin') {
         liste(alle.filter(t => t.art === 'ferien').slice(0, 8), heute, 'Keine Ferientermine gefunden.') + '<p class="kl-quelle">Quelle: OpenHolidays API</p>'
         : '<p class="kl-leer">Die Schulferien sind gerade nicht erreichbar.</p>' }
     ] : []),
-    { id: 'himmel', name: 'Himmel', html: himmelReiter(h, heute, zone) }
+    { id: 'himmel', name: 'Himmel', html: himmelReiter(h, heute, zone) },
+    ...(nEnv && nEnv.daten && nEnv.daten.woche.some(w => w.namen.length) ? [{ id: 'namen', name: 'Namenstage', html: namenReiter(nEnv.daten, heute) }] : [])
   ];
   const titel = kw ? `Kalender · KW ${kw}` : 'Kalender';
   const rows = alle.slice(0, 12).map(t => [wtag(t.datum), t.text + (t.zusatz ? ` (${t.zusatz})` : '')]);
   return { state: 'live', title: titel, m, ms, x, tabs, rows };
+}
+
+// Antwort auf „Wann hat Josef Namenstag?“ aus der Dienstantwort mit name=… (nEnv) bzw. „Wer hat heute Namenstag?“
+export function namenAntwort(nEnv, jetzt = Date.now(), zone = 'Europe/Berlin') {
+  if (!nEnv || !nEnv.daten) return 'Die Namenstage sind gerade nicht erreichbar.';
+  const d = nEnv.daten, heute = tagImOrt(new Date(jetzt).toISOString(), zone);
+  if (!d.stand) return 'Die Namenstage werden gerade erst aufgebaut.';
+  if (!d.gesucht) return d.heute.namen.length ? `Heute haben Namenstag: ${namenText(d.heute.namen, 6)}.` : 'Heute steht kein Namenstag im Kalender.';
+  const g = d.gesucht;
+  if (!g.naechster) return `Für ${g.name} ist kein Namenstag eingetragen.`;
+  const alle = g.tage.length > 1 ? ` (weitere: ${g.tage.filter(t => t !== g.naechster.slice(5)).map(t => `${+t.slice(3)}.${+t.slice(0, 2)}.`).join(', ')})` : '';
+  return `${g.name} hat Namenstag am ${wtag(g.naechster)} (${wann(tageBis(heute, g.naechster))})${alle}.`;
 }
 
 // Antworten für „Frag DAILY“

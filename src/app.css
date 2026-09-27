@@ -388,4 +388,4 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
 .kl-jahreszeit .kl-punkt{background:var(--wd-min)}
 .kl-kopf,.kl-jetzt{margin:0 0 6px;font-size:13px}
 .kl-leer{margin:4px 0;color:var(--active-muted)}
-.kl-quelle{margin:6px 0 0;font-size:11px;color:var(--active-muted)}
+.kl-quelle,.content .kl-quelle{margin:6px 0 0;font-size:11px;line-height:1.35;color:var(--active-muted)}

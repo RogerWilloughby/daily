@@ -19,6 +19,7 @@ Kein Impressum, keine Datenschutzerklärung, keine Medienpflichten nötig. Aktue
 - DWD-Warnungen (Dienst `wetterhinweise`): Quelle „Deutscher Wetterdienst“ nennen (GeoNutzV) – umgesetzt (Reiter „Hinweise“, Impressum, Datenquellen). Amtlicher Text bleibt unverändert; die Alltagstipps sind klar als „Tipp“ von DAILY gekennzeichnet und ersetzen die Warnung nicht.
 - Tankerkönig: CC BY 4.0, Quelle nennen – umgesetzt; Nutzungsbedingungen (Abfragehäufigkeit) beachten, Cache 5 min.
 - OpenHolidays: frei nutzbar, Quelle genannt (Dienst `feiertage`, Reiter „Ferien“, Impressum).
+- Wikidata (Dienst `namenstage`): CC0 – keine Auflagen; Quelle trotzdem genannt (Reiter „Namenstage“, Datenquellen). Wikidata-Abfrage mit eigenem User-Agent (Richtlinie der Wikimedia Foundation), einmal im Monat.
 - Astronomy Engine (Dienst `himmel`): MIT-Lizenz – Lizenztext liegt mit dem npm-Paket bei; genannt in Impressum und Datenquellen. Sternschnuppen-Termine: Mittelwerte nach International Meteor Organization (Fakten, keine Übernahme von Texten).
 - GeoNames (Postleitzahlen und Orte Deutschland, CC BY 4.0): eigener Ortsbestand `services/daten/orte-de.json`, Quelle in Impressum, Katalog und Seite „Woher kommen die Daten?“ genannt. CC BY verlangt Namensnennung und Hinweis auf Änderungen (wir filtern und fassen zusammen – steht im Dienstblatt `docs/dienste/ort.md`).
 - Open-Meteo Geocoding (nur Ortssuche im Ausland, CC BY 4.0): kostenlos nur nicht kommerziell – vor kommerziellem Betrieb Tarif prüfen.

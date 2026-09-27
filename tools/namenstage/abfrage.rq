@@ -1,0 +1,20 @@
+# DAILY – Namenstage aus Wikidata (CC0). Wird von tools/namenstage-daten.js ausgewertet.
+# Weg 1: Heilige (Heiligsprechung „Heiliger“) mit Gedenktag (P841) und Vorname (P735) → Namenstag des Vornamens.
+# Weg 2: Vornamen mit ausdrücklichem Namenstag (P1750) für Deutschland oder Österreich.
+SELECT ?name ?nameDe ?tagEn ?weg ?heiliger ?links WHERE {
+  {
+    ?heiliger wdt:P411 wd:Q43115 ;
+              wdt:P841 ?tag ;
+              wdt:P735 ?name .
+    BIND("heilige" AS ?weg)
+  } UNION {
+    ?name p:P1750 ?aussage .
+    ?aussage ps:P1750 ?tag .
+    ?aussage (pq:P17|pq:P1001) ?land .
+    VALUES ?land { wd:Q183 wd:Q40 }
+    BIND("namenstag" AS ?weg)
+  }
+  ?name rdfs:label ?nameDe . FILTER(LANG(?nameDe) = "de")
+  ?tag rdfs:label ?tagEn . FILTER(LANG(?tagEn) = "en")
+  ?name wikibase:sitelinks ?links .
+}

@@ -26,6 +26,7 @@ Stand 27.09.2026. Für neue Chats: hier steht, woran gerade gearbeitet wird und 
 |---|---|
 | `ort` | ✅ fertig bis auf Rogers Test. Eigener Ortsbestand aus GeoNames (`services/daten/orte-de.json`, ≈ 14.700 Orte, Einwohnerzahlen, Großkunden gefiltert), monatlich per Action „Ortsbestand erneuern“. Suche wie eine Suchmaschine (Wörter einzeln, Kürzel Sa./Thür./Westf./Opf., Umlaute, Tippfehler, Doppelte zusammengefasst), Vorschläge beim Tippen (`land=DE`), Ausland über Open-Meteo nur, wenn kein deutscher Ort genau passt oder nur ein kleiner. Umkehrsuche (Gerätestandort) im eigenen Bestand. Ort hat seit 27.09. einen eigenen Knopf in der unteren Leiste mit eigenem Dialog (Standort ermitteln, Suche, Klick übernimmt sofort). |
 | `feiertage`, `himmel` | ✅ neu 27.09. (0.12.0): Kachel „Kalender“ (Feiertage, Ferien, Brückentage, Zeitumstellung, KW, Aktionstage; Mond, Finsternisse, Sternschnuppen, Jahreszeiten). Ersetzt „Feiertage & Ferien“ und „Himmel“. Wartet auf Rogers Test. Als Nächstes: Namenstage (Wikidata), dann private Termine in der Kachel. |
+| `namenstage` | ✅ neu 27.09. (0.13.0): Wikidata (CC0) per Action „Namenstage erneuern“. **Roger muss einmal** die Workflow-Dateien verschieben und die Action von Hand starten – bis dahin ist der Bestand leer (Hinweis `daten_fehlen`, im Kalender erscheint nichts). |
 | `wetterhinweise` | ✅ neu 27.09. (0.10.0): amtliche DWD-Warnungen über Bright Sky in der Wetterkachel (Abzeichen, Hinweis, Reiter „Hinweise“ mit Alltagstipp) – ersetzt die Kachel „Warnungen“. Wartet auf Rogers Test. |
 | `regen` | ✅ neu 27.09.: DWD-Radar über Bright Sky, 2 h Verlauf, Nähe, Karte; in der Wetterkachel. Wartet auf Rogers Test. |
 | `wetter` | ✅ überarbeitet 27.09. (siehe unten): Open-Meteo, 16 Tage (ab Tag 8 Trend), Zusatzwerte, Cache-Takt :00/:30. Wartet auf Rogers Test. |
@@ -44,12 +45,12 @@ App-Seite „Woher kommen die Daten?“ (Fußzeile → Datenquellen) zeigt die D
 
 ## Zuletzt offen (27.09.2026)
 1. Roger testet den überarbeiteten Wetterdienst in der App.
-2. Bekannte Kleinigkeiten Ort: 130 Kreisnamen ohne Typ („Zwickau“ statt „Landkreis Zwickau“); Stadtteilnamen der Quelle teils doppelt („Stuttgart Stuttgart-Mitte“); Warnung Node.js 20 in der Action (bei nächster Änderung `actions/checkout@v5`, `actions/setup-node@v5`, Node 22 – Datei muss Roger dann wieder verschieben).
+2. Bekannte Kleinigkeiten Ort: 130 Kreisnamen ohne Typ („Zwickau“ statt „Landkreis Zwickau“); Stadtteilnamen der Quelle teils doppelt („Stuttgart Stuttgart-Mitte“); ~~Warnung Node.js 20 in der Action~~ (0.13.0: v5/Node 22; `orte-daten.yml` installiert jetzt auch die Abhängigkeiten, weil die Tests `astronomy-engine` brauchen).
 
 ## Nächste Schritte (in dieser Reihenfolge)
 1. Roger testet den Dienst `regen` (Radar-Reiter, Hinweis „Regen in X Min.“). Offen: Luftqualität/Pollen prüfen (DWD-Pollenflug-Gefahrenindex, Umweltbundesamt); Radarkarte ohne Landkarte darunter – ggf. später Umrisse/Orte.
 2. Roger testet mehrere Orte (Auswahlbox) und die neue aufgeklappte Kachel. Später: Kachelauswahl in den Einstellungen, ggf. Ort je Kachel.
-3. Roger testet die Kachel „Kalender“; danach Namenstage (Wikidata CC0, GitHub Action wie Ortsbestand) und private Termine (iCal) in der Kachel.
+3. Roger verschiebt `tools/namenstage-daten.yml` und `tools/orte-daten.yml` nach `.github/workflows/`, startet „Namenstage erneuern“ und testet Kalender und Namenstage. Danach: private Termine (iCal) in der Kachel.
 3a. Roger testet die Wetterhinweise (im Testserver mit Beispielwarnungen; echt nur bei aktueller DWD-Warnung am Ort). Freie Plätze füllen sich mit jeder überarbeiteten Kachel.
 4. ~~Vercel oder AWS~~ entschieden 27.09.: Vercel; Performance-Maßnahmen 1–3 umgesetzt (0.9.0). **Vor dem öffentlichen Start:** eigene Daten Wetter/Radar (zentral), Lasttest, Vercel Pro.
 5. Übrige Dienste auf daily/1 umziehen (Reihenfolge `dienste-katalog.md`), je mit Dienstblatt.

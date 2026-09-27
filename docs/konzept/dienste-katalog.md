@@ -24,7 +24,7 @@ Status: ✅ fertig in daily/1 · 🔁 läuft, noch alte Schnittstelle · 🆕 ne
 | Dienst | Ideen | Art | Eingabe | Quelle | Status |
 |---|---|---|---|---|---|
 | `feiertage` | Feiertage, Schulferien, Brückentage, Zeitumstellung, Kalenderwoche, Aktions- und Brauchtumstage – Kachel „Kalender“ | Rechnen + Live | Ort (Bundesland aus dem Ort) | eigene Berechnung + OpenHolidays | ✅ |
-| `namenstage` | Namenstage – Kachel „Kalender“ | Daten | Datum | Wikidata (CC0), monatlich per GitHub Action | ⏳ nächster Schritt |
+| `namenstage` | Namenstage – Kachel „Kalender“ | Daten | Datum, Name | Wikidata (CC0), monatlich per GitHub Action „Namenstage erneuern“ | ✅ |
 | `an-diesem-tag` | Weltereignisse, historische Ereignisse, Wissenschaftler-Geburtstage | Live | Datum | Wikipedia „An diesem Tag“ (Ereignisse, Geburten) | 🔁 (Geburten 🆕) |
 | `countdowns` | Countdowns, eigene Geburtstage und Jahrestage, Beziehungskalender | Lokal | – | Browser | 🆕 |
 | `aufgaben` | Aufgaben, Hausaufgaben, Tagesziele, Wochenziele, On-Track | Lokal | – | Browser | 🔁 (Kachel „Mein Daily“) |
@@ -95,7 +95,7 @@ Ein Dienst `tagesinhalt?rubrik=<rubrik>&datum=<JJJJ-MM-TT>` liefert alle vorbere
 | Social-Media-Ausspielung (Content Engine) | ⏸ | eigenes Produkt; kann später dieselben Dienste nutzen |
 
 ## Vorschlag Reihenfolge
-1. **Umzug** der laufenden Dienste auf daily/1: ~~`himmel`, `feiertage`, `warnungen`~~ (erledigt), `namenstage`, Termine (privat), `tanken`, `abfahrten`, `fussball`, `an-diesem-tag`, `tagesinhalt`, `kurse` (privat).
+1. **Umzug** der laufenden Dienste auf daily/1: ~~`himmel`, `feiertage`, `warnungen`, `namenstage`~~ (erledigt), Termine (privat), `tanken`, `abfahrten`, `fussball`, `an-diesem-tag`, `tagesinhalt`, `kurse` (privat).
 2. **Neue Live-Dienste mit freier Quelle:** `waehrungen`, `strompreis`, `verkehr`, `weltwetter`, `raumfahrt`, `krypto`, `klima`.
 3. **Neue Tagesinhalte:** weitere Rubriken in `tagesinhalt`, dazu `quiz`.
 4. **Lokale Dienste:** `countdowns`, `notizen`.

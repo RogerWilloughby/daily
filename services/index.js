@@ -10,7 +10,8 @@ const DIENSTE = [
   require('./regen'),
   require('./wetterhinweise'),
   require('./feiertage'),
-  require('./himmel')
+  require('./himmel'),
+  require('./namenstage')
 ];
 const byId = Object.fromEntries(DIENSTE.map(d => [d.id, d]));
 

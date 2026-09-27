@@ -583,3 +583,39 @@ test('Adapter Kalender: Kachel aus Feiertagen und Himmel, Reiter, Antworten', as
   assert.match(antwort('Zeitumstellung?', fe, hi, 'Dresden', jetzt), /Winterzeit: Uhr zurück .* am So\., 25\.10\./);
   assert.equal(antwort('Ferien?', null, hi, 'Rom', jetzt), 'Feiertage und Ferien gibt es für Orte in Deutschland.');
 });
+
+test('Namenstage: Erzeugung aus Wikidata, Dienst, Kachel und Antwort', async () => {
+  const t = require('../tools/namenstage-daten');
+  const b = (name, tag, links, heiliger, weg = 'heilige') => ({ nameDe: { value: name }, tagEn: { value: tag }, links: { value: String(links) }, weg: { value: weg }, ...(heiliger ? { heiliger: { value: heiliger } } : {}) });
+  const json = { results: { bindings: [
+    b('Josef', 'March 19', 120, 'Q1'), b('Joseph', '19 March', 80, 'Q1'), b('Josef', 'March 19', 120, 'Q2'),
+    b('Johannes der Täufer', 'June 24', 50, 'Q3'), b('Johannes', 'June 24', 150, 'Q3'), b('Hans-Peter', 'June 24', 5, null, 'namenstag'),
+    b('Wenzel', 'September 28', 40, 'Q4'), b('Lioba', 'September 28', 10, 'Q5'), b('Falsch', 'Juni 99', 10, 'Q6'), b('kleinschrift', 'May 1', 10, 'Q7')
+  ] } };
+  const tage = t.auswerten(json);
+  assert.deepEqual(tage, { '03-19': ['Josef', 'Joseph'], '06-24': ['Hans-Peter', 'Johannes'], '09-28': ['Wenzel', 'Lioba'] });   // ausdrücklicher Namenstag zuerst
+  assert.ok(t.pruefe(tage).length === 2);                                              // zu wenig → Abbruch, alter Stand bleibt
+  // Dienst (rein)
+  const na = dienste.byId.namenstage;
+  const d = na.auswerten({ stand: '2026-09-01', tage }, '2026-09-27', 'josef');
+  assert.deepEqual(d.woche[1], { datum: '2026-09-28', namen: ['Wenzel', 'Lioba'] });
+  assert.equal(d.heute.namen.length, 0);
+  assert.deepEqual(d.gesucht, { name: 'Josef', tage: ['03-19'], naechster: '2027-03-19' });
+  assert.equal(na.auswerten({ tage }, '2026-09-27', 'Hänsel').gesucht.naechster, null);
+  // Router: gültig, auch solange der Bestand noch leer ist
+  const r = await rufe('namenstage', { name: 'Josef' });
+  assert.equal(r.code, 200);
+  gueltig(r.body, na.schema);
+  if (!r.body.daten.stand) assert.deepEqual(r.body.hinweise, ['daten_fehlen']);
+  // Kachel und Antwort
+  const { kachel, namenAntwort } = await esm('src/js/adapter/kalender.js');
+  const jetzt = Date.parse('2026-09-28T10:00:00Z');
+  const nEnv = { daten: na.auswerten({ stand: '2026-09-01', tage }, '2026-09-28') };
+  const k = kachel(null, { daten: dienste.byId.himmel.berechne(51.05, 13.74, jetzt) }, jetzt, 'Europe/Berlin', nEnv);
+  assert.match(k.x, /Namenstag: Wenzel, Lioba$/);
+  assert.match(k.tabs[0].html, /Namenstag heute: <b>Wenzel, Lioba<\/b>/);
+  assert.equal(k.tabs.at(-1).id, 'namen');
+  assert.equal(namenAntwort(nEnv, jetzt), 'Heute haben Namenstag: Wenzel, Lioba.');
+  assert.equal(namenAntwort({ daten: d }, jetzt), 'Josef hat Namenstag am Fr., 19.3. (in 172 Tagen).');
+  assert.equal(namenAntwort({ daten: { ...d, stand: null } }, jetzt), 'Die Namenstage werden gerade erst aufgebaut.');
+});
