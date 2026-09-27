@@ -24,7 +24,7 @@ Status: ✅ fertig in daily/1 · 🔁 läuft, noch alte Schnittstelle · 🆕 ne
 | Dienst | Ideen | Art | Eingabe | Quelle | Status |
 |---|---|---|---|---|---|
 | `feiertage` | Feiertage, Schulferien, Brückentage, Zeitumstellung, Kalenderwoche, Aktions- und Brauchtumstage – Kachel „Kalender“ | Rechnen + Live | Ort (Bundesland aus dem Ort) | eigene Berechnung + OpenHolidays | ✅ |
-| `namenstage` | Namenstage – Kachel „Kalender“ | Daten | Datum, Name | Wikidata (CC0), monatlich per GitHub Action „Daten erneuern“ | ✅ |
+| `namenstage` | Namenstage – Kachel „Kalender“ | Daten | Datum, Name | feste Liste von DAILY nach dem kirchlichen Kalender | ✅ |
 | `an-diesem-tag` | Weltereignisse, historische Ereignisse, Wissenschaftler-Geburtstage | Live | Datum | Wikipedia „An diesem Tag“ (Ereignisse, Geburten) | 🔁 (Geburten 🆕) |
 | `countdowns` | Countdowns, eigene Geburtstage und Jahrestage, Beziehungskalender | Lokal | – | Browser | 🆕 |
 | `aufgaben` | Aufgaben, Hausaufgaben, Tagesziele, Wochenziele, On-Track | Lokal | – | Browser | 🔁 (Kachel „Mein Daily“) |

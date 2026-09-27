@@ -1,5 +1,5 @@
 // Dienst „ort“ (Standort): findet Orte
-//  – in Deutschland aus dem eigenen Ortsbestand (services/daten/orte-de.json, GeoNames, monatlich erneuert) – ohne externe Anfrage:
+//  – in Deutschland aus dem eigenen Ortsbestand (services/daten/orte-de.json, GeoNames, feste Datei) – ohne externe Anfrage:
 //    nach Name (q=Neustadt), nach Postleitzahl (q=01844) und nach Koordinaten (lat, lon – Gerätestandort)
 //  – im Ausland nur nach Name, und nur wenn es in Deutschland keinen Treffer gibt: Open-Meteo Geocoding
 // Das Ort-Objekt ist die Eingabe fast aller anderen Dienste.
@@ -63,8 +63,9 @@ const suche = async (q, anzahl = 6) => (await finde(q, anzahl)).orte;
 module.exports = {
   id: 'ort',
   version: 1,                 // Vertrag (Datenformat)
-  programmversion: '1.3.1',   // steigt bei jeder Änderung des Dienstes
+  programmversion: '1.3.2',   // steigt bei jeder Änderung des Dienstes
   aenderungen: [
+    { version: '1.3.2', datum: '2026-09-27', text: 'Ortsbestand ist eine feste Datei – keine monatliche Action mehr (Orte ändern sich kaum); bei Bedarf einmalig mit tools/orte-daten.js neu erzeugen' },
     { version: '1.3.1', datum: '2026-09-27', text: 'Ortsbestand wird jetzt über die gemeinsame Action „Daten erneuern“ erzeugt (Dienstblatt angepasst)' },
     { version: '1.3.0', datum: '2026-09-27', text: 'Doppelte zusammengefasst, Stadtstaaten korrigiert, weitere Firmennamen gefiltert' },
     { version: '1.2.0', datum: '2026-09-27', text: 'Suche wie eine Suchmaschine (Kürzel, Umlaute, Tippfehler), Einwohnerzahlen, Vorschläge beim Tippen (land=DE)' },
@@ -82,7 +83,7 @@ module.exports = {
   blatt: {
     zweck: 'Grundlage aller ortsbezogenen Dienste: macht aus einer Eingabe des Nutzers (Name, Postleitzahl oder Gerätestandort) einen eindeutigen Ort mit Koordinaten.',
     herkunft: [
-      'Deutschland: eigener Ortsbestand aus den GeoNames-Postleitzahldaten, Einwohnerzahlen aus dem GeoNames-Ortsverzeichnis (beide CC BY 4.0). Monatlich neu erzeugt (tools/orte-daten.js, GitHub Action „Daten erneuern“, Erzeuger tools/daten/orte.js). Liegt als Datei beim Dienst – keine externe Anfrage.',
+      'Deutschland: eigener Ortsbestand aus den GeoNames-Postleitzahldaten, Einwohnerzahlen aus dem GeoNames-Ortsverzeichnis (beide CC BY 4.0). Feste Datei; bei Bedarf einmalig neu erzeugt mit tools/orte-daten.js (Orte ändern sich kaum). Liegt als Datei beim Dienst – keine externe Anfrage.',
       'Ausland: Open-Meteo Geocoding (Datenbasis GeoNames), nur Namenssuche und nur, wenn kein deutscher Ort genau passt oder der beste deutsche Treffer weniger als 5.000 Einwohner hat.'
     ],
     verarbeitung: [

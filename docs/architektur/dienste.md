@@ -77,7 +77,7 @@ Der Dienst `ort` findet Orte
 - nach **Postleitzahl** (Deutschland): `/api/v1/ort?q=01844` – eigener Ortsbestand,
 - nach **Koordinaten** (Gerätestandort): `/api/v1/ort?lat=51.05&lon=13.74` – nächster Postleitzahl-Punkt im eigenen Bestand (bis 25 km, nur Deutschland; sonst leer mit Hinweis `ausserhalb`).
 
-Der Ortsbestand `services/daten/orte-de.json` (≈ 15.000 Orte, 1,3 MB) wird mit `tools/orte-daten.js` aus den GeoNames-Downloads erzeugt – monatlich und auf Knopfdruck durch die GitHub Action „Daten erneuern“ (`.github/workflows/daten-erneuern.yml`, Erzeuger `tools/daten/orte.js`). Alle Datenbestände laufen über diesen einen Workflow; ein neuer Bestand braucht nur eine neue Datei `tools/daten/<name>.js`. Details: Dienstblatt `../dienste/ort.md`.
+Der Ortsbestand `services/daten/orte-de.json` (≈ 15.000 Orte, 1,3 MB) wird mit `tools/orte-daten.js` aus den GeoNames-Downloads erzeugt und liegt als **feste Datei** im Repo – keine Automatik (Orte ändern sich kaum); bei Bedarf einmalig neu erzeugen. Grundsatz seit 27.09.2026: selten geänderte Daten (Orte, Namenstage) sind feste Dateien, keine Workflows. Details: Dienstblatt `../dienste/ort.md`.
 
 Ort-Objekt (Pflicht: `name`, `lat`, `lon`; der Dienst `ort` liefert immer alle Felder, ggf. `null`/leer):
 
@@ -150,7 +150,7 @@ Daraus entstehen der Katalog `/api/v1/dienste`, die Dateien `docs/dienste/<id>.m
 | `regen` | ✅ daily/1 – DWD-Radar über Bright Sky; erscheint in der Wetterkachel (Hinweis + Reiter „Radar“) |
 | `wetterhinweise` | ✅ daily/1 – amtliche DWD-Warnungen über Bright Sky; ersetzt die Kachel „Warnungen“, erscheint in der Wetterkachel (Abzeichen, Hinweis, Reiter „Hinweise“) nur, wenn es etwas gibt |
 | `feiertage`, `himmel` | ✅ daily/1 – Kachel „Kalender“ (ersetzt „Feiertage & Ferien“ und „Himmel“): Feiertage, Ferien (OpenHolidays), Brückentage, Zeitumstellung, KW, Aktionstage; Mond, Finsternisse, Sternschnuppen, Jahreszeiten (Astronomy Engine) |
-| `namenstage` | ✅ daily/1 – eigener Bestand aus Wikidata (CC0), monatlich per Action; in der Kachel „Kalender“ (Zeile, Reiter „Namenstage“, Frag DAILY „Wann hat Josef Namenstag?“) |
+| `namenstage` | ✅ daily/1 – feste, gepflegte Liste nach dem kirchlichen Kalender (`services/daten/namenstage.json`); in der Kachel „Kalender“ (Zeile, Reiter „Namenstage“, Frag DAILY „Wann hat Josef Namenstag?“) |
 | Tanken, Abfahrten, Sport, Geld, Wissen, Tagesinhalte | ⏳ noch alte Einzelfunktionen bzw. im Browser berechnet |
 | Kalender, Schlagzeilen (privat) | ⏳ |
 

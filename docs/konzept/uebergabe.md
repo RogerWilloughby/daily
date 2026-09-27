@@ -3,6 +3,7 @@
 Stand 27.09.2026. Für neue Chats: hier steht, woran gerade gearbeitet wird und wie es weitergeht. Verbindliche Entscheidungen stehen in `entscheidungen.md`, die Architektur in `../architektur/dienste.md`.
 
 ## Vorgehen (Rogers Vorgaben)
+- **Erst Plan, dann Umsetzung (Rogers Vorgabe vom 27.09.2026):** Vor jeder Umsetzung und vor jedem Schreiben ins Repo einen kurzen Plan vorlegen – was und warum, welche Dateien (neu/geändert/gelöscht), was Roger danach tun muss, was offen/unsicher ist – und auf Rogers OK warten. Nicht einfach loslegen.
 - **Der Reihe nach, einzeln:** ein Punkt pro Schritt, Entscheidungen per Rückfrage. Erst testen, dann zum nächsten Dienst. Nicht vorgreifen („Warum beschäftigen wir uns schon mit dem Wetter, wenn wir doch noch am Standort arbeiten?“).
 - **Headless:** Dienste liefern reine Daten im Format daily/1, Adapter und Oberflächen stellen dar. Jeder Dienst wird einzeln gebaut und in der Kachelansicht getestet.
 - **Transparenz:** Jeder Dienst hat ein Dienstblatt (Herkunft, Zweck, Eingabe, Ausgabe, Verarbeitung, Skalierung) – siehe `../dienste/`.
@@ -17,18 +18,17 @@ Stand 27.09.2026. Für neue Chats: hier steht, woran gerade gearbeitet wird und 
 - `hochladen.cmd` lädt seit 27.09. auch liegengebliebene Commits nach (wenn ein Push fehlschlug und nichts Neues zu committen ist).
 - **Dateien unter `.github/workflows/` darf Claude nicht schreiben** (von der Desktop-App geschützt). Claude legt sie unter `tools/` ab, Roger verschiebt sie von Hand (`move tools\x.yml .github\workflows\x.yml`).
 - Für Workflow-Dateien braucht die GitHub-Anmeldung das Recht `workflow`. Eingerichtet am 27.09.: `gh auth refresh -h github.com -s workflow` und `gh auth setup-git` (Git meldet sich jetzt über die GitHub-Kommandozeile an).
-- **Ein Workflow für alle Datenbestände (seit 27.09., Rogers Entscheidung):** `.github/workflows/daten-erneuern.yml` („Daten erneuern“) startet alle Erzeuger in `tools/daten/` (heute `orte`, `namenstage`), monatlich am 2. und auf Knopfdruck (Eingabe „erzeuger“ = nur bestimmte). Neue Bestände = neue Datei `tools/daten/<name>.js` mit `{ titel, ausfuehren() }` – **keine Workflow-Änderung, nichts zu verschieben**. Ein fehlgeschlagener Erzeuger stoppt die anderen nicht, der Lauf wird am Ende rot.
+- **Keine Workflows mehr (seit 27.09., Rogers Entscheidung):** Selten geänderte Daten (Ortsbestand, Namenstage) sind feste Dateien in `services/daten/`. Keine GitHub Actions, keine Erzeuger-Skripte, nichts von Hand zu starten. `.github/workflows` ist leer.
 - Warum Dateien statt Datenbank: kleine, selten geänderte Daten liegen im Speicher der Funktion (< 1 ms); eine Datenbank kostete je Anfrage 5–20 ms und bräuchte trotzdem einen Abrufjob. Datenbank erst für große/oft geänderte Daten (zentrales Wetter/Radar).
-- Die GitHub-Actions-Seite zeigt einen Workflow erst nach dem ersten Lauf; direkter Link: https://github.com/RogerWilloughby/daily/actions/workflows/daten-erneuern.yml
-- Netz: Cloud-Container und Desktop-VM erreichen nur GitHub, npm und PyPI – nicht Open-Meteo, GeoNames, DWD, destatis. Deshalb werden Ortsdaten per GitHub Action erzeugt.
+- Netz: Cloud-Container und Desktop-VM erreichen nur GitHub, npm und PyPI – nicht Open-Meteo, GeoNames, DWD, destatis. Neu erzeugte Datenbestände (selten) daher auf einem Rechner mit Netz; im Alltag sind es feste Dateien.
 - Tests in der Desktop-VM: dort fehlt `node_modules`, `npm test` scheitert an `node-ical`; `node --test test/dienste.test.js` läuft. Vollständig läuft `npm test` im Cloud-Container.
 
 ## Stand der Dienste
 | Dienst | Stand |
 |---|---|
-| `ort` | ✅ fertig bis auf Rogers Test. Eigener Ortsbestand aus GeoNames (`services/daten/orte-de.json`, ≈ 14.700 Orte, Einwohnerzahlen, Großkunden gefiltert), monatlich per Action „Daten erneuern“. Suche wie eine Suchmaschine (Wörter einzeln, Kürzel Sa./Thür./Westf./Opf., Umlaute, Tippfehler, Doppelte zusammengefasst), Vorschläge beim Tippen (`land=DE`), Ausland über Open-Meteo nur, wenn kein deutscher Ort genau passt oder nur ein kleiner. Umkehrsuche (Gerätestandort) im eigenen Bestand. Ort hat seit 27.09. einen eigenen Knopf in der unteren Leiste mit eigenem Dialog (Standort ermitteln, Suche, Klick übernimmt sofort). |
+| `ort` | ✅ fertig bis auf Rogers Test. Eigener Ortsbestand aus GeoNames (`services/daten/orte-de.json`, ≈ 14.700 Orte, Einwohnerzahlen, Großkunden gefiltert), feste Datei (keine Automatik). Suche wie eine Suchmaschine (Wörter einzeln, Kürzel Sa./Thür./Westf./Opf., Umlaute, Tippfehler, Doppelte zusammengefasst), Vorschläge beim Tippen (`land=DE`), Ausland über Open-Meteo nur, wenn kein deutscher Ort genau passt oder nur ein kleiner. Umkehrsuche (Gerätestandort) im eigenen Bestand. Ort hat seit 27.09. einen eigenen Knopf in der unteren Leiste mit eigenem Dialog (Standort ermitteln, Suche, Klick übernimmt sofort). |
 | `feiertage`, `himmel` | ✅ neu 27.09. (0.12.0): Kachel „Kalender“ (Feiertage, Ferien, Brückentage, Zeitumstellung, KW, Aktionstage; Mond, Finsternisse, Sternschnuppen, Jahreszeiten). Ersetzt „Feiertage & Ferien“ und „Himmel“. Wartet auf Rogers Test. Als Nächstes: Namenstage (Wikidata), dann private Termine in der Kachel. |
-| `namenstage` | ✅ neu 27.09. (0.13.0): Wikidata (CC0) per Action „Daten erneuern“ (Erzeuger `namenstage`). Erster Lauf (Fassung 1) unbrauchbar → Fassung 2 (deutsche Namen, Ankerprüfung), wartet auf neuen Lauf „Daten erneuern“ mit `namenstage`. Bis zum ersten erfolgreichen Lauf der Fassung 2 ist der Bestand leer (Hinweis `daten_fehlen`, im Kalender erscheint nichts). |
+| `namenstage` | ✅ neu 27.09. (0.14.0): feste Liste nach dem kirchlichen Kalender, im Kalender. Wartet auf Rogers Test. |
 | `wetterhinweise` | ✅ neu 27.09. (0.10.0): amtliche DWD-Warnungen über Bright Sky in der Wetterkachel (Abzeichen, Hinweis, Reiter „Hinweise“ mit Alltagstipp) – ersetzt die Kachel „Warnungen“. Wartet auf Rogers Test. |
 | `regen` | ✅ neu 27.09.: DWD-Radar über Bright Sky, 2 h Verlauf, Nähe, Karte; in der Wetterkachel. Wartet auf Rogers Test. |
 | `wetter` | ✅ überarbeitet 27.09. (siehe unten): Open-Meteo, 16 Tage (ab Tag 8 Trend), Zusatzwerte, Cache-Takt :00/:30. Wartet auf Rogers Test. |
@@ -52,7 +52,7 @@ App-Seite „Woher kommen die Daten?“ (Fußzeile → Datenquellen) zeigt die D
 ## Nächste Schritte (in dieser Reihenfolge)
 1. Roger testet den Dienst `regen` (Radar-Reiter, Hinweis „Regen in X Min.“). Offen: Luftqualität/Pollen prüfen (DWD-Pollenflug-Gefahrenindex, Umweltbundesamt); Radarkarte ohne Landkarte darunter – ggf. später Umrisse/Orte.
 2. Roger testet mehrere Orte (Auswahlbox) und die neue aufgeklappte Kachel. Später: Kachelauswahl in den Einstellungen, ggf. Ort je Kachel.
-3. Roger legt `tools/daten-erneuern.yml` einmalig als `.github/workflows/daten-erneuern.yml` ab, löscht die alten `orte-daten.yml` und `namenstage-daten.yml` dort, startet „Daten erneuern“ (Eingabe `namenstage`) und testet Kalender und Namenstage. Danach: private Termine (iCal) in der Kachel.
+3. Roger testet Kalender und Namenstage. Danach: private Termine (iCal) in der Kachel.
 3a. Roger testet die Wetterhinweise (im Testserver mit Beispielwarnungen; echt nur bei aktueller DWD-Warnung am Ort). Freie Plätze füllen sich mit jeder überarbeiteten Kachel.
 4. ~~Vercel oder AWS~~ entschieden 27.09.: Vercel; Performance-Maßnahmen 1–3 umgesetzt (0.9.0). **Vor dem öffentlichen Start:** eigene Daten Wetter/Radar (zentral), Lasttest, Vercel Pro.
 5. Übrige Dienste auf daily/1 umziehen (Reihenfolge `dienste-katalog.md`), je mit Dienstblatt.

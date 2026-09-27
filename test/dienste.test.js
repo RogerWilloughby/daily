@@ -584,25 +584,18 @@ test('Adapter Kalender: Kachel aus Feiertagen und Himmel, Reiter, Antworten', as
   assert.equal(antwort('Ferien?', null, hi, 'Rom', jetzt), 'Feiertage und Ferien gibt es für Orte in Deutschland.');
 });
 
-test('Namenstage: Erzeugung aus Wikidata, Dienst, Kachel und Antwort', async () => {
-  const t = require('../tools/namenstage-daten');
-  const b = (name, tag, links, heiliger, weg = 'heilige') => ({ nameDe: { value: name }, tagEn: { value: tag }, links: { value: String(links) }, weg: { value: weg }, ...(heiliger ? { heiliger: { value: heiliger } } : {}) });
-  const json = { results: { bindings: [
-    b('Josef', 'March 19', 120, 'Q1'), b('Joseph', '19 March', 80, 'Q1'), b('Josef', 'March 19', 120, 'Q2'),
-    b('Johannes der Täufer', 'June 24', 50, 'Q3'), b('Johannes', 'June 24', 150, 'Q3'), b('Hans-Peter', 'June 24', 5, null, 'namenstag'),
-    b('Wenzel', 'September 28', 40, 'Q4'), b('Lioba', 'September 28', 10, 'Q5'), b('Falsch', 'Juni 99', 10, 'Q6'), b('kleinschrift', 'May 1', 10, 'Q7')
-  ] } };
-  const tage = t.auswerten(json);
-  assert.deepEqual(tage, { '03-19': ['Josef', 'Joseph'], '06-24': ['Hans-Peter', 'Johannes'], '09-28': ['Wenzel', 'Lioba'] });   // ausdrücklicher Namenstag zuerst
-  assert.equal(t.pruefe(tage).length, 3);                                              // zu wenig und bekannte Namenstage fehlen → Abbruch
-  assert.match(t.pruefe(tage)[2], /Martin 11-11/);
-  const voll = Object.fromEntries(Object.entries(t.ANKER).map(([k, v]) => [k, [v]]));
-  assert.equal(t.pruefe(voll).length, 2);                                              // Anker stimmen, nur zu wenig Tage/Namen
-  assert.deepEqual(['Josef von Nazaret', 'Georg (Heiliger)', 'Nikolaus von Myra', 'Johannes Paul II.', 'hl. Anna', '聖母'].map(t.vornameAus),
-    ['Josef', 'Georg', 'Nikolaus', 'Johannes', null, null]);
-  const z = t.zeilen([{ heiliger: 'Q1', tag: 'T' }, { heiliger: 'Q2', tag: 'T' }], { Q1: { de: 'Josef von Nazaret', links: 90, dewiki: true }, Q2: { de: 'Giovanni X', links: 99, dewiki: false } }, { T: { en: 'March 19' } });
-  assert.deepEqual(t.auswerten(z), { '03-19': ['Josef'] });                             // ohne deutschen Artikel fällt weg
-  assert.equal(t.erzeuge(z).format, 2);
+test('Namenstage: feste Liste plausibel, Dienst, Kachel und Antwort', async () => {
+  const liste = require('../services/daten/namenstage.json');
+  assert.equal(liste.format, 2);
+  const alle = Object.entries(liste.tage);
+  assert.ok(alle.length >= 360, String(alle.length));
+  for (const [t, namen] of alle) {
+    assert.match(t, /^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/);
+    namen.forEach(n => assert.match(n, /^\p{Lu}[\p{Ll}]+$/u, `${t} ${n}`));
+  }
+  const anker = { '03-19': 'Josef', '06-24': 'Johannes', '11-11': 'Martin', '12-06': 'Nikolaus', '04-23': 'Georg', '11-19': 'Elisabeth', '12-04': 'Barbara', '10-04': 'Franz', '06-29': 'Peter', '07-26': 'Anna' };
+  for (const [t, n] of Object.entries(anker)) assert.ok(liste.tage[t].includes(n), `${n} am ${t}`);
+  const tage = { '03-19': ['Josef'], '09-28': ['Wenzel', 'Lioba'] };
   // Dienst (rein)
   const na = dienste.byId.namenstage;
   const d = na.auswerten({ stand: '2026-09-01', tage }, '2026-09-27', 'josef');
@@ -610,11 +603,12 @@ test('Namenstage: Erzeugung aus Wikidata, Dienst, Kachel und Antwort', async () 
   assert.equal(d.heute.namen.length, 0);
   assert.deepEqual(d.gesucht, { name: 'Josef', tage: ['03-19'], naechster: '2027-03-19' });
   assert.equal(na.auswerten({ tage }, '2026-09-27', 'Hänsel').gesucht.naechster, null);
-  // Router: gültig, auch solange der Bestand noch leer ist
-  const r = await rufe('namenstage', { name: 'Josef' });
+  // Router: echte Liste
+  const r = await rufe('namenstage', { name: 'josef' });
   assert.equal(r.code, 200);
   gueltig(r.body, na.schema);
-  if (!r.body.daten.stand) assert.deepEqual(r.body.hinweise, ['daten_fehlen']);
+  assert.deepEqual(r.body.hinweise, []);
+  assert.ok(r.body.daten.gesucht.tage.includes('03-19') && r.body.daten.gesucht.tage.includes('05-01'));
   // Kachel und Antwort
   const { kachel, namenAntwort } = await esm('src/js/adapter/kalender.js');
   const jetzt = Date.parse('2026-09-28T10:00:00Z');
@@ -628,12 +622,3 @@ test('Namenstage: Erzeugung aus Wikidata, Dienst, Kachel und Antwort', async () 
   assert.equal(namenAntwort({ daten: { ...d, stand: null } }, jetzt), 'Die Namenstage werden gerade erst aufgebaut.');
 });
 
-test('Daten-Erzeuger: jede Datei in tools/daten ist ein Erzeuger, unbekannte werden abgelehnt', async () => {
-  const { alle, lauf } = require('../tools/daten/lauf');
-  assert.deepEqual(alle(), ['namenstage', 'orte']);
-  for (const n of alle()) {
-    const e = require(`../tools/daten/${n}.js`);
-    assert.equal(typeof e.titel, 'string', n); assert.equal(typeof e.ausfuehren, 'function', n);
-  }
-  await assert.rejects(lauf('gibtsnicht'), /Unbekannter Erzeuger: gibtsnicht/);
-});

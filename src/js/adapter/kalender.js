@@ -71,7 +71,7 @@ export const namenText = (l, max = 3) => !l || !l.length ? '' : l.length <= max 
 function namenReiter(n, heute) {
   const z = n.woche.map(w => `<li class="kl-z kl-namen${w.datum === heute ? ' kl-wichtig' : ''}"><span class="kl-d">${esc(wtag(w.datum))}<small>${esc(wann(tageBis(heute, w.datum)))}</small></span>` +
     `<span class="kl-t">${esc(w.namen.join(', ') || '–')}</span></li>`).join('');
-  return `<ul class="kl-liste">${z}</ul><p class="kl-quelle">Namenstage nach Gedenktagen der Heiligen (Wikidata, CC0) – eine Auswahl, Kalender unterscheiden sich je Region und Konfession.</p>`;
+  return `<ul class="kl-liste">${z}</ul><p class="kl-quelle">Namenstage nach den Gedenktagen der Heiligen – eine Auswahl, Kalender unterscheiden sich je Region und Konfession.</p>`;
 }
 
 // Die Kachel. fEnv (feiertage) kann fehlen (Ausland, Störung), hEnv (himmel) und nEnv (namenstage) ebenso.

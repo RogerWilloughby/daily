@@ -1,15 +1,16 @@
 // Dienst „namenstage“: wer heute und in den nächsten Tagen Namenstag hat – und wann ein bestimmter Name Namenstag hat.
-// Daten: eigener Bestand services/daten/namenstage.json, monatlich per GitHub Action aus Wikidata (CC0) erzeugt
-// (Gedenktage der Heiligen und ausdrückliche Namenstage für Deutschland/Österreich, tools/namenstage-daten.js).
+// Daten: feste, von DAILY gepflegte Liste services/daten/namenstage.json nach dem kirchlichen Kalender
+// (Allgemeiner Römischer Kalender, Regionalkalender für das deutsche Sprachgebiet). Keine Abrufe, keine Automatik:
+// Namenstage ändern sich praktisch nie; Korrekturen direkt in der Datei.
 const { DienstFehler, tagIn, text } = require('./_lib/rahmen');
 const { S } = require('./_lib/schema');
 
 const QUELLEN = [
-  { name: 'Wikidata (Gedenktage der Heiligen, Namenstage)', lizenz: 'CC0 1.0 (gemeinfrei)', url: 'https://www.wikidata.org' }
+  { name: 'DAILY-Auswahl nach dem kirchlichen Kalender (Gedenktage der Heiligen)', lizenz: null, url: null }
 ];
 const TAGE_VORAUS = 7;
 
-// Nur Bestände der Fassung 2 (deutsche Namen, geprüft) gelten; ältere Dateien werden ignoriert, bis die Action neu erzeugt hat.
+// Nur Bestände der Fassung 2 (deutsche Namen) gelten.
 const FORMAT = 2;
 let BESTAND = null;
 const bestand = () => BESTAND || (BESTAND = (d => (d && d.format === FORMAT ? d : { tage: {}, stand: null }))(require('./daten/namenstage.json')));
@@ -46,8 +47,9 @@ const SCHEMA = S.obj({
 module.exports = {
   id: 'namenstage',
   version: 1,
-  programmversion: '1.0.2',
+  programmversion: '1.1.0',
   aenderungen: [
+    { version: '1.1.0', datum: '2026-09-27', text: 'Feste, gepflegte Liste deutscher Namenstage nach dem kirchlichen Kalender statt Wikidata-Abruf (lieferte keine brauchbaren deutschen Namen); keine Action mehr' },
     { version: '1.0.2', datum: '2026-09-27', text: 'Deutsche Namen: Vorname aus dem deutschen Namen des Heiligen (nur mit Artikel in der deutschen Wikipedia), Prüfung an bekannten Namenstagen; Bestände ohne Fassung 2 werden ignoriert' },
     { version: '1.0.1', datum: '2026-09-27', text: 'Wikidata-Abruf in kleinen Schritten (die große Abfrage lief in den 60-s-Abbruch); erzeugt über die gemeinsame Action „Daten erneuern“' },
     { version: '1.0.0', datum: '2026-09-27', text: 'Erste Fassung: Namenstage heute und die nächsten 7 Tage, Suche nach einem Namen; Bestand aus Wikidata (CC0), monatlich erneuert' }
@@ -64,14 +66,12 @@ module.exports = {
   blatt: {
     zweck: 'Kleiner Anlass zum Gratulieren: zeigt im Kalender, wer heute Namenstag hat, und beantwortet „Wann hat Josef Namenstag?“.',
     herkunft: [
-      'Wikidata (freie Wissensdatenbank, CC0): Personen mit Gedenktag (Eigenschaft „Gedenktag“), die einen Artikel in der deutschen Wikipedia haben. Der Vorname kommt aus ihrem deutschen Namen („Josef von Nazaret“ → Josef).',
-      'Eigener Bestand services/daten/namenstage.json, erzeugt monatlich per GitHub Action „Daten erneuern“ (Erzeuger tools/daten/namenstage.js → tools/namenstage-daten.js).'
+      'Feste Liste von DAILY (services/daten/namenstage.json): je Tag die üblichen Vornamen nach den Gedenktagen der Heiligen im Allgemeinen Römischen Kalender und im Regionalkalender für das deutsche Sprachgebiet.',
+      'Keine Abrufe und keine Automatik – Namenstage ändern sich praktisch nie; Korrekturen und Ergänzungen direkt in der Datei.'
     ],
     verarbeitung: [
-      'Je Tag höchstens 6 Vornamen, bekannteste Heilige zuerst (Zahl der Wikipedia-Sprachversionen).',
-      'Nur echte Vornamen (ein Wort, auch mit Bindestrich); deutsche Schreibweise aus Wikidata.',
+      'Je Tag 1 bis 3 Vornamen in deutscher Schreibweise, der bekannteste zuerst; an Allerheiligen, Allerseelen und einigen Festtagen keine.',
       'Namenstage folgen der kirchlichen Tradition und unterscheiden sich je Kalender (katholisch, evangelisch, regional) – DAILY zeigt eine Auswahl, keinen amtlichen Kalender.',
-      'Eine Erzeugung wird verworfen (alter Stand bleibt), wenn weniger als 300 Tage oder 300 Namen herauskommen oder mehr als 2 von 8 bekannten Namenstagen fehlen (Josef 19.3., Johannes 24.6., Martin 11.11., Nikolaus 6.12., Georg 23.4., Elisabeth 19.11., Barbara 4.12., Franz 4.10.).',
       '„Heute“ in der Zeitzone Europe/Berlin.'
     ],
     ausgabe: {
@@ -85,11 +85,11 @@ module.exports = {
       'gesucht.name': 'gesuchter Name',
       'gesucht.tage': 'Namenstage als MM-TT',
       'gesucht.naechster': 'nächster Namenstag ab heute (oder null)',
-      stand: 'Tag der letzten Erneuerung aus Wikidata (null = noch nicht erzeugt)'
+      stand: 'Stand der Liste'
     },
     skalierung: {
       klasse: 'A',
-      quelle: 'keine zur Laufzeit – eigener Bestand (≈ 20 KB), Wikidata nur einmal im Monat per Action.',
+      quelle: 'keine – feste Liste (≈ 10 KB) beim Dienst.',
       kosten: 'Nachschlagen < 1 ms.',
       cache: 'Takt 1 Tag; ohne Namen für alle Nutzer dieselbe Antwort.',
       bei10Mio: 'Unproblematisch: eine Antwort je Tag für alle (CDN), Suchen nach Namen ebenfalls je Tag zwischengespeichert.'

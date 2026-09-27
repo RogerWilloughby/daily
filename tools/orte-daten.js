@@ -3,7 +3,7 @@
 //   <Postleitzahlen> = GeoNames DE.txt aus https://download.geonames.org/export/zip/DE.zip (tabulatorgetrennt)
 //                      oder der CSV-Spiegel zipcodes.de.csv (github.com/zauberware/postal-codes-json-xml-csv, gleiche Daten)
 //   <Orte>           = optional GeoNames DE.txt aus https://download.geonames.org/export/dump/DE.zip – liefert die Einwohnerzahlen
-// Monatlich aktualisiert durch die GitHub Action „Daten erneuern“ (Erzeuger tools/daten/orte.js).
+// Keine Automatik: Der Bestand ist eine feste Datei. Nur bei Bedarf (selten) einmalig neu erzeugen, z. B. auf einem Rechner mit Netz.
 const fs = require('fs');
 const path = require('path');
 

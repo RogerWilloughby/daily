@@ -40,7 +40,7 @@ Hinweis: Vercel Hobby und das freie Open-Meteo sind nur für **nicht kommerziell
 | `wetterhinweise` | C | Bright Sky ohne veröffentlichte Grenze, ohne Zusage | nur auf Anfrage im Paket mit Wetter/Regen, Takt 5 min. Bei Wachstum: DWD-Warnliste zentral alle 5 min laden und je Warnzelle (≈ 11.000 Gemeinden) vorhalten – Abrufe unabhängig von der Nutzerzahl | Stufe 1–2 |
 | `feiertage` | B | OpenHolidays frei, ohne Grenze; Rest gerechnet | Takt 1 Tag, je Bundesland höchstens 1 Ferien-Abruf am Tag (16 Länder) | Stufe 1–2 |
 | `himmel` | A | keine Quelle (Astronomy Engine) | Takt 1 Stunde, ≈ 20–40 ms Rechenzeit je Ort; bei Bedarf je 1°-Feld vorrechnen | Stufe 1 |
-| `namenstage` | A | keine zur Laufzeit (eigener Bestand, Wikidata monatlich per Action) | Takt 1 Tag, für alle gleich | Stufe 1 |
+| `namenstage` | A | keine (feste Liste beim Dienst) | Takt 1 Tag, für alle gleich | Stufe 1 |
 
 Weitere Dienste werden beim Umzug auf daily/1 hier eingetragen.
 
