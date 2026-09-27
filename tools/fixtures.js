@@ -101,4 +101,31 @@ const fuel = () => ({ ok: true, status: 'ok', stations: [
   { id: 's4', name: 'Ohne Preis', brand: 'Shell', street: 'x', place: 'Dresden', dist: 1.1, price: null, isOpen: true }
 ] });
 
-module.exports = { rss, atom, yahoo, table1, table2, matches2, pointfinder, departures, onthisday, ics, alerts, school, fuel };
+// ---- Open-Meteo (Format mit timezone=auto & timeformat=unixtime) ----
+const ZONE = 'Europe/Berlin';
+const offsetSek = t => { const m = /GMT([+-]\d+)(?::(\d+))?/.exec(new Intl.DateTimeFormat('en-US', { timeZone: ZONE, timeZoneName: 'shortOffset' }).format(t)) || [];
+  return ((+m[1] || 0) * 60 + Math.sign(+m[1] || 1) * (+m[2] || 0)) * 60; };
+const berlinTag = t => new Intl.DateTimeFormat('en-CA', { timeZone: ZONE, year: 'numeric', month: '2-digit', day: '2-digit' }).format(t);
+const mitternacht = t => (Date.parse(berlinTag(t) + 'T00:00:00Z') - offsetSek(t) * 1000) / 1000; // Unix-Sekunden
+function forecast() {
+  const m0 = mitternacht(now), off = offsetSek(now);
+  const hours = Array.from({ length: 7 * 24 }, (_, k) => m0 + k * 3600);
+  const days = Array.from({ length: 7 }, (_, k) => m0 + k * 86400);
+  return {
+    latitude: 52.52, longitude: 13.41, timezone: ZONE, utc_offset_seconds: off,
+    current: { time: Math.floor(now / 900e3) * 900, temperature_2m: 15.4, apparent_temperature: 13.9, relative_humidity_2m: 71, precipitation: 0,
+      weather_code: 2, is_day: 1, wind_speed_10m: 11.2, wind_gusts_10m: 24.8 },
+    hourly: { time: hours, temperature_2m: hours.map((_, k) => 10 + 6 * Math.sin((k % 24 - 8) / 24 * 2 * Math.PI)),
+      precipitation_probability: hours.map((_, k) => k % 24 === 17 ? 55 : 8), precipitation: hours.map((_, k) => k % 24 === 17 ? 0.6 : 0),
+      weather_code: hours.map((_, k) => k % 24 === 17 ? 61 : 2) },
+    daily: { time: days, weather_code: [61, 2, 3, 80, 0, 1, 95], temperature_2m_max: [16.2, 18.1, 14, 12.5, 17, 19.2, 21],
+      temperature_2m_min: [9.4, 8.7, 7, 6.1, 5, 8, 12], precipitation_probability_max: [55, 10, 30, 80, 0, 5, 70],
+      precipitation_sum: [1.2, 0, 0.3, 6.4, 0, 0, 12], sunrise: days.map(d => d + 6.97 * 3600), sunset: days.map(d => d + 18.87 * 3600),
+      uv_index_max: [3.1, 3.4, 2, 1.5, 3.8, 3.6, 2.9] }
+  };
+}
+const airQuality = () => ({ timezone: ZONE, current: { time: Math.floor(now / 3600e3) * 3600, european_aqi: 27, alder_pollen: 0, birch_pollen: 0, grass_pollen: 4.2, mugwort_pollen: 1, ragweed_pollen: 0.5 } });
+const geocoding = q => ({ results: /berlin/i.test(q) ? [{ id: 2950159, name: 'Berlin', latitude: 52.52437, longitude: 13.41053, country_code: 'DE', admin1: 'Berlin', timezone: 'Europe/Berlin' }]
+  : /dresden/i.test(q) ? [{ id: 2935022, name: 'Dresden', latitude: 51.05089, longitude: 13.73832, country_code: 'DE', admin1: 'Sachsen', timezone: 'Europe/Berlin' }] : undefined });
+
+module.exports = { rss, atom, yahoo, table1, table2, matches2, pointfinder, departures, onthisday, ics, alerts, school, fuel, forecast, airQuality, geocoding };

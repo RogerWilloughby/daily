@@ -1,6 +1,7 @@
 // Dialoge: Impressum, Datenschutz und Einstellungen.
 import { settings, saveSettings } from '../core/store.js';
-import { esc, getJson } from '../core/util.js';
+import { esc } from '../core/util.js';
+import { dienst } from '../dienste/client.js';
 
 export function initDialogs(onSaved, isPrivate = false) {
   document.querySelectorAll('[data-doc]').forEach(b => b.addEventListener('click', () => {
@@ -33,10 +34,10 @@ export function initDialogs(onSaved, isPrivate = false) {
     if (!q) return;
     box.textContent = 'Suche …';
     try {
-      const res = (await getJson('https://geocoding-api.open-meteo.com/v1/search?count=6&language=de&format=json&name=' + encodeURIComponent(q))).results || [];
+      const res = (await dienst('ort', { q })).daten.orte; // Dienst „ort“ (daily/1)
       if (!res.length) { box.textContent = 'Kein Ort gefunden. Anders schreiben?'; return; }
-      box.innerHTML = res.map((p, k) => `<label><input type="radio" name="place" value="${k}"${k === 0 ? ' checked' : ''}> ${esc(p.name)}${p.admin1 ? ', ' + esc(p.admin1) : ''}${p.country ? ' (' + esc(p.country) + ')' : ''}</label>`).join('');
-      const pick = k => { const p = res[k]; placeChoice = { name: p.name, admin: p.admin1 || '', lat: p.latitude, lon: p.longitude }; };
+      box.innerHTML = res.map((p, k) => `<label><input type="radio" name="place" value="${k}"${k === 0 ? ' checked' : ''}> ${esc(p.name)}${p.region ? ', ' + esc(p.region) : ''}${p.land ? ' (' + esc(p.land) + ')' : ''}</label>`).join('');
+      const pick = k => { const p = res[k]; placeChoice = { name: p.name, admin: p.region || '', land: p.land, lat: p.lat, lon: p.lon, zeitzone: p.zeitzone }; };
       pick(0);
       box.querySelectorAll('input').forEach(i => i.addEventListener('change', () => pick(+i.value)));
     } catch (e) { box.textContent = 'Die Ortssuche ist gerade nicht erreichbar.'; }
