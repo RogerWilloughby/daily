@@ -52,7 +52,15 @@ const S = {
 };
 
 // Schema des gemeinsamen Rahmens (daily/1); „daten“ prüft der jeweilige Dienst
-const ORT = S.obj({ name: S.text(), region: S.text(), land: S.text(), lat: { type: 'number' }, lon: { type: 'number' }, zeitzone: S.text() }, ['name', 'lat', 'lon'], true);
+// Ort-Objekt: name, lat, lon Pflicht; weitere Angaben, soweit bekannt
+const ORT_FELDER = {
+  name: S.text(), region: S.text(), land: S.text(), kreis: S.text(), plz: S.liste({ type: 'string' }),
+  einwohner: S.ganz({ minimum: 0 }), typ: { type: ['string', 'null'], enum: ['ort', 'stadtteil', null] },
+  lat: { type: 'number' }, lon: { type: 'number' }, zeitzone: S.text()
+};
+const ORT = S.obj(ORT_FELDER, ['name', 'lat', 'lon'], true);
+// vollständiges Ort-Objekt, wie es der Dienst „ort“ liefert
+const ORT_VOLL = S.obj(ORT_FELDER);
 const RAHMEN = S.obj({
   format: { type: 'string', enum: ['daily/1'] },
   dienst: S.text(), version: S.ganz(), ort: ORT,
@@ -63,4 +71,4 @@ const RAHMEN = S.obj({
   fehler: S.obj({ code: { type: 'string' }, meldung: S.text() }, ['code'], true)
 });
 
-module.exports = { pruefe, S, ORT, RAHMEN };
+module.exports = { pruefe, S, ORT, ORT_VOLL, RAHMEN };

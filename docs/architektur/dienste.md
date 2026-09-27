@@ -55,6 +55,7 @@ Jede Antwort – auch jeder Fehler – hat diese Form:
 | `dienst_unbekannt` | 404 | Dienst gibt es nicht |
 | `nur_privat` | 404 | Dienst nur im privaten Betrieb |
 | `ort_nicht_gefunden` | 404 | Ortsname nicht auflösbar |
+| `nicht_unterstuetzt` | 422 | Dienst deckt das Land des Orts nicht ab (siehe `laender` im Katalog) |
 | `schluessel_fehlt` | 503 | Betreiber-Schlüssel (z. B. Tankerkönig) nicht eingerichtet |
 | `quelle_fehler` | 502 | externe Quelle nicht erreichbar oder fehlerhaft |
 | `intern` | 500 | Programmfehler |
@@ -68,12 +69,35 @@ Jede Antwort – auch jeder Fehler – hat diese Form:
 - **Fehlender Wert** = `null`, nie leerer String oder 0.
 - **Listen** sind sortiert (zeitlich aufsteigend oder nach Relevanz – im Schema dokumentiert).
 
-## Eingabe „Ort“
+## Dienst „ort“ (Standort) und das Ort-Objekt
+Der Dienst `ort` findet Orte
+- nach **Name**: `/api/v1/ort?q=Neustadt` – Open-Meteo Geocoding; Deutschland zuerst, Stadtteile nach hinten, dann nach Einwohnern; bis zu 6 Treffer,
+- nach **Postleitzahl** (Deutschland): `/api/v1/ort?q=01844` – OpenPLZ API liefert Ort, Landkreis, Bundesland; die Koordinaten kommen von Open-Meteo,
+- nach **Koordinaten** (Gerätestandort): `/api/v1/ort?lat=51.05&lon=13.74` – Umkehrsuche über Nominatim/OpenStreetMap (höchstens 1 Anfrage/s, daher nur beim Einrichten).
+
+Ort-Objekt (Pflicht: `name`, `lat`, `lon`; der Dienst `ort` liefert immer alle Felder, ggf. `null`/leer):
+
+| Feld | Beispiel | Bedeutung |
+|---|---|---|
+| `name` | `Neustadt in Sachsen` | Ortsname |
+| `region` | `Sachsen` | Bundesland bzw. Region |
+| `land` | `DE` | Ländercode (ISO 3166-1) |
+| `kreis` | `Sächsische Schweiz-Osterzgebirge` | Landkreis (in Deutschland) |
+| `plz` | `["01844"]` | Postleitzahlen (Liste) |
+| `einwohner` | `12460` | Einwohnerzahl, falls bekannt |
+| `typ` | `ort` / `stadtteil` | Stadtteile werden nachrangig sortiert |
+| `lat`, `lon` | `51.02`, `14.22` | auf 2 Nachkommastellen gerundet |
+| `zeitzone` | `Europe/Berlin` | IANA-Zeitzone |
+
+## Eingabe „Ort“ für andere Dienste
 Ortsbezogene Dienste akzeptieren
-- `ort=<Name>` → wird über den Dienst `ort` aufgelöst (erster Treffer), oder
+- `ort=<Name oder Postleitzahl>` → wird über den Dienst `ort` aufgelöst (erster Treffer), oder
 - `lat`, `lon` (+ optional `name`, `region`, `land`, `zeitzone`) – so ruft die App auf.
 
 Koordinaten werden **auf 2 Nachkommastellen (≈ 1 km) gerundet**: Datenschutz und gemeinsamer Cache.
+
+## Länder
+Jeder Dienst gibt im Katalog an, wo er funktioniert: `laender: "alle"` oder eine Liste wie `["DE"]`. Liegt der Ort außerhalb, antwortet der Dienst mit `nicht_unterstuetzt`; Oberflächen können solche Dienste ausblenden. Der Dienst `ort` findet weltweit, sortiert Deutschland aber nach vorn.
 
 ## Klassen
 | Klasse | Bedeutung |
@@ -83,7 +107,7 @@ Koordinaten werden **auf 2 Nachkommastellen (≈ 1 km) gerundet**: Datenschutz u
 | `schluessel` (geplant) | braucht einen Betreiber-Schlüssel, sonst `schluessel_fehlt` |
 
 ## Einen Dienst bauen
-1. `services/<id>.js` mit `id, version, titel, beschreibung, eingaben, klasse, ttl, quellen, schema` und `run(eingabe) → { daten, ort?, hinweise? }`.
+1. `services/<id>.js` mit `id, version, titel, beschreibung, eingaben, laender, klasse, ttl, quellen, schema` und `run(eingabe) → { daten, ort?, hinweise? }`.
    Die Umwandlung der Quelle als eigene, reine Funktion `umwandeln()` exportieren (testbar ohne Netz).
 2. In `services/index.js` eintragen.
 3. Beispieldaten der Quelle in `tools/fixtures.js`, Umleitung in `tools/fetch-stub.js`.
@@ -105,7 +129,7 @@ Koordinaten werden **auf 2 Nachkommastellen (≈ 1 km) gerundet**: Datenschutz u
 ## Stand der Umstellung
 | Dienst | Status |
 |---|---|
-| `ort` | ✅ daily/1 (Ortssuche in den Einstellungen nutzt ihn) |
+| `ort` | ✅ daily/1 – Name, Postleitzahl, Gerätestandort; Einstellungen nutzen ihn |
 | `wetter` | ✅ daily/1 – Referenz; Kachel über Adapter |
 | Feiertage & Ferien, Himmel, Warnungen, Tanken, Abfahrten, Sport, Geld, Wissen, Tagesinhalte | ⏳ noch alte Einzelfunktionen bzw. im Browser berechnet |
 | Kalender, Schlagzeilen (privat) | ⏳ |

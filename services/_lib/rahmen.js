@@ -15,7 +15,7 @@ class DienstFehler extends Error {
 }
 const STATUS = {
   eingabe_fehlt: 400, eingabe_ungueltig: 400, dienst_unbekannt: 404, nur_privat: 404,
-  ort_nicht_gefunden: 404, schluessel_fehlt: 503, quelle_fehler: 502, intern: 500
+  ort_nicht_gefunden: 404, nicht_unterstuetzt: 422, schluessel_fehlt: 503, quelle_fehler: 502, intern: 500
 };
 
 // Zeitpunkt als ISO-UTC ohne Millisekunden

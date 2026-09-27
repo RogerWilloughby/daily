@@ -11,7 +11,7 @@ Status: ✅ fertig in daily/1 · 🔁 läuft, noch alte Schnittstelle · 🆕 ne
 ## 1. Ort, Wetter, Himmel, Umwelt
 | Dienst | Ideen aus der Liste | Art | Eingabe | Quelle (Kandidat) | Status |
 |---|---|---|---|---|---|
-| `ort` | – (Grundlage aller Ortsdienste) | Live | Name | Open-Meteo Geocoding | ✅ |
+| `ort` | Standort (Grundlage aller Ortsdienste): Name, Postleitzahl, Gerätestandort | Live | Name, PLZ oder Koordinaten | Open-Meteo Geocoding, OpenPLZ, Nominatim | ✅ |
 | `wetter` | lokales Wetter, Luftqualität, Pollen | Live | Ort | Open-Meteo | ✅ |
 | `himmel` | Sonnenauf-/-untergang, Mondphase, Sternschnuppen | Rechnen | Ort | eigene Berechnung | 🔁 |
 | `warnungen` | Warnmeldungen | Live | Ort | DWD über Bright Sky | 🔁 |

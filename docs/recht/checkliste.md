@@ -19,6 +19,9 @@ Kein Impressum, keine Datenschutzerklärung, keine Medienpflichten nötig. Aktue
 - DWD-Warnungen: Quelle „Deutscher Wetterdienst“ nennen (GeoNutzV) – umgesetzt.
 - Tankerkönig: CC BY 4.0, Quelle nennen – umgesetzt; Nutzungsbedingungen (Abfragehäufigkeit) beachten, Cache 5 min.
 - OpenHolidays: frei nutzbar, Quelle genannt.
+- OpenPLZ API (Postleitzahlen, ODbL): Quelle genannt.
+- Nominatim/OpenStreetMap (Umkehrsuche Gerätestandort, ODbL): Quelle „© OpenStreetMap-Mitwirkende“ genannt; Nutzungsregeln: höchstens 1 Anfrage/s, eindeutige Kennung (User-Agent mit Projekt-URL), keine Massenabfragen – DAILY fragt nur auf Knopfdruck beim Einrichten. Bei öffentlichem Betrieb mit vielen Nutzern ggf. eigenen Dienst oder kommerziellen Anbieter nutzen.
+- Gerätestandort: nur nach Knopfdruck und Browser-Erlaubnis, auf ~1 km gerundet, gespeichert wird nur der Ortsname (im Browser). Im Datenschutz-Entwurf beschrieben.
 - „Meine Seiten“: nur vom Nutzer selbst angelegte Links, keine fremden Inhalte.
 - Geld: Yahoo-Daten nur privat; öffentlich andere Quelle.
 

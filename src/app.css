@@ -185,6 +185,8 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
 .btn{min-height:42px;padding:0 16px;border-radius:10px;border:1px solid var(--line);font-size:14px;font-weight:600}
 .btn.primary{background:var(--active-bg);color:var(--active-ink);border-color:var(--active-bg)}
 .set-results{display:flex;flex-direction:column;gap:2px;margin:8px 0}
+.btn.link{border:0;padding:0;min-height:36px;color:var(--accent);font-weight:600;text-decoration:underline;text-underline-offset:3px;margin-top:6px}
+.set-results small{color:var(--muted)}
 .set-results label{display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:8px;cursor:pointer}
 .set-results label:hover{background:var(--ground)}
 .set-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}

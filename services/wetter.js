@@ -95,6 +95,7 @@ module.exports = {
   titel: 'Wetter',
   beschreibung: 'Aktuelles Wetter, 48-Stunden- und 7-Tage-Vorhersage, Luftqualität und Pollen für einen Ort.',
   eingaben: { ort: 'Ortsname (z. B. Berlin) – oder –', lat: 'Breitengrad', lon: 'Längengrad', name: 'Anzeigename (optional)', region: 'Bundesland (optional)', land: 'Ländercode (optional)' },
+  laender: 'alle',
   klasse: 'oeffentlich',
   ttl: 900,
   quellen: QUELLEN,

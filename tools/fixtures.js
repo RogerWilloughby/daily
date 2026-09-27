@@ -125,7 +125,27 @@ function forecast() {
   };
 }
 const airQuality = () => ({ timezone: ZONE, current: { time: Math.floor(now / 3600e3) * 3600, european_aqi: 27, alder_pollen: 0, birch_pollen: 0, grass_pollen: 4.2, mugwort_pollen: 1, ragweed_pollen: 0.5 } });
-const geocoding = q => ({ results: /berlin/i.test(q) ? [{ id: 2950159, name: 'Berlin', latitude: 52.52437, longitude: 13.41053, country_code: 'DE', admin1: 'Berlin', timezone: 'Europe/Berlin' }]
-  : /dresden/i.test(q) ? [{ id: 2935022, name: 'Dresden', latitude: 51.05089, longitude: 13.73832, country_code: 'DE', admin1: 'Sachsen', timezone: 'Europe/Berlin' }] : undefined });
+// Open-Meteo Geocoding – Felder wie in echten Antworten (admin3 = Landkreis, PPLX = Stadtteil, population/postcodes oft leer)
+const GEO = {
+  berlin: [{ id: 2950159, name: 'Berlin', latitude: 52.52437, longitude: 13.41053, feature_code: 'PPLC', country_code: 'DE', admin1: 'Berlin', admin3: 'Berlin, Stadt', timezone: 'Europe/Berlin', population: 3426354, postcodes: ['10178', '10115'] }],
+  dresden: [{ id: 2935022, name: 'Dresden', latitude: 51.05089, longitude: 13.73832, feature_code: 'PPLA', country_code: 'DE', admin1: 'Sachsen', admin3: 'Kreisfreie Stadt Dresden', timezone: 'Europe/Berlin', population: 556780, postcodes: ['01067', '01069'] }],
+  neustadt: [
+    { id: 1, name: 'Neustadt', latitude: 53.55, longitude: 9.98, feature_code: 'PPLX', country_code: 'DE', admin1: 'Freie und Hansestadt Hamburg', admin3: 'Hamburg', timezone: 'Europe/Berlin', population: 12689 },
+    { id: 2, name: 'Neustadt', latitude: 51.19, longitude: 14.58, feature_code: 'PPL', country_code: 'DE', admin1: 'Sachsen', admin3: 'Landkreis Görlitz', timezone: 'Europe/Berlin' },
+    { id: 3, name: 'Neustadt an der Weinstraße', latitude: 49.35, longitude: 8.14, feature_code: 'PPLA3', country_code: 'DE', admin1: 'Rheinland-Pfalz', admin3: 'Neustadt an der Weinstraße', timezone: 'Europe/Berlin', population: 53353, postcodes: ['67433'] },
+    { id: 4, name: 'Neustadt', latitude: 47.91, longitude: 16.2, feature_code: 'PPL', country_code: 'AT', admin1: 'Niederösterreich', admin2: 'Bezirk Wiener Neustadt', timezone: 'Europe/Vienna', population: 900 },
+    { id: 5, name: 'Bad Neustadt an der Saale', latitude: 50.32, longitude: 10.21, feature_code: 'PPL', country_code: 'DE', admin1: 'Bayern', admin2: 'Unterfranken', admin3: 'Landkreis Rhön-Grabfeld', timezone: 'Europe/Berlin', population: 15261, postcodes: ['97616'] }
+  ],
+  'neustadt in sachsen': [{ id: 6, name: 'Neustadt in Sachsen', latitude: 51.02396, longitude: 14.21611, feature_code: 'PPL', country_code: 'DE', admin1: 'Sachsen', admin3: 'Landkreis Sächsische Schweiz-Osterzgebirge', timezone: 'Europe/Berlin', population: 12460, postcodes: ['01844'] }]
+};
+const geocoding = q => ({ results: GEO[String(q || '').toLowerCase()] });
+// OpenPLZ API /de/Localities?postalCode=
+const openplz = plz => ({
+  '01844': [{ postalCode: '01844', name: 'Neustadt in Sachsen', municipality: { key: '14628260', name: 'Neustadt in Sachsen, Stadt', type: 'Stadt' }, district: { key: '14628', name: 'Sächsische Schweiz-Osterzgebirge', type: 'Landkreis' }, federalState: { key: '14', name: 'Sachsen' } }],
+  '01067': [{ postalCode: '01067', name: 'Dresden', municipality: { key: '14612000', name: 'Dresden, Stadt', type: 'Kreisfreie Stadt' }, district: { key: '14612', name: 'Dresden', type: 'Kreisfreie Stadt' }, federalState: { key: '14', name: 'Sachsen' } }]
+}[plz] || []);
+// Nominatim /reverse (jsonv2)
+const nominatim = () => ({ place_id: 1, lat: '51.0504', lon: '13.7373', display_name: 'Dresden, Sachsen, 01067, Deutschland',
+  address: { city: 'Dresden', state: 'Sachsen', postcode: '01067', country: 'Deutschland', country_code: 'de' } });
 
-module.exports = { rss, atom, yahoo, table1, table2, matches2, pointfinder, departures, onthisday, ics, alerts, school, fuel, forecast, airQuality, geocoding };
+module.exports = { rss, atom, yahoo, table1, table2, matches2, pointfinder, departures, onthisday, ics, alerts, school, fuel, forecast, airQuality, geocoding, openplz, nominatim };

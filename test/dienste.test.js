@@ -64,7 +64,7 @@ test('Router: /api/v1/wetter?ort=Berlin liefert daily/1 mit gerundetem Ort', asy
   const r = await rufe('wetter', { ort: 'Berlin' });
   assert.equal(r.code, 200);
   gueltig(r.body, dienste.byId.wetter.schema);
-  assert.deepEqual(r.body.ort, { name: 'Berlin', region: 'Berlin', land: 'DE', lat: 52.52, lon: 13.41, zeitzone: 'Europe/Berlin' });
+  assert.deepEqual(r.body.ort, { name: 'Berlin', region: 'Berlin', land: 'DE', kreis: 'Berlin, Stadt', plz: ['10178', '10115'], einwohner: 3426354, typ: 'ort', lat: 52.52, lon: 13.41, zeitzone: 'Europe/Berlin' });
   assert.match(r.headers['cache-control'], /s-maxage=900/);
   assert.equal(r.headers['access-control-allow-origin'], '*');
 });
@@ -89,17 +89,47 @@ test('Router: Fehler kommen im Rahmen mit passendem Status', async () => {
   assert.equal(post.code, 405);
 });
 
-test('Ortssuche und Katalog', async () => {
-  const o = await rufe('ort', { q: 'Dresden' });
+test('Standort: Name – Deutschland zuerst, Stadtteile hinten, größere Orte vorn', async () => {
+  const o = await rufe('ort', { q: 'Neustadt' });
   assert.equal(o.code, 200);
   gueltig(o.body, dienste.byId.ort.schema);
-  assert.equal(o.body.daten.orte[0].region, 'Sachsen');
+  const orte = o.body.daten.orte;
+  assert.deepEqual(orte.map(x => x.name), ['Neustadt an der Weinstraße', 'Bad Neustadt an der Saale', 'Neustadt', 'Neustadt', 'Neustadt']);
+  assert.equal(orte[2].kreis, 'Landkreis Görlitz');   // Landkreis aus admin3
+  assert.equal(orte[3].typ, 'stadtteil');             // Hamburg-Neustadt nach den Orten
+  assert.equal(orte[4].land, 'AT');                   // Ausland zuletzt
+  assert.equal(orte[0].einwohner, 53353);
+});
+
+test('Standort: Postleitzahl über OpenPLZ, Koordinaten über Open-Meteo', async () => {
+  const o = await rufe('ort', { q: '01844' });
+  assert.equal(o.code, 200);
+  gueltig(o.body, dienste.byId.ort.schema);
+  assert.deepEqual(o.body.daten.orte.map(x => [x.name, x.kreis, x.plz[0], x.lat]), [['Neustadt in Sachsen', 'Sächsische Schweiz-Osterzgebirge', '01844', 51.02]]);
+  assert.deepEqual(o.body.quellen.map(q => q.name), ['OpenPLZ API', 'Open-Meteo Geocoding (GeoNames)']);
+  assert.equal((await rufe('ort', { q: '99999' })).body.daten.orte.length, 0);
+  // Postleitzahl funktioniert auch als Ort-Eingabe anderer Dienste
+  const w = await rufe('wetter', { ort: '01844' });
+  assert.equal(w.code, 200); assert.equal(w.body.ort.name, 'Neustadt in Sachsen');
+});
+
+test('Standort: Umkehrsuche aus Koordinaten (gerundet, Nominatim)', async () => {
+  const o = await rufe('ort', { lat: '51.050409', lon: '13.737262' });
+  assert.equal(o.code, 200);
+  gueltig(o.body, dienste.byId.ort.schema);
+  assert.deepEqual(o.body.daten.orte[0], { name: 'Dresden', region: 'Sachsen', land: 'DE', kreis: 'Dresden', plz: ['01067'], einwohner: null, typ: 'ort', lat: 51.05, lon: 13.74, zeitzone: 'Europe/Berlin' });
+  assert.equal(o.body.quellen[0].name, 'Nominatim / OpenStreetMap-Mitwirkende');
+  assert.equal((await rufe('ort', { q: 'x' })).body.fehler.code, 'eingabe_fehlt');
+  assert.equal((await rufe('ort', { lat: '99', lon: '0' })).body.fehler.code, 'eingabe_ungueltig');
+});
+
+test('Katalog: jeder Dienst vollständig beschrieben, mit Ländern', async () => {
   const k = await rufe('dienste');
   gueltig(k.body);
   const ids = k.body.daten.dienste.map(d => d.id);
   assert.ok(ids.includes('wetter') && ids.includes('ort'));
   for (const d of k.body.daten.dienste) {
-    for (const f of ['id', 'version', 'titel', 'beschreibung', 'eingaben', 'klasse', 'ttl', 'quellen', 'schema']) assert.ok(d[f] != null, `${d.id}.${f} fehlt`);
+    for (const f of ['id', 'version', 'titel', 'beschreibung', 'eingaben', 'laender', 'klasse', 'ttl', 'quellen', 'schema']) assert.ok(d[f] != null, `${d.id}.${f} fehlt`);
   }
 });
 

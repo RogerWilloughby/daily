@@ -74,7 +74,7 @@
       <h3>Umsatzsteuer</h3>
       <p><span class="ph">[USt-IdNr. – nur falls vorhanden, sonst Abschnitt entfernen]</span></p>
       <h3>Datenquellen</h3>
-      <p>Wetter, Luftqualität, Pollen und Ortssuche: Open-Meteo.com (CC BY 4.0). „An diesem Tag“: Wikipedia (CC BY-SA 4.0). Fußballdaten: OpenLigaDB. Abfahrten: Verkehrsverbund Oberelbe (VVO). Kurse: Yahoo Finance (ohne Gewähr). Wetterwarnungen: Deutscher Wetterdienst, abgerufen über Bright Sky. Schulferien: OpenHolidays API. Tankpreise: Tankerkönig (CC BY 4.0), Daten der Markttransparenzstelle für Kraftstoffe. Feiertage, Sonne und Mond werden von DAILY berechnet.</p>
+      <p>Wetter, Luftqualität, Pollen und Ortssuche: Open-Meteo.com (CC BY 4.0). Postleitzahlen: OpenPLZ API (ODbL). Standort zu Ort: Nominatim, © OpenStreetMap-Mitwirkende (ODbL). „An diesem Tag“: Wikipedia (CC BY-SA 4.0). Fußballdaten: OpenLigaDB. Abfahrten: Verkehrsverbund Oberelbe (VVO). Kurse: Yahoo Finance (ohne Gewähr). Wetterwarnungen: Deutscher Wetterdienst, abgerufen über Bright Sky. Schulferien: OpenHolidays API. Tankpreise: Tankerkönig (CC BY 4.0), Daten der Markttransparenzstelle für Kraftstoffe. Feiertage, Sonne und Mond werden von DAILY berechnet.</p>
       <p>DAILY ist kein Nachrichtenangebot. „Meine Seiten“ enthält nur Links, die du selbst angelegt hast; für die verlinkten Inhalte sind deren Anbieter verantwortlich.</p>
       <p>Tagesinhalte wie Rätsel, Rezepte, Tipps und das Land des Tages sind eigene Service-Texte, die mit Unterstützung von KI erstellt wurden.</p>
       <p class="draft">Entwurf mit Platzhaltern. Vor der Veröffentlichung ausfüllen und prüfen lassen.</p>
@@ -94,6 +94,8 @@
       <p><b>DAILY-Dienste auf Vercel</b>: Wetter, Luftqualität, Pollen, Ortssuche, Kurse, Fußballdaten, Abfahrten, Schulferien, Wetterwarnungen, Tankpreise und „An diesem Tag“ werden über eigene Dienste auf dem Server abgerufen. Dein Browser spricht nur mit DAILY. Die Anbieter dieser Daten sehen dabei nicht deine IP-Adresse. An ortsbezogene Dienste wird nur der auf etwa 1 km gerundete Standort deines gewählten Orts übermittelt. DAILY braucht kein Konto und verarbeitet außer dem Ort keine persönlichen Daten.</p>
       <p><b>Schriftarten</b> werden direkt von diesem Server geladen, nicht von Google.</p>
       <p><b>Hosting</b>: Vercel Inc., USA. Beim Aufruf verarbeitet Vercel technisch notwendige Daten wie deine IP-Adresse. <span class="ph">[Vor Veröffentlichung: Auftragsverarbeitung und Drittlandübermittlung (EU-US Data Privacy Framework) ergänzen]</span></p>
+      <h3>Gerätestandort</h3>
+      <p>Nur wenn du „Meinen Standort verwenden“ drückst, fragt dein Browser um Erlaubnis und ermittelt deine Position. DAILY rundet sie auf etwa 1 km, ermittelt daraus einmalig den Ortsnamen (über Nominatim/OpenStreetMap, ohne deine IP-Adresse) und speichert nur den gefundenen Ort in deinem Browser.</p>
       <h3>Keine Analyse, kein Tracking</h3>
       <p>DAILY verwendet keine Analyse- oder Werbe-Tracker und setzt keine Cookies.</p>
       <h3>Deine Rechte</h3>
@@ -112,9 +114,10 @@
       <p>Aktuell: <b id="set-place-current"></b></p>
       <div class="set-row">
         <label for="set-place" class="sr">Ort suchen</label>
-        <input class="field" id="set-place" type="text" placeholder="Ort eingeben, z. B. Radebeul" autocomplete="off">
+        <input class="field" id="set-place" type="text" placeholder="Ort oder Postleitzahl, z. B. Radebeul oder 01445" autocomplete="off">
         <button type="button" class="btn" id="set-place-search">Suchen</button>
       </div>
+      <button type="button" class="btn link" id="set-place-here">Meinen Standort verwenden</button>
       <div id="set-place-results" class="set-results" role="radiogroup" aria-label="Gefundene Orte"></div>
 
       <div id="set-private" hidden>

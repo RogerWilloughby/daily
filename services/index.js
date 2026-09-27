@@ -1,4 +1,4 @@
-// Dienst-Verzeichnis: jeder Dienst ist ein Modul mit id, version, titel, beschreibung, eingaben, klasse,
+// Dienst-Verzeichnis: jeder Dienst ist ein Modul mit id, version, titel, beschreibung, eingaben, laender ('alle' oder Liste wie ['DE']), klasse,
 // ttl (Sekunden), quellen, schema (Vertrag für „daten“) und run(eingabe) → { daten, ort?, hinweise?, quellen? }.
 // Neuer Dienst = Modul in services/ + Eintrag hier. Aufruf: GET /api/v1/<id>
 const { DienstFehler, antwort } = require('./_lib/rahmen');
@@ -28,7 +28,7 @@ async function ausfuehren(id, eingabe = {}, ctx = {}) {
 function katalog() {
   return DIENSTE.filter(d => d.klasse !== 'privat' || isPrivate()).map(d => ({
     id: d.id, version: d.version, titel: d.titel, beschreibung: d.beschreibung, eingaben: d.eingaben,
-    klasse: d.klasse, ttl: d.ttl, quellen: d.quellen, schema: d.schema
+    laender: d.laender || 'alle', klasse: d.klasse, ttl: d.ttl, quellen: d.quellen, schema: d.schema
   }));
 }
 
