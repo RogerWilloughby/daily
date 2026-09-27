@@ -38,7 +38,7 @@ function antwort(dienst, { ort = null, daten, quellen = [], hinweise = [], jetzt
     version: dienst.version,
     ort,
     erstellt: iso(jetzt),
-    gueltigBis: iso(jetzt + dienst.ttl * 1000),
+    gueltigBis: iso(dienst.takt ? Math.ceil((jetzt + 1) / (dienst.takt * 1000)) * dienst.takt * 1000 : jetzt + dienst.ttl * 1000), // takt: bis zum nächsten Taktende (z. B. :00/:30)
     quellen: quellen.length ? quellen : dienst.quellen,
     hinweise,
     daten,

@@ -56,7 +56,7 @@ ${d.beschreibung}
 | Version | ${d.version} |
 | Klasse | ${d.klasse} |
 | Länder | ${laender} |
-| Gültigkeit (TTL) | ${d.ttl} s |
+| Gültigkeit | ${d.takt ? `bis zum nächsten Takt von ${d.takt / 60} min (z. B. :00/:30)` : `${d.ttl} s`} |
 
 ## Zweck
 ${b.zweck}

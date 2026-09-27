@@ -18,7 +18,8 @@ module.exports = async (req, res) => {
       return send(res, antwort({ id: 'dienste', version: 1, ttl: 300, quellen: [] }, { daten: { dienste: katalog() } }), 300);
     }
     const r = await ausfuehren(id, q);
-    send(res, r, privat ? 0 : byId[id].ttl);
+    // CDN-Cache genau bis gueltigBis (mindestens 60 s) – bei Diensten mit Takt also bis zur nächsten vollen/halben Stunde
+    send(res, r, privat ? 0 : Math.max(60, Math.round((Date.parse(r.gueltigBis) - Date.now()) / 1000)));
   } catch (e) {
     const f = e instanceof DienstFehler ? e : new DienstFehler('intern');
     if (!(e instanceof DienstFehler)) console.error('[daily]', id, e);

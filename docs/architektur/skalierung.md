@@ -35,6 +35,6 @@ Hinweis: Vercel Hobby und das freie Open-Meteo sind nur für **nicht kommerziell
 | Dienst | Klasse | Quelle bei 10 Mio./Tag | Maßnahme | Stand |
 |---|---|---|---|---|
 | `ort` | D | Deutschland: keine externe Quelle (eigener Bestand) | erledigt: eigener GeoNames-Bestand, monatliche Aktualisierung; Ausland nur ohne deutschen Treffer | ✅ Stufe 4 |
-| `wetter` | C | Open-Meteo frei (10.000/Tag) reicht nicht | gröberes Raster/TTL, bezahlter Tarif oder DWD-Open-Data selbst aufbereiten | offen – nächster Schritt |
+| `wetter` | C | Open-Meteo frei (10.000/Tag, nicht kommerziell) reicht nicht | jetzt: nur auf Anfrage, Takt :00/:30 (≈ 100 Orte/Tag im freien Kontingent). Bei Wachstum: DWD MOSMIX (Abrufe unabhängig von Nutzern), gröberes Raster oder bezahlter Tarif | Stufe 1–2 |
 
 Weitere Dienste werden beim Umzug auf daily/1 hier eingetragen.

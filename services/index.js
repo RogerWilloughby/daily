@@ -28,7 +28,7 @@ async function ausfuehren(id, eingabe = {}, ctx = {}) {
 function katalog() {
   return DIENSTE.filter(d => d.klasse !== 'privat' || isPrivate()).map(d => ({
     id: d.id, version: d.version, titel: d.titel, beschreibung: d.beschreibung, eingaben: d.eingaben,
-    laender: d.laender || 'alle', klasse: d.klasse, ttl: d.ttl, quellen: d.quellen, schema: d.schema, blatt: d.blatt || null
+    laender: d.laender || 'alle', klasse: d.klasse, ttl: d.ttl, takt: d.takt || null, quellen: d.quellen, schema: d.schema, blatt: d.blatt || null
   }));
 }
 

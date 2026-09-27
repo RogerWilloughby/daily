@@ -50,7 +50,16 @@ test('Wetter: Umwandlung erfüllt den Vertrag, auch ohne Luftdaten', () => {
   const r = w.umwandeln(fx.forecast(), fx.airQuality());
   assert.deepEqual(pruefe(r.daten, w.schema), []);
   assert.equal(r.daten.stunden.length, 48);
-  assert.equal(r.daten.tage.length, 7);
+  assert.equal(r.daten.tage.length, 16);
+  assert.deepEqual(r.daten.tage.map(t => t.trend), [...Array(7).fill(false), ...Array(9).fill(true)]);   // ab Tag 8 Trend
+  const a = r.daten.aktuell;
+  assert.deepEqual([a.windRichtung, a.windRichtungGrad, a.wolkenProzent, a.luftdruckHpa, a.druckTendenz, a.sichtweiteM, a.taupunktC, a.schneehoeheCm],
+    ['W', 250, 45, 1016.2, 'fallend', 24000, 10.1, 0]);
+  const t8 = r.daten.tage[7];                                 // Tag 8: Frost, Schnee, Glätte, Nordwind
+  assert.deepEqual([t8.frost, t8.glaette, t8.neuschneeCm, t8.windRichtung, t8.sonnenstunden], [true, true, 3.5, 'N', 1]);
+  assert.deepEqual([r.daten.tage[0].frost, r.daten.tage[0].glaette, r.daten.tage[0].sonnenstunden, r.daten.tage[0].boeenMaxKmh], [false, false, 4, 38]);
+  assert.ok(r.daten.tage[0].nullgradgrenzeM > 2000);
+  assert.ok('uvIndex' in r.daten.stunden[0] && 'windRichtungGrad' in r.daten.stunden[0]);
   assert.equal(r.daten.aktuell.zustand, 'teilweise_bewoelkt');
   assert.equal(r.daten.luft.stufe, 'ausreichend');
   const heute = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin' }).format(new Date());
@@ -68,7 +77,11 @@ test('Router: /api/v1/wetter?ort=Berlin liefert daily/1 mit gerundetem Ort', asy
   assert.deepEqual([o.name, o.region, o.land, o.kreis, o.kreisSchluessel, o.typ, o.zeitzone], ['Berlin', 'Berlin', 'DE', 'Berlin', '11000', 'ort', 'Europe/Berlin']);
   assert.ok(Math.abs(o.lat - 52.5) < 0.1 && Math.abs(o.lon - 13.4) < 0.1, `${o.lat},${o.lon}`);
   assert.equal(o.lat, Math.round(o.lat * 100) / 100);
-  assert.match(r.headers['cache-control'], /s-maxage=900/);
+  // Takt: gültig bis zur nächsten vollen oder halben Stunde, CDN-Cache genau so lange
+  const bis = new Date(r.body.gueltigBis);
+  assert.ok([0, 30].includes(bis.getUTCMinutes()) && bis.getUTCSeconds() === 0, r.body.gueltigBis);
+  const s = +/s-maxage=(\d+)/.exec(r.headers['cache-control'])[1];
+  assert.ok(s >= 60 && s <= 1800 && Math.abs(s - Math.max(60, (bis - Date.now()) / 1000)) < 5, r.headers["cache-control"]);
   assert.equal(r.headers['access-control-allow-origin'], '*');
 });
 
@@ -208,6 +221,12 @@ test('Adapter Wetter: Kachel und Antwort aus dem Vertrag', async () => {
   assert.match(k.x, /Teilweise bewölkt, gefühlt 14°/);
   assert.ok(k.rows.some(([l]) => l === 'Luftqualität'));
   assert.ok(k.rows.some(([l]) => l === 'Morgen'));
+  const zeile = l => (k.rows.find(([x]) => x.startsWith(l)) || [])[1];
+  assert.equal(zeile('Wind'), '11 km/h aus W, Böen 25 km/h');
+  assert.match(zeile('Sonne'), /4 Std\. Sonne · UV bis 3$/);
+  assert.equal(zeile('Luftdruck'), '1016 hPa, fallend');
+  assert.match(zeile('Trend bis'), /° bis .*° · .* \(unsicher\)$/);
+  assert.ok(!k.rows.some(([l]) => l === 'Achtung'));        // heute/morgen kein Frost
   assert.match(text(env), /^Berlin: jetzt 15°/);
 });
 

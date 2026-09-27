@@ -10,7 +10,7 @@ Findet Orte nach Name, Postleitzahl oder Koordinaten – mit Landkreis, Bundesla
 | Version | 1 |
 | Klasse | oeffentlich |
 | Länder | weltweit |
-| Gültigkeit (TTL) | 86400 s |
+| Gültigkeit | 86400 s |
 
 ## Zweck
 Grundlage aller ortsbezogenen Dienste: macht aus einer Eingabe des Nutzers (Name, Postleitzahl oder Gerätestandort) einen eindeutigen Ort mit Koordinaten.

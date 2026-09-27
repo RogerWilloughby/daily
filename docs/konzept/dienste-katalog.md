@@ -12,7 +12,8 @@ Status: ✅ fertig in daily/1 · 🔁 läuft, noch alte Schnittstelle · 🆕 ne
 | Dienst | Ideen aus der Liste | Art | Eingabe | Quelle (Kandidat) | Status |
 |---|---|---|---|---|---|
 | `ort` | Standort (Grundlage aller Ortsdienste): Name, Postleitzahl, Gerätestandort | Live | Name, PLZ oder Koordinaten | eigener Bestand aus GeoNames; Ausland Open-Meteo Geocoding | ✅ |
-| `wetter` | lokales Wetter, Luftqualität, Pollen | Live | Ort | Open-Meteo | ✅ |
+| `wetter` | lokales Wetter (16 Tage), Luftqualität, Pollen | Live | Ort | Open-Meteo (nicht kommerziell) | ✅ |
+| `regen` | Regenradar, „Regen in X Minuten“ | Live | Ort | DWD-Radar + RADVOR (Open Data) | 🆕 als Nächstes |
 | `himmel` | Sonnenauf-/-untergang, Mondphase, Sternschnuppen | Rechnen | Ort | eigene Berechnung | 🔁 |
 | `warnungen` | Warnmeldungen | Live | Ort | DWD über Bright Sky | 🔁 |
 | `weltwetter` | Weltwetter (Hauptstädte, Reiseziele) | Live | Liste von Orten | Open-Meteo (mehrere Orte je Abfrage) | 🆕 |

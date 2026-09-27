@@ -108,20 +108,30 @@ const offsetSek = t => { const m = /GMT([+-]\d+)(?::(\d+))?/.exec(new Intl.DateT
 const berlinTag = t => new Intl.DateTimeFormat('en-CA', { timeZone: ZONE, year: 'numeric', month: '2-digit', day: '2-digit' }).format(t);
 const mitternacht = t => (Date.parse(berlinTag(t) + 'T00:00:00Z') - offsetSek(t) * 1000) / 1000; // Unix-Sekunden
 function forecast() {
-  const m0 = mitternacht(now), off = offsetSek(now);
-  const hours = Array.from({ length: 7 * 24 }, (_, k) => m0 + k * 3600);
-  const days = Array.from({ length: 7 }, (_, k) => m0 + k * 86400);
+  const m0 = mitternacht(now), off = offsetSek(now), T = 16;
+  const hours = Array.from({ length: T * 24 }, (_, k) => m0 + k * 3600);
+  const days = Array.from({ length: T }, (_, k) => m0 + k * 86400);
+  const je = (werte) => days.map((_, k) => werte[k % werte.length]);
   return {
     latitude: 52.52, longitude: 13.41, timezone: ZONE, utc_offset_seconds: off,
     current: { time: Math.floor(now / 900e3) * 900, temperature_2m: 15.4, apparent_temperature: 13.9, relative_humidity_2m: 71, precipitation: 0,
-      weather_code: 2, is_day: 1, wind_speed_10m: 11.2, wind_gusts_10m: 24.8 },
+      weather_code: 2, is_day: 1, wind_speed_10m: 11.2, wind_gusts_10m: 24.8, wind_direction_10m: 250, cloud_cover: 45, uv_index: 2.4,
+      pressure_msl: 1016.2, visibility: 24000, dew_point_2m: 10.1, snow_depth: 0 },
     hourly: { time: hours, temperature_2m: hours.map((_, k) => 10 + 6 * Math.sin((k % 24 - 8) / 24 * 2 * Math.PI)),
+      apparent_temperature: hours.map((_, k) => 9 + 6 * Math.sin((k % 24 - 8) / 24 * 2 * Math.PI)),
       precipitation_probability: hours.map((_, k) => k % 24 === 17 ? 55 : 8), precipitation: hours.map((_, k) => k % 24 === 17 ? 0.6 : 0),
-      weather_code: hours.map((_, k) => k % 24 === 17 ? 61 : 2) },
-    daily: { time: days, weather_code: [61, 2, 3, 80, 0, 1, 95], temperature_2m_max: [16.2, 18.1, 14, 12.5, 17, 19.2, 21],
-      temperature_2m_min: [9.4, 8.7, 7, 6.1, 5, 8, 12], precipitation_probability_max: [55, 10, 30, 80, 0, 5, 70],
-      precipitation_sum: [1.2, 0, 0.3, 6.4, 0, 0, 12], sunrise: days.map(d => d + 6.97 * 3600), sunset: days.map(d => d + 18.87 * 3600),
-      uv_index_max: [3.1, 3.4, 2, 1.5, 3.8, 3.6, 2.9] }
+      snowfall: hours.map(() => 0), weather_code: hours.map((_, k) => k % 24 === 17 ? 61 : 2),
+      wind_speed_10m: hours.map(() => 12), wind_gusts_10m: hours.map(() => 25), wind_direction_10m: hours.map(() => 250),
+      cloud_cover: hours.map(() => 45), uv_index: hours.map((_, k) => Math.max(0, 3 * Math.sin((k % 24 - 7) / 12 * Math.PI))),
+      visibility: hours.map(() => 24000), pressure_msl: hours.map((_, k) => 1016.2 - k * 0.5),   // fallend: -1,5 hPa in 3 h
+      freezing_level_height: hours.map((_, k) => 2400 - (k % 24) * 10), snow_depth: hours.map(() => 0) },
+    daily: { time: days, weather_code: je([61, 2, 3, 80, 0, 1, 95, 73]), temperature_2m_max: je([16.2, 18.1, 14, 12.5, 17, 19.2, 21, 2]),
+      temperature_2m_min: je([9.4, 8.7, 7, 6.1, 5, 8, 12, -3.5]), precipitation_probability_max: je([55, 10, 30, 80, 0, 5, 70, 60]),
+      precipitation_sum: je([1.2, 0, 0.3, 6.4, 0, 0, 12, 2]), snowfall_sum: je([0, 0, 0, 0, 0, 0, 0, 3.5]),
+      sunrise: days.map(d => d + 6.97 * 3600), sunset: days.map(d => d + 18.87 * 3600),
+      sunshine_duration: je([14400, 30000, 9000, 0, 36000, 32000, 5000, 3600]), uv_index_max: je([3.1, 3.4, 2, 1.5, 3.8, 3.6, 2.9, 1]),
+      wind_speed_10m_max: je([18, 12, 22, 35, 10, 14, 28, 20]), wind_gusts_10m_max: je([38, 25, 45, 70, 20, 30, 60, 40]),
+      wind_direction_10m_dominant: je([250, 270, 180, 225, 90, 45, 315, 0]) }
   };
 }
 const airQuality = () => ({ timezone: ZONE, current: { time: Math.floor(now / 3600e3) * 3600, european_aqi: 27, alder_pollen: 0, birch_pollen: 0, grass_pollen: 4.2, mugwort_pollen: 1, ragweed_pollen: 0.5 } });

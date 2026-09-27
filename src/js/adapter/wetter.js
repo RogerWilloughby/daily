@@ -50,20 +50,46 @@ export function auswerten(env) {
   return { z, heute, morgen, regenMax, regenUm: regenMax >= 25 ? regenUm : null, pollen };
 }
 
+// Frost und Glätte heute oder morgen
+function warnung(tage, z) {
+  const t = tage.slice(0, 2).find(x => x.glaette || x.frost);
+  if (!t) return null;
+  const wann = t === tage[0] ? 'heute' : 'morgen';
+  return t.glaette ? `Glätte möglich ${wann} (bis ${r0(t.minC)}°)` : `Frost ${wann} (bis ${r0(t.minC)}°)`;
+}
+
+// Trend-Tage zusammengefasst: Temperaturspanne und Tendenz
+function trendText(tage) {
+  const min = Math.min(...tage.map(t => t.minC ?? Infinity)), max = Math.max(...tage.map(t => t.maxC ?? -Infinity));
+  const nass = tage.filter(t => (t.regenProzent ?? 0) >= 50).length;
+  const art = nass >= tage.length / 2 ? 'eher wechselhaft' : nass === 0 ? 'eher trocken' : 'teils Regen';
+  return `${r0(min)}° bis ${r0(max)}° · ${art} (unsicher)`;
+}
+
 // Darstellung als Kachel (Felder wie in core/board.js erwartet)
 export function kachel(env) {
   const d = env.daten, a = d.aktuell, { z, heute, regenMax, regenUm, pollen } = auswerten(env);
   const regenText = regenMax >= 25 ? `Regen möglich, am ehesten gegen ${regenUm} Uhr.` : 'Kein Regen zu erwarten.';
+  const wind = `${r0(a.windKmh)} km/h${a.windRichtung ? ' aus ' + a.windRichtung : ''}${a.boeenKmh ? `, Böen ${r0(a.boeenKmh)} km/h` : ''}`;
+  const sonne = [`${z.hm(heute.sonnenaufgang)} bis ${z.hm(heute.sonnenuntergang)}`,
+    heute.sonnenstunden != null ? `${String(heute.sonnenstunden).replace('.', ',')} Std. Sonne` : null,
+    heute.uvMax != null ? `UV bis ${Math.round(heute.uvMax)}` : null].filter(Boolean).join(' · ');
   const rows = [
     ['Heute', `${r0(heute.minC)}° bis ${r0(heute.maxC)}° · ${zustandText(heute.zustand, heute.code)}`],
     ['Regenrisiko', `bis ${regenMax} % (restlicher Tag)`],
-    ['Wind', `${r0(a.windKmh)} km/h${a.boeenKmh ? `, Böen ${r0(a.boeenKmh)} km/h` : ''}`],
-    ['Sonne', `${z.hm(heute.sonnenaufgang)} bis ${z.hm(heute.sonnenuntergang)}${heute.uvMax != null ? ` · UV bis ${Math.round(heute.uvMax)}` : ''}`]
+    ['Wind', wind],
+    ['Sonne', sonne]
   ];
+  if (a.luftdruckHpa != null) rows.push(['Luftdruck', `${r0(a.luftdruckHpa)} hPa${a.druckTendenz ? ', ' + a.druckTendenz : ''}`]);
+  if (a.sichtweiteM != null && a.sichtweiteM < 1000) rows.push(['Sicht', `nur ${r0(a.sichtweiteM)} m (Nebel)`]);
+  const warn = warnung(d.tage, z);
+  if (warn) rows.push(['Achtung', warn]);
   if (d.luft) rows.push(['Luftqualität', `${LUFT[d.luft.stufe] || '–'} (EAQI ${r0(d.luft.aqi)})`]);
   if (pollen) rows.push(['Pollen', pollen]);
-  d.tage.slice(1, 4).forEach((t, i) => rows.push([i === 0 ? 'Morgen' : z.wtag(t.datum),
+  d.tage.slice(1, 7).filter(t => !t.trend).forEach((t, i) => rows.push([i === 0 ? 'Morgen' : z.wtag(t.datum),
     `${r0(t.minC)}° bis ${r0(t.maxC)}° · ${zustandText(t.zustand, t.code)} · Regen bis ${t.regenProzent ?? 0} %`]));
+  const trend = d.tage.filter(t => t.trend);
+  if (trend.length) rows.push([`Trend bis ${z.wtag(trend[trend.length - 1].datum)}`, trendText(trend)]);
   rows.push(['Stand', `${z.hm(a.zeit)} Uhr · ${env.quellen.map(q => q.name).join(', ')}`]);
   return {
     state: 'live', title: 'Wetter ' + (env.ort.name || ''),

@@ -24,18 +24,26 @@ Stand 27.09.2026. Für neue Chats: hier steht, woran gerade gearbeitet wird und 
 | Dienst | Stand |
 |---|---|
 | `ort` | ✅ fertig bis auf Rogers Test. Eigener Ortsbestand aus GeoNames (`services/daten/orte-de.json`, ≈ 14.700 Orte, Einwohnerzahlen, Großkunden gefiltert), monatlich per Action „Ortsbestand erneuern“. Suche wie eine Suchmaschine (Wörter einzeln, Kürzel Sa./Thür./Westf./Opf., Umlaute, Tippfehler, Doppelte zusammengefasst), Vorschläge beim Tippen (`land=DE`), Ausland über Open-Meteo nur, wenn kein deutscher Ort genau passt oder nur ein kleiner. Umkehrsuche (Gerätestandort) im eigenen Bestand. Ort hat seit 27.09. einen eigenen Knopf in der unteren Leiste mit eigenem Dialog (Standort ermitteln, Suche, Klick übernimmt sofort). |
-| `wetter` | ✅ läuft über daily/1 und Open-Meteo, Dienstblatt vorhanden. **Überarbeitung ist der nächste Schritt.** |
+| `wetter` | ✅ überarbeitet 27.09. (siehe unten): Open-Meteo, 16 Tage (ab Tag 8 Trend), Zusatzwerte, Cache-Takt :00/:30. Wartet auf Rogers Test. |
 | alle anderen | noch alte Schnittstelle (`api/*.js`), Reihenfolge in `dienste-katalog.md` |
 
 App-Seite „Woher kommen die Daten?“ (Fußzeile → Datenquellen) zeigt die Dienstblätter aus dem Katalog `/api/v1/dienste`.
 
+## Wetter – Entscheidungen vom 27.09.2026
+1. **Quelle Open-Meteo** (nicht DWD MOSMIX), solange DAILY nicht kommerziell ist (keine Werbung, kein Abo). Grund: am wenigsten eigener Aufwand, mehr Daten (16 Tage, UV, Luft, Pollen). Verworfen: Abruf direkt aus dem Browser des Nutzers (Nutzungsbedingungen gelten trotzdem, IP an Dritte, bricht headless). Offen bleibt die Grenze 10.000 Abrufe/Tag; Ausweg bei Wachstum: DWD MOSMIX (Abrufe unabhängig von der Nutzerzahl) oder bezahlter Tarif.
+   - Hintergrund für Rückfragen: ICON-D2 (≈ 2 km) rechnet der DWD selbst; Open-Meteo verfeinert nicht, es wählt nur die höhenpassende Zelle. MOSMIX ist kein Raster, sondern Stationsvorhersage (ICON + ECMWF, statistisch korrigiert), 10 Tage. wetter.com nennt seine Quellen nicht (16 Tage deuten auf GFS/ECMWF). ECMWF ist seit 01.10.2025 offen (CC BY 4.0, 15 Tage, 25 km).
+2. **Abruf nur auf Anfrage**, Cache gilt bis zur nächsten **vollen oder halben Stunde** (`takt: 1800`, Rahmen setzt `gueltigBis`, Router den CDN-Cache).
+3. **16 Tage**, ab Tag 8 `trend: true`; Kachel zeigt 6 Folgetage einzeln und die Trendtage zusammengefasst.
+4. **Zusatzwerte:** Windrichtung, Wind/Böen je Stunde und Tagesmaximum, Sonnenstunden, Bewölkung, UV je Stunde, Luftdruck mit 3-h-Tendenz, Sichtweite, Taupunkt, Neuschnee, Schneehöhe, Nullgradgrenze, Frost, Glätte.
+5. **Regen und Radar werden ein eigener Dienst `regen`** (DWD-Radar alle 5 min + RADVOR 2 h, frei auch kommerziell; weltweit RainViewer nur nicht kommerziell). Die Wetterkachel kann beide Dienste zusammen zeigen.
+6. Später zu besprechen: „Immer meinen aktuellen Standort verwenden“; Trend über Tag 16 hinaus nicht nötig.
+
 ## Zuletzt offen (27.09.2026)
-1. Geprüft 27.09.: Firmennamen raus, Einwohner stimmen (München, Halle (Saale), Freiburg …), Doppelte zusammengefasst. Noch einmal Action laufen lassen für die Stadtstaaten-Korrektur („Hamburg Bergedorf“ stand unter Schleswig-Holstein).
-2. Roger testet die Ortssuche in der App mit eigenen Schreibweisen – Fehlfälle als Tests aufnehmen.
-3. Bekannte Kleinigkeiten: 130 Kreisnamen ohne Typ („Zwickau“ statt „Landkreis Zwickau“); Stadtteilnamen der Quelle teils doppelt („Stuttgart Stuttgart-Mitte“); Warnung Node.js 20 in der Action (bei nächster Änderung `actions/checkout@v5`, `actions/setup-node@v5`, Node 22 – Datei muss Roger dann wieder verschieben).
+1. Roger testet den überarbeiteten Wetterdienst in der App.
+2. Bekannte Kleinigkeiten Ort: 130 Kreisnamen ohne Typ („Zwickau“ statt „Landkreis Zwickau“); Stadtteilnamen der Quelle teils doppelt („Stuttgart Stuttgart-Mitte“); Warnung Node.js 20 in der Action (bei nächster Änderung `actions/checkout@v5`, `actions/setup-node@v5`, Node 22 – Datei muss Roger dann wieder verschieben).
 
 ## Nächste Schritte (in dieser Reihenfolge)
-1. **Wetter** Punkt für Punkt: DWD direkt bzw. Bright Sky (MOSMIX) statt Open-Meteo? Nur angefragte Orte abrufen statt alle; Raster und TTL; Skalierung (Open-Meteo frei nur 10.000/Tag, nicht kommerziell); Stufe „eigene Daten“.
+1. **Dienst `regen`** Punkt für Punkt (DWD-Radar, „Regen in X Minuten“), dann in die Wetterkachel einbinden. Danach Luftqualität/Pollen prüfen (DWD-Pollenflug-Gefahrenindex, Umweltbundesamt).
 2. **Vercel oder AWS** bei 10 Mio. Nutzern (Vercel Hobby nur nicht kommerziell; Pro 20 $/Monat, 1 Mio. Aufrufe inklusive, dann 0,60 $/Mio.).
 3. Übrige Dienste auf daily/1 umziehen (Reihenfolge `dienste-katalog.md`), je mit Dienstblatt.
 4. Neue Dienst-Ideen von Roger aufnehmen.

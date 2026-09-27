@@ -93,6 +93,7 @@ Der Prototyp zählt lokal, welche Kacheln geöffnet werden (Kachel „Deine Nutz
 ## 11. Technischer Aufbau (seit 26.09.2026)
 - **Seit 27.09.2026: headless.** Dienste liefern reine Daten im Austauschformat daily/1 über `GET /api/v1/<dienst>`, Adapter machen daraus Kacheln, Listen oder Dashboards. Verbindliche Beschreibung: `../architektur/dienste.md`. Referenz-Dienst: `wetter`.
 - **Transparenz:** Jeder Dienst hat ein Dienstblatt (Herkunft, Zweck, Eingabe, Ausgabe, Verarbeitung, Skalierung) – im Code, im Katalog `/api/v1/dienste`, in `docs/dienste/` (`npm run doku`) und in der App unter „Datenquellen“. Skalierungsrahmen: `../architektur/skalierung.md`.
+- **Wetter (27.09.2026):** Open-Meteo, solange DAILY nicht kommerziell ist; 16 Tage (ab Tag 8 Trend), Cache bis zur nächsten vollen/halben Stunde; Regen/Radar als eigener Dienst `regen` (DWD). Begründung und Verworfenes: `uebergabe.md`.
 - **Eigene Daten, wo es geht:** Orte und Postleitzahlen Deutschland kommen aus dem eigenen Bestand (GeoNames, monatlich per GitHub Action), nicht mehr von OpenPLZ/Nominatim.
 - Frontend ohne Bundler: `src/index.html` (nur Gerüst), `src/app.css` (Design-Tokens, Hell/Dunkel), ES-Module unter `src/js/`:
   - `core/` – `tiles.js` (Kachel-Katalog, Layouts öffentlich/privat, `chooseLayout`), `board.js` (Raster, Aktivierung, Mobil-Vollbild), `store.js` (Einstellungen, Aufgaben, Klickzähler in localStorage), `ask.js` („Frag DAILY“: jede Datenquelle meldet eigene Antworten an), `status.js` (Statusanzeige), `util.js`.
