@@ -4,6 +4,7 @@
 import { glyph, esc } from '../core/util.js';
 import { miniDiagramm, tageDiagramm, stundenDiagramm } from './diagramm.js';
 import { hinweis as regenHinweis, radarReiter } from './regen.js';
+import { abzeichen, kurz as hinweisKurz, reiter as hinweisReiter } from './hinweise.js';
 
 export const TEXT = {
   klar: 'Klar', ueberwiegend_klar: 'Überwiegend klar', teilweise_bewoelkt: 'Teilweise bewölkt', bedeckt: 'Bedeckt',
@@ -130,7 +131,8 @@ function trendText(tage) {
 
 // Darstellung als Kachel (Felder wie in core/board.js erwartet)
 // regenEnv (optional): Antwort des Dienstes „regen“ – liefert „Regen in 20 Min.“ und den Reiter „Radar“
-export function kachel(env, regenEnv = null) {
+// hinweisEnv (optional): Antwort des Dienstes „wetterhinweise“ – Abzeichen, kurzer Hinweis und Reiter „Hinweise“, nur wenn es etwas gibt
+export function kachel(env, regenEnv = null, hinweisEnv = null) {
   const d = env.daten, a = d.aktuell, { z, heute, regenMax, regenUm, pollen } = auswerten(env);
   const regenText = regenMax >= 25 ? `Regen möglich gegen ${regenUm} Uhr.` : 'Kein Regen zu erwarten.';
   const wind = `${r0(a.windKmh)} km/h${a.windRichtung ? ' aus ' + a.windRichtung : ''}${a.boeenKmh ? `, Böen ${r0(a.boeenKmh)} km/h` : ''}`;
@@ -155,19 +157,26 @@ export function kachel(env, regenEnv = null) {
   if (trend.length) rows.push([`Trend bis ${z.wtag(trend[trend.length - 1].datum)}`, trendText(trend)]);
   rows.push(['Stand', `${z.hm(a.zeit)} Uhr · ${env.quellen.map(q => q.name).join(', ')}`]);
   // Aufgeklappt: Reiter statt langer Liste – alles ohne Scrollen sichtbar
+  const zone = env.ort.zeitzone || 'Europe/Berlin', hTop = (hinweisEnv && hinweisEnv.daten && hinweisEnv.daten.hinweise[0]) || null;
+  const hKurz = hinweisKurz(hinweisEnv, zone);
+  if (hKurz) rows.unshift(['Hinweis', hKurz]);
   const tabs = [
+    ...(hTop && hTop.stufe >= 3 ? [{ id: 'hinweise', name: 'Hinweise', html: hinweisReiter(hinweisEnv, zone) }] : []),   // Unwetter: zuerst
     { id: 'heute', name: 'Heute', html: zeilen(heuteZeilen(env, z, heute, regenMax, regenUm, wind, sonne)) },
     ...(regenEnv && regenEnv.daten ? [{ id: 'radar', name: 'Radar', html: radarReiter(regenEnv, z.hm) }] : []),
     { id: 'tage', name: `${d.tage.length} Tage`, html: tageDiagramm(d.tage, z.wtag, t => zustandText(t.zustand, t.code)) },
     { id: 'stunden', name: `${d.stunden.length} Std.`, html: stundenDiagramm(d.stunden, iso => ({ h: z.h(iso), tag: z.wtagKurz(iso) })) },
+    ...(hTop && hTop.stufe < 3 ? [{ id: 'hinweise', name: 'Hinweise', html: hinweisReiter(hinweisEnv, zone) }] : []),
     { id: 'mehr', name: 'Mehr', html: zeilen(mehrZeilen(env, pollen)) }
   ];
+  const wetterText = `${zustandText(a.zustand, a.code)}, gefühlt ${r0(a.gefuehltC)}°.`, regenZeile = regenHinweis(regenEnv) || regenText;
   // Kopfzeile: Ort, jetzt, Tiefst/Höchst von heute – alles in einer Zeile
   return {
-    state: 'live', title: kopfzeile(env), titleHtml: kopfzeileHtml(env), tabs,
+    state: 'live', title: kopfzeile(env) + (hTop ? ` · ${hKurz}` : ''), titleHtml: kopfzeileHtml(env) + abzeichen(hinweisEnv), tabs,
     lglyph: glyph(bild(a.zustand, a.tag)), lglyphTip: zustandText(a.zustand, a.code),   // Symbol in der Kopfzeile, Erklärung beim Überfahren
     glyph: '', m: '', ms: r0(a.tempC) + '°',                                               // keine große Zeile – Platz fürs Diagramm
-    x: `${zustandText(a.zustand, a.code)}, gefühlt ${r0(a.gefuehltC)}°. ${regenHinweis(regenEnv) || regenText}`,   // Radar geht vor der Stundenvorhersage
+    // Unwetter zuerst, sonst Wetter · Hinweis · Regen (Radar geht vor der Stundenvorhersage)
+    x: (hTop && hTop.stufe >= 3 ? [hKurz, wetterText, regenZeile] : [wetterText, hKurz, regenZeile]).filter(Boolean).join(' '),
     chart: miniDiagramm(d.tage),
     rows
   };

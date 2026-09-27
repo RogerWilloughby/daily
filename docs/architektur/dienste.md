@@ -15,7 +15,7 @@ Externe Quellen (Open-Meteo, DWD, OpenLigaDB …) haben jede ihr eigenes Format.
 ```
 GET /api/v1/<dienst>?<eingaben>
 GET /api/v1/dienste            → Katalog aller Dienste (mit Eingaben, Klasse, TTL, Quellen, Schema)
-GET /api/v1/paket?dienste=wetter,regen&lat=…&lon=…  → mehrere Dienste in einer Anfrage (daten.antworten[id] = Rahmen je Dienst)
+GET /api/v1/paket?dienste=wetter,regen,wetterhinweise&lat=…&lon=…  → mehrere Dienste in einer Anfrage (daten.antworten[id] = Rahmen je Dienst)
 ```
 Eine einzige Vercel-Funktion (`api/v1/[dienst].js`) bedient alle Dienste (Grenze Hobby-Tarif: 12 Funktionen).
 
@@ -148,7 +148,8 @@ Daraus entstehen der Katalog `/api/v1/dienste`, die Dateien `docs/dienste/<id>.m
 | `ort` | ✅ daily/1 – eigener Ortsbestand (Name, Postleitzahl, Gerätestandort), Ausland über Open-Meteo; Einstellungen nutzen ihn |
 | `wetter` | ✅ daily/1 – Referenz; Kachel über Adapter |
 | `regen` | ✅ daily/1 – DWD-Radar über Bright Sky; erscheint in der Wetterkachel (Hinweis + Reiter „Radar“) |
-| Feiertage & Ferien, Himmel, Warnungen, Tanken, Abfahrten, Sport, Geld, Wissen, Tagesinhalte | ⏳ noch alte Einzelfunktionen bzw. im Browser berechnet |
+| `wetterhinweise` | ✅ daily/1 – amtliche DWD-Warnungen über Bright Sky; ersetzt die Kachel „Warnungen“, erscheint in der Wetterkachel (Abzeichen, Hinweis, Reiter „Hinweise“) nur, wenn es etwas gibt |
+| Feiertage & Ferien, Himmel, Tanken, Abfahrten, Sport, Geld, Wissen, Tagesinhalte | ⏳ noch alte Einzelfunktionen bzw. im Browser berechnet |
 | Kalender, Schlagzeilen (privat) | ⏳ |
 
 Nach der Umstellung aller Dienste entfallen die alten `api/*.js`-Funktionen.

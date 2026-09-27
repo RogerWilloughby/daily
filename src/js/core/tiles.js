@@ -16,7 +16,6 @@ export const CATALOG = [
   T('play', 'Rätsel & Witz', 'Rätsel', 'dice', { state: 'content' }),
   T('food', 'Essen', 'Essen', 'food', { state: 'content' }),
   T('knowledge', 'Wissen', 'Wissen', 'book'),
-  T('alerts', 'Warnungen', 'Warnung', 'warn'),
   T('fuel', 'Tanken', 'Tanken', 'fuel'),
   T('sky', 'Himmel', 'Himmel', 'moon', { state: 'local' }),
   T('travel', 'Land des Tages', 'Reisen', 'globe', { state: 'content' }),
@@ -38,13 +37,13 @@ export const LAYOUTS = {
   public: [
     'weather', 'holidays', 'links', 'tasks', 'transit',
     'sport', 'money', 'play', 'food', 'knowledge',
-    'alerts', 'fuel', 'sky', 'travel', 'film',
+    'fuel', 'sky', 'travel', 'film',
     'health', 'tech', 'saving', 'relation', 'usage'
   ],
   private: [
     'weather', 'calendar', 'news', 'tasks', 'transit',
     'sport', 'money', 'play', 'food', 'knowledge',
-    'alerts', 'fuel', 'sky', 'holidays', 'film',
+    'fuel', 'sky', 'holidays', 'film', 'relation',
     'links', 'tech', 'saving', 'travel', 'usage'
   ]
 };
@@ -52,7 +51,7 @@ export const LAYOUTS = {
 export const byId = Object.fromEntries(CATALOG.map(t => [t.id, t]));
 
 // Aktive Belegung (wird beim Start einmal gesetzt). Ein eigenes Layout (später aus den Einstellungen)
-// wird geprüft: nur bekannte, erlaubte Kacheln, keine doppelten, auf 20 Plätze aufgefüllt.
+// wird geprüft: nur bekannte, erlaubte Kacheln, keine doppelten, auf 20 Plätze aufgefüllt (sonst freier Platz).
 export const TILES = [];
 export function chooseLayout(isPrivate, custom) {
   const allowed = id => byId[id] && (isPrivate || byId[id].scope === 'public');
@@ -62,6 +61,7 @@ export function chooseLayout(isPrivate, custom) {
     if (ids.length >= SLOTS) break;
     if (allowed(id) && !ids.includes(id)) ids.push(id);
   }
-  TILES.splice(0, TILES.length, ...ids.map(id => byId[id]));
+  // Fehlende Plätze bleiben frei (null → „Freier Platz“), z. B. seit die Warnungen in der Wetterkachel stecken
+  TILES.splice(0, TILES.length, ...ids.map(id => byId[id]), ...Array(SLOTS - ids.length).fill(null));
   return TILES;
 }

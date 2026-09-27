@@ -353,3 +353,16 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
 
 /* 9 Bewegung reduzieren */
 @media (prefers-reduced-motion:reduce){.grid,.tile,.head{transition:none}.tile[data-mode="active"] .body{animation:none}}
+
+/* Wetterhinweise (DWD-Farben: 1 gelb, 2 orange, 3 rot, 4 violett) – in beiden Farbschemen gleich, Text kontraststark */
+.wh-s1{--wh:#F2D02E;--wh-text:#3A2E00}.wh-s2{--wh:#F08A24;--wh-text:#2A1400}.wh-s3{--wh:#D12A2A;--wh-text:#fff}.wh-s4{--wh:#8E1F8E;--wh-text:#fff}
+.wh-badge{display:inline-block;margin-left:6px;padding:0 6px;border-radius:9px;background:var(--wh);color:var(--wh-text);font-size:11px;font-weight:700;line-height:17px;vertical-align:1px;white-space:nowrap}
+.wh-feld{display:grid;gap:6px;font-size:13px;line-height:1.3}
+.wh-karte{border-left:5px solid var(--wh);padding:2px 0 2px 10px}
+.wh-karte header{margin-bottom:2px}
+.wh-stufe{display:inline-block;padding:0 6px;border-radius:9px;background:var(--wh);color:var(--wh-text);font-size:11px;font-weight:700}
+.wh-karte p{margin:2px 0}
+.wh-titel{font-weight:700}
+.wh-tipp{color:var(--active-muted)}
+.wh-s3 .wh-titel,.wh-s4 .wh-titel{font-size:14px}
+.wh-quelle,.wh-mehr{margin:0;font-size:11px;color:var(--active-muted)}

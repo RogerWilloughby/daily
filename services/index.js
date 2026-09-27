@@ -7,7 +7,8 @@ const { isPrivate } = require('./_lib/http');
 const DIENSTE = [
   require('./ort'),
   require('./wetter'),
-  require('./regen')
+  require('./regen'),
+  require('./wetterhinweise')
 ];
 const byId = Object.fromEntries(DIENSTE.map(d => [d.id, d]));
 

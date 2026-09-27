@@ -398,11 +398,11 @@ test('Mehrere Orte: Auswahlbox, hinzufügen, wechseln, entfernen', async () => {
 });
 
 test('Paket: mehrere Dienste in einer Anfrage, Fehler nur im eigenen Teil, gültig bis zum frühesten Takt', async () => {
-  const r = await rufe('paket', { dienste: 'wetter,regen,gibtsnicht', lat: '52.52', lon: '13.41', name: 'Berlin' });
+  const r = await rufe('paket', { dienste: 'wetter,regen,wetterhinweise,gibtsnicht', lat: '52.52', lon: '13.41', name: 'Berlin' });
   assert.equal(r.code, 200);
   gueltig(r.body);
   const a = r.body.daten.antworten;
-  assert.equal(a.wetter.dienst, 'wetter'); assert.equal(a.regen.dienst, 'regen');
+  assert.equal(a.wetter.dienst, 'wetter'); assert.equal(a.regen.dienst, 'regen'); assert.equal(a.wetterhinweise.dienst, 'wetterhinweise');
   assert.equal(a.gibtsnicht.fehler.code, 'dienst_unbekannt');
   assert.equal(r.body.gueltigBis, a.regen.gueltigBis);                 // Radar (5 min) bestimmt die Gültigkeit
   assert.equal((await rufe('paket', {})).body.fehler.code, 'eingabe_fehlt');
@@ -437,4 +437,59 @@ test('Client: Paket, sofort anzeigen aus dem Speicher, Rückfall auf letzten Sta
     assert.equal(r2.regen.veraltet, true);
     await assert.rejects(c2.dienst('ort', { q: 'Berlin' }), e => e.code === 'nicht_erreichbar');   // nichts gespeichert → Fehler
   } finally { global.fetch = echt; delete global.localStorage; }
+});
+
+test('Wetterhinweise: DWD-Warnungen über Bright Sky – ohne Testmeldungen, höchste Stufe zuerst, mit Tipp', async () => {
+  const r = await rufe('wetterhinweise', { lat: '51.05', lon: '13.74', name: 'Dresden' });
+  assert.equal(r.code, 200);
+  gueltig(r.body, dienste.byId.wetterhinweise.schema);
+  const d = r.body.daten;
+  assert.equal(d.gebiet, 'Dresden');
+  assert.equal(d.hoechsteStufe, 2);
+  assert.deepEqual(d.hinweise.map(h => [h.art, h.stufe, h.stufeName, h.aktiv]), [['wind', 2, 'markant', false], ['wind', 1, 'wetterwarnung', false]]);
+  assert.equal(d.hinweise[0].empfehlung, 'Achten Sie auf herabstürzende Äste.');   // amtlicher Text unverändert
+  assert.match(d.hinweise[0].tipp, /Balkonmöbel/);
+  assert.equal(new Date(r.body.gueltigBis).getUTCMinutes() % 5, 0);
+  const { umwandeln, art } = dienste.byId.wetterhinweise;
+  assert.deepEqual(umwandeln(fx.alerts(false)).hinweise, []);
+  assert.equal(umwandeln(fx.alerts(false)).hoechsteStufe, 0);
+  const jetzt = Date.now(), vorbei = { alerts: [{ severity: 'minor', event_de: 'FROST', expires: new Date(jetzt - 1000).toISOString() }] };
+  assert.equal(umwandeln(vorbei, jetzt).hinweise.length, 0);                          // abgelaufene fallen weg
+  assert.deepEqual(['GLATTEIS', 'STARKES GEWITTER', 'ORKANBÖEN', 'DICHTER NEBEL', 'STRENGER FROST', 'STARKE HITZE', 'HEFTIGER STARKREGEN', 'LEICHTER SCHNEEFALL', 'XYZ'].map(art),
+    ['glaette', 'gewitter', 'wind', 'nebel', 'frost', 'hitze', 'regen', 'schnee', 'sonstiges']);
+  const unwetter = umwandeln({ alerts: [{ severity: 'extreme', event_de: 'ORKANBÖEN', onset: new Date(jetzt - 6e5).toISOString(), expires: new Date(jetzt + 36e5).toISOString() }] }, jetzt);
+  assert.deepEqual([unwetter.hinweise[0].stufe, unwetter.hinweise[0].aktiv], [4, true]);
+  assert.match(unwetter.hinweise[0].tipp, /Aufenthalt im Freien vermeiden/);          // ab Stufe 3 ernster Tipp
+});
+
+test('Adapter Wetterhinweise: Abzeichen, kurzer Hinweis und Reiter in der Wetterkachel, Unwetter zuerst', async () => {
+  const h = await esm('src/js/adapter/hinweise.js');
+  const { kachel } = await esm('src/js/adapter/wetter.js');
+  const env = (await rufe('wetterhinweise', { lat: '51.05', lon: '13.74' })).body;
+  const wetter = (await rufe('wetter', { ort: 'Berlin' })).body;
+  assert.match(h.abzeichen(env), /class="wh-badge wh-s2"[^>]*>Sturmböen \+1</);
+  assert.match(h.kurz(env), /^Sturmböen ab (morgen )?\d{1,2}(:\d\d)? Uhr\.$/);
+  const html = h.reiter(env);
+  assert.match(html, /Markantes Wetter.*Amtliche WARNUNG vor STURMBÖEN.*Uhr.*Empfehlung:<\/b> Achten Sie.*Tipp:/s);
+  assert.equal((html.match(/Tipp:/g) || []).length, 1);                              // gleicher Tipp nur einmal
+  assert.match(html, /Deutscher Wetterdienst · Dresden/);
+  assert.match(h.antwort(env), /^Sturmböen \(Markantes Wetter\).*Quelle: Deutscher Wetterdienst\.$/);
+  assert.match(h.antwort({ daten: { gebiet: 'Dresden', hoechsteStufe: 0, hinweise: [] } }), /kein amtlicher Wetterhinweis/);
+  // in der Kachel: Abzeichen in der Kopfzeile, Hinweis in der Zeile, Reiter vor „Mehr“
+  const k = kachel(wetter, null, env);
+  assert.match(k.titleHtml, /wh-badge/);
+  assert.match(k.x, /gefühlt .*°\. Sturmböen ab/);
+  assert.deepEqual(k.tabs.map(t => t.id), ['heute', 'tage', 'stunden', 'hinweise', 'mehr']);
+  // ohne Hinweis: nichts davon
+  const leer = kachel(wetter, null, { daten: { gebiet: '', hoechsteStufe: 0, hinweise: [] } });
+  assert.doesNotMatch(leer.titleHtml, /wh-badge/);
+  assert.ok(!leer.tabs.some(t => t.id === 'hinweise'));
+  // Unwetter (Stufe 3–4): deutlich, zuerst, nicht verharmlost
+  const u = { daten: { gebiet: 'Dresden', hoechsteStufe: 4, hinweise: [{ art: 'wind', stufe: 4, stufeName: 'extrem', ereignis: 'ORKANBÖEN', titel: 'Amtliche WARNUNG vor ORKANBÖEN',
+    beginn: new Date().toISOString(), ende: new Date(Date.now() + 36e5).toISOString(), aktiv: true, beschreibung: 'Orkanböen bis 130 km/h.', empfehlung: 'Aufenthalt im Freien vermeiden!', tipp: 'x' }] } };
+  const ku = kachel(wetter, null, u);
+  assert.match(ku.titleHtml, /wh-s4[^>]*>! Unwetter: Orkanböen</);
+  assert.match(ku.x, /^Extreme Unwetterwarnung: Orkanböen bis/);
+  assert.equal(ku.tabs[0].id, 'hinweise');
+  assert.match(ku.tabs[0].html, /Aufenthalt im Freien vermeiden!/);
 });

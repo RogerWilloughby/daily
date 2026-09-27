@@ -15,7 +15,7 @@ Status: ✅ fertig in daily/1 · 🔁 läuft, noch alte Schnittstelle · 🆕 ne
 | `wetter` | lokales Wetter (16 Tage), Luftqualität, Pollen | Live | Ort | Open-Meteo (nicht kommerziell) | ✅ |
 | `regen` | Regenradar, „Regen in X Minuten“, Regen in der Nähe, Radarkarte | Live | Ort (Deutschland) | DWD-Radar RV über Bright Sky | ✅ |
 | `himmel` | Sonnenauf-/-untergang, Mondphase, Sternschnuppen | Rechnen | Ort | eigene Berechnung | 🔁 |
-| `warnungen` | Warnmeldungen | Live | Ort | DWD über Bright Sky | 🔁 |
+| `wetterhinweise` | Warnmeldungen – freundlich als „Wetterhinweise“ mit Alltagstipp, in der Wetterkachel (keine eigene Kachel) | Live | Ort (Deutschland) | amtliche DWD-Warnungen über Bright Sky | ✅ |
 | `weltwetter` | Weltwetter (Hauptstädte, Reiseziele) | Live | Liste von Orten | Open-Meteo (mehrere Orte je Abfrage) | 🆕 |
 | `klima` | Weltklima, CO₂-Themen | Live | – | NOAA Mauna Loa (CO₂-Tageswert), Copernicus (Temperatur-Abweichung) | 🆕 |
 | `wetterkarte` | Wetterkarte, Weltwetterkarte, Weltklimakarte | Live (Kartenbilder) | Ort/Region | DWD-Kartendienst (WMS, GeoNutzV) | ⏸ Darstellung aufwendig |

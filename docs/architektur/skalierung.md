@@ -19,7 +19,7 @@ Jede Anfrage soll so früh wie möglich beantwortet werden:
 |---|---|---|---|
 | **A** | berechnet, ohne Quelle | Himmel, Feiertage | unkritisch, nur Rechenzeit |
 | **B** | für alle gleich | Strompreis, Währungen, An diesem Tag | ein Abruf je Zeitraum, CDN verteilt – unkritisch |
-| **C** | je Ort, rasterbar | Wetter, Warnungen, Tanken | Zahl der belegten Zellen × Aktualisierungen/Tag entscheidet; Raster und TTL sind die Stellschrauben, am Ende eigene Daten |
+| **C** | je Ort, rasterbar | Wetter, Wetterhinweise, Tanken | Zahl der belegten Zellen × Aktualisierungen/Tag entscheidet; Raster und TTL sind die Stellschrauben, am Ende eigene Daten |
 | **D** | je Eingabe | Ortssuche, Fußballverein, Haltestelle | CDN hilft nur bei häufigen Eingaben; möglichst eigener Bestand (Stufe 4) |
 
 ## Drei Ausbaustufen
@@ -37,6 +37,7 @@ Hinweis: Vercel Hobby und das freie Open-Meteo sind nur für **nicht kommerziell
 | `ort` | D | Deutschland: keine externe Quelle (eigener Bestand) | erledigt: eigener GeoNames-Bestand, monatliche Aktualisierung; Ausland nur ohne deutschen Treffer | ✅ Stufe 4 |
 | `wetter` | C | Open-Meteo frei (10.000/Tag, nicht kommerziell) reicht nicht | jetzt: nur auf Anfrage, Takt :00/:30 (≈ 100 Orte/Tag im freien Kontingent). Bei Wachstum: DWD MOSMIX (Abrufe unabhängig von Nutzern), gröberes Raster oder bezahlter Tarif | Stufe 1–2 |
 | `regen` | C | Bright Sky ohne veröffentlichte Grenze, ohne Zusage | nur auf Anfrage, Takt 5 min (≤ 288 Abrufe je 1-km-Zelle und Tag). Bei Wachstum: Bright Sky selbst betreiben oder DWD-RV-Datei zentral alle 5 min laden (288 Abrufe/Tag gesamt) | Stufe 1–2 |
+| `wetterhinweise` | C | Bright Sky ohne veröffentlichte Grenze, ohne Zusage | nur auf Anfrage im Paket mit Wetter/Regen, Takt 5 min. Bei Wachstum: DWD-Warnliste zentral alle 5 min laden und je Warnzelle (≈ 11.000 Gemeinden) vorhalten – Abrufe unabhängig von der Nutzerzahl | Stufe 1–2 |
 
 Weitere Dienste werden beim Umzug auf daily/1 hier eingetragen.
 

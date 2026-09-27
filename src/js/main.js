@@ -19,7 +19,6 @@ import knowledge from './providers/knowledge.js';
 import local from './providers/local.js';
 import links from './providers/links.js';
 import holidays from './providers/holidays.js';
-import alerts from './providers/alerts.js';
 import fuel from './providers/fuel.js';
 import sky from './providers/sky.js';
 
@@ -29,7 +28,7 @@ if (ONLINE) { try { isPrivate = !!(await getJson('/api/config', { timeout: 2500 
 chooseLayout(isPrivate, settings.layout);
 
 // Reihenfolge = Priorität: was am häufigsten gebraucht wird, lädt zuerst
-const PROVIDERS = [local, links, sky, weather, calendar, news, holidays, content, transit, markets, sport, knowledge, alerts, fuel]
+const PROVIDERS = [local, links, sky, weather, calendar, news, holidays, content, transit, markets, sport, knowledge, fuel]
   .filter(p => isPrivate || !p.private);
 const lastRun = new Map();
 

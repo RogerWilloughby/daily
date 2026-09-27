@@ -103,16 +103,6 @@ test('Himmel: Sonne in Dresden, Vollmond am 26.09.2026', async () => {
   assert.equal(sunTimes(Date.UTC(2026, 5, 21), 78, 15).rise, null); // Polartag
 });
 
-test('Warnungen: Testmeldungen raus, höchste Stufe zuerst', () => {
-  const { mapAlerts } = require('../api/alerts');
-  const r = mapAlerts(fx.alerts());
-  assert.equal(r.area, 'Dresden');
-  assert.equal(r.alerts.length, 2);
-  assert.equal(r.alerts[0].event, 'Sturmböen');
-  assert.equal(r.alerts[0].level, 2);
-  assert.equal(mapAlerts(fx.alerts(false)).alerts.length, 0);
-});
-
 test('Tanken: nur offene mit Preis, günstigste zuerst', () => {
   const { mapStations } = require('../api/fuel');
   const r = mapStations(fx.fuel().stations);
@@ -148,17 +138,19 @@ test('Betriebsart: Kalender und Schlagzeilen nur privat', async () => {
   delete process.env.DAILY_PRIVATE;
 });
 
-test('Layouts: öffentlich ohne private Kacheln, immer 20 Plätze', async () => {
+test('Layouts: öffentlich ohne private Kacheln, immer 20 Plätze (fehlende bleiben frei)', async () => {
   const { LAYOUTS, CATALOG, byId, chooseLayout, SLOTS } = await esm('src/js/core/tiles.js');
   for (const [mode, ids] of Object.entries(LAYOUTS)) {
-    assert.equal(ids.length, SLOTS, mode);
-    assert.equal(new Set(ids).size, SLOTS, mode + ': doppelte Kachel');
+    assert.ok(ids.length <= SLOTS, mode);
+    assert.equal(new Set(ids).size, ids.length, mode + ': doppelte Kachel');
     ids.forEach(id => assert.ok(byId[id], mode + ': unbekannt ' + id));
   }
   assert.ok(LAYOUTS.public.every(id => byId[id].scope === 'public'));
   assert.ok(!CATALOG.some(t => t.id === 'mail' || t.id === 'parcels'));
-  const pub = chooseLayout(false, ['news', 'calendar', 'sky', 'sky', 'gibtsnicht']).map(t => t.id);
+  const pub = chooseLayout(false, ['news', 'calendar', 'sky', 'sky', 'gibtsnicht']).map(t => t && t.id);
   assert.equal(pub.length, SLOTS);
+  assert.equal(pub.filter(x => x === null).length, SLOTS - LAYOUTS.public.length);   // freie Plätze am Ende
+  assert.ok(!pub.includes('alerts'));                                                // Warnungen stecken jetzt in der Wetterkachel
   assert.equal(pub[0], 'sky');
   assert.ok(!pub.includes('news') && !pub.includes('calendar'));
   assert.equal(chooseLayout(true).map(t => t.id)[1], 'calendar');
