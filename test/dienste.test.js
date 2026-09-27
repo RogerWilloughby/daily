@@ -594,7 +594,15 @@ test('Namenstage: Erzeugung aus Wikidata, Dienst, Kachel und Antwort', async () 
   ] } };
   const tage = t.auswerten(json);
   assert.deepEqual(tage, { '03-19': ['Josef', 'Joseph'], '06-24': ['Hans-Peter', 'Johannes'], '09-28': ['Wenzel', 'Lioba'] });   // ausdrücklicher Namenstag zuerst
-  assert.ok(t.pruefe(tage).length === 2);                                              // zu wenig → Abbruch, alter Stand bleibt
+  assert.equal(t.pruefe(tage).length, 3);                                              // zu wenig und bekannte Namenstage fehlen → Abbruch
+  assert.match(t.pruefe(tage)[2], /Martin 11-11/);
+  const voll = Object.fromEntries(Object.entries(t.ANKER).map(([k, v]) => [k, [v]]));
+  assert.equal(t.pruefe(voll).length, 2);                                              // Anker stimmen, nur zu wenig Tage/Namen
+  assert.deepEqual(['Josef von Nazaret', 'Georg (Heiliger)', 'Nikolaus von Myra', 'Johannes Paul II.', 'hl. Anna', '聖母'].map(t.vornameAus),
+    ['Josef', 'Georg', 'Nikolaus', 'Johannes', null, null]);
+  const z = t.zeilen([{ heiliger: 'Q1', tag: 'T' }, { heiliger: 'Q2', tag: 'T' }], { Q1: { de: 'Josef von Nazaret', links: 90, dewiki: true }, Q2: { de: 'Giovanni X', links: 99, dewiki: false } }, { T: { en: 'March 19' } });
+  assert.deepEqual(t.auswerten(z), { '03-19': ['Josef'] });                             // ohne deutschen Artikel fällt weg
+  assert.equal(t.erzeuge(z).format, 2);
   // Dienst (rein)
   const na = dienste.byId.namenstage;
   const d = na.auswerten({ stand: '2026-09-01', tage }, '2026-09-27', 'josef');

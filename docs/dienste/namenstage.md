@@ -7,7 +7,7 @@ Wer heute und in den nächsten Tagen Namenstag hat – und wann ein bestimmter V
 | | |
 |---|---|
 | Aufruf | `GET /api/v1/namenstage` |
-| Programmversion | 1.0.1 |
+| Programmversion | 1.0.2 |
 | Vertrag (Datenformat) | daily/1, Version 1 |
 | Klasse | oeffentlich |
 | Länder | weltweit |
@@ -17,7 +17,7 @@ Wer heute und in den nächsten Tagen Namenstag hat – und wann ein bestimmter V
 Kleiner Anlass zum Gratulieren: zeigt im Kalender, wer heute Namenstag hat, und beantwortet „Wann hat Josef Namenstag?“.
 
 ## Herkunft der Daten
-- Wikidata (freie Wissensdatenbank, CC0): Gedenktage der Heiligen (Eigenschaft „Gedenktag“) mit ihrem Vornamen und ausdrücklich eingetragene Namenstage für Deutschland und Österreich.
+- Wikidata (freie Wissensdatenbank, CC0): Personen mit Gedenktag (Eigenschaft „Gedenktag“), die einen Artikel in der deutschen Wikipedia haben. Der Vorname kommt aus ihrem deutschen Namen („Josef von Nazaret“ → Josef).
 - Eigener Bestand services/daten/namenstage.json, erzeugt monatlich per GitHub Action „Daten erneuern“ (Erzeuger tools/daten/namenstage.js → tools/namenstage-daten.js).
 
 Quellen mit Lizenz:
@@ -29,10 +29,10 @@ Quellen mit Lizenz:
 | `name` | Vorname (optional, z. B. Josef) – liefert dessen Namenstage |
 
 ## Verarbeitung
-- Je Tag höchstens 6 Vornamen; Reihenfolge: ausdrücklicher Namenstag vor Heiligen-Gedenktag, dann Bekanntheit des Namens (Zahl der Wikipedia-Sprachversionen).
+- Je Tag höchstens 6 Vornamen, bekannteste Heilige zuerst (Zahl der Wikipedia-Sprachversionen).
 - Nur echte Vornamen (ein Wort, auch mit Bindestrich); deutsche Schreibweise aus Wikidata.
 - Namenstage folgen der kirchlichen Tradition und unterscheiden sich je Kalender (katholisch, evangelisch, regional) – DAILY zeigt eine Auswahl, keinen amtlichen Kalender.
-- Eine Erzeugung mit weniger als 330 Tagen oder 500 Namen wird verworfen; dann bleibt der alte Stand.
+- Eine Erzeugung wird verworfen (alter Stand bleibt), wenn weniger als 300 Tage oder 300 Namen herauskommen oder mehr als 2 von 8 bekannten Namenstagen fehlen (Josef 19.3., Johannes 24.6., Martin 11.11., Nikolaus 6.12., Georg 23.4., Elisabeth 19.11., Barbara 4.12., Franz 4.10.).
 - „Heute“ in der Zeitzone Europe/Berlin.
 
 ## Ausgabe (`daten`)
@@ -64,6 +64,7 @@ Rahmen und Stufen: `../architektur/skalierung.md`
 ## Änderungen
 | Version | Datum | Änderung |
 |---|---|---|
+| 1.0.2 | 2026-09-27 | Deutsche Namen: Vorname aus dem deutschen Namen des Heiligen (nur mit Artikel in der deutschen Wikipedia), Prüfung an bekannten Namenstagen; Bestände ohne Fassung 2 werden ignoriert |
 | 1.0.1 | 2026-09-27 | Wikidata-Abruf in kleinen Schritten (die große Abfrage lief in den 60-s-Abbruch); erzeugt über die gemeinsame Action „Daten erneuern“ |
 | 1.0.0 | 2026-09-27 | Erste Fassung: Namenstage heute und die nächsten 7 Tage, Suche nach einem Namen; Bestand aus Wikidata (CC0), monatlich erneuert |
 
