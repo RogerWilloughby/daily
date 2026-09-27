@@ -15,6 +15,7 @@ Externe Quellen (Open-Meteo, DWD, OpenLigaDB …) haben jede ihr eigenes Format.
 ```
 GET /api/v1/<dienst>?<eingaben>
 GET /api/v1/dienste            → Katalog aller Dienste (mit Eingaben, Klasse, TTL, Quellen, Schema)
+GET /api/v1/paket?dienste=wetter,regen&lat=…&lon=…  → mehrere Dienste in einer Anfrage (daten.antworten[id] = Rahmen je Dienst)
 ```
 Eine einzige Vercel-Funktion (`api/v1/[dienst].js`) bedient alle Dienste (Grenze Hobby-Tarif: 12 Funktionen).
 

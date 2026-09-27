@@ -44,6 +44,7 @@ Kacheln und Quellen:
 
 ## 3a. Einstellungen (Konfigurator)
 Zahnrad-Button „Einstellungen“ in der unteren Leiste (der Ort hat seinen eigenen Knopf daneben):
+- **Performance (27.09.2026):** Plattform bleibt Vercel. Sofort anzeigen aus dem Browser-Speicher mit „Stand …“ und Rückfall bei Störungen, Ladezeiten in der Statusanzeige, Paket-Anfrage (`/api/v1/paket`), Instanz-Zwischenspeicher. Vor dem öffentlichen Start: eigene Daten für Wetter/Radar und Lasttest. Details `../architektur/skalierung.md` → Performance.
 - **Orte (seit 27.09.2026, mehrere):** Auswahlbox in der unteren Leiste mit allen gespeicherten Orten (höchstens 10), dazu „+ Ort hinzufügen …“ und „Orte verwalten …“. Wechsel lädt alle Kacheln für den neuen Ort. Dialog „Orte“: gespeicherte Orte wählen/entfernen, „Meinen Standort ermitteln“ oder Suche mit Vorschlägen – ein Treffer wird aufgenommen und aktiv. Solange kein eigener Ort gespeichert ist, gilt der Beispielort Dresden („Ort wählen …“). Die Dienste bleiben unverändert (Ort kommt mit jeder Anfrage). Ort je Kachel: bewusst noch nicht. Später zu besprechen: „Immer meinen aktuellen Standort verwenden“ (Datenschutz).
 - Kalender: iCal-Links, einer pro Zeile (nur im privaten Betrieb sichtbar)
 - Haltestelle für Abfahrten (Standard Postplatz, VVO-Gebiet)

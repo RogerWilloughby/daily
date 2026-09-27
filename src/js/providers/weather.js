@@ -3,20 +3,27 @@
 import { set } from '../core/board.js';
 import { settings } from '../core/store.js';
 import { addAnswer } from '../core/ask.js';
-import { dienst, ortParams } from '../dienste/client.js';
+import { paket, gespeichert, ortParams } from '../dienste/client.js';
 import { kachel, antwort } from '../adapter/wetter.js';
+import { hm } from '../core/util.js';
 
 let env = null, regen = null;
 
-// Wetter (Takt 30 min) und Regenradar (Takt 5 min) zusammen; der Client holt nur, was abgelaufen ist.
+// „Stand 10:30“ an der Kachel, wenn ein älterer Stand gezeigt wird (beim Öffnen oder weil die Quelle gerade nicht antwortet)
+const stand = e => (e && (e.veraltet || Date.parse(e.gueltigBis) < Date.now()) ? `Stand ${hm(e.erstellt)}` : '');
+
+// Wetter (Takt 30 min) und Regenradar (Takt 5 min) mit EINER Anfrage (Paket); der Client holt nur, was abgelaufen ist.
+// Beim Öffnen erscheint sofort der zuletzt gespeicherte Stand, die neuen Daten kommen im Hintergrund.
 // Radar ist optional: außerhalb Deutschlands oder bei Störung zeigt die Kachel das Wetter ohne Radar.
 export async function load() {
-  set('weather', { title: settings.place.name });
   const p = ortParams(settings.place);
-  const [w, r] = await Promise.allSettled([dienst('wetter', p), dienst('regen', p)]);
-  if (w.status === 'rejected') throw w.reason;
-  env = w.value; regen = r.status === 'fulfilled' ? r.value : null;
-  set('weather', kachel(env, regen));
+  const altW = gespeichert('wetter', p), altR = gespeichert('regen', p);
+  if (altW && !env) set('weather', { ...kachel(altW, altR), tag: stand(altW) });
+  else if (!altW) set('weather', { title: settings.place.name });
+  const r = await paket(['wetter', 'regen'], p);
+  if (r.wetter instanceof Error) throw r.wetter;
+  env = r.wetter; regen = r.regen instanceof Error ? null : r.regen;
+  set('weather', { ...kachel(env, regen), tag: stand(env) });
 }
 
 addAnswer(/schirm|regen|wetter|warm|kalt|grad|pollen|luft|jacke|radar/i, () =>

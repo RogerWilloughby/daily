@@ -396,3 +396,45 @@ test('Mehrere Orte: Auswahlbox, hinzufügen, wechseln, entfernen', async () => {
   for (let i = 0; i < 12; i++) st.ortHinzufuegen({ ...orte[0], name: 'Ort ' + i, lat: 50 + i * 0.1 });
   assert.equal(st.settings.orte.length, st.MAX_ORTE);
 });
+
+test('Paket: mehrere Dienste in einer Anfrage, Fehler nur im eigenen Teil, gültig bis zum frühesten Takt', async () => {
+  const r = await rufe('paket', { dienste: 'wetter,regen,gibtsnicht', lat: '52.52', lon: '13.41', name: 'Berlin' });
+  assert.equal(r.code, 200);
+  gueltig(r.body);
+  const a = r.body.daten.antworten;
+  assert.equal(a.wetter.dienst, 'wetter'); assert.equal(a.regen.dienst, 'regen');
+  assert.equal(a.gibtsnicht.fehler.code, 'dienst_unbekannt');
+  assert.equal(r.body.gueltigBis, a.regen.gueltigBis);                 // Radar (5 min) bestimmt die Gültigkeit
+  assert.equal((await rufe('paket', {})).body.fehler.code, 'eingabe_fehlt');
+});
+
+test('Client: Paket, sofort anzeigen aus dem Speicher, Rückfall auf letzten Stand bei Störung, Messung', async () => {
+  const lager = {};
+  global.localStorage = { getItem: k => lager[k] ?? null, setItem: (k, v) => { lager[k] = String(v); }, removeItem: k => { delete lager[k]; } };
+  const echt = global.fetch; let stoerung = false;
+  global.fetch = async url => {
+    if (stoerung) throw new Error('offline');
+    const u = new URL(url, 'http://x'); const q = Object.fromEntries(u.searchParams);
+    const r = await rufe(u.pathname.split('/').pop(), q);
+    return { ok: r.code < 400, status: r.code, json: async () => r.body };
+  };
+  try {
+    const neu = z => import(pathToFileURL(path.join(__dirname, '..', 'src/js/dienste/client.js')).href + '?t=' + z);   // frisches Modul = Browser-Neustart
+    const c = await neu(1);
+    const zeiten = []; c.aufMessung((n, ms, q) => zeiten.push([n, q]));
+    const p = { lat: 52.52, lon: 13.41, name: 'Berlin' };
+    assert.equal(c.gespeichert('wetter', p), null);
+    const r1 = await c.paket(['wetter', 'regen'], p);
+    assert.equal(r1.wetter.dienst, 'wetter'); assert.equal(r1.regen.dienst, 'regen');
+    assert.deepEqual(zeiten.at(-1), ['paket', 'netz']);
+    assert.ok(Object.keys(lager).some(k => k.includes('/api/v1/wetter?')));   // für das nächste Öffnen gespeichert
+    // Speicher im Browser wie nach einem Neustart: nur localStorage bleibt
+    const c2 = await neu(2);
+    assert.equal(c2.gespeichert('wetter', p).dienst, 'wetter');                // sofort anzeigen
+    stoerung = true;
+    const r2 = await c2.paket(['wetter', 'regen'], p);                         // Netz weg → letzter Stand, als veraltet markiert
+    assert.equal(r2.wetter.veraltet, true);
+    assert.equal(r2.regen.veraltet, true);
+    await assert.rejects(c2.dienst('ort', { q: 'Berlin' }), e => e.code === 'nicht_erreichbar');   // nichts gespeichert → Fehler
+  } finally { global.fetch = echt; delete global.localStorage; }
+});

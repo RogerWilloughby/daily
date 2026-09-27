@@ -1,7 +1,8 @@
 // DAILY – Einstieg: Raster aufbauen, Anbieter starten und regelmäßig aktualisieren.
 import { initBoard, closeAll } from './core/board.js';
 import { initAsk, answerOpen, closeAnswer } from './core/ask.js';
-import { report, demo } from './core/status.js';
+import { report, demo, zeit } from './core/status.js';
+import { aufMessung } from './dienste/client.js';
 import { ONLINE, getJson } from './core/util.js';
 import { chooseLayout } from './core/tiles.js';
 import { settings } from './core/store.js';
@@ -56,6 +57,7 @@ function tick() {
   document.getElementById('clock').textContent = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 }
 
+aufMessung(zeit);   // Ladezeiten der Dienste in die Statusanzeige (Mouseover)
 initBoard();
 initAsk();
 initDialogs(() => PROVIDERS.forEach(run), isPrivate);

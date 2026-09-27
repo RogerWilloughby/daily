@@ -1,7 +1,7 @@
 // Dienst-Verzeichnis: jeder Dienst ist ein Modul mit id, version, titel, beschreibung, eingaben, laender ('alle' oder Liste wie ['DE']), klasse,
 // ttl (Sekunden), quellen, schema (Vertrag für „daten“), blatt (Dienstblatt, siehe _lib/blatt.js) und run(eingabe) → { daten, ort?, hinweise?, quellen? }.
 // Neuer Dienst = Modul in services/ + Eintrag hier. Aufruf: GET /api/v1/<id>
-const { DienstFehler, antwort } = require('./_lib/rahmen');
+const { DienstFehler, antwort, fehlerAntwort, iso } = require('./_lib/rahmen');
 const { isPrivate } = require('./_lib/http');
 
 const DIENSTE = [
@@ -18,11 +18,47 @@ function finde(id) {
   return d;
 }
 
+// Instanz-Zwischenspeicher: Antworten bleiben bis gueltigBis im Speicher der laufenden Funktion (Vercel nutzt Instanzen mehrfach).
+// Schützt die Quellen, wenn viele Anfragen gleichzeitig am CDN vorbeikommen (z. B. zum Takt :00/:30). Nie für private Dienste.
+const INSTANZ = new Map(), INSTANZ_MAX = 500;
+const schluessel = (id, e) => id + '?' + Object.keys(e).sort().map(k => `${k}=${e[k]}`).join('&');
+const laufend = new Map();   // gleichzeitige gleiche Anfragen warten auf dieselbe Berechnung
+
 // Dienst ausführen und in den Rahmen daily/1 packen
 async function ausfuehren(id, eingabe = {}, ctx = {}) {
   const d = finde(id);
-  const r = await d.run(eingabe, ctx);
-  return antwort(d, { ...r, jetzt: ctx.jetzt });
+  const privat = d.klasse === 'privat', k = schluessel(id, eingabe), jetzt = ctx.jetzt || Date.now();
+  if (!privat && !ctx.jetzt) {
+    const alt = INSTANZ.get(k);
+    if (alt && Date.parse(alt.gueltigBis) > jetzt) return alt;
+    if (laufend.has(k)) return laufend.get(k);
+  }
+  const p = (async () => antwort(d, { ...(await d.run(eingabe, ctx)), jetzt: ctx.jetzt }))();
+  if (privat || ctx.jetzt) return p;
+  laufend.set(k, p);
+  try {
+    const r = await p;
+    INSTANZ.set(k, r);
+    if (INSTANZ.size > INSTANZ_MAX) INSTANZ.delete(INSTANZ.keys().next().value);
+    return r;
+  } finally { laufend.delete(k); }
+}
+
+// Paket: mehrere Dienste für denselben Ort in einer Anfrage (weniger Anfragen, schneller auf dem Handy).
+// Jeder Dienst behält seinen Rahmen; ein Fehler betrifft nur seinen Teil. Gültig bis zum frühesten gueltigBis.
+async function paket(ids, eingabe = {}, ctx = {}) {
+  const liste = [...new Set(ids)].slice(0, 10);
+  if (!liste.length) throw new DienstFehler('eingabe_fehlt', 'Parameter dienste fehlt (z. B. dienste=wetter,regen)');
+  const antworten = {};
+  await Promise.all(liste.map(async id => {
+    try { antworten[id] = await ausfuehren(id, eingabe, ctx); }
+    catch (e) { antworten[id] = fehlerAntwort(id, e instanceof DienstFehler ? e : new DienstFehler('intern'), ctx.jetzt); }
+  }));
+  const jetzt = ctx.jetzt || Date.now();
+  const gueltig = Object.values(antworten).filter(a => !a.fehler).map(a => Date.parse(a.gueltigBis));
+  const bis = gueltig.length ? Math.min(...gueltig) : jetzt + 60e3;
+  return { format: 'daily/1', dienst: 'paket', version: 1, programm: null, ort: null, erstellt: iso(jetzt), gueltigBis: iso(bis),
+    quellen: [], hinweise: [], daten: { antworten }, fehler: null };
 }
 
 // Katalog: was es gibt, was es braucht, wie die Daten aussehen
@@ -33,4 +69,4 @@ function katalog() {
   }));
 }
 
-module.exports = { DIENSTE, byId, finde, ausfuehren, katalog };
+module.exports = { DIENSTE, byId, finde, ausfuehren, paket, katalog, INSTANZ };
