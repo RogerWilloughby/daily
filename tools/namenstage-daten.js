@@ -1,5 +1,5 @@
 // Erzeugt services/daten/namenstage.json aus Wikidata (CC0, gemeinfrei). Je Tag die bekanntesten Vornamen, höchstens MAX.
-// Aufruf (in der GitHub Action „Namenstage erneuern“): node tools/namenstage-daten.js
+// Aufruf: über den Erzeuger tools/daten/namenstage.js (GitHub Action „Daten erneuern“) oder direkt: node tools/namenstage-daten.js
 // Ablauf in kleinen Schritten, weil Wikidata Abfragen nach 60 s abbricht:
 //   1. SPARQL nur mit Kennungen: Heilige (P411 = Heiliger) mit Gedenktag (P841) und Vorname (P735)
 //   2. SPARQL nur mit Kennungen: Vornamen mit Namenstag (P1750) für Deutschland/Österreich

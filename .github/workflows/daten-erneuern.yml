@@ -1,0 +1,49 @@
+# „Daten erneuern“ – EIN Workflow für alle Datenbestände von DAILY.
+# Startet die Erzeuger in tools/daten/ (Ortsbestand, Namenstage, künftige). Neue Erzeuger brauchen KEINE Änderung
+# an dieser Datei: eine neue Datei tools/daten/<name>.js genügt.
+# Läuft monatlich und auf Knopfdruck (Actions → „Daten erneuern“ → Run workflow; optional nur bestimmte Erzeuger).
+# Ablauf: Erzeuger laufen (ein Fehler stoppt die anderen nicht) → Tests → geänderte Dateien in services/daten/ committen
+# → ist ein Erzeuger fehlgeschlagen, wird der Lauf am Ende rot.
+name: Daten erneuern
+
+on:
+  schedule:
+    - cron: '17 3 2 * *'   # am 2. jedes Monats, 03:17 UTC
+  workflow_dispatch:
+    inputs:
+      erzeuger:
+        description: 'Nur diese Erzeuger (z. B. namenstage oder orte,namenstage) – leer = alle'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  daten:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: npm ci --omit=dev
+      - name: Erzeuger ausführen
+        env:
+          ERZEUGER: ${{ inputs.erzeuger }}
+        run: node tools/daten/lauf.js
+      - name: Prüfen
+        run: node --test test/dienste.test.js
+      - name: Committen, falls geändert
+        run: |
+          if git diff --quiet -- services/daten; then echo "keine Änderung"; exit 0; fi
+          git config user.name "daily-bot"
+          git config user.email "daily-bot@users.noreply.github.com"
+          git add services/daten
+          git commit -m "Daten erneuert: $(git diff --cached --name-only | xargs -n1 basename | tr '\n' ' ')"
+          git push
+      - name: Fehlgeschlagene Erzeuger melden
+        run: |
+          if [ -s /tmp/daten-fehler.txt ]; then echo "Fehlgeschlagen:"; cat /tmp/daten-fehler.txt; exit 1; fi
+          echo "Alle Erzeuger erfolgreich."

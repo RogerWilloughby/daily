@@ -7,7 +7,7 @@ Findet Orte nach Name, Postleitzahl oder Koordinaten – mit Landkreis, Bundesla
 | | |
 |---|---|
 | Aufruf | `GET /api/v1/ort` |
-| Programmversion | 1.3.0 |
+| Programmversion | 1.3.1 |
 | Vertrag (Datenformat) | daily/1, Version 1 |
 | Klasse | oeffentlich |
 | Länder | weltweit |
@@ -17,7 +17,7 @@ Findet Orte nach Name, Postleitzahl oder Koordinaten – mit Landkreis, Bundesla
 Grundlage aller ortsbezogenen Dienste: macht aus einer Eingabe des Nutzers (Name, Postleitzahl oder Gerätestandort) einen eindeutigen Ort mit Koordinaten.
 
 ## Herkunft der Daten
-- Deutschland: eigener Ortsbestand aus den GeoNames-Postleitzahldaten, Einwohnerzahlen aus dem GeoNames-Ortsverzeichnis (beide CC BY 4.0). Monatlich neu erzeugt (tools/orte-daten.js, GitHub Action „Ortsbestand erneuern“). Liegt als Datei beim Dienst – keine externe Anfrage.
+- Deutschland: eigener Ortsbestand aus den GeoNames-Postleitzahldaten, Einwohnerzahlen aus dem GeoNames-Ortsverzeichnis (beide CC BY 4.0). Monatlich neu erzeugt (tools/orte-daten.js, GitHub Action „Daten erneuern“, Erzeuger tools/daten/orte.js). Liegt als Datei beim Dienst – keine externe Anfrage.
 - Ausland: Open-Meteo Geocoding (Datenbasis GeoNames), nur Namenssuche und nur, wenn kein deutscher Ort genau passt oder der beste deutsche Treffer weniger als 5.000 Einwohner hat.
 
 Quellen mit Lizenz:
@@ -78,6 +78,7 @@ Rahmen und Stufen: `../architektur/skalierung.md`
 ## Änderungen
 | Version | Datum | Änderung |
 |---|---|---|
+| 1.3.1 | 2026-09-27 | Ortsbestand wird jetzt über die gemeinsame Action „Daten erneuern“ erzeugt (Dienstblatt angepasst) |
 | 1.3.0 | 2026-09-27 | Doppelte zusammengefasst, Stadtstaaten korrigiert, weitere Firmennamen gefiltert |
 | 1.2.0 | 2026-09-27 | Suche wie eine Suchmaschine (Kürzel, Umlaute, Tippfehler), Einwohnerzahlen, Vorschläge beim Tippen (land=DE) |
 | 1.1.0 | 2026-09-27 | Eigener Ortsbestand aus GeoNames statt OpenPLZ und Nominatim; Ausland über Open-Meteo |

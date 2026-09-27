@@ -44,8 +44,9 @@ const SCHEMA = S.obj({
 module.exports = {
   id: 'namenstage',
   version: 1,
-  programmversion: '1.0.0',
+  programmversion: '1.0.1',
   aenderungen: [
+    { version: '1.0.1', datum: '2026-09-27', text: 'Wikidata-Abruf in kleinen Schritten (die große Abfrage lief in den 60-s-Abbruch); erzeugt über die gemeinsame Action „Daten erneuern“' },
     { version: '1.0.0', datum: '2026-09-27', text: 'Erste Fassung: Namenstage heute und die nächsten 7 Tage, Suche nach einem Namen; Bestand aus Wikidata (CC0), monatlich erneuert' }
   ],
   titel: 'Namenstage',
@@ -61,7 +62,7 @@ module.exports = {
     zweck: 'Kleiner Anlass zum Gratulieren: zeigt im Kalender, wer heute Namenstag hat, und beantwortet „Wann hat Josef Namenstag?“.',
     herkunft: [
       'Wikidata (freie Wissensdatenbank, CC0): Gedenktage der Heiligen (Eigenschaft „Gedenktag“) mit ihrem Vornamen und ausdrücklich eingetragene Namenstage für Deutschland und Österreich.',
-      'Eigener Bestand services/daten/namenstage.json, erzeugt monatlich per GitHub Action „Namenstage erneuern“ (tools/namenstage-daten.js).'
+      'Eigener Bestand services/daten/namenstage.json, erzeugt monatlich per GitHub Action „Daten erneuern“ (Erzeuger tools/daten/namenstage.js → tools/namenstage-daten.js).'
     ],
     verarbeitung: [
       'Je Tag höchstens 6 Vornamen; Reihenfolge: ausdrücklicher Namenstag vor Heiligen-Gedenktag, dann Bekanntheit des Namens (Zahl der Wikipedia-Sprachversionen).',

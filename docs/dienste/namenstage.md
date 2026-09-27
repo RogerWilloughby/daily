@@ -7,7 +7,7 @@ Wer heute und in den nächsten Tagen Namenstag hat – und wann ein bestimmter V
 | | |
 |---|---|
 | Aufruf | `GET /api/v1/namenstage` |
-| Programmversion | 1.0.0 |
+| Programmversion | 1.0.1 |
 | Vertrag (Datenformat) | daily/1, Version 1 |
 | Klasse | oeffentlich |
 | Länder | weltweit |
@@ -18,7 +18,7 @@ Kleiner Anlass zum Gratulieren: zeigt im Kalender, wer heute Namenstag hat, und 
 
 ## Herkunft der Daten
 - Wikidata (freie Wissensdatenbank, CC0): Gedenktage der Heiligen (Eigenschaft „Gedenktag“) mit ihrem Vornamen und ausdrücklich eingetragene Namenstage für Deutschland und Österreich.
-- Eigener Bestand services/daten/namenstage.json, erzeugt monatlich per GitHub Action „Namenstage erneuern“ (tools/namenstage-daten.js).
+- Eigener Bestand services/daten/namenstage.json, erzeugt monatlich per GitHub Action „Daten erneuern“ (Erzeuger tools/daten/namenstage.js → tools/namenstage-daten.js).
 
 Quellen mit Lizenz:
 - Wikidata (Gedenktage der Heiligen, Namenstage) (CC0 1.0 (gemeinfrei)) – https://www.wikidata.org
@@ -64,5 +64,6 @@ Rahmen und Stufen: `../architektur/skalierung.md`
 ## Änderungen
 | Version | Datum | Änderung |
 |---|---|---|
+| 1.0.1 | 2026-09-27 | Wikidata-Abruf in kleinen Schritten (die große Abfrage lief in den 60-s-Abbruch); erzeugt über die gemeinsame Action „Daten erneuern“ |
 | 1.0.0 | 2026-09-27 | Erste Fassung: Namenstage heute und die nächsten 7 Tage, Suche nach einem Namen; Bestand aus Wikidata (CC0), monatlich erneuert |
 

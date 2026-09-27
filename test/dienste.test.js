@@ -619,3 +619,13 @@ test('Namenstage: Erzeugung aus Wikidata, Dienst, Kachel und Antwort', async () 
   assert.equal(namenAntwort({ daten: d }, jetzt), 'Josef hat Namenstag am Fr., 19.3. (in 172 Tagen).');
   assert.equal(namenAntwort({ daten: { ...d, stand: null } }, jetzt), 'Die Namenstage werden gerade erst aufgebaut.');
 });
+
+test('Daten-Erzeuger: jede Datei in tools/daten ist ein Erzeuger, unbekannte werden abgelehnt', async () => {
+  const { alle, lauf } = require('../tools/daten/lauf');
+  assert.deepEqual(alle(), ['namenstage', 'orte']);
+  for (const n of alle()) {
+    const e = require(`../tools/daten/${n}.js`);
+    assert.equal(typeof e.titel, 'string', n); assert.equal(typeof e.ausfuehren, 'function', n);
+  }
+  await assert.rejects(lauf('gibtsnicht'), /Unbekannter Erzeuger: gibtsnicht/);
+});

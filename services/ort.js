@@ -63,8 +63,9 @@ const suche = async (q, anzahl = 6) => (await finde(q, anzahl)).orte;
 module.exports = {
   id: 'ort',
   version: 1,                 // Vertrag (Datenformat)
-  programmversion: '1.3.0',   // steigt bei jeder Änderung des Dienstes
+  programmversion: '1.3.1',   // steigt bei jeder Änderung des Dienstes
   aenderungen: [
+    { version: '1.3.1', datum: '2026-09-27', text: 'Ortsbestand wird jetzt über die gemeinsame Action „Daten erneuern“ erzeugt (Dienstblatt angepasst)' },
     { version: '1.3.0', datum: '2026-09-27', text: 'Doppelte zusammengefasst, Stadtstaaten korrigiert, weitere Firmennamen gefiltert' },
     { version: '1.2.0', datum: '2026-09-27', text: 'Suche wie eine Suchmaschine (Kürzel, Umlaute, Tippfehler), Einwohnerzahlen, Vorschläge beim Tippen (land=DE)' },
     { version: '1.1.0', datum: '2026-09-27', text: 'Eigener Ortsbestand aus GeoNames statt OpenPLZ und Nominatim; Ausland über Open-Meteo' },
@@ -81,7 +82,7 @@ module.exports = {
   blatt: {
     zweck: 'Grundlage aller ortsbezogenen Dienste: macht aus einer Eingabe des Nutzers (Name, Postleitzahl oder Gerätestandort) einen eindeutigen Ort mit Koordinaten.',
     herkunft: [
-      'Deutschland: eigener Ortsbestand aus den GeoNames-Postleitzahldaten, Einwohnerzahlen aus dem GeoNames-Ortsverzeichnis (beide CC BY 4.0). Monatlich neu erzeugt (tools/orte-daten.js, GitHub Action „Ortsbestand erneuern“). Liegt als Datei beim Dienst – keine externe Anfrage.',
+      'Deutschland: eigener Ortsbestand aus den GeoNames-Postleitzahldaten, Einwohnerzahlen aus dem GeoNames-Ortsverzeichnis (beide CC BY 4.0). Monatlich neu erzeugt (tools/orte-daten.js, GitHub Action „Daten erneuern“, Erzeuger tools/daten/orte.js). Liegt als Datei beim Dienst – keine externe Anfrage.',
       'Ausland: Open-Meteo Geocoding (Datenbasis GeoNames), nur Namenssuche und nur, wenn kein deutscher Ort genau passt oder der beste deutsche Treffer weniger als 5.000 Einwohner hat.'
     ],
     verarbeitung: [

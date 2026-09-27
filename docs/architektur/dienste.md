@@ -77,7 +77,7 @@ Der Dienst `ort` findet Orte
 - nach **Postleitzahl** (Deutschland): `/api/v1/ort?q=01844` – eigener Ortsbestand,
 - nach **Koordinaten** (Gerätestandort): `/api/v1/ort?lat=51.05&lon=13.74` – nächster Postleitzahl-Punkt im eigenen Bestand (bis 25 km, nur Deutschland; sonst leer mit Hinweis `ausserhalb`).
 
-Der Ortsbestand `services/daten/orte-de.json` (≈ 15.000 Orte, 1,3 MB) wird mit `tools/orte-daten.js` aus den GeoNames-Downloads erzeugt – monatlich und auf Knopfdruck durch die GitHub Action „Ortsbestand erneuern“ (`.github/workflows/orte-daten.yml`). Details: Dienstblatt `../dienste/ort.md`.
+Der Ortsbestand `services/daten/orte-de.json` (≈ 15.000 Orte, 1,3 MB) wird mit `tools/orte-daten.js` aus den GeoNames-Downloads erzeugt – monatlich und auf Knopfdruck durch die GitHub Action „Daten erneuern“ (`.github/workflows/daten-erneuern.yml`, Erzeuger `tools/daten/orte.js`). Alle Datenbestände laufen über diesen einen Workflow; ein neuer Bestand braucht nur eine neue Datei `tools/daten/<name>.js`. Details: Dienstblatt `../dienste/ort.md`.
 
 Ort-Objekt (Pflicht: `name`, `lat`, `lon`; der Dienst `ort` liefert immer alle Felder, ggf. `null`/leer):
 
