@@ -67,4 +67,4 @@ export async function getJson(url, opts = {}) {
 }
 
 // Läuft DAILY auf dem Server (mit /api) oder nur als lokale Datei?
-export const ONLINE = location.protocol === 'https:' || location.hostname === 'localhost';
+export const ONLINE = typeof location !== 'undefined' && (location.protocol === 'https:' || location.hostname === 'localhost');

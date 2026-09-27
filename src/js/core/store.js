@@ -10,7 +10,7 @@ function write(key, value) {
 
 // ---- Einstellungen ----
 export const DEFAULTS = {
-  place: { name: 'Dresden', admin: 'Sachsen', lat: 51.05, lon: 13.74 },
+  place: { name: 'Dresden', admin: 'Sachsen', land: 'DE', lat: 51.05, lon: 13.74, zeitzone: 'Europe/Berlin' },
   icsUrls: [],
   stop: 'Postplatz',
   team: 'Dynamo Dresden',
