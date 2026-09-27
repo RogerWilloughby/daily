@@ -74,8 +74,8 @@
       <h3>Umsatzsteuer</h3>
       <p><span class="ph">[USt-IdNr. – nur falls vorhanden, sonst Abschnitt entfernen]</span></p>
       <h3>Datenquellen</h3>
-      <p>Wetter, Luftqualität, Pollen und Ortssuche: Open-Meteo.com (CC BY 4.0). „An diesem Tag“: Wikipedia (CC BY-SA 4.0). Fußballdaten: OpenLigaDB. Abfahrten: Verkehrsverbund Oberelbe (VVO). Kurse: Yahoo Finance (ohne Gewähr).</p>
-      <p>Schlagzeilen: Originalüberschriften und Links der jeweiligen Anbieter. Für deren Inhalte sind die Anbieter verantwortlich.</p>
+      <p>Wetter, Luftqualität, Pollen und Ortssuche: Open-Meteo.com (CC BY 4.0). „An diesem Tag“: Wikipedia (CC BY-SA 4.0). Fußballdaten: OpenLigaDB. Abfahrten: Verkehrsverbund Oberelbe (VVO). Kurse: Yahoo Finance (ohne Gewähr). Wetterwarnungen: Deutscher Wetterdienst, abgerufen über Bright Sky. Schulferien: OpenHolidays API. Tankpreise: Tankerkönig (CC BY 4.0), Daten der Markttransparenzstelle für Kraftstoffe. Feiertage, Sonne und Mond werden von DAILY berechnet.</p>
+      <p>DAILY ist kein Nachrichtenangebot. „Meine Seiten“ enthält nur Links, die du selbst angelegt hast; für die verlinkten Inhalte sind deren Anbieter verantwortlich.</p>
       <p>Tagesinhalte wie Rätsel, Rezepte, Tipps und das Land des Tages sind eigene Service-Texte, die mit Unterstützung von KI erstellt wurden.</p>
       <p class="draft">Entwurf mit Platzhaltern. Vor der Veröffentlichung ausfüllen und prüfen lassen.</p>
     </div>
@@ -89,10 +89,10 @@
       <h3>Verantwortlicher</h3>
       <p><span class="ph">[Vorname Nachname]</span>, <span class="ph">[Anschrift]</span>, Dresden · <span class="ph">[E-Mail]</span></p>
       <h3>Was DAILY auf deinem Gerät speichert</h3>
-      <p>Deine Einstellungen (Ort, Kalender-Links, Haltestelle, Verein), deine Aufgaben und der Klickzähler („Deine Nutzung“) werden nur lokal in deinem Browser gespeichert. Sie werden nicht dauerhaft an uns übertragen. Du kannst sie jederzeit über die Browser-Einstellungen löschen.</p>
+      <p>Deine Einstellungen (Ort, Haltestelle, Verein, Kraftstoff), deine Aufgaben, deine Links („Meine Seiten“) und der Klickzähler („Deine Nutzung“) werden nur lokal in deinem Browser gespeichert. Sie werden nicht dauerhaft an uns übertragen. Du kannst sie jederzeit über die Browser-Einstellungen löschen.</p>
       <h3>Externe Dienste</h3>
       <p><b>Open-Meteo</b> (Wetter, Luftqualität, Pollen, Ortssuche): Dein Browser ruft die Server von Open-Meteo direkt auf. Dabei wird deine IP-Adresse übertragen. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (Bereitstellung der Wetteranzeige).</p>
-      <p><b>DAILY-Funktionen auf Vercel</b>: Schlagzeilen, Kalender, Kurse, Fußballdaten, Abfahrten und „An diesem Tag“ werden über eigene Funktionen auf dem Server abgerufen. Die Anbieter dieser Daten sehen dabei nicht deine IP-Adresse. Kalender-Links werden nur für den Abruf verwendet und nicht gespeichert.</p>
+      <p><b>DAILY-Funktionen auf Vercel</b>: Kurse, Fußballdaten, Abfahrten, Schulferien, Wetterwarnungen, Tankpreise und „An diesem Tag“ werden über eigene Funktionen auf dem Server abgerufen. Die Anbieter dieser Daten sehen dabei nicht deine IP-Adresse. Für Warnungen und Tankpreise wird nur der auf etwa 1 km gerundete Standort deines gewählten Orts übermittelt. DAILY braucht kein Konto und verarbeitet außer dem Ort keine persönlichen Daten.</p>
       <p><b>Schriftarten</b> werden direkt von diesem Server geladen, nicht von Google.</p>
       <p><b>Hosting</b>: Vercel Inc., USA. Beim Aufruf verarbeitet Vercel technisch notwendige Daten wie deine IP-Adresse. <span class="ph">[Vor Veröffentlichung: Auftragsverarbeitung und Drittlandübermittlung (EU-US Data Privacy Framework) ergänzen]</span></p>
       <h3>Keine Analyse, kein Tracking</h3>
@@ -108,7 +108,8 @@
   <form class="doc-in" id="settings-form">
     <div class="doc-head"><h2 id="h-set">Einstellungen</h2><button class="x" type="button" data-doc-close>Abbrechen</button></div>
     <div class="doc-body">
-      <h3>Ort für das Wetter</h3>
+      <h3>Ort</h3>
+      <p>Für Wetter, Warnungen, Feiertage, Tankpreise und Himmel.</p>
       <p>Aktuell: <b id="set-place-current"></b></p>
       <div class="set-row">
         <label for="set-place" class="sr">Ort suchen</label>
@@ -117,10 +118,12 @@
       </div>
       <div id="set-place-results" class="set-results" role="radiogroup" aria-label="Gefundene Orte"></div>
 
-      <h3>Kalender</h3>
+      <div id="set-private" hidden>
+      <h3>Kalender (nur privat)</h3>
       <p>iCal-Links deiner Kalender, einer pro Zeile. Bei Google: Kalender-Einstellungen → dein Kalender → „Privatadresse im iCal-Format“.</p>
       <label for="set-ics" class="sr">Kalender-Links</label>
       <textarea class="field" id="set-ics" rows="3" spellcheck="false" placeholder="https://calendar.google.com/calendar/ical/…/basic.ics"></textarea>
+      </div>
 
       <h3>Mobilität: Haltestelle</h3>
       <p>Abfahrten im Verkehrsverbund Oberelbe (Dresden und Umgebung).</p>
@@ -132,7 +135,11 @@
       <label for="set-team" class="sr">Verein</label>
       <input class="field" id="set-team" type="text" placeholder="z. B. Dynamo Dresden" autocomplete="off">
 
-      <p class="draft">Die Einstellungen bleiben nur auf diesem Gerät in diesem Browser. Kalender-Links gehen zum Abrufen der Termine an die DAILY-Funktion auf Vercel und werden dort nicht gespeichert.</p>
+      <h3>Tanken: Kraftstoff</h3>
+      <label for="set-fuel" class="sr">Kraftstoff</label>
+      <select class="field" id="set-fuel"><option value="e10">Super E10</option><option value="e5">Super E5</option><option value="diesel">Diesel</option></select>
+
+      <p class="draft">Die Einstellungen bleiben nur auf diesem Gerät in diesem Browser. DAILY braucht kein Konto.</p>
       <div class="set-actions"><button type="submit" class="btn primary">Speichern</button></div>
     </div>
   </form>

@@ -1,11 +1,13 @@
 // DAILY Service Worker: App offline startbar, Daten und Code immer frisch aus dem Netz.
-const CACHE = 'daily-v2';
+const CACHE = 'daily-v3';
 const SHELL = [
   '/', '/app.css', '/manifest.webmanifest', '/content/daily.json',
   '/js/main.js', '/js/core/util.js', '/js/core/store.js', '/js/core/tiles.js', '/js/core/board.js',
   '/js/core/ask.js', '/js/core/status.js', '/js/ui/dialogs.js',
   '/js/providers/weather.js', '/js/providers/calendar.js', '/js/providers/news.js', '/js/providers/markets.js',
   '/js/providers/sport.js', '/js/providers/transit.js', '/js/providers/content.js', '/js/providers/knowledge.js', '/js/providers/local.js',
+  '/js/providers/links.js', '/js/providers/holidays.js', '/js/providers/alerts.js', '/js/providers/fuel.js', '/js/providers/sky.js',
+  '/js/lib/feiertage.js', '/js/lib/astro.js', '/js/lib/url.js',
   '/fonts/bricolage-grotesque.woff2', '/fonts/figtree-400.woff2', '/fonts/figtree-500.woff2', '/fonts/figtree-600.woff2',
   '/icons/icon-192.png', '/icons/icon-512.png'
 ];

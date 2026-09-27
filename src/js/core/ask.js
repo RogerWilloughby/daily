@@ -13,9 +13,11 @@ export function initAsk() {
   document.getElementById('ask').addEventListener('submit', e => {
     e.preventDefault();
     const q = document.getElementById('q').value.trim(); if (!q) return;
-    const hit = answers.find(([re]) => re.test(q));
-    let txt = hit ? hit[1](q) : null;
-    if (!txt) txt = 'Darauf habe ich noch keine Antwort. Frag zum Beispiel nach Wetter, Terminen, Schlagzeilen, DAX, Dynamo, Abfahrten, Rezept, Rätsel oder deinen Aufgaben.';
+    // erste passende Antwort, die etwas liefert (sonst die nächste passende)
+    let txt = null;
+    for (const [re, fn] of answers) { if (re.test(q)) { txt = fn(q); if (txt) break; } }
+    if (txt) txt = txt.replace(/\.\.$/, '.');
+    if (!txt) txt = 'Darauf habe ich noch keine Antwort. Frag zum Beispiel nach Wetter, Ferien, Warnungen, Tankpreis, Mond, DAX, Abfahrten, Rezept oder deinen Aufgaben.';
     document.getElementById('answer-text').innerHTML = `<span class="q">${esc(q)}</span>${esc(txt)}`;
     box.hidden = false;
   });

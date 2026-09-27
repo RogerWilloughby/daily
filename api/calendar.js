@@ -1,6 +1,7 @@
 // DAILY – Kalender: bekommt die privaten iCal-Links aus den DAILY-Einstellungen
 // (POST, werden nicht gespeichert) oder ersatzweise aus der Vercel-Umgebungsvariable
 // CALENDAR_ICS_URL und liefert die Termine von heute bis +7 Tage. Links nie in den Code!
+const { privateOnly } = require('./_lib/http');
 const ical = require('node-ical');
 
 const TZ = 'Europe/Berlin';
@@ -10,6 +11,7 @@ const localKey = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2,
 const dayKey = (d, tz) => new Intl.DateTimeFormat('en-CA', { timeZone: tz || TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
 
 module.exports = async (req, res) => {
+  if (privateOnly(res)) return; // Kalender nur im privaten Betrieb (Strategie: keine Nutzerdaten, keine Nachrichten)
   res.setHeader('Cache-Control', 'private, no-store');
   // Links kommen aus den DAILY-Einstellungen (POST {urls:[...]}); Ersatz: Umgebungsvariable.
   let urls = [];

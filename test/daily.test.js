@@ -71,3 +71,113 @@ test('Tagesinhalte: 31 Tage ab 26.09.2026, alle Felder gefüllt', () => {
     assert.equal(new Set(v).size, v.length, 'doppelter Eintrag: ' + v.find((x, i) => v.indexOf(x) !== i));
   }
 });
+
+// ---- Strategie „ohne Nutzerdaten, ohne Nachrichten“ ----
+const { pathToFileURL } = require('node:url');
+const esm = p => import(pathToFileURL(path.join(__dirname, '..', p)).href); // auch unter Windows
+
+test('Feiertage: Ostern, Sachsen 2026, Buß- und Bettag, Brückentag', async () => {
+  const { easter, holidays, bridgeDay, clockChanges, STATES } = await esm('src/js/lib/feiertage.js');
+  assert.equal(easter(2026).toISOString().slice(0, 10), '2026-04-05');
+  assert.equal(easter(2027).toISOString().slice(0, 10), '2027-03-28');
+  const sn = holidays(2026, 'SN').map(h => h.date + ' ' + h.name);
+  assert.ok(sn.includes('2026-11-18 Buß- und Bettag'));
+  assert.ok(sn.includes('2026-10-31 Reformationstag'));
+  assert.ok(!sn.some(x => x.includes('Fronleichnam')));
+  assert.equal(holidays(2026, 'BY').filter(h => h.name === 'Fronleichnam')[0].date, '2026-06-04');
+  assert.equal(holidays(2026, 'SN').length, 11);
+  assert.equal(bridgeDay(holidays(2026, 'SN')[0]), '2026-01-02'); // Neujahr ist Donnerstag
+  assert.deepEqual(clockChanges(2026).map(c => c.date), ['2026-03-29', '2026-10-25']);
+  assert.equal(Object.keys(STATES).length, 16);
+});
+
+test('Himmel: Sonne in Dresden, Vollmond am 26.09.2026', async () => {
+  const { sunTimes, moon, nextMeteor } = await esm('src/js/lib/astro.js');
+  const t = Date.UTC(2026, 8, 26, 10);
+  const s = sunTimes(t, 51.05, 13.74);
+  const hmBerlin = x => new Date(x).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' });
+  assert.ok(['06:57', '06:58', '06:59'].includes(hmBerlin(s.rise)), hmBerlin(s.rise));
+  assert.ok(['18:55', '18:56', '18:57', '18:58'].includes(hmBerlin(s.set)), hmBerlin(s.set));
+  assert.equal(moon(t).name, 'Vollmond');
+  assert.equal(nextMeteor(t).name, 'Draconiden');
+  assert.equal(sunTimes(Date.UTC(2026, 5, 21), 78, 15).rise, null); // Polartag
+});
+
+test('Warnungen: Testmeldungen raus, höchste Stufe zuerst', () => {
+  const { mapAlerts } = require('../api/alerts');
+  const r = mapAlerts(fx.alerts());
+  assert.equal(r.area, 'Dresden');
+  assert.equal(r.alerts.length, 2);
+  assert.equal(r.alerts[0].event, 'Sturmböen');
+  assert.equal(r.alerts[0].level, 2);
+  assert.equal(mapAlerts(fx.alerts(false)).alerts.length, 0);
+});
+
+test('Tanken: nur offene mit Preis, günstigste zuerst', () => {
+  const { mapStations } = require('../api/fuel');
+  const r = mapStations(fx.fuel().stations);
+  assert.deepEqual(r.map(s => s.price), [1.689, 1.749]);
+  assert.equal(r[1].name, 'ARAL');
+  assert.equal(r[1].street, 'Königsbrücker Straße 96');
+});
+
+test('Schulferien: deutscher Name, sortiert', () => {
+  const { mapSchool } = require('../api/holidays');
+  const r = mapSchool(fx.school());
+  assert.deepEqual(r.map(s => s.name), ['Herbstferien', 'Weihnachtsferien']);
+  assert.equal(mapSchool(null).length, 0);
+});
+
+test('Datenschutz: Koordinaten werden auf ~1 km gerundet', () => {
+  const { coord } = require('../api/_lib/http');
+  assert.equal(coord('51.050912', 90), 51.05);
+  assert.equal(coord('abc', 90), null);
+  assert.equal(coord('200', 180), null);
+});
+
+test('Betriebsart: Kalender und Schlagzeilen nur privat', async () => {
+  const res = () => { const r = { headers: {}, setHeader(k, v) { r.headers[k] = v; }, status(c) { r.code = c; return r; }, json(o) { r.body = o; } }; return r; };
+  delete process.env.DAILY_PRIVATE;
+  for (const f of ['calendar', 'headlines']) {
+    const r = res(); await require('../api/' + f)({ method: 'GET', query: {} }, r);
+    assert.equal(r.code, 404, f + ' müsste öffentlich gesperrt sein');
+  }
+  const r = res(); require('../api/config')({}, r); assert.equal(r.body.private, false);
+  process.env.DAILY_PRIVATE = '1';
+  const r2 = res(); require('../api/config')({}, r2); assert.equal(r2.body.private, true);
+  delete process.env.DAILY_PRIVATE;
+});
+
+test('Layouts: öffentlich ohne private Kacheln, immer 20 Plätze', async () => {
+  const { LAYOUTS, CATALOG, byId, chooseLayout, SLOTS } = await esm('src/js/core/tiles.js');
+  for (const [mode, ids] of Object.entries(LAYOUTS)) {
+    assert.equal(ids.length, SLOTS, mode);
+    assert.equal(new Set(ids).size, SLOTS, mode + ': doppelte Kachel');
+    ids.forEach(id => assert.ok(byId[id], mode + ': unbekannt ' + id));
+  }
+  assert.ok(LAYOUTS.public.every(id => byId[id].scope === 'public'));
+  assert.ok(!CATALOG.some(t => t.id === 'mail' || t.id === 'parcels'));
+  const pub = chooseLayout(false, ['news', 'calendar', 'sky', 'sky', 'gibtsnicht']).map(t => t.id);
+  assert.equal(pub.length, SLOTS);
+  assert.equal(pub[0], 'sky');
+  assert.ok(!pub.includes('news') && !pub.includes('calendar'));
+  assert.equal(chooseLayout(true).map(t => t.id)[1], 'calendar');
+});
+
+test('Meine Seiten: nur http(s)-Adressen', async () => {
+  const { cleanUrl } = await esm('src/js/lib/url.js');
+  assert.equal(cleanUrl('spiegel.de'), 'https://spiegel.de/');
+  assert.equal(cleanUrl('javascript:alert(1)'), null);
+  assert.equal(cleanUrl('http://example.org/x'), 'http://example.org/x');
+  assert.equal(cleanUrl(''), null);
+});
+
+test('Service Worker: alle Module im Offline-Speicher', () => {
+  const sw = fs.readFileSync(path.join(__dirname, '../src/sw.js'), 'utf8');
+  const walk = d => fs.readdirSync(d, { withFileTypes: true }).flatMap(e => e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]);
+  const root = path.join(__dirname, '../src');
+  walk(path.join(root, 'js')).forEach(f => {
+    const url = '/' + path.relative(root, f).split(path.sep).join('/');
+    assert.ok(sw.includes(`'${url}'`), 'fehlt im Service Worker: ' + url);
+  });
+});

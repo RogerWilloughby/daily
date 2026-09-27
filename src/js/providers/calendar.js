@@ -46,4 +46,4 @@ addAnswer(/termin|kalender|heute an|morgen|geburtstag|was steht/i, () => {
   return a;
 });
 
-export default { id: 'calendar', name: 'Kalender', every: 10 * 60e3, load };
+export default { id: 'calendar', private: true, name: 'Kalender', every: 10 * 60e3, load };

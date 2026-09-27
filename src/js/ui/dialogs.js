@@ -2,7 +2,7 @@
 import { settings, saveSettings } from '../core/store.js';
 import { esc, getJson } from '../core/util.js';
 
-export function initDialogs(onSaved) {
+export function initDialogs(onSaved, isPrivate = false) {
   document.querySelectorAll('[data-doc]').forEach(b => b.addEventListener('click', () => {
     const d = document.getElementById('doc-' + b.dataset.doc);
     if (d && typeof d.showModal === 'function') d.showModal();
@@ -23,6 +23,8 @@ export function initDialogs(onSaved) {
     $('set-ics').value = (settings.icsUrls || []).join('\n');
     $('set-stop').value = settings.stop || '';
     $('set-team').value = settings.team || '';
+    $('set-fuel').value = settings.fuel || 'e10';
+    $('set-private').hidden = !isPrivate;
     if (typeof dlg.showModal === 'function') dlg.showModal();
   });
 
@@ -47,7 +49,8 @@ export function initDialogs(onSaved) {
     const patch = {
       icsUrls: $('set-ics').value.split(/\s+/).map(u => u.trim()).filter(u => /^(https|webcal):\/\//i.test(u)),
       stop: $('set-stop').value.trim() || 'Postplatz',
-      team: $('set-team').value.trim() || 'Dynamo Dresden'
+      team: $('set-team').value.trim() || 'Dynamo Dresden',
+      fuel: $('set-fuel').value
     };
     if (placeChoice) patch.place = placeChoice;
     saveSettings(patch);

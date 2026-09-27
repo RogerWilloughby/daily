@@ -13,7 +13,9 @@ export const DEFAULTS = {
   place: { name: 'Dresden', admin: 'Sachsen', lat: 51.05, lon: 13.74 },
   icsUrls: [],
   stop: 'Postplatz',
-  team: 'Dynamo Dresden'
+  team: 'Dynamo Dresden',
+  fuel: 'e10',
+  layout: null // eigene Kachelbelegung (Liste von IDs), kommt später über die Einstellungen
 };
 const SKEY = 'daily-settings';
 export const settings = Object.assign({}, DEFAULTS, read(SKEY, {}));
@@ -46,3 +48,12 @@ export const tasks = read(TKEY, null) || [
   { id: 't2', text: 'Eigene Aufgabe hinzufügen', done: false }
 ];
 export function saveTasks() { return write(TKEY, tasks); }
+
+// ---- Meine Seiten (Links zu den eigenen Portalen) ----
+const LKEY = 'daily-links';
+export const links = read(LKEY, null) || [
+  { id: 'l1', name: 'Tagesschau', url: 'https://www.tagesschau.de' },
+  { id: 'l2', name: 'Gmail', url: 'https://mail.google.com' },
+  { id: 'l3', name: 'Google Kalender', url: 'https://calendar.google.com' }
+];
+export function saveLinks() { return write(LKEY, links); }

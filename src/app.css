@@ -124,6 +124,8 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .tile[data-mode="active"] .tag{border-color:var(--active-line);color:var(--active-muted)}
 .tile[data-mode="active"] .metric{font-size:clamp(28px,2.8vw,46px)}
 .tile[data-mode="active"] .metric .m-long{white-space:normal;overflow:visible;overflow-wrap:anywhere;hyphens:auto}
+.tile[data-mode="active"] .metric[data-len="long"]{font-size:clamp(26px,2.2vw,36px);line-height:1.1}
+.tile[data-mode="active"] .metric[data-len="long"] .m-long{display:block;-webkit-line-clamp:unset}
 .tile[data-mode="active"] .teaser{color:var(--active-muted);font-size:17px;-webkit-line-clamp:6}
 .tile[data-mode="active"] .trend-up{color:var(--active-up)}.tile[data-mode="active"] .trend-down{color:var(--active-down)}
 .tile[data-mode="active"] .body{display:flex;flex-direction:column;min-height:0;padding:22px 26px 22px 0;gap:10px;animation:fadein .4s var(--ease)}
@@ -154,6 +156,15 @@ dl{margin:0}
 .task-list label{flex:1;display:flex;align-items:center;gap:10px;min-height:32px;cursor:pointer;line-height:1.35}
 .task-list input[type=checkbox]{width:18px;height:18px;accent-color:currentColor;flex:none}
 .task-list li.done label span{text-decoration:line-through;opacity:.6}
+.link-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.link-list li{display:flex;align-items:center;gap:10px}
+.link-list a{flex:1;min-width:0;display:flex;align-items:baseline;gap:10px;min-height:44px;padding:0 14px;border-radius:10px;border:1px solid var(--active-line);color:inherit;text-decoration:none}
+.link-list a:hover{background:color-mix(in srgb,var(--active-ink) 8%,transparent)}
+.link-list a:focus-visible{outline:2px solid var(--active-ink);outline-offset:2px}
+.link-name{font-weight:600;font-size:15px;line-height:44px;white-space:nowrap}
+.link-host{color:var(--active-muted);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.links-form{flex-wrap:wrap}
+.links-form input{flex:1 1 140px}
 .task-del{min-height:32px;padding:0 10px;font-size:13px}
 
 /* 7 Dialoge (Impressum, Datenschutz, Einstellungen) */

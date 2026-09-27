@@ -7,7 +7,7 @@ const WEIGHT = 4;
 const mobileMQ = window.matchMedia('(max-width:760px), (max-height:520px)');
 const grid = document.getElementById('grid');
 const sheet = document.getElementById('sheet');
-const ORDER = TILES.filter(Boolean).map(t => t.id); // Reihenfolge für das Wischen
+let ORDER = []; // Reihenfolge für das Wischen (= Belegung des Rasters)
 let active = null; // aktive Kachel (Desktop)
 let open = null;   // offene Kachel (Handy)
 
@@ -37,7 +37,7 @@ export function paint(id) {
   el.dataset.state = t.state;
   el.querySelector('.label .long').textContent = t.title;
   const tag = el.querySelector('.tag');
-  tag.hidden = t.state !== 'off'; tag.textContent = 'später';
+  const tagText = t.tag ?? (t.state === 'off' ? 'einrichten' : ''); tag.hidden = !tagText; tag.textContent = tagText;
   el.querySelector('.glyph').innerHTML = t.glyph || '';
   const mEl = el.querySelector('.metric');
   mEl.classList.toggle('trend-up', t.trend === 'up');
@@ -104,6 +104,7 @@ function hideSheet() { open = null; sheet.classList.remove('open'); }
 function step(d) { const n = ORDER.length; showSheet(ORDER[(ORDER.indexOf(open) + d + n) % n]); }
 
 export function initBoard() {
+  ORDER = TILES.filter(Boolean).map(t => t.id);
   grid.innerHTML = TILES.map((t, c) => t ? tileHTML(t)
     : `<div class="tile free" data-mode="rest" id="cell-${c}" aria-hidden="true"><span>Freier Platz</span></div>`).join('');
   TILES.forEach(t => t && paint(t.id));

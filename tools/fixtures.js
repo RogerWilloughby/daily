@@ -74,4 +74,31 @@ function ics() {
     'END:VCALENDAR'].join('\r\n');
 }
 
-module.exports = { rss, atom, yahoo, table1, table2, matches2, pointfinder, departures, onthisday, ics };
+// Bright Sky /alerts (DWD)
+const alerts = (withWarning = true) => ({
+  alerts: withWarning ? [
+    { id: 1, status: 'actual', severity: 'minor', event_de: 'STARKE BÖEN', headline_de: 'Amtliche WARNUNG vor STARKEN BÖEN',
+      onset: inMin(60).toISOString(), expires: inMin(600).toISOString(), description_de: 'Es treten Windböen mit Geschwindigkeiten um 55 km/h auf.', instruction_de: '' },
+    { id: 2, status: 'actual', severity: 'moderate', event_de: 'STURMBÖEN', headline_de: 'Amtliche WARNUNG vor STURMBÖEN',
+      onset: inMin(120).toISOString(), expires: inMin(480).toISOString(), description_de: 'Es treten Sturmböen um 70 km/h auf.', instruction_de: 'Achten Sie auf herabstürzende Äste.' },
+    { id: 3, status: 'test', severity: 'extreme', event_de: 'TEST' }
+  ] : [],
+  location: { warn_cell_id: 814612000, name: 'Stadt Dresden', name_short: 'Dresden', district: 'Dresden', state: 'Sachsen', state_short: 'SN' }
+});
+
+// OpenHolidays /SchoolHolidays
+const day = d => d.toISOString().slice(0, 10);
+const school = () => [
+  { id: 'a', startDate: day(inMin(60 * 24 * 12)), endDate: day(inMin(60 * 24 * 24)), type: 'School', name: [{ language: 'DE', text: 'Herbstferien' }] },
+  { id: 'b', startDate: day(inMin(60 * 24 * 88)), endDate: day(inMin(60 * 24 * 100)), type: 'School', name: [{ language: 'EN', text: 'Christmas holidays' }, { language: 'DE', text: 'Weihnachtsferien' }] }
+];
+
+// Tankerkönig list.php
+const fuel = () => ({ ok: true, status: 'ok', stations: [
+  { id: 's1', name: 'Tankstelle Nord', brand: 'ARAL', street: 'Königsbrücker Straße', houseNumber: '96', place: 'Dresden', dist: 2.4, price: 1.749, isOpen: true },
+  { id: 's2', name: 'Freie Tankstelle', brand: '', street: 'Budapester Str.', houseNumber: '1', place: 'Dresden', dist: 0.9, price: 1.689, isOpen: true },
+  { id: 's3', name: 'Zu', brand: 'JET', street: 'Leipziger Str.', houseNumber: '', place: 'Dresden', dist: 1.5, price: 1.599, isOpen: false },
+  { id: 's4', name: 'Ohne Preis', brand: 'Shell', street: 'x', place: 'Dresden', dist: 1.1, price: null, isOpen: true }
+] });
+
+module.exports = { rss, atom, yahoo, table1, table2, matches2, pointfinder, departures, onthisday, ics, alerts, school, fuel };

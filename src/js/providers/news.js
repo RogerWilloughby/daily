@@ -24,4 +24,4 @@ export async function load() {
 addAnswer(/news|schlagzeil|nachrichten|neuigkeit|was gibt.s neues/i, () =>
   items.length ? 'Neueste Schlagzeilen: ' + items.slice(0, 3).map(i => `${i.source}: ${i.title}`).join(' · ') : 'Die Schlagzeilen sind gerade nicht erreichbar.');
 
-export default { id: 'news', name: 'Schlagzeilen', every: 15 * 60e3, load };
+export default { id: 'news', private: true, name: 'Schlagzeilen', every: 15 * 60e3, load };
