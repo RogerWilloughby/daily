@@ -91,6 +91,7 @@ Der Prototyp zählt lokal, welche Kacheln geöffnet werden (Kachel „Deine Nutz
 - Schriften selbst gehostet (kein Google Fonts).
 
 ## 11. Technischer Aufbau (seit 26.09.2026)
+- **Seit 27.09.2026: headless.** Dienste liefern reine Daten im Austauschformat daily/1 über `GET /api/v1/<dienst>`, Adapter machen daraus Kacheln, Listen oder Dashboards. Verbindliche Beschreibung: `../architektur/dienste.md`. Referenz-Dienst: `wetter`.
 - Frontend ohne Bundler: `src/index.html` (nur Gerüst), `src/app.css` (Design-Tokens, Hell/Dunkel), ES-Module unter `src/js/`:
   - `core/` – `tiles.js` (Kachel-Katalog, Layouts öffentlich/privat, `chooseLayout`), `board.js` (Raster, Aktivierung, Mobil-Vollbild), `store.js` (Einstellungen, Aufgaben, Klickzähler in localStorage), `ask.js` („Frag DAILY“: jede Datenquelle meldet eigene Antworten an), `status.js` (Statusanzeige), `util.js`.
   - `providers/` – je Datenquelle ein Modul mit `load()` und Intervall (`every`). `main.js` lädt alle, aktualisiert nur bei sichtbarem Tab und meldet Fehler an die Statusanzeige.
@@ -109,6 +110,7 @@ Prototyp: `../prototyp/daily-prototyp.html`.
 
 ## Offen
 - **Roger, einmalig in Vercel (Settings → Environment Variables):** `DAILY_PRIVATE` = `1` (damit Kalender und Schlagzeilen für dich bleiben) und `TANKERKOENIG_API_KEY` (kostenlos beantragen). Danach neu veröffentlichen.
+- Alle Dienste auf daily/1 umstellen (siehe `../architektur/dienste.md`, Stand der Umstellung)
 - Kachelauswahl in den Einstellungen: weitere Kacheln definieren (Katalog in `core/tiles.js`), Auswahl-Oberfläche bauen
 - Geld für die öffentliche Version auf frei nutzbare Quellen umstellen
 - Abfahrten bundesweit (andere Datenquelle) oder als Kachel nur für den VVO-Raum kennzeichnen
