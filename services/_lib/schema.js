@@ -63,7 +63,7 @@ const ORT = S.obj(ORT_FELDER, ['name', 'lat', 'lon'], true);
 const ORT_VOLL = S.obj(ORT_FELDER);
 const RAHMEN = S.obj({
   format: { type: 'string', enum: ['daily/1'] },
-  dienst: S.text(), version: S.ganz(), ort: ORT,
+  dienst: S.text(), version: S.ganz(), programm: S.text({ pattern: '^\\d+\\.\\d+\\.\\d+$' }), ort: ORT,
   erstellt: { type: 'string', format: 'zeit' }, gueltigBis: { type: 'string', format: 'zeit' },
   quellen: S.liste(S.obj({ name: { type: 'string' }, lizenz: S.text(), url: S.text() }, ['name'])),
   hinweise: S.liste({ type: 'string' }),

@@ -27,6 +27,8 @@ function pfade(schema, vor = '') {
 function pruefeBlatt(d) {
   const b = d.blatt, f = [];
   if (!b) return [`${d.id}: blatt fehlt`];
+  if (!/^\d+\.\d+\.\d+$/.test(d.programmversion || '')) f.push(`${d.id}: programmversion fehlt oder ist nicht x.y.z`);
+  if (!d.aenderungen || !d.aenderungen.length || d.aenderungen[0].version !== d.programmversion) f.push(`${d.id}: aenderungen muss mit der programmversion beginnen`);
   for (const k of ['zweck', 'herkunft', 'verarbeitung', 'ausgabe', 'skalierung']) if (!b[k] || (Array.isArray(b[k]) && !b[k].length)) f.push(`${d.id}: blatt.${k} fehlt`);
   for (const k of SKALIERUNG) if (!b.skalierung || !b.skalierung[k]) f.push(`${d.id}: blatt.skalierung.${k} fehlt`);
   if (b.skalierung && b.skalierung.klasse && !KLASSEN[b.skalierung.klasse]) f.push(`${d.id}: Skalierungsklasse ${b.skalierung.klasse} unbekannt`);
@@ -53,7 +55,8 @@ ${d.beschreibung}
 | | |
 |---|---|
 | Aufruf | \`GET /api/v1/${d.id}\` |
-| Version | ${d.version} |
+| Programmversion | ${d.programmversion || '–'} |
+| Vertrag (Datenformat) | daily/1, Version ${d.version} |
 | Klasse | ${d.klasse} |
 | Länder | ${laender} |
 | Gültigkeit | ${d.takt ? `bis zum nächsten Takt von ${d.takt / 60} min (z. B. :00/:30)` : `${d.ttl} s`} |
@@ -93,6 +96,12 @@ ${Object.entries(b.hinweise).map(([k, v]) => `- \`${k}\`: ${v}`).join('\n')}
 | Bei 10 Mio. Aufrufen/Tag | ${zelle(s.bei10Mio)} |
 
 Rahmen und Stufen: \`../architektur/skalierung.md\`
+${d.aenderungen && d.aenderungen.length ? `
+## Änderungen
+| Version | Datum | Änderung |
+|---|---|---|
+${d.aenderungen.map(a => `| ${a.version} | ${a.datum} | ${zelle(a.text)} |`).join('\n')}
+` : ''}
 `;
 }
 

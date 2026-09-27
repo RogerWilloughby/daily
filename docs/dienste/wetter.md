@@ -7,7 +7,8 @@ Aktuelles Wetter, 48-Stunden- und 16-Tage-Vorhersage (ab Tag 8 als Trend) mit Wi
 | | |
 |---|---|
 | Aufruf | `GET /api/v1/wetter` |
-| Version | 1 |
+| Programmversion | 1.2.0 |
+| Vertrag (Datenformat) | daily/1, Version 1 |
 | Klasse | oeffentlich |
 | Länder | weltweit |
 | Gültigkeit | bis zum nächsten Takt von 30 min (z. B. :00/:30) |
@@ -128,3 +129,11 @@ Hinweise (`hinweise`):
 | Bei 10 Mio. Aufrufen/Tag | Nicht mit dem freien Open-Meteo: bei z. B. 50.000 belegten Zellen × 48 Aktualisierungen wären es ~4,8 Mio. Abrufe/Tag. Wege: gröberes Raster (z. B. 0,05° ≈ 5 km), bezahlter Tarif (ab 29 $/Monat) oder DWD-Open-Data (MOSMIX: Abrufe unabhängig von der Nutzerzahl). |
 
 Rahmen und Stufen: `../architektur/skalierung.md`
+
+## Änderungen
+| Version | Datum | Änderung |
+|---|---|---|
+| 1.2.0 | 2026-09-27 | 16 Tage (ab Tag 8 Trend), Wind/Sonne/Wolken/Luftdruck/Sicht/Schnee/Frost, Cache-Takt :00/:30 |
+| 1.1.0 | 2026-09-27 | Dienstblatt (Herkunft, Verarbeitung, Skalierung) |
+| 1.0.0 | 2026-09-27 | Erste Fassung im Format daily/1: jetzt, 48 Stunden, 7 Tage, Luft und Pollen (Open-Meteo) |
+

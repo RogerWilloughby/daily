@@ -36,6 +36,7 @@ function antwort(dienst, { ort = null, daten, quellen = [], hinweise = [], jetzt
     format: FORMAT,
     dienst: dienst.id,
     version: dienst.version,
+    programm: dienst.programmversion || null,
     ort,
     erstellt: iso(jetzt),
     gueltigBis: iso(dienst.takt ? Math.ceil((jetzt + 1) / (dienst.takt * 1000)) * dienst.takt * 1000 : jetzt + dienst.ttl * 1000), // takt: bis zum nächsten Taktende (z. B. :00/:30)
@@ -50,7 +51,7 @@ function antwort(dienst, { ort = null, daten, quellen = [], hinweise = [], jetzt
 function fehlerAntwort(id, fehler, jetzt = Date.now()) {
   const code = fehler instanceof DienstFehler ? fehler.code : 'intern';
   return {
-    format: FORMAT, dienst: id || null, version: null, ort: null,
+    format: FORMAT, dienst: id || null, version: null, programm: null, ort: null,
     erstellt: iso(jetzt), gueltigBis: iso(jetzt), quellen: [], hinweise: [], daten: null,
     fehler: { code, meldung: fehler instanceof DienstFehler ? fehler.message : 'Interner Fehler' }
   };

@@ -7,7 +7,8 @@ Findet Orte nach Name, Postleitzahl oder Koordinaten – mit Landkreis, Bundesla
 | | |
 |---|---|
 | Aufruf | `GET /api/v1/ort` |
-| Version | 1 |
+| Programmversion | 1.3.0 |
+| Vertrag (Datenformat) | daily/1, Version 1 |
 | Klasse | oeffentlich |
 | Länder | weltweit |
 | Gültigkeit | 86400 s |
@@ -73,3 +74,12 @@ Hinweise (`hinweise`):
 | Bei 10 Mio. Aufrufen/Tag | Unkritisch: Ortssuche passiert beim Einrichten, nicht bei jedem Aufruf. Andere Dienste bekommen lat/lon direkt. Ausland ggf. eigener Bestand (GeoNames allCountries) statt Open-Meteo. |
 
 Rahmen und Stufen: `../architektur/skalierung.md`
+
+## Änderungen
+| Version | Datum | Änderung |
+|---|---|---|
+| 1.3.0 | 2026-09-27 | Doppelte zusammengefasst, Stadtstaaten korrigiert, weitere Firmennamen gefiltert |
+| 1.2.0 | 2026-09-27 | Suche wie eine Suchmaschine (Kürzel, Umlaute, Tippfehler), Einwohnerzahlen, Vorschläge beim Tippen (land=DE) |
+| 1.1.0 | 2026-09-27 | Eigener Ortsbestand aus GeoNames statt OpenPLZ und Nominatim; Ausland über Open-Meteo |
+| 1.0.0 | 2026-09-27 | Erste Fassung: Name (Open-Meteo), Postleitzahl (OpenPLZ), Gerätestandort (Nominatim) |
+

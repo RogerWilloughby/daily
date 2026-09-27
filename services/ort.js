@@ -62,7 +62,14 @@ const suche = async (q, anzahl = 6) => (await finde(q, anzahl)).orte;
 
 module.exports = {
   id: 'ort',
-  version: 1,
+  version: 1,                 // Vertrag (Datenformat)
+  programmversion: '1.3.0',   // steigt bei jeder Änderung des Dienstes
+  aenderungen: [
+    { version: '1.3.0', datum: '2026-09-27', text: 'Doppelte zusammengefasst, Stadtstaaten korrigiert, weitere Firmennamen gefiltert' },
+    { version: '1.2.0', datum: '2026-09-27', text: 'Suche wie eine Suchmaschine (Kürzel, Umlaute, Tippfehler), Einwohnerzahlen, Vorschläge beim Tippen (land=DE)' },
+    { version: '1.1.0', datum: '2026-09-27', text: 'Eigener Ortsbestand aus GeoNames statt OpenPLZ und Nominatim; Ausland über Open-Meteo' },
+    { version: '1.0.0', datum: '2026-09-27', text: 'Erste Fassung: Name (Open-Meteo), Postleitzahl (OpenPLZ), Gerätestandort (Nominatim)' }
+  ],
   titel: 'Standort',
   beschreibung: 'Findet Orte nach Name, Postleitzahl oder Koordinaten – mit Landkreis, Bundesland, Postleitzahlen und Zeitzone. Deutschland aus eigenem Bestand, Ausland nach Name.',
   eingaben: { q: 'Ortsname oder Postleitzahl (mind. 2 Zeichen) – oder –', lat: 'Breitengrad (Umkehrsuche, nur Deutschland)', lon: 'Längengrad (Umkehrsuche, nur Deutschland)', land: 'optional „DE“: nur Deutschland (für Vorschläge beim Tippen, ohne Auslandsabruf)' },

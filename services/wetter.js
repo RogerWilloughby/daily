@@ -143,7 +143,13 @@ const SCHEMA = S.obj({
 
 module.exports = {
   id: 'wetter',
-  version: 1,
+  version: 1,                 // Vertrag (Datenformat)
+  programmversion: '1.2.0',   // steigt bei jeder Änderung des Dienstes
+  aenderungen: [
+    { version: '1.2.0', datum: '2026-09-27', text: '16 Tage (ab Tag 8 Trend), Wind/Sonne/Wolken/Luftdruck/Sicht/Schnee/Frost, Cache-Takt :00/:30' },
+    { version: '1.1.0', datum: '2026-09-27', text: 'Dienstblatt (Herkunft, Verarbeitung, Skalierung)' },
+    { version: '1.0.0', datum: '2026-09-27', text: 'Erste Fassung im Format daily/1: jetzt, 48 Stunden, 7 Tage, Luft und Pollen (Open-Meteo)' }
+  ],
   titel: 'Wetter',
   beschreibung: 'Aktuelles Wetter, 48-Stunden- und 16-Tage-Vorhersage (ab Tag 8 als Trend) mit Wind, Sonne, Wolken, Luftdruck, Sicht, Schnee und Frost, dazu Luftqualität und Pollen für einen Ort.',
   eingaben: { ort: 'Ortsname (z. B. Berlin) – oder –', lat: 'Breitengrad', lon: 'Längengrad', name: 'Anzeigename (optional)', region: 'Bundesland (optional)', land: 'Ländercode (optional)' },

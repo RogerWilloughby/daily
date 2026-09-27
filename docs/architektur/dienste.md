@@ -40,6 +40,7 @@ Jede Antwort – auch jeder Fehler – hat diese Form:
 |---|---|
 | `format` | immer `daily/1` (Version des Rahmens) |
 | `dienst`, `version` | Kennung und Version des Datenvertrags; neue Felder = gleiche Version, geänderte/entfernte Felder = neue Version |
+| `programm` | Programmversion des Dienstes (`x.y.z`), steigt bei jeder Änderung |
 | `ort` | aufgelöster Ort oder `null` bei ortsunabhängigen Diensten |
 | `erstellt`, `gueltigBis` | ab wann die Daten veraltet sind (Oberflächen und Cache richten sich danach) |
 | `quellen` | Pflicht für Quellenangabe/Lizenz in jeder Oberfläche |
@@ -108,6 +109,11 @@ Jeder Dienst gibt im Katalog an, wo er funktioniert: `laender: "alle"` oder eine
 | `oeffentlich` | ohne Nutzerdaten, CDN-Cache nach TTL, CORS offen (andere Oberflächen dürfen lesen) |
 | `privat` | nur mit `DAILY_PRIVATE=1`, nie gecacht, kein CORS (z. B. Kalender, Schlagzeilen) |
 | `schluessel` (geplant) | braucht einen Betreiber-Schlüssel, sonst `schluessel_fehlt` |
+
+## Versionen
+- **App-Version** (Oberfläche und Server, ein Upload): Nummer `x.y.z` in `package.json` und `src/js/core/version.js` (gleich, Test prüft das). Kleine Korrektur → `z+1`, neue Funktion → `y+1`. `build.js` ergänzt Zeitpunkt und Commit (Vercel) und benennt den Service-Worker-Cache je Upload neu. Anzeige: Fußzeile („v0.6.0“, öffnet „Datenquellen“), unten in den Einstellungen, oben auf der Datenquellen-Seite; der Katalog liefert `daten.app` (Server).
+- **Dienst:** `version` = Vertrag (Datenformat, nur bei inkompatibler Änderung), `programmversion` = Stand des Dienstes (`x.y.z`, steigt bei jeder Änderung) mit Liste `aenderungen` (neueste zuerst). Jede Antwort trägt `programm`; Katalog, Dienstblatt und Datenquellen-Seite zeigen beides.
+- Regel für Claude: Bei jeder Änderung App-Nummer und betroffene Dienst-Programmversionen erhöhen und `aenderungen` ergänzen.
 
 ## Dienstblatt (Transparenz)
 Jeder Dienst beschreibt sich selbst im Feld `blatt`: Zweck, Herkunft der Daten, Verarbeitung, jedes Ausgabefeld, Hinweise und Skalierung (Klasse A–D, Grenzen der Quelle, Kosten, Cache, Verhalten bei 10 Mio. Aufrufen/Tag – Rahmen in `skalierung.md`).

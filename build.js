@@ -11,6 +11,15 @@ fs.mkdirSync(path.join(OUT, 'icons'), { recursive: true });
 // App-Dateien (HTML, CSS, JS-Module, Inhalte) 1:1 übernehmen; das Icon wird unten gerendert
 fs.cpSync(path.join(__dirname, 'src'), OUT, { recursive: true, filter: src => !src.endsWith('icon.svg') });
 
+// Version: Nummer aus package.json, Zeitpunkt und Commit (Vercel) in die App schreiben; Service-Worker-Cache je Upload neu
+const { version } = require('./package.json');
+const commit = (process.env.VERCEL_GIT_COMMIT_SHA || '').slice(0, 7) || null;
+const verDatei = path.join(OUT, 'js', 'core', 'version.js');
+fs.writeFileSync(verDatei, fs.readFileSync(verDatei, 'utf8').replace(/export const APP = \{[^}]*\};/,
+  `export const APP = ${JSON.stringify({ version, stand: new Date().toISOString(), commit })};`));
+const swDatei = path.join(OUT, 'sw.js');
+fs.writeFileSync(swDatei, fs.readFileSync(swDatei, 'utf8').replace(/const CACHE = '[^']*';/, `const CACHE = 'daily-${version}-${commit || Date.now()}';`));
+
 const nm = p => require.resolve(p);
 const fonts = {
   'bricolage-grotesque.woff2': '@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2',

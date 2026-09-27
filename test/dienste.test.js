@@ -268,7 +268,7 @@ test('Dienstblätter: vollständig, jedes Ausgabefeld beschrieben, docs/dienste 
 test('Adapter Katalog: Seite „Woher kommen die Daten?“ nennt jeden Dienst mit Quellen', async () => {
   const { seite } = await esm('src/js/adapter/katalog.js');
   const html = seite((await rufe('dienste')).body);
-  for (const d of dienste.DIENSTE) assert.ok(html.includes(`<h3>${d.titel}</h3>`), d.id);
+  for (const d of dienste.DIENSTE) assert.ok(html.includes(`<h3>${d.titel} <small class="dversion">${d.id} ${d.programmversion}</small></h3>`), d.id);
   assert.match(html, /GeoNames/);
   assert.match(html, /<details>/);
   assert.equal(seite(null), '<p>Keine Angaben verfügbar.</p>');
@@ -322,4 +322,22 @@ test('Ort-Knopf: Beschriftung, gespeicherter Ort, Trefferzeile', async () => {
   assert.equal(knopfText({ name: 'Dresden', lat: 51.05 }), 'Ort wählen');           // nur Beispielort
   assert.equal(beschrift(p), 'Neustadt in Sachsen, Lkr. Sächsische Schweiz-Osterzgebirge (01844) <small>· Sachsen</small>');
   assert.equal(beschrift({ name: 'Dresden', kreis: 'Kreisfreie Stadt Dresden', plz: ['01067', '01069'], region: 'Sachsen', land: 'DE' }), 'Dresden (01067 …) <small>· Sachsen</small>');
+});
+
+test('Versionen: App-Nummer gleich in package.json und Oberfläche, Programmversion in jeder Antwort und im Katalog', async () => {
+  const { APP, versionText } = await esm('src/js/core/version.js');
+  assert.equal(APP.version, require('../package.json').version);
+  assert.match(APP.version, /^\d+\.\d+\.\d+$/);
+  assert.equal(versionText({ version: '0.6.0', stand: '2026-09-27T12:32:00Z', commit: 'b518008' }), 'DAILY 0.6.0 · 27.09.2026 14:32 · b518008');
+  assert.equal(versionText({ version: '0.6.0', stand: null, commit: null }), 'DAILY 0.6.0');
+  const w = await rufe('wetter', { ort: 'Berlin' });
+  assert.equal(w.body.programm, dienste.byId.wetter.programmversion);
+  const k = (await rufe('dienste')).body.daten;
+  assert.equal(k.app.version, APP.version);
+  for (const d of k.dienste) {
+    assert.match(d.programmversion, /^\d+\.\d+\.\d+$/, d.id);
+    assert.equal(d.aenderungen[0].version, d.programmversion, d.id);
+  }
+  const { seite } = await esm('src/js/adapter/katalog.js');
+  assert.match(seite({ daten: k }, 'DAILY 0.6.0'), /DAILY 0\.6\.0.*wetter 1\.\d+\.\d+/s);
 });

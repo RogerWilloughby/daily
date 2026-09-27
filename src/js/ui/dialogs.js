@@ -2,6 +2,7 @@
 import { settings, saveSettings } from '../core/store.js';
 import { dienst } from '../dienste/client.js';
 import { seite as quellenSeite } from '../adapter/katalog.js';
+import { versionText } from '../core/version.js';
 
 export function initDialogs(onSaved, isPrivate = false) {
   document.querySelectorAll('[data-doc]').forEach(b => b.addEventListener('click', () => {
@@ -9,7 +10,7 @@ export function initDialogs(onSaved, isPrivate = false) {
     if (d && typeof d.showModal === 'function') d.showModal();
     if (b.dataset.doc === 'quellen') {           // Katalog der Dienste: Herkunft und Verarbeitung je Dienst
       const box = document.getElementById('quellen-body');
-      dienst('dienste').then(env => { box.innerHTML = quellenSeite(env); })
+      dienst('dienste').then(env => { box.innerHTML = quellenSeite(env, versionText()); })
         .catch(() => { box.textContent = 'Die Angaben sind gerade nicht abrufbar. Die Quellen stehen auch im Impressum.'; });
     }
   }));
@@ -19,6 +20,9 @@ export function initDialogs(onSaved, isPrivate = false) {
 
   const dlg = document.getElementById('settings');
   const $ = id => document.getElementById(id);
+
+  // Version sichtbar: klein in der Fußzeile (öffnet „Datenquellen“) und unten in den Einstellungen
+  document.querySelectorAll('[data-version]').forEach(e => { e.textContent = e.dataset.version === 'kurz' ? 'v' + versionText().split(' ')[1] : versionText(); });
 
   $('open-settings').addEventListener('click', () => {
     $('set-ics').value = (settings.icsUrls || []).join('\n');

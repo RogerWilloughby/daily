@@ -13,9 +13,9 @@ function uebersicht() {
 > Erzeugt mit \`npm run doku\` – nicht von Hand bearbeiten. Jeder Dienst beschreibt sich selbst im Feld \`blatt\` seines Moduls in \`services/\`.
 > Dieselben Angaben liefert der Katalog \`GET /api/v1/dienste\`; die App zeigt sie unter „Woher kommen die Daten?“.
 
-| Dienst | Titel | Quellen | Länder | Skalierung |
-|---|---|---|---|---|
-${DIENSTE.map(d => `| [\`${d.id}\`](${d.id}.md) | ${d.titel} | ${d.quellen.map(q => q.name).join(', ')} | ${d.laender === 'alle' ? 'weltweit' : d.laender.join(', ')} | ${d.blatt ? d.blatt.skalierung.klasse : '–'} |`).join('\n')}
+| Dienst | Titel | Version | Quellen | Länder | Skalierung |
+|---|---|---|---|---|---|
+${DIENSTE.map(d => `| [\`${d.id}\`](${d.id}.md) | ${d.titel} | ${d.programmversion || '–'} | ${d.quellen.map(q => q.name).join(', ')} | ${d.laender === 'alle' ? 'weltweit' : d.laender.join(', ')} | ${d.blatt ? d.blatt.skalierung.klasse : '–'} |`).join('\n')}
 
 Skalierungsklassen: ${Object.entries(KLASSEN).map(([k, v]) => `**${k}** ${v}`).join(' · ')}
 `;

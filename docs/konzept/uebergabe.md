@@ -12,6 +12,7 @@ Stand 27.09.2026. Für neue Chats: hier steht, woran gerade gearbeitet wird und 
 - Roger liefert später weitere Dienst-Ideen.
 
 ## Arbeitsablauf und Stolpersteine
+- **Versionen (seit 27.09.2026, App 0.6.0):** bei jeder Änderung App-Nummer (`package.json` + `src/js/core/version.js`) und betroffene Dienst-`programmversion` + `aenderungen` erhöhen. Details `../architektur/dienste.md` → Versionen.
 - Hochladen nur über `hochladen.cmd` (siehe Wegweiser im Projekt). Claude schreibt Dateien ins lokale Repo und legt `.commit-msg.txt` an; lokal nie git-Befehle.
 - `hochladen.cmd` lädt seit 27.09. auch liegengebliebene Commits nach (wenn ein Push fehlschlug und nichts Neues zu committen ist).
 - **Dateien unter `.github/workflows/` darf Claude nicht schreiben** (von der Desktop-App geschützt). Claude legt sie unter `tools/` ab, Roger verschiebt sie von Hand (`move tools\x.yml .github\workflows\x.yml`).

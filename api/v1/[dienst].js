@@ -15,7 +15,7 @@ module.exports = async (req, res) => {
   if (req.method !== 'GET') return send(res, fehlerAntwort(id, new DienstFehler('eingabe_ungueltig', 'Nur GET')), 0, 405);
   try {
     if (id === 'dienste') {
-      return send(res, antwort({ id: 'dienste', version: 1, ttl: 300, quellen: [] }, { daten: { dienste: katalog() } }), 300);
+      return send(res, antwort({ id: 'dienste', version: 1, ttl: 300, quellen: [] }, { daten: { app: require('../../services/_lib/version').APP, dienste: katalog() } }), 300);
     }
     const r = await ausfuehren(id, q);
     // CDN-Cache genau bis gueltigBis (mindestens 60 s) – bei Diensten mit Takt also bis zur nächsten vollen/halben Stunde
