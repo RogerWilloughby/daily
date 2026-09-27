@@ -28,7 +28,7 @@ Stand 27.09.2026. Für neue Chats: hier steht, woran gerade gearbeitet wird und 
 | `wetterhinweise` | ✅ neu 27.09. (0.10.0): amtliche DWD-Warnungen über Bright Sky in der Wetterkachel (Abzeichen, Hinweis, Reiter „Hinweise“ mit Alltagstipp) – ersetzt die Kachel „Warnungen“. Wartet auf Rogers Test. |
 | `regen` | ✅ neu 27.09.: DWD-Radar über Bright Sky, 2 h Verlauf, Nähe, Karte; in der Wetterkachel. Wartet auf Rogers Test. |
 | `wetter` | ✅ überarbeitet 27.09. (siehe unten): Open-Meteo, 16 Tage (ab Tag 8 Trend), Zusatzwerte, Cache-Takt :00/:30. Wartet auf Rogers Test. |
-| alle anderen | noch alte Schnittstelle (`api/*.js`), Reihenfolge in `dienste-katalog.md` |
+| alle anderen | noch alte Schnittstelle (`api/*.js`), Reihenfolge in `dienste-katalog.md`. **Seit 0.11.0 ausgeblendet**, nur über Einstellungen → „Alle Kacheln zeigen (Vorschau)“. Nach dem Umzug in `tiles.js` `fertig: true` setzen. |
 
 App-Seite „Woher kommen die Daten?“ (Fußzeile → Datenquellen) zeigt die Dienstblätter aus dem Katalog `/api/v1/dienste`.
 
@@ -48,7 +48,7 @@ App-Seite „Woher kommen die Daten?“ (Fußzeile → Datenquellen) zeigt die D
 ## Nächste Schritte (in dieser Reihenfolge)
 1. Roger testet den Dienst `regen` (Radar-Reiter, Hinweis „Regen in X Min.“). Offen: Luftqualität/Pollen prüfen (DWD-Pollenflug-Gefahrenindex, Umweltbundesamt); Radarkarte ohne Landkarte darunter – ggf. später Umrisse/Orte.
 2. Roger testet mehrere Orte (Auswahlbox) und die neue aufgeklappte Kachel. Später: Kachelauswahl in den Einstellungen, ggf. Ort je Kachel.
-3. Roger testet die Wetterhinweise (im Testserver mit Beispielwarnungen; echt nur bei aktueller DWD-Warnung am Ort). Offen: was kommt auf den freien Platz im öffentlichen Raster?
+3. Roger testet die Wetterhinweise (im Testserver mit Beispielwarnungen; echt nur bei aktueller DWD-Warnung am Ort). Freie Plätze füllen sich mit jeder überarbeiteten Kachel.
 4. ~~Vercel oder AWS~~ entschieden 27.09.: Vercel; Performance-Maßnahmen 1–3 umgesetzt (0.9.0). **Vor dem öffentlichen Start:** eigene Daten Wetter/Radar (zentral), Lasttest, Vercel Pro.
 5. Übrige Dienste auf daily/1 umziehen (Reihenfolge `dienste-katalog.md`), je mit Dienstblatt.
 6. Neue Dienst-Ideen von Roger aufnehmen.

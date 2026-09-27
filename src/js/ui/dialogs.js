@@ -29,9 +29,13 @@ export function initDialogs(onSaved, isPrivate = false) {
     $('set-stop').value = settings.stop || '';
     $('set-team').value = settings.team || '';
     $('set-fuel').value = settings.fuel || 'e10';
-    $('set-private').hidden = !isPrivate;
+    $('set-alle').checked = !!settings.alleKacheln;
+    $('set-vorschau').hidden = !settings.alleKacheln;           // Einstellungen nur für sichtbare Kacheln
+    $('set-private').hidden = !isPrivate || !settings.alleKacheln;
     if (typeof dlg.showModal === 'function') dlg.showModal();
   });
+
+  $('set-alle').addEventListener('change', () => { $('set-vorschau').hidden = !$('set-alle').checked; $('set-private').hidden = !isPrivate || !$('set-alle').checked; });
 
   $('settings-form').addEventListener('submit', e => {
     e.preventDefault();
@@ -39,9 +43,12 @@ export function initDialogs(onSaved, isPrivate = false) {
       icsUrls: $('set-ics').value.split(/\s+/).map(u => u.trim()).filter(u => /^(https|webcal):\/\//i.test(u)),
       stop: $('set-stop').value.trim() || 'Postplatz',
       team: $('set-team').value.trim() || 'Dynamo Dresden',
-      fuel: $('set-fuel').value
+      fuel: $('set-fuel').value,
+      alleKacheln: $('set-alle').checked
     };
+    const neuesRaster = patch.alleKacheln !== !!settings.alleKacheln;
     saveSettings(patch);
+    if (neuesRaster) { location.reload(); return; }             // andere Kacheln → Raster neu aufbauen
     dlg.close();
     onSaved();
   });

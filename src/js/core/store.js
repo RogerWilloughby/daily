@@ -15,6 +15,7 @@ export const DEFAULTS = {
   stop: 'Postplatz',
   team: 'Dynamo Dresden',
   fuel: 'e10',
+  alleKacheln: false, // Vorschau: auch noch nicht überarbeitete Kacheln zeigen
   layout: null // eigene Kachelbelegung (Liste von IDs), kommt später über die Einstellungen
 };
 const SKEY = 'daily-settings';

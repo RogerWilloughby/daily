@@ -147,13 +147,19 @@ test('Layouts: öffentlich ohne private Kacheln, immer 20 Plätze (fehlende blei
   }
   assert.ok(LAYOUTS.public.every(id => byId[id].scope === 'public'));
   assert.ok(!CATALOG.some(t => t.id === 'mail' || t.id === 'parcels'));
-  const pub = chooseLayout(false, ['news', 'calendar', 'sky', 'sky', 'gibtsnicht']).map(t => t && t.id);
+  const pub = chooseLayout(false, ['news', 'calendar', 'sky', 'sky', 'gibtsnicht'], true).map(t => t && t.id);
   assert.equal(pub.length, SLOTS);
   assert.equal(pub.filter(x => x === null).length, SLOTS - LAYOUTS.public.length);   // freie Plätze am Ende
   assert.ok(!pub.includes('alerts'));                                                // Warnungen stecken jetzt in der Wetterkachel
   assert.equal(pub[0], 'sky');
   assert.ok(!pub.includes('news') && !pub.includes('calendar'));
-  assert.equal(chooseLayout(true).map(t => t.id)[1], 'calendar');
+  assert.equal(chooseLayout(true, null, true).map(t => t.id)[1], 'calendar');
+  // Standard: nur überarbeitete Kacheln, Rest freie Plätze; Vorschau zeigt alle
+  const fertig = chooseLayout(false).map(t => t && t.id);
+  assert.deepEqual(fertig.filter(Boolean), ['weather', 'links', 'tasks', 'usage']);
+  assert.equal(fertig.length, SLOTS);
+  assert.deepEqual(chooseLayout(true).filter(Boolean).map(t => t.id), ['weather', 'tasks', 'links', 'usage']);   // privat ebenso
+  assert.ok(chooseLayout(false, null, true).filter(Boolean).length > 4);
 });
 
 test('Meine Seiten: nur http(s)-Adressen', async () => {

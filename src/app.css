@@ -366,3 +366,6 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
 .wh-tipp{color:var(--active-muted)}
 .wh-s3 .wh-titel,.wh-s4 .wh-titel{font-size:14px}
 .wh-quelle,.wh-mehr{margin:0;font-size:11px;color:var(--active-muted)}
+
+.set-check{display:flex;align-items:center;gap:8px;font-size:15px;cursor:pointer}
+.set-check input{width:18px;height:18px;accent-color:var(--accent)}

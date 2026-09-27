@@ -17,7 +17,7 @@ export function initAsk() {
     let txt = null;
     for (const [re, fn] of answers) { if (re.test(q)) { txt = fn(q); if (txt) break; } }
     if (txt) txt = txt.replace(/\.\.$/, '.');
-    if (!txt) txt = 'Darauf habe ich noch keine Antwort. Frag zum Beispiel nach Wetter, Ferien, Warnungen, Tankpreis, Mond, DAX, Abfahrten, Rezept oder deinen Aufgaben.';
+    if (!txt) txt = 'Darauf habe ich noch keine Antwort. Frag zum Beispiel nach Wetter, Regen, Sturm oder Glätte.';
     document.getElementById('answer-text').innerHTML = `<span class="q">${esc(q)}</span>${esc(txt)}`;
     box.hidden = false;
   });

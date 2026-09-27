@@ -25,11 +25,13 @@ import sky from './providers/sky.js';
 // Betriebsart vom Server: privat nur mit Vercel-Variable DAILY_PRIVATE=1 (Kalender, Schlagzeilen)
 let isPrivate = false;
 if (ONLINE) { try { isPrivate = !!(await getJson('/api/config', { timeout: 2500 })).private; } catch (e) { /* öffentlich */ } }
-chooseLayout(isPrivate, settings.layout);
+const sichtbar = new Set(chooseLayout(isPrivate, settings.layout, settings.alleKacheln).filter(Boolean).map(t => t.id));
 
+// Welche Kacheln ein Anbieter füllt – Anbieter ausgeblendeter Kacheln starten gar nicht erst (keine Abrufe)
+const KACHELN = { local: ['tasks', 'usage'], content: ['play', 'food', 'travel', 'film', 'health', 'tech', 'saving', 'relation'] };
 // Reihenfolge = Priorität: was am häufigsten gebraucht wird, lädt zuerst
 const PROVIDERS = [local, links, sky, weather, calendar, news, holidays, content, transit, markets, sport, knowledge, fuel]
-  .filter(p => isPrivate || !p.private);
+  .filter(p => (isPrivate || !p.private) && (KACHELN[p.id] || [p.id]).some(id => sichtbar.has(id)));
 const lastRun = new Map();
 
 async function run(p) {
