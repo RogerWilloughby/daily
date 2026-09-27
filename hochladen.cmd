@@ -12,10 +12,7 @@ echo.
 
 git add .
 git diff --cached --quiet
-if %errorlevel%==0 (
-  echo Keine Aenderungen - nichts hochzuladen.
-  goto ende
-)
+if %errorlevel%==0 goto keine
 
 if not exist ".commit-msg.txt" goto eigener
 echo Commit-Kommentar von Claude:
@@ -47,6 +44,18 @@ if errorlevel 1 goto fehler
 echo.
 echo Fertig. In ca. 1 Minute ist die neue Version auf Vercel online.
 goto ende
+
+:keine
+rem Nichts Neues - aber vielleicht liegen noch Commits, deren Hochladen fehlgeschlagen ist
+set "AHEAD=0"
+for /f %%n in ('git rev-list --count "@{u}..HEAD"') do set "AHEAD=%%n"
+if not "%AHEAD%"=="0" goto nachholen
+echo Keine Aenderungen - nichts hochzuladen.
+goto ende
+
+:nachholen
+echo Keine neuen Aenderungen, aber %AHEAD% Commit - noch nicht hochgeladen. Lade hoch ...
+goto push
 
 :fehler
 echo.
