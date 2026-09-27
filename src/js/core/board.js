@@ -14,7 +14,7 @@ let open = null;   // offene Kachel (Handy)
 function tileHTML(t) {
   return `<article class="tile" data-mode="rest" data-state="${t.state}" id="tile-${t.id}">
     <button class="head" type="button" data-id="${t.id}" aria-expanded="false">
-      <span class="label">${icon(t.icon)}<span class="long"></span><span class="short">${esc(t.short)}</span><span class="tag" hidden></span></span>
+      <span class="label">${icon(t.icon)}<span class="lglyph" hidden></span><span class="long"></span><span class="short">${esc(t.short)}</span><span class="tag" hidden></span></span>
       <span class="metric"><span class="glyph"></span><span class="m-long"></span><span class="m-short"></span></span>
       <span class="teaser"></span>
       <span class="mini" aria-hidden="true"></span>
@@ -55,15 +55,19 @@ export function paint(id) {
   const tag = el.querySelector('.tag');
   const tagText = t.tag ?? (t.state === 'off' ? 'einrichten' : ''); tag.hidden = !tagText; tag.textContent = tagText;
   el.querySelector('.glyph').innerHTML = t.glyph || '';
+  // Symbol in der Kopfzeile (z. B. aktuelles Wetter) mit Erklärung beim Überfahren
+  const lg = el.querySelector('.lglyph');
+  lg.innerHTML = t.lglyph || ''; lg.hidden = !t.lglyph; lg.title = t.lglyphTip || ''; lg.setAttribute('aria-label', t.lglyphTip || '');
   const mEl = el.querySelector('.metric');
   mEl.classList.toggle('trend-up', t.trend === 'up');
   mEl.classList.toggle('trend-down', t.trend === 'down');
   el.querySelector('.m-long').textContent = t.m;
+  mEl.toggleAttribute('data-leer', !t.m && !t.glyph);   // keine große Zeile (Handy zeigt trotzdem die Kurzform)
   mEl.dataset.len = String(t.m).length > 13 ? 'long' : 'short';
   el.querySelector('.m-short').textContent = t.ms ?? t.m;
   el.querySelector('.teaser').textContent = t.x;
   el.querySelector('.mini').innerHTML = t.chart || '';
-  el.querySelector('.head').setAttribute('aria-label', `${t.title}: ${t.m}`);
+  el.querySelector('.head').setAttribute('aria-label', [t.title, t.lglyphTip, t.m].filter(Boolean).join(': '));
   // Aufgeklappten Inhalt nur neu zeichnen, wenn er sichtbar ist (schont Eingaben in Formularen)
   if (active === id) fillContent(t, el.querySelector('.content'));
   if (open === id) showSheet(id);
@@ -109,7 +113,7 @@ function showSheet(id) {
   open = id;
   const t = byId[id], i = ORDER.indexOf(id), n = ORDER.length;
   document.getElementById('s-label').innerHTML = icon(t.icon) + esc(t.title);
-  document.getElementById('s-metric').textContent = t.m;
+  document.getElementById('s-metric').textContent = t.m || t.ms || '';
   document.getElementById('s-teaser').textContent = t.x;
   fillContent(t, document.getElementById('s-content'));
   document.getElementById('s-pos').textContent = `${i + 1} / ${n}`;

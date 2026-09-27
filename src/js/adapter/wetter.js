@@ -107,9 +107,9 @@ export function kachel(env) {
   // Kopfzeile: Ort, jetzt, Tiefst/Höchst von heute – alles in einer Zeile
   return {
     state: 'live', title: kopfzeile(env),
-    glyph: glyph(bild(a.zustand, a.tag)),
-    m: KURZ[a.zustand] || zustandText(a.zustand, a.code), ms: r0(a.tempC) + '°',
-    x: `Gefühlt ${r0(a.gefuehltC)}°. ${regenText}`,   // Zustand steht schon groß daneben
+    lglyph: glyph(bild(a.zustand, a.tag)), lglyphTip: zustandText(a.zustand, a.code),   // Symbol in der Kopfzeile, Erklärung beim Überfahren
+    glyph: '', m: '', ms: r0(a.tempC) + '°',                                               // keine große Zeile – Platz fürs Diagramm
+    x: `${zustandText(a.zustand, a.code)}, gefühlt ${r0(a.gefuehltC)}°. ${regenText}`,
     chart: miniDiagramm(d.tage),
     big: tageDiagramm(d.tage, z.wtag),
     rows

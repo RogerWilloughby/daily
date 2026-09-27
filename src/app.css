@@ -99,9 +99,9 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--wd-max:#D9773A;--wd-min:#5B8FE0;--wd-regen:#1FA08C;--wd-sonne:#A6841E}}
 :root[data-theme="dark"]{--wd-max:#D9773A;--wd-min:#5B8FE0;--wd-regen:#1FA08C;--wd-sonne:#A6841E}
 .tile[data-mode="active"],.sheet{--wd-max:#D9773A;--wd-min:#5B8FE0;--wd-regen:#1FA08C;--wd-sonne:#A6841E}
-.mini{display:block;align-self:stretch;margin-top:auto;padding-top:6px}
+.mini{display:block;align-self:stretch;flex:1 1 auto;min-height:32px;padding-top:6px}
 .mini:empty{display:none}
-.wd-mini{display:block;width:100%;height:26px;overflow:visible}
+.wd-mini{display:block;width:100%;height:100%;min-height:26px;overflow:visible}
 .tile[data-mode="small"] .mini,.tile[data-mode="active"] .mini{display:none}
 .tile[data-mode="rest"] .head:has(.mini:not(:empty)) .teaser{-webkit-line-clamp:2}
 .tile[data-mode="lane"] .wd-mini{height:22px}
@@ -123,6 +123,11 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .wd-l-max{background:var(--wd-max)}.wd-l-min{background:var(--wd-min)}.wd-l-regen{background:var(--wd-regen);height:8px!important}.wd-l-sonne{background:var(--wd-sonne);height:8px!important}
 .wd-l-trend{background:repeating-linear-gradient(90deg,currentColor 0 3px,transparent 3px 6px);opacity:.7}
 .wd-tip{position:absolute;right:0;top:0;font-size:12px;padding:4px 8px;border-radius:8px;background:var(--surface);color:var(--ink);border:1px solid var(--line);pointer-events:none;max-width:90%}
+.lglyph{flex:none;width:18px;height:18px;color:var(--accent);display:inline-flex}
+.lglyph[hidden]{display:none}
+.lglyph svg{width:100%;height:100%}
+.tile[data-mode="active"] .lglyph{width:22px;height:22px;color:var(--active-muted)}
+.metric[data-leer]{display:none}
 .glyph{flex:none;width:1.05em;height:1.05em;color:var(--accent)}
 .glyph:empty{display:none}
 .glyph svg{width:100%;height:100%;display:block}
@@ -244,6 +249,7 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
   .clock{font-size:19px;margin-left:auto}
   .gear{order:2}.gear span{display:none}
   .mini{display:none}
+  .metric[data-leer]{display:flex}
   .ort-knopf{order:2;max-width:19ch;padding:0 10px}
   .date{order:3;flex:1 1 auto;min-width:0;font-size:14px}
   .status{order:4;padding:3px 8px}

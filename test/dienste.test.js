@@ -217,13 +217,15 @@ test('Adapter Wetter: Kachel und Antwort aus dem Vertrag', async () => {
   const env = (await rufe('wetter', { ort: 'Berlin' })).body;
   const k = kachel(env);
   assert.equal(k.title, 'Berlin 15° · 9°/16°');               // Ort, jetzt, Tiefst/Höchst in einer Zeile
-  assert.equal(k.m, 'Wolkig');
-  assert.equal(k.ms, '15°');
+  assert.equal(k.m, '');                                        // keine große Zeile mehr
+  assert.equal(k.ms, '15°');                                    // Handy: Kurzform
+  assert.equal(k.lglyphTip, 'Teilweise bewölkt');               // Symbol in der Kopfzeile mit Erklärung
+  assert.match(k.lglyph, /^<svg/);
   assert.match(k.chart, /^<svg class="wd wd-mini".*wd-max.*wd-min.*wd-trend/);   // Mini-Diagramm, Trendtage gestrichelt
   assert.equal((k.big.match(/data-tip=/g) || []).length, 16);           // großes Diagramm: 16 Tagesspalten mit Hinweis
   assert.ok(!/<path[^>]*d=""/.test(k.big + k.chart), 'leerer Pfad');
   assert.match(k.big, /Trend/);
-  assert.equal(k.x, 'Gefühlt 14°. Regen möglich gegen 17 Uhr.');
+  assert.equal(k.x, 'Teilweise bewölkt, gefühlt 14°. Regen möglich gegen 17 Uhr.');
   assert.ok(k.rows.some(([l]) => l === 'Luftqualität'));
   assert.ok(k.rows.some(([l]) => l === 'Morgen'));
   const zeile = l => (k.rows.find(([x]) => x.startsWith(l)) || [])[1];
