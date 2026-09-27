@@ -46,7 +46,7 @@ App-Seite „Woher kommen die Daten?“ (Fußzeile → Datenquellen) zeigt die D
 
 ## Nächste Schritte (in dieser Reihenfolge)
 1. Roger testet den Dienst `regen` (Radar-Reiter, Hinweis „Regen in X Min.“). Offen: Luftqualität/Pollen prüfen (DWD-Pollenflug-Gefahrenindex, Umweltbundesamt); Radarkarte ohne Landkarte darunter – ggf. später Umrisse/Orte.
-2. **Mehrere Standorte** (Thema 4 vom 27.09.): reines Oberflächenthema – Liste von Orten mit aktivem Ort, Ort-Knopf, ggf. Ort je Kachel; zusammen mit der Kachelauswahl in den Einstellungen.
+2. Roger testet mehrere Orte (Auswahlbox) und die neue aufgeklappte Kachel. Später: Kachelauswahl in den Einstellungen, ggf. Ort je Kachel.
 3. **Vercel oder AWS** bei 10 Mio. Nutzern (Vercel Hobby nur nicht kommerziell; Pro 20 $/Monat, 1 Mio. Aufrufe inklusive, dann 0,60 $/Mio.).
 4. Übrige Dienste auf daily/1 umziehen (Reihenfolge `dienste-katalog.md`), je mit Dienstblatt.
 5. Neue Dienst-Ideen von Roger aufnehmen.

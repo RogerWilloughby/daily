@@ -62,10 +62,20 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .status i{width:8px;height:8px;border-radius:50%;background:var(--muted)}
 .status[data-level="ok"] i{background:var(--ok)}
 .status[data-level="warn"] i{background:var(--warn)}
-.ort-knopf{display:flex;align-items:center;gap:6px;min-height:36px;max-width:26ch;padding:0 12px;border-radius:10px;border:1px solid var(--line);font-size:13px;font-weight:600;color:var(--ink)}
-.ort-knopf:hover{border-color:var(--accent)}
-.ort-knopf svg{width:16px;height:16px;flex:none;color:var(--accent)}
-.ort-knopf span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ort-wahl{display:flex;align-items:center;gap:4px;min-height:36px;padding:0 4px 0 10px;border-radius:10px;border:1px solid var(--line);color:var(--ink);cursor:pointer}
+.ort-wahl:hover,.ort-wahl:focus-within{border-color:var(--accent)}
+.ort-wahl svg{width:16px;height:16px;flex:none;color:var(--accent)}
+.ort-wahl select{appearance:auto;border:0;background:transparent;color:inherit;font:inherit;font-size:13px;font-weight:600;max-width:24ch;min-height:34px;cursor:pointer;outline:none;text-overflow:ellipsis}
+.ort-wahl select option{color:var(--ink);background:var(--surface)}
+.ort-meine{list-style:none;margin:4px 0 10px;padding:0;display:flex;flex-direction:column;gap:2px}
+.ort-meine li{display:flex;align-items:center;gap:6px;border-radius:8px}
+.ort-meine li.aktiv{background:var(--ground)}
+.ort-meine .ort-name{flex:1;text-align:left;padding:8px 10px;font-size:15px;color:var(--ink)}
+.ort-meine .ort-name small{color:var(--muted)}
+.ort-meine .ort-weg{width:34px;height:34px;border-radius:8px;color:var(--muted);font-size:18px}
+.ort-meine .ort-weg:hover{color:var(--down);background:var(--ground)}
+.ort-meine .leer{color:var(--muted);font-size:14px;padding:6px 0}
+#ort-anzahl{font-weight:500;color:var(--muted);text-transform:none;letter-spacing:0}
 .gear{display:flex;align-items:center;gap:6px;min-height:36px;padding:0 10px;border-radius:10px;border:1px solid var(--line);color:var(--muted);font-size:13px}
 .gear:hover{color:var(--ink);border-color:var(--accent)}
 .gear svg{width:16px;height:16px}
@@ -197,20 +207,30 @@ b.wd-t-max,b.wd-t-min,b.wd-t-regen,b.wd-t-sonne{font-weight:700}
 .tile[data-mode="small"] .tag{display:none}
 .tile[data-mode="lane"] .teaser{font-size:13px;-webkit-line-clamp:2}
 
-/* 6 Aktive Kachel */
+/* 6 Aktive Kachel: oben eine Kopfzeile (Überschrift, Wert, Unterzeile), darunter die ganze Breite für Reiter und Inhalt */
 .tile[data-mode="active"]{background:var(--active-bg);border-color:var(--active-bg);border-style:solid;color:var(--active-ink);
-  grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);grid-template-rows:minmax(0,1fr)}
-.tile[data-mode="active"] .head{padding:28px 30px;gap:12px;cursor:default}
+  grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}
+.tile[data-mode="active"] .head{flex-direction:row;flex-wrap:wrap;align-items:baseline;padding:18px 150px 10px 26px;gap:4px 18px;cursor:default}
+.tile[data-mode="active"] .head .label{flex:none;max-width:100%}
+.tile[data-mode="active"] .head .teaser{flex:1 1 260px;font-size:15px!important;-webkit-line-clamp:2!important}
 .tile[data-mode="active"] .ico,.tile[data-mode="active"] .glyph{color:var(--active-muted)}
 .tile[data-mode="active"] .label{font-size:14px;letter-spacing:.06em;text-transform:uppercase}
 .tile[data-mode="active"] .tag{border-color:var(--active-line);color:var(--active-muted)}
-.tile[data-mode="active"] .metric{font-size:clamp(28px,2.8vw,46px)}
+.tile[data-mode="active"] .metric{font-size:clamp(20px,1.8vw,28px)}
 .tile[data-mode="active"] .metric .m-long{white-space:normal;overflow:visible;overflow-wrap:anywhere;hyphens:auto}
-.tile[data-mode="active"] .metric[data-len="long"]{font-size:clamp(26px,2.2vw,36px);line-height:1.1}
+.tile[data-mode="active"] .metric[data-len="long"]{font-size:clamp(18px,1.6vw,24px);line-height:1.1}
 .tile[data-mode="active"] .metric[data-len="long"] .m-long{display:block;-webkit-line-clamp:unset}
 .tile[data-mode="active"] .teaser{color:var(--active-muted);font-size:17px;-webkit-line-clamp:6}
 .tile[data-mode="active"] .trend-up{color:var(--active-up)}.tile[data-mode="active"] .trend-down{color:var(--active-down)}
-.tile[data-mode="active"] .body{display:flex;flex-direction:column;min-height:0;padding:22px 26px 22px 0;gap:10px;animation:fadein .4s var(--ease)}
+.tile[data-mode="active"] .body{display:flex;flex-direction:column;min-height:0;padding:0 26px 14px;gap:10px;animation:fadein .4s var(--ease)}
+.tile[data-mode="active"] .body .close{position:absolute;top:14px;right:18px}
+.tile[data-mode="active"] .wd-figur{display:flex;align-items:flex-start;gap:18px;margin-bottom:4px}
+.tile[data-mode="active"] .wd-gross{height:226px;width:auto;max-width:calc(100% - 150px);flex:none}
+.tile[data-mode="active"] .wd-figur .wd-legende{flex-direction:column;gap:6px;margin-top:18px}
+.tile[data-mode="active"] .rk-verlauf .wd-gross{height:92px;max-width:100%}
+.tile[data-mode="active"] .rk-feld{grid-template-columns:150px minmax(0,1fr) minmax(0,1fr);gap:8px 20px}
+.tile[data-mode="active"] .rk{width:150px;height:150px}
+.tile[data-mode="active"] .rk-werte{grid-column:auto;grid-template-columns:1fr;align-self:start}
 .close{align-self:flex-end;min-height:40px;padding:0 14px;border-radius:10px;border:1px solid var(--active-line);color:var(--active-ink);font-size:14px}
 .content{min-height:0;overflow:auto;display:flex;flex-direction:column;gap:10px;padding-bottom:18px;scrollbar-width:thin;scrollbar-color:var(--active-line) transparent;
   -webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 22px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 22px),transparent)}
@@ -294,7 +314,7 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
   .gear{order:2}.gear span{display:none}
   .mini{display:none}
   .metric[data-leer]{display:flex}
-  .ort-knopf{order:2;max-width:19ch;padding:0 10px}
+  .ort-wahl{order:2}.ort-wahl select{max-width:15ch}
   .date{order:3;flex:1 1 auto;min-width:0;font-size:14px}
   .status{order:4;padding:3px 8px}
   .legal{order:5;flex-basis:100%;gap:12px;font-size:12px}

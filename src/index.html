@@ -39,7 +39,7 @@
     </form>
     <div class="spacer"></div>
     <div class="status" id="status" data-level="idle" title="Datenquellen"><i aria-hidden="true"></i><span id="status-text">Beispieldaten</span></div>
-    <button class="ort-knopf" type="button" id="open-ort" aria-label="Ort ändern"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span id="ort-name">Ort wählen</span></button>
+    <label class="ort-wahl" title="Ort"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span class="sr">Ort</span><select id="ort-select" aria-label="Ort wählen"></select></label>
     <button class="gear" type="button" id="open-settings" aria-label="Einstellungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Einstellungen</span></button>
     <nav class="legal" aria-label="Rechtliches">
       <button type="button" data-doc="quellen">Datenquellen</button>
@@ -120,9 +120,12 @@
 
 <dialog class="doc" id="ort-dlg" aria-labelledby="h-ort">
   <div class="doc-in">
-    <div class="doc-head"><h2 id="h-ort">Ort</h2><button class="x" type="button" data-doc-close>Schließen</button></div>
+    <div class="doc-head"><h2 id="h-ort">Orte</h2><button class="x" type="button" data-doc-close>Schließen</button></div>
     <div class="doc-body">
-      <p>Für Wetter, Warnungen, Feiertage, Tankpreise und Himmel. Aktuell: <b id="ort-aktuell"></b></p>
+      <p>Für Wetter, Regen, Warnungen, Feiertage, Tankpreise und Himmel. Wechseln kannst du unten in der Leiste.</p>
+      <h3>Deine Orte <small id="ort-anzahl"></small></h3>
+      <ul class="ort-meine" id="ort-meine"></ul>
+      <h3>Ort hinzufügen</h3>
       <button type="button" class="btn primary wide" id="ort-hier"><span aria-hidden="true">&#x2316;</span> Meinen Standort ermitteln</button>
       <p class="set-oder">oder Ort eintippen:</p>
       <div class="set-row">

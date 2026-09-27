@@ -375,3 +375,24 @@ test('Adapter Regen: Hinweis in der Wetterkachel und Reiter „Radar“', async 
   assert.deepEqual(kachel(wetter, null).tabs.map(t => t.id), ['heute', 'tage', 'stunden', 'mehr']);   // ohne Radar
   assert.match(text(wetter, regen), /Radar: Regen in 20 Min\./);
 });
+
+test('Mehrere Orte: Auswahlbox, hinzufügen, wechseln, entfernen', async () => {
+  const st = await esm('src/js/core/store.js');
+  const { auswahl, alsEinstellung } = await esm('src/js/ui/ort.js');
+  assert.deepEqual(auswahl([], -1).map(e => e.text), ['Ort wählen …']);
+  const orte = (await rufe('ort', { q: 'Neustadt' })).body.daten.orte.map(alsEinstellung);
+  st.settings.orte = []; st.settings.place = st.DEFAULTS.place;
+  st.ortHinzufuegen(orte[0]); st.ortHinzufuegen(orte[1]); st.ortHinzufuegen(orte[0]);   // doppelt → nur gewählt
+  assert.equal(st.settings.orte.length, 2);
+  assert.equal(st.settings.place.name, orte[0].name);
+  const a = auswahl(st.settings.orte, st.aktiverOrt());
+  assert.deepEqual(a.map(e => e.wert), ['0', '1', 'neu', 'verwalten']);
+  assert.equal(a.find(e => e.gewaehlt).text, orte[0].name);
+  st.ortWaehlen(1); assert.equal(st.settings.place.name, orte[1].name);
+  st.ortEntfernen(1);                                          // aktiver Ort entfernt → erster verbleibender
+  assert.deepEqual([st.settings.orte.length, st.settings.place.name], [1, orte[0].name]);
+  st.ortEntfernen(0);                                          // keiner mehr → Beispielort
+  assert.equal(st.settings.place.name, 'Dresden');
+  for (let i = 0; i < 12; i++) st.ortHinzufuegen({ ...orte[0], name: 'Ort ' + i, lat: 50 + i * 0.1 });
+  assert.equal(st.settings.orte.length, st.MAX_ORTE);
+});

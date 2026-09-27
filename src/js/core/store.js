@@ -25,6 +25,29 @@ else if (settings.place.gewaehlt == null && read(SKEY, {}).place && !(settings.p
   settings.place = { ...settings.place, gewaehlt: true };
 export function saveSettings(patch) { Object.assign(settings, patch); return write(SKEY, settings); }
 
+// ---- Mehrere Orte: settings.orte (Liste), settings.place = aktiver Ort (alle Kacheln lesen nur place) ----
+export const MAX_ORTE = 10;
+const gleicherOrt = (a, b) => a && b && a.name === b.name && Math.abs(a.lat - b.lat) < 0.02 && Math.abs(a.lon - b.lon) < 0.02;
+if (!Array.isArray(settings.orte)) settings.orte = settings.place && settings.place.gewaehlt ? [settings.place] : [];
+export function ortWaehlen(i) {
+  const o = settings.orte[i]; if (!o) return false;
+  return saveSettings({ place: o });
+}
+// neuen Ort aufnehmen (oder vorhandenen wählen) und aktiv setzen; der älteste fällt bei mehr als MAX_ORTE heraus
+export function ortHinzufuegen(p) {
+  const da = settings.orte.find(o => gleicherOrt(o, p));
+  if (da) return saveSettings({ place: da });           // schon gespeichert: nur wählen, Reihenfolge bleibt
+  const orte = [...settings.orte, p];
+  while (orte.length > MAX_ORTE) orte.shift();
+  return saveSettings({ orte, place: p });
+}
+export function ortEntfernen(i) {
+  const orte = settings.orte.filter((_, k) => k !== i);
+  const aktivWeg = gleicherOrt(settings.orte[i], settings.place);
+  return saveSettings({ orte, place: aktivWeg ? (orte[0] || DEFAULTS.place) : settings.place });
+}
+export const aktiverOrt = () => settings.orte.findIndex(o => gleicherOrt(o, settings.place));
+
 // ---- Klickzähler „Deine Nutzung“ (Schlüssel: Kachel-ID) ----
 const CKEY = 'daily-clicks';
 const LEGACY = { 'Heute & Wetter': 'weather', 'Kalender': 'calendar', 'Mail': 'mail', 'Nachrichten': 'news', 'Schlagzeilen': 'news',

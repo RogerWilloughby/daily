@@ -1,6 +1,6 @@
-// Ort: Knopf in der Leiste (zeigt, für welchen Ort die Kacheln gelten) und eigener Ort-Dialog.
-// Gerätestandort auf Knopfdruck, Suche mit Vorschlägen beim Tippen (Dienst „ort“). Ein Klick auf einen Treffer übernimmt ihn sofort.
-import { settings, saveSettings } from '../core/store.js';
+// Orte: Auswahlbox in der Leiste (alle gespeicherten Orte, Wechsel lädt alle Kacheln neu) und Dialog „Orte“
+// zum Hinzufügen (Gerätestandort oder Suche mit Vorschlägen) und Entfernen.
+import { settings, ortWaehlen, ortHinzufuegen, ortEntfernen, aktiverOrt, MAX_ORTE } from '../core/store.js';
 import { esc } from '../core/util.js';
 import { dienst } from '../dienste/client.js';
 
@@ -20,34 +20,60 @@ export const alsEinstellung = p => ({ name: p.name, admin: p.region || '', land:
 // Text auf dem Knopf: eigener Ort oder Aufforderung (solange nur der Beispielort Dresden gilt)
 export const knopfText = place => (place && place.gewaehlt ? place.name : 'Ort wählen');
 
+// Einträge der Auswahlbox (rein, testbar): gespeicherte Orte, dann „hinzufügen“ und „verwalten“
+export function auswahl(orte, aktiv) {
+  const liste = orte.map((o, i) => ({ wert: String(i), text: o.name + (orte.some((x, k) => k !== i && x.name === o.name) && o.admin ? ` (${o.admin})` : ''), gewaehlt: i === aktiv }));
+  if (!orte.length) liste.push({ wert: 'neu', text: 'Ort wählen …', gewaehlt: true });
+  else liste.push({ wert: 'neu', text: '+ Ort hinzufügen …', gewaehlt: false });
+  if (orte.length) liste.push({ wert: 'verwalten', text: 'Orte verwalten …', gewaehlt: false });
+  return liste;
+}
+
 export function initOrt(onChange) {
   const $ = id => document.getElementById(id);
-  const dlg = $('ort-dlg'), knopf = $('open-ort'), box = $('ort-results'), eingabe = $('ort-q');
+  const dlg = $('ort-dlg'), wahl = $('ort-select'), box = $('ort-results'), eingabe = $('ort-q'), meine = $('ort-meine');
   let tippTimer = null, tippNr = 0, treffer = [];
 
-  const zeigeKnopf = () => {
-    $('ort-name').textContent = knopfText(settings.place);
-    knopf.title = settings.place.gewaehlt ? `Ort: ${settings.place.name} – ändern` : `Beispielort ${settings.place.name} – eigenen Ort wählen`;
-  };
-  zeigeKnopf();
+  // Auswahlbox in der Leiste
+  function zeigeAuswahl() {
+    wahl.innerHTML = auswahl(settings.orte, aktiverOrt()).map(e =>
+      `<option value="${e.wert}"${e.gewaehlt ? ' selected' : ''}>${esc(e.text)}</option>`).join('');
+    wahl.title = settings.place.gewaehlt ? `Ort: ${settings.place.name}${settings.place.admin ? ', ' + settings.place.admin : ''}` : `Beispielort ${settings.place.name} – eigenen Ort wählen`;
+  }
+  wahl.addEventListener('change', () => {
+    const v = wahl.value;
+    if (v === 'neu' || v === 'verwalten') { zeigeAuswahl(); oeffne(); return; }
+    ortWaehlen(+v); zeigeAuswahl(); onChange();
+  });
+  zeigeAuswahl();
 
-  knopf.addEventListener('click', () => {
-    eingabe.value = '';
-    box.innerHTML = '';
-    $('ort-aktuell').textContent = settings.place.gewaehlt
-      ? settings.place.name + (settings.place.admin ? ', ' + settings.place.admin : '')
-      : `${settings.place.name} (Beispiel)`;
+  // Dialog „Orte“: gespeicherte Orte (wählen, entfernen), darunter hinzufügen
+  function zeigeMeine() {
+    const a = aktiverOrt();
+    meine.innerHTML = settings.orte.length ? settings.orte.map((o, i) =>
+      `<li${i === a ? ' class="aktiv"' : ''}><button type="button" class="ort-name" data-i="${i}">${i === a ? '✓ ' : ''}${esc(o.name)}${o.admin && o.admin !== o.name ? ` <small>· ${esc(o.admin)}</small>` : ''}</button>` +
+      `<button type="button" class="ort-weg" data-weg="${i}" aria-label="${esc(o.name)} entfernen" title="Entfernen">×</button></li>`).join('')
+      : `<li class="leer">Noch kein eigener Ort – angezeigt wird der Beispielort ${esc(settings.place.name)}.</li>`;
+    $('ort-anzahl').textContent = settings.orte.length ? `${settings.orte.length} von ${MAX_ORTE}` : '';
+  }
+  meine.addEventListener('click', e => {
+    const w = e.target.closest('[data-weg]'), n = e.target.closest('[data-i]');
+    if (w) { const vorher = settings.place; ortEntfernen(+w.dataset.weg); zeigeMeine(); zeigeAuswahl(); if (settings.place !== vorher) onChange(); }
+    else if (n) { ortWaehlen(+n.dataset.i); zeigeAuswahl(); dlg.close(); onChange(); }
+  });
+  function oeffne() {
+    eingabe.value = ''; box.innerHTML = '';
+    zeigeMeine();
     if (typeof dlg.showModal === 'function') dlg.showModal();
     setTimeout(() => eingabe.focus(), 50);
-  });
+  }
 
   function waehle(p) {
-    saveSettings({ place: alsEinstellung(p) });
-    zeigeKnopf();
+    ortHinzufuegen(alsEinstellung(p));
+    zeigeAuswahl();
     dlg.close();
     onChange();
   }
-
   function zeige(liste, leerText) {
     treffer = liste;
     if (!liste.length) { box.textContent = leerText || 'Kein Ort gefunden. Anders schreiben oder Postleitzahl versuchen?'; return; }
