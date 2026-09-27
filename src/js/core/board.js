@@ -17,6 +17,7 @@ function tileHTML(t) {
       <span class="label">${icon(t.icon)}<span class="long"></span><span class="short">${esc(t.short)}</span><span class="tag" hidden></span></span>
       <span class="metric"><span class="glyph"></span><span class="m-long"></span><span class="m-short"></span></span>
       <span class="teaser"></span>
+      <span class="mini" aria-hidden="true"></span>
     </button>
     <div class="body">
       <button class="close" type="button" data-close>Schließen</button>
@@ -26,9 +27,24 @@ function tileHTML(t) {
 }
 
 // Inhalt einer Kachel (aufgeklappt) in ein Element schreiben: eigene Darstellung oder Zeilen
+// t.big: optionale Grafik (HTML/SVG) über den Zeilen; Elemente mit data-tip zeigen beim Überfahren einen Hinweis
 function fillContent(t, el) {
   if (typeof t.render === 'function') { el.innerHTML = ''; t.render(el); }
-  else el.innerHTML = rows(t.rows);
+  else el.innerHTML = (t.big || '') + rows(t.rows);
+  hinweise(el);
+}
+function hinweise(el) {
+  el.querySelectorAll('figure').forEach(fig => {
+    const tip = fig.querySelector('.wd-tip'); if (!tip) return;
+    const zeige = e => {
+      const z = e.target.closest('[data-tip]');
+      if (!z) { tip.hidden = true; return; }
+      fig.querySelectorAll('.an').forEach(x => x.classList.remove('an')); z.classList.add('an');
+      tip.textContent = z.dataset.tip; tip.hidden = false;
+    };
+    fig.addEventListener('pointermove', zeige);
+    fig.addEventListener('pointerleave', () => { tip.hidden = true; fig.querySelectorAll('.an').forEach(x => x.classList.remove('an')); });
+  });
 }
 
 export function paint(id) {
@@ -46,6 +62,7 @@ export function paint(id) {
   mEl.dataset.len = String(t.m).length > 13 ? 'long' : 'short';
   el.querySelector('.m-short').textContent = t.ms ?? t.m;
   el.querySelector('.teaser').textContent = t.x;
+  el.querySelector('.mini').innerHTML = t.chart || '';
   el.querySelector('.head').setAttribute('aria-label', `${t.title}: ${t.m}`);
   // Aufgeklappten Inhalt nur neu zeichnen, wenn er sichtbar ist (schont Eingaben in Formularen)
   if (active === id) fillContent(t, el.querySelector('.content'));

@@ -9,7 +9,7 @@ import { kachel, antwort } from '../adapter/wetter.js';
 let env = null;
 
 export async function load() {
-  set('weather', { title: 'Wetter ' + settings.place.name });
+  set('weather', { title: settings.place.name });
   env = await dienst('wetter', ortParams(settings.place));
   set('weather', kachel(env));
 }

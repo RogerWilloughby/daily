@@ -93,6 +93,7 @@ Der Prototyp zählt lokal, welche Kacheln geöffnet werden (Kachel „Deine Nutz
 ## 11. Technischer Aufbau (seit 26.09.2026)
 - **Seit 27.09.2026: headless.** Dienste liefern reine Daten im Austauschformat daily/1 über `GET /api/v1/<dienst>`, Adapter machen daraus Kacheln, Listen oder Dashboards. Verbindliche Beschreibung: `../architektur/dienste.md`. Referenz-Dienst: `wetter`.
 - **Transparenz:** Jeder Dienst hat ein Dienstblatt (Herkunft, Zweck, Eingabe, Ausgabe, Verarbeitung, Skalierung) – im Code, im Katalog `/api/v1/dienste`, in `docs/dienste/` (`npm run doku`) und in der App unter „Datenquellen“. Skalierungsrahmen: `../architektur/skalierung.md`.
+- **Wetterkachel (27.09.2026):** Kopfzeile „Ort jetzt° · Tiefst°/Höchst°“, groß der Zustand mit Wettersymbol (kein festes Kachelsymbol), darunter Mini-Diagramm 16 Tage (Höchst/Tiefst, Regenbalken, Trend gestrichelt). Aufgeklappt: Diagramm in drei Feldern (Temperatur, Niederschlag, Sonne – keine zweite Y-Achse) mit Hinweis je Tag. Diagramme sind Auswertung im Adapter (`src/js/adapter/diagramm.js`), kein eigener Dienst.
 - **Wetter (27.09.2026):** Open-Meteo, solange DAILY nicht kommerziell ist; 16 Tage (ab Tag 8 Trend), Cache bis zur nächsten vollen/halben Stunde; Regen/Radar als eigener Dienst `regen` (DWD). Begründung und Verworfenes: `uebergabe.md`.
 - **Eigene Daten, wo es geht:** Orte und Postleitzahlen Deutschland kommen aus dem eigenen Bestand (GeoNames, monatlich per GitHub Action), nicht mehr von OpenPLZ/Nominatim.
 - Frontend ohne Bundler: `src/index.html` (nur Gerüst), `src/app.css` (Design-Tokens, Hell/Dunkel), ES-Module unter `src/js/`:
@@ -101,7 +102,7 @@ Der Prototyp zählt lokal, welche Kacheln geöffnet werden (Kachel „Deine Nutz
   - Neue Kachel = Eintrag in `tiles.js` + Provider-Modul + Eintrag in `main.js`.
 - Statusanzeige in der Leiste: „Live · HH:MM“ oder „N Quellen gestört“.
 - Server-Funktionen in `api/` (Vercel, Region fra1 = Frankfurt), gemeinsame Helfer in `api/_lib/http.js`. Server-Funktionen verbergen die IP der Nutzer vor den Anbietern und setzen CDN-Cache-Zeiten.
-- Service Worker `daily-v6`: App-Dateien network-first, Schriften/Icons cache-first, `/api/` nie aus dem Cache.
+- Service Worker `daily-v7`: App-Dateien network-first, Schriften/Icons cache-first, `/api/` nie aus dem Cache.
 - Tests: `npm test` (node:test, ohne Netz, 31 Prüfungen): `test/daily.test.js` (alte Kacheln) und `test/dienste.test.js` (daily/1: Rahmen, Schema, Ort, Wetter, Router, Katalog, Dienstblätter, Adapter).
 - Lokaler Testserver: `node tools/mock-server.js` (nach `npm run build`), liefert Beispieldaten aus `tools/fixtures.js` statt echter Dienste; `MOCK_PRIVATE=1` für den privaten Betrieb.
 - Betriebsart: `api/config.js` meldet `private` (aus `DAILY_PRIVATE`). `main.js` wählt damit das Layout (`chooseLayout` in `core/tiles.js`) und startet nur die passenden Anbieter. Ein eigenes Layout aus `settings.layout` (Liste von Kachel-IDs) wird geprüft und mit der Standardbelegung auf 20 Plätze aufgefüllt – Grundlage für die Kachelauswahl in den Einstellungen.

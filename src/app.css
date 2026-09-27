@@ -94,6 +94,35 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .metric[data-len="long"]{font-size:23px;line-height:1.12}
 .metric[data-len="long"] .m-long{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .tile[data-mode="lane"] .metric[data-len="long"] .m-long,.tile[data-mode="small"] .metric[data-len="long"] .m-long{white-space:nowrap;display:block}
+/* Wetter-Diagramme (Farben geprüft: Höchst/Tiefst/Regen/Sonne je Hell und Dunkel) */
+:root{--wd-max:#C0621C;--wd-min:#1F63B8;--wd-regen:#0F8A7A;--wd-sonne:#B07E0A}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--wd-max:#D9773A;--wd-min:#5B8FE0;--wd-regen:#1FA08C;--wd-sonne:#A6841E}}
+:root[data-theme="dark"]{--wd-max:#D9773A;--wd-min:#5B8FE0;--wd-regen:#1FA08C;--wd-sonne:#A6841E}
+.tile[data-mode="active"],.sheet{--wd-max:#D9773A;--wd-min:#5B8FE0;--wd-regen:#1FA08C;--wd-sonne:#A6841E}
+.mini{display:block;align-self:stretch;margin-top:auto;padding-top:6px}
+.mini:empty{display:none}
+.wd-mini{display:block;width:100%;height:26px;overflow:visible}
+.tile[data-mode="small"] .mini,.tile[data-mode="active"] .mini{display:none}
+.tile[data-mode="rest"] .head:has(.mini:not(:empty)) .teaser{-webkit-line-clamp:2}
+.tile[data-mode="lane"] .wd-mini{height:22px}
+.wd path{fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.wd .wd-max{stroke:var(--wd-max)}.wd .wd-min{stroke:var(--wd-min)}
+.wd .wd-trend{stroke-dasharray:3 3;opacity:.75}
+.wd .wd-regen{fill:var(--wd-regen)}.wd .wd-sonne{fill:var(--wd-sonne)}
+.wd .wd-blass{opacity:.55}
+.wd-figur{margin:0 0 14px;position:relative}
+.wd-gross{display:block;width:100%;height:auto;font-family:var(--body)}
+.wd-gross .wd-achse{font-size:9.5px;fill:currentColor;opacity:.7}
+.wd-gross .wd-wert{font-size:11px;font-weight:600;fill:currentColor}
+.wd-gross .wd-gitter{stroke:currentColor;opacity:.15;stroke-width:1}
+.wd-gross .wd-trendfeld{fill:currentColor;opacity:.06}
+.wd-gross .wd-spalte{fill:transparent;cursor:crosshair}
+.wd-gross .wd-spalte.an{fill:currentColor;opacity:.08}
+.wd-legende{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;opacity:.85;margin-top:4px}
+.wd-legende i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:5px;vertical-align:middle}
+.wd-l-max{background:var(--wd-max)}.wd-l-min{background:var(--wd-min)}.wd-l-regen{background:var(--wd-regen);height:8px!important}.wd-l-sonne{background:var(--wd-sonne);height:8px!important}
+.wd-l-trend{background:repeating-linear-gradient(90deg,currentColor 0 3px,transparent 3px 6px);opacity:.7}
+.wd-tip{position:absolute;right:0;top:0;font-size:12px;padding:4px 8px;border-radius:8px;background:var(--surface);color:var(--ink);border:1px solid var(--line);pointer-events:none;max-width:90%}
 .glyph{flex:none;width:1.05em;height:1.05em;color:var(--accent)}
 .glyph:empty{display:none}
 .glyph svg{width:100%;height:100%;display:block}
@@ -214,6 +243,7 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
   .brand{font-size:24px}
   .clock{font-size:19px;margin-left:auto}
   .gear{order:2}.gear span{display:none}
+  .mini{display:none}
   .ort-knopf{order:2;max-width:19ch;padding:0 10px}
   .date{order:3;flex:1 1 auto;min-width:0;font-size:14px}
   .status{order:4;padding:3px 8px}

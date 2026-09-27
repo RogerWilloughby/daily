@@ -2,6 +2,7 @@
 // Heute: kachel() für das Kachelraster und antwort() für „Frag DAILY“. Später z. B. liste(), dashboard().
 // Ohne DOM – daher auch in Node testbar.
 import { glyph } from '../core/util.js';
+import { miniDiagramm, tageDiagramm } from './diagramm.js';
 
 export const TEXT = {
   klar: 'Klar', ueberwiegend_klar: 'Überwiegend klar', teilweise_bewoelkt: 'Teilweise bewölkt', bedeckt: 'Bedeckt',
@@ -11,6 +12,12 @@ export const TEXT = {
 };
 // Stärke aus dem WMO-Code (leicht/stark) für genauere Texte
 const STAERKE = { 51: 'Leichter ', 55: 'Starker ', 61: 'Leichter ', 65: 'Starker ', 71: 'Leichter ', 75: 'Starker ', 80: 'Leichte ', 82: 'Heftige ', 86: 'Starke ' };
+// Kurzform für die große Zeile der Kachel
+export const KURZ = {
+  klar: 'Klar', ueberwiegend_klar: 'Heiter', teilweise_bewoelkt: 'Wolkig', bedeckt: 'Bedeckt', nebel: 'Nebel', niesel: 'Niesel',
+  gefrierender_niesel: 'Glatteis', regen: 'Regen', gefrierender_regen: 'Glatteis', schnee: 'Schnee', schneegriesel: 'Schnee',
+  regenschauer: 'Schauer', schneeschauer: 'Schnee', gewitter: 'Gewitter', gewitter_hagel: 'Gewitter', unbekannt: '–'
+};
 export const zustandText = (zustand, code) => {
   const t = TEXT[zustand] || '–';
   return STAERKE[code] ? STAERKE[code] + t : t;
@@ -50,6 +57,12 @@ export function auswerten(env) {
   return { z, heute, morgen, regenMax, regenUm: regenMax >= 25 ? regenUm : null, pollen };
 }
 
+// „Dresden 15° · 9°/16°“
+export function kopfzeile(env) {
+  const a = env.daten.aktuell, h = env.daten.tage[0] || {};
+  return `${env.ort.name || 'Wetter'} ${r0(a.tempC)}° · ${r0(h.minC)}°/${r0(h.maxC)}°`;
+}
+
 // Frost und Glätte heute oder morgen
 function warnung(tage, z) {
   const t = tage.slice(0, 2).find(x => x.glaette || x.frost);
@@ -69,7 +82,7 @@ function trendText(tage) {
 // Darstellung als Kachel (Felder wie in core/board.js erwartet)
 export function kachel(env) {
   const d = env.daten, a = d.aktuell, { z, heute, regenMax, regenUm, pollen } = auswerten(env);
-  const regenText = regenMax >= 25 ? `Regen möglich, am ehesten gegen ${regenUm} Uhr.` : 'Kein Regen zu erwarten.';
+  const regenText = regenMax >= 25 ? `Regen möglich gegen ${regenUm} Uhr.` : 'Kein Regen zu erwarten.';
   const wind = `${r0(a.windKmh)} km/h${a.windRichtung ? ' aus ' + a.windRichtung : ''}${a.boeenKmh ? `, Böen ${r0(a.boeenKmh)} km/h` : ''}`;
   const sonne = [`${z.hm(heute.sonnenaufgang)} bis ${z.hm(heute.sonnenuntergang)}`,
     heute.sonnenstunden != null ? `${String(heute.sonnenstunden).replace('.', ',')} Std. Sonne` : null,
@@ -91,11 +104,14 @@ export function kachel(env) {
   const trend = d.tage.filter(t => t.trend);
   if (trend.length) rows.push([`Trend bis ${z.wtag(trend[trend.length - 1].datum)}`, trendText(trend)]);
   rows.push(['Stand', `${z.hm(a.zeit)} Uhr · ${env.quellen.map(q => q.name).join(', ')}`]);
+  // Kopfzeile: Ort, jetzt, Tiefst/Höchst von heute – alles in einer Zeile
   return {
-    state: 'live', title: 'Wetter ' + (env.ort.name || ''),
+    state: 'live', title: kopfzeile(env),
     glyph: glyph(bild(a.zustand, a.tag)),
-    m: r0(a.tempC) + '°', ms: r0(a.tempC) + '°',
-    x: `${zustandText(a.zustand, a.code)}, gefühlt ${r0(a.gefuehltC)}°. ${regenText}`,
+    m: KURZ[a.zustand] || zustandText(a.zustand, a.code), ms: r0(a.tempC) + '°',
+    x: `Gefühlt ${r0(a.gefuehltC)}°. ${regenText}`,   // Zustand steht schon groß daneben
+    chart: miniDiagramm(d.tage),
+    big: tageDiagramm(d.tage, z.wtag),
     rows
   };
 }

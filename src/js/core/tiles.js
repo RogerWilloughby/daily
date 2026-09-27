@@ -6,7 +6,7 @@
 const T = (id, title, short, icon, extra = {}) => ({ id, title, short, icon, scope: 'public', state: 'loading', m: '…', ms: '…', x: 'Wird geladen …', rows: [], ...extra });
 
 export const CATALOG = [
-  T('weather', 'Wetter', 'Wetter', 'sun'),
+  T('weather', 'Wetter', 'Wetter', null),   // kein festes Symbol: das Wettersymbol neben dem Wert zeigt das aktuelle Wetter
   T('holidays', 'Feiertage & Ferien', 'Ferien', 'flag'),
   T('links', 'Meine Seiten', 'Seiten', 'link', { state: 'local' }),
   T('tasks', 'Mein Daily', 'Aufgaben', 'list', { state: 'local' }),
