@@ -371,3 +371,21 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
 .set-check input{width:18px;height:18px;accent-color:var(--accent)}
 .wh-ruhig{align-content:start}
 .wh-keine{font-size:15px;margin:4px 0}
+
+/* Kalender: Liste „Datum | Ereignis“ mit farbigem Punkt je Art */
+.kl-liste{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:auto 1fr;column-gap:12px;font-size:13px;line-height:1.3}
+.kl-z{display:contents}
+.kl-z>span{border-top:1px solid var(--active-line);padding:3px 0}
+.kl-z:first-child>span{border-top:0;padding-top:0}
+.kl-d{white-space:nowrap}.kl-d small{margin-left:6px;color:var(--active-muted);font-size:11px}
+.kl-t small{color:var(--active-muted);font-size:11px}
+.kl-wichtig .kl-t{font-weight:600}.kl-wichtig .kl-t small{font-weight:400}
+.kl-punkt{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;vertical-align:1px;background:var(--active-muted)}
+.kl-feiertag .kl-punkt,.kl-brueckentag .kl-punkt{background:var(--wd-max)}
+.kl-ferien .kl-punkt{background:var(--wd-regen)}
+.kl-mond .kl-punkt,.kl-sterne .kl-punkt{background:var(--wd-sonne)}
+.kl-finsternis .kl-punkt{background:#B07CE0}
+.kl-jahreszeit .kl-punkt{background:var(--wd-min)}
+.kl-kopf,.kl-jetzt{margin:0 0 6px;font-size:13px}
+.kl-leer{margin:4px 0;color:var(--active-muted)}
+.kl-quelle{margin:6px 0 0;font-size:11px;color:var(--active-muted)}

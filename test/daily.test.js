@@ -76,46 +76,12 @@ test('Tagesinhalte: 31 Tage ab 26.09.2026, alle Felder gefüllt', () => {
 const { pathToFileURL } = require('node:url');
 const esm = p => import(pathToFileURL(path.join(__dirname, '..', p)).href); // auch unter Windows
 
-test('Feiertage: Ostern, Sachsen 2026, Buß- und Bettag, Brückentag', async () => {
-  const { easter, holidays, bridgeDay, clockChanges, STATES } = await esm('src/js/lib/feiertage.js');
-  assert.equal(easter(2026).toISOString().slice(0, 10), '2026-04-05');
-  assert.equal(easter(2027).toISOString().slice(0, 10), '2027-03-28');
-  const sn = holidays(2026, 'SN').map(h => h.date + ' ' + h.name);
-  assert.ok(sn.includes('2026-11-18 Buß- und Bettag'));
-  assert.ok(sn.includes('2026-10-31 Reformationstag'));
-  assert.ok(!sn.some(x => x.includes('Fronleichnam')));
-  assert.equal(holidays(2026, 'BY').filter(h => h.name === 'Fronleichnam')[0].date, '2026-06-04');
-  assert.equal(holidays(2026, 'SN').length, 11);
-  assert.equal(bridgeDay(holidays(2026, 'SN')[0]), '2026-01-02'); // Neujahr ist Donnerstag
-  assert.deepEqual(clockChanges(2026).map(c => c.date), ['2026-03-29', '2026-10-25']);
-  assert.equal(Object.keys(STATES).length, 16);
-});
-
-test('Himmel: Sonne in Dresden, Vollmond am 26.09.2026', async () => {
-  const { sunTimes, moon, nextMeteor } = await esm('src/js/lib/astro.js');
-  const t = Date.UTC(2026, 8, 26, 10);
-  const s = sunTimes(t, 51.05, 13.74);
-  const hmBerlin = x => new Date(x).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' });
-  assert.ok(['06:57', '06:58', '06:59'].includes(hmBerlin(s.rise)), hmBerlin(s.rise));
-  assert.ok(['18:55', '18:56', '18:57', '18:58'].includes(hmBerlin(s.set)), hmBerlin(s.set));
-  assert.equal(moon(t).name, 'Vollmond');
-  assert.equal(nextMeteor(t).name, 'Draconiden');
-  assert.equal(sunTimes(Date.UTC(2026, 5, 21), 78, 15).rise, null); // Polartag
-});
-
 test('Tanken: nur offene mit Preis, günstigste zuerst', () => {
   const { mapStations } = require('../api/fuel');
   const r = mapStations(fx.fuel().stations);
   assert.deepEqual(r.map(s => s.price), [1.689, 1.749]);
   assert.equal(r[1].name, 'ARAL');
   assert.equal(r[1].street, 'Königsbrücker Straße 96');
-});
-
-test('Schulferien: deutscher Name, sortiert', () => {
-  const { mapSchool } = require('../api/holidays');
-  const r = mapSchool(fx.school());
-  assert.deepEqual(r.map(s => s.name), ['Herbstferien', 'Weihnachtsferien']);
-  assert.equal(mapSchool(null).length, 0);
 });
 
 test('Datenschutz: Koordinaten werden auf ~1 km gerundet', () => {
@@ -147,18 +113,18 @@ test('Layouts: öffentlich ohne private Kacheln, immer 20 Plätze (fehlende blei
   }
   assert.ok(LAYOUTS.public.every(id => byId[id].scope === 'public'));
   assert.ok(!CATALOG.some(t => t.id === 'mail' || t.id === 'parcels'));
-  const pub = chooseLayout(false, ['news', 'calendar', 'sky', 'sky', 'gibtsnicht'], true).map(t => t && t.id);
+  const pub = chooseLayout(false, ['news', 'calendar', 'fuel', 'fuel', 'gibtsnicht'], true).map(t => t && t.id);
   assert.equal(pub.length, SLOTS);
   assert.equal(pub.filter(x => x === null).length, SLOTS - LAYOUTS.public.length);   // freie Plätze am Ende
   assert.ok(!pub.includes('alerts'));                                                // Warnungen stecken jetzt in der Wetterkachel
-  assert.equal(pub[0], 'sky');
+  assert.equal(pub[0], 'fuel');
   assert.ok(!pub.includes('news') && !pub.includes('calendar'));
-  assert.equal(chooseLayout(true, null, true).map(t => t.id)[1], 'calendar');
+  assert.equal(chooseLayout(true, null, true).filter(Boolean).map(t => t.id)[2], 'calendar');
   // Standard: nur überarbeitete Kacheln, Rest freie Plätze; Vorschau zeigt alle
   const fertig = chooseLayout(false).map(t => t && t.id);
-  assert.deepEqual(fertig.filter(Boolean), ['weather', 'links', 'tasks', 'usage']);
+  assert.deepEqual(fertig.filter(Boolean), ['weather', 'kalender', 'links', 'tasks', 'usage']);
   assert.equal(fertig.length, SLOTS);
-  assert.deepEqual(chooseLayout(true).filter(Boolean).map(t => t.id), ['weather', 'tasks', 'links', 'usage']);   // privat ebenso
+  assert.deepEqual(chooseLayout(true).filter(Boolean).map(t => t.id), ['weather', 'kalender', 'tasks', 'links', 'usage']);   // privat ebenso
   assert.ok(chooseLayout(false, null, true).filter(Boolean).length > 4);
 });
 

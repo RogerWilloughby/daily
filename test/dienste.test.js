@@ -496,3 +496,90 @@ test('Adapter Wetterhinweise: Abzeichen, kurzer Hinweis und Reiter in der Wetter
   assert.equal(ku.tabs[0].id, 'hinweise');
   assert.match(ku.tabs[0].html, /Aufenthalt im Freien vermeiden!/);
 });
+
+test('Feiertage: Bundesland aus dem Ort, Feiertage, Brückentage, Ferien, Zeitumstellung, KW, Aktionstage', async () => {
+  const fe = dienste.byId.feiertage;
+  const r = await rufe('feiertage', { lat: '51.05', lon: '13.74', name: 'Dresden' });     // ohne region → Bundesland aus dem Ortsbestand
+  assert.equal(r.code, 200);
+  gueltig(r.body, fe.schema);
+  const d = r.body.daten;
+  assert.deepEqual([d.bundesland, d.kuerzel], ['Sachsen', 'SN']);
+  assert.deepEqual(d.ferien.map(f => f.name), ['Herbstferien', 'Weihnachtsferien']);
+  assert.equal((await rufe('feiertage', { lat: '48.14', lon: '11.58', region: 'Bayern' })).body.daten.kuerzel, 'BY');
+  assert.equal((await rufe('feiertage', { lat: '41.9', lon: '12.5', land: 'IT' })).body.fehler.code, 'nicht_unterstuetzt');
+  // Rechnung (rein)
+  assert.equal(fe.ostern(2026).toISOString().slice(0, 10), '2026-04-05');
+  assert.equal(fe.ostern(2027).toISOString().slice(0, 10), '2027-03-28');
+  const sn = fe.berechne('SN', '2026-01-01');
+  const namen = sn.feiertage.map(f => f.datum + ' ' + f.name);
+  assert.ok(namen.includes('2026-11-18 Buß- und Bettag') && namen.includes('2026-10-31 Reformationstag'));
+  assert.ok(!namen.some(x => x.includes('Fronleichnam')));
+  assert.equal(fe.berechne('BY', '2026-01-01').feiertage.find(f => f.name === 'Fronleichnam').datum, '2026-06-04');
+  assert.equal(sn.feiertage.filter(f => f.datum < '2027-01-01').length, 11);
+  assert.equal(sn.feiertage[0].brueckentag, '2026-01-02');                            // Neujahr am Donnerstag
+  assert.deepEqual(sn.zeitumstellung.slice(0, 2).map(z => z.datum + ' ' + z.art), ['2026-03-29 sommerzeit', '2026-10-25 winterzeit']);
+  const akt = Object.fromEntries(sn.aktionstage.filter(a => a.datum < '2027-01-01').map(a => [a.name, a.datum]));
+  assert.equal(akt.Muttertag, '2026-05-10');
+  assert.equal(akt['1. Advent'], '2026-11-29');
+  assert.equal(akt.Totensonntag, '2026-11-22');
+  assert.equal(akt.Rosenmontag, '2026-02-16');
+  assert.equal(akt.Erntedankfest, '2026-10-04');
+  assert.ok(!fe.berechne('BE', '2026-01-01').aktionstage.some(a => a.name === 'Internationaler Frauentag'));   // in Berlin Feiertag
+  assert.deepEqual(['2026-01-01', '2026-09-27', '2026-12-31', '2027-01-03', '2027-01-04'].map(fe.kalenderwoche), [1, 39, 53, 53, 1]);
+});
+
+test('Himmel: Mond, Mondphasen, Sternschnuppen, Finsternisse am Ort, Jahreszeiten', async () => {
+  const hi = dienste.byId.himmel;
+  const r = await rufe('himmel', { lat: '51.05', lon: '13.74', name: 'Dresden' });
+  assert.equal(r.code, 200);
+  gueltig(r.body, hi.schema);
+  const d = hi.berechne(51.05, 13.74, Date.parse('2026-09-27T10:00:00Z'));
+  assert.equal(d.mond.name, 'vollmond');                                              // Vollmond am 26.09.2026
+  assert.ok(d.mond.beleuchtung >= 98);
+  assert.equal(d.mondphasen[0].phase, 'letztes_viertel');
+  assert.equal(d.mondphasen[3].zeit.slice(0, 10), '2026-10-26');                      // nächster Vollmond
+  assert.equal(d.sternschnuppen[0].name, 'Draconiden');
+  // Sonnenfinsternis 02.08.2027 (in Spanien total) ist in Dresden teilweise zu sehen
+  const sofi = d.finsternisse.find(f => f.art === 'sonne');
+  assert.deepEqual([sofi.maximum.slice(0, 10), sofi.typ, sofi.sichtbar], ['2027-08-02', 'partiell', 'ganz']);
+  assert.ok(sofi.bedeckung > 25 && sofi.bedeckung < 55, String(sofi.bedeckung));
+  assert.ok(d.finsternisse.every(f => f.typ !== 'halbschatten'));
+  assert.deepEqual(d.jahreszeiten.map(j => j.art), ['winter', 'fruehling', 'sommer', 'herbst']);
+  assert.equal(d.jahreszeiten[0].zeit.slice(0, 10), '2026-12-21');
+  assert.deepEqual([0, 45, 90, 135, 180, 225, 270, 315].map(hi.phasenName),
+    ['neumond', 'zunehmende_sichel', 'erstes_viertel', 'zunehmender_mond', 'vollmond', 'abnehmender_mond', 'letztes_viertel', 'abnehmende_sichel']);
+});
+
+test('Adapter Kalender: Kachel aus Feiertagen und Himmel, Reiter, Antworten', async () => {
+  const { kachel, antwort, termine } = await esm('src/js/adapter/kalender.js');
+  const jetzt = Date.parse('2026-09-27T10:00:00Z');
+  const fe = { daten: { ...dienste.byId.feiertage.berechne('SN', '2026-09-27'), bundesland: 'Sachsen', kuerzel: 'SN',
+    ferien: [{ name: 'Herbstferien', von: '2026-10-12', bis: '2026-10-24' }] } };
+  const hi = { daten: dienste.byId.himmel.berechne(51.05, 13.74, jetzt) };
+  const k = kachel(fe, hi, jetzt);
+  assert.equal(k.title, 'Kalender · KW 39');
+  assert.equal(k.m, 'Tag der Deutschen Einheit');
+  assert.equal(k.ms, '6 Tage');
+  assert.match(k.x, /^In 6 Tagen \(Sa\., 3\.10\.\) · Herbstferien ab Mo\., 12\.10\./);
+  assert.deepEqual(k.tabs.map(t => t.id), ['naechste', 'feiertage', 'ferien', 'himmel']);
+  assert.match(k.tabs[0].html, /Tag der Deutschen Einheit.*am Wochenende/);
+  assert.match(k.tabs[3].html, /Vollmond<\/b>, \d+ % beleuchtet/);
+  assert.match(k.tabs[3].html, /Partielle Sonnenfinsternis/);
+  // laufende Ferien gehen vor
+  const k2 = kachel({ daten: { ...fe.daten, feiertage: [], ferien: [{ name: 'Herbstferien', von: '2026-09-20', bis: '2026-10-02' }] } }, hi, jetzt);
+  assert.deepEqual([k2.m, k2.ms, k2.x.split(' · ')[0]], ['Herbstferien', 'Ferien', 'bis Fr., 2.10.']);
+  // Ausland: nur Himmel
+  const k3 = kachel(null, hi, jetzt);
+  assert.deepEqual(k3.tabs.map(t => t.id), ['naechste', 'himmel']);
+  assert.equal(k3.title, 'Kalender');
+  assert.ok(termine(fe, hi, '2026-09-27').every((t, i, a) => !i || a[i - 1].datum <= t.datum));
+  // Frag DAILY
+  assert.match(antwort('Wann sind Ferien?', fe, hi, 'Dresden', jetzt), /Nächste Ferien in Sachsen: Herbstferien vom Mo\., 12\.10\./);
+  assert.match(antwort('Wann ist Muttertag?', fe, hi, 'Dresden', jetzt), /^Muttertag: So\., 9\.5\./);
+  assert.match(antwort('Wann ist der 1. Advent?', fe, hi, 'Dresden', jetzt), /^1\. Advent: So\., 29\.11\./);
+  assert.match(antwort('Welche KW haben wir?', fe, hi, 'Dresden', jetzt), /Kalenderwoche 39/);
+  assert.match(antwort('Wann ist die nächste Sonnenfinsternis?', fe, hi, 'Dresden', jetzt), /^Partielle Sonnenfinsternis am Mo\., 2\.8\./);
+  assert.match(antwort('Mond heute?', fe, hi, 'Dresden', jetzt), /^Vollmond, \d+ % beleuchtet/);
+  assert.match(antwort('Zeitumstellung?', fe, hi, 'Dresden', jetzt), /Winterzeit: Uhr zurück .* am So\., 25\.10\./);
+  assert.equal(antwort('Ferien?', null, hi, 'Rom', jetzt), 'Feiertage und Ferien gibt es für Orte in Deutschland.');
+});

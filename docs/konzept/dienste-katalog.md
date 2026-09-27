@@ -14,7 +14,7 @@ Status: ✅ fertig in daily/1 · 🔁 läuft, noch alte Schnittstelle · 🆕 ne
 | `ort` | Standort (Grundlage aller Ortsdienste): Name, Postleitzahl, Gerätestandort | Live | Name, PLZ oder Koordinaten | eigener Bestand aus GeoNames; Ausland Open-Meteo Geocoding | ✅ |
 | `wetter` | lokales Wetter (16 Tage), Luftqualität, Pollen | Live | Ort | Open-Meteo (nicht kommerziell) | ✅ |
 | `regen` | Regenradar, „Regen in X Minuten“, Regen in der Nähe, Radarkarte | Live | Ort (Deutschland) | DWD-Radar RV über Bright Sky | ✅ |
-| `himmel` | Sonnenauf-/-untergang, Mondphase, Sternschnuppen | Rechnen | Ort | eigene Berechnung | 🔁 |
+| `himmel` | Mondphase, Supermond, Sternschnuppen, Sonnen-/Mondfinsternisse am Ort, Jahreszeiten (Sonnenzeiten stehen im Wetter) – in der Kachel „Kalender“ | Rechnen | Ort | Astronomy Engine (MIT) | ✅ |
 | `wetterhinweise` | Warnmeldungen – freundlich als „Wetterhinweise“ mit Alltagstipp, in der Wetterkachel (keine eigene Kachel) | Live | Ort (Deutschland) | amtliche DWD-Warnungen über Bright Sky | ✅ |
 | `weltwetter` | Weltwetter (Hauptstädte, Reiseziele) | Live | Liste von Orten | Open-Meteo (mehrere Orte je Abfrage) | 🆕 |
 | `klima` | Weltklima, CO₂-Themen | Live | – | NOAA Mauna Loa (CO₂-Tageswert), Copernicus (Temperatur-Abweichung) | 🆕 |
@@ -23,7 +23,8 @@ Status: ✅ fertig in daily/1 · 🔁 läuft, noch alte Schnittstelle · 🆕 ne
 ## 2. Kalender, Zeit, Alltag
 | Dienst | Ideen | Art | Eingabe | Quelle | Status |
 |---|---|---|---|---|---|
-| `feiertage` | Feiertage, Schulferien, Brückentage, Zeitumstellung | Rechnen + Live | Ort (Bundesland) | eigene Berechnung + OpenHolidays | 🔁 |
+| `feiertage` | Feiertage, Schulferien, Brückentage, Zeitumstellung, Kalenderwoche, Aktions- und Brauchtumstage – Kachel „Kalender“ | Rechnen + Live | Ort (Bundesland aus dem Ort) | eigene Berechnung + OpenHolidays | ✅ |
+| `namenstage` | Namenstage – Kachel „Kalender“ | Daten | Datum | Wikidata (CC0), monatlich per GitHub Action | ⏳ nächster Schritt |
 | `an-diesem-tag` | Weltereignisse, historische Ereignisse, Wissenschaftler-Geburtstage | Live | Datum | Wikipedia „An diesem Tag“ (Ereignisse, Geburten) | 🔁 (Geburten 🆕) |
 | `countdowns` | Countdowns, eigene Geburtstage und Jahrestage, Beziehungskalender | Lokal | – | Browser | 🆕 |
 | `aufgaben` | Aufgaben, Hausaufgaben, Tagesziele, Wochenziele, On-Track | Lokal | – | Browser | 🔁 (Kachel „Mein Daily“) |
@@ -94,7 +95,7 @@ Ein Dienst `tagesinhalt?rubrik=<rubrik>&datum=<JJJJ-MM-TT>` liefert alle vorbere
 | Social-Media-Ausspielung (Content Engine) | ⏸ | eigenes Produkt; kann später dieselben Dienste nutzen |
 
 ## Vorschlag Reihenfolge
-1. **Umzug** der laufenden Dienste auf daily/1: `himmel`, `feiertage`, `warnungen`, `tanken`, `abfahrten`, `fussball`, `an-diesem-tag`, `tagesinhalt`, `kurse` (privat).
+1. **Umzug** der laufenden Dienste auf daily/1: ~~`himmel`, `feiertage`, `warnungen`~~ (erledigt), `namenstage`, Termine (privat), `tanken`, `abfahrten`, `fussball`, `an-diesem-tag`, `tagesinhalt`, `kurse` (privat).
 2. **Neue Live-Dienste mit freier Quelle:** `waehrungen`, `strompreis`, `verkehr`, `weltwetter`, `raumfahrt`, `krypto`, `klima`.
 3. **Neue Tagesinhalte:** weitere Rubriken in `tagesinhalt`, dazu `quiz`.
 4. **Lokale Dienste:** `countdowns`, `notizen`.

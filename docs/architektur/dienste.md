@@ -149,7 +149,8 @@ Daraus entstehen der Katalog `/api/v1/dienste`, die Dateien `docs/dienste/<id>.m
 | `wetter` | ✅ daily/1 – Referenz; Kachel über Adapter |
 | `regen` | ✅ daily/1 – DWD-Radar über Bright Sky; erscheint in der Wetterkachel (Hinweis + Reiter „Radar“) |
 | `wetterhinweise` | ✅ daily/1 – amtliche DWD-Warnungen über Bright Sky; ersetzt die Kachel „Warnungen“, erscheint in der Wetterkachel (Abzeichen, Hinweis, Reiter „Hinweise“) nur, wenn es etwas gibt |
-| Feiertage & Ferien, Himmel, Tanken, Abfahrten, Sport, Geld, Wissen, Tagesinhalte | ⏳ noch alte Einzelfunktionen bzw. im Browser berechnet |
+| `feiertage`, `himmel` | ✅ daily/1 – Kachel „Kalender“ (ersetzt „Feiertage & Ferien“ und „Himmel“): Feiertage, Ferien (OpenHolidays), Brückentage, Zeitumstellung, KW, Aktionstage; Mond, Finsternisse, Sternschnuppen, Jahreszeiten (Astronomy Engine) |
+| Tanken, Abfahrten, Sport, Geld, Wissen, Tagesinhalte | ⏳ noch alte Einzelfunktionen bzw. im Browser berechnet |
 | Kalender, Schlagzeilen (privat) | ⏳ |
 
 Nach der Umstellung aller Dienste entfallen die alten `api/*.js`-Funktionen.

@@ -9,7 +9,7 @@ const T = (id, title, short, icon, extra = {}) => ({ id, title, short, icon, sco
 
 export const CATALOG = [
   T('weather', 'Wetter', 'Wetter', null, { fertig: true }),   // kein festes Symbol: das Wettersymbol neben dem Wert zeigt das aktuelle Wetter
-  T('holidays', 'Feiertage & Ferien', 'Ferien', 'flag'),
+  T('kalender', 'Kalender', 'Kalender', 'cal', { fertig: true }),   // Feiertage, Ferien, Aktionstage, Mond, Finsternisse (ersetzt „Feiertage & Ferien“ und „Himmel“)
   T('links', 'Meine Seiten', 'Seiten', 'link', { state: 'local', fertig: true }),
   T('tasks', 'Mein Daily', 'Aufgaben', 'list', { state: 'local', fertig: true }),
   T('transit', 'Abfahrten', 'ÖPNV', 'tram'),
@@ -19,7 +19,6 @@ export const CATALOG = [
   T('food', 'Essen', 'Essen', 'food', { state: 'content' }),
   T('knowledge', 'Wissen', 'Wissen', 'book'),
   T('fuel', 'Tanken', 'Tanken', 'fuel'),
-  T('sky', 'Himmel', 'Himmel', 'moon', { state: 'local' }),
   T('travel', 'Land des Tages', 'Reisen', 'globe', { state: 'content' }),
   T('film', 'Filmtipp', 'Film', 'film', { state: 'content' }),
   T('health', 'Gesundheit', 'Fitness', 'heart', { state: 'content' }),
@@ -37,16 +36,16 @@ export const COLS = 5, ROWS = 4, SLOTS = COLS * ROWS;
 // Standard-Belegung, Zeile für Zeile (Priorität nach Nutzung)
 export const LAYOUTS = {
   public: [
-    'weather', 'holidays', 'links', 'tasks', 'transit',
+    'weather', 'kalender', 'links', 'tasks', 'transit',
     'sport', 'money', 'play', 'food', 'knowledge',
-    'fuel', 'sky', 'travel', 'film',
+    'fuel', 'travel', 'film',
     'health', 'tech', 'saving', 'relation', 'usage'
   ],
   private: [
-    'weather', 'calendar', 'news', 'tasks', 'transit',
-    'sport', 'money', 'play', 'food', 'knowledge',
-    'fuel', 'sky', 'holidays', 'film', 'relation',
-    'links', 'tech', 'saving', 'travel', 'usage'
+    'weather', 'kalender', 'calendar', 'news', 'tasks',
+    'transit', 'sport', 'money', 'play', 'food',
+    'knowledge', 'fuel', 'film', 'relation', 'links',
+    'tech', 'saving', 'travel', 'usage'
   ]
 };
 

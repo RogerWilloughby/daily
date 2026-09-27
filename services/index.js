@@ -8,7 +8,9 @@ const DIENSTE = [
   require('./ort'),
   require('./wetter'),
   require('./regen'),
-  require('./wetterhinweise')
+  require('./wetterhinweise'),
+  require('./feiertage'),
+  require('./himmel')
 ];
 const byId = Object.fromEntries(DIENSTE.map(d => [d.id, d]));
 

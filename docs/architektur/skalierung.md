@@ -38,6 +38,8 @@ Hinweis: Vercel Hobby und das freie Open-Meteo sind nur für **nicht kommerziell
 | `wetter` | C | Open-Meteo frei (10.000/Tag, nicht kommerziell) reicht nicht | jetzt: nur auf Anfrage, Takt :00/:30 (≈ 100 Orte/Tag im freien Kontingent). Bei Wachstum: DWD MOSMIX (Abrufe unabhängig von Nutzern), gröberes Raster oder bezahlter Tarif | Stufe 1–2 |
 | `regen` | C | Bright Sky ohne veröffentlichte Grenze, ohne Zusage | nur auf Anfrage, Takt 5 min (≤ 288 Abrufe je 1-km-Zelle und Tag). Bei Wachstum: Bright Sky selbst betreiben oder DWD-RV-Datei zentral alle 5 min laden (288 Abrufe/Tag gesamt) | Stufe 1–2 |
 | `wetterhinweise` | C | Bright Sky ohne veröffentlichte Grenze, ohne Zusage | nur auf Anfrage im Paket mit Wetter/Regen, Takt 5 min. Bei Wachstum: DWD-Warnliste zentral alle 5 min laden und je Warnzelle (≈ 11.000 Gemeinden) vorhalten – Abrufe unabhängig von der Nutzerzahl | Stufe 1–2 |
+| `feiertage` | B | OpenHolidays frei, ohne Grenze; Rest gerechnet | Takt 1 Tag, je Bundesland höchstens 1 Ferien-Abruf am Tag (16 Länder) | Stufe 1–2 |
+| `himmel` | A | keine Quelle (Astronomy Engine) | Takt 1 Stunde, ≈ 20–40 ms Rechenzeit je Ort; bei Bedarf je 1°-Feld vorrechnen | Stufe 1 |
 
 Weitere Dienste werden beim Umzug auf daily/1 hier eingetragen.
 
