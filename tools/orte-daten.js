@@ -80,22 +80,28 @@ function kreisNamen(zeilen) {
   return namen;
 }
 
-// Einwohner aus dem GeoNames-Ortsverzeichnis (dump): Schlüssel „Name|Kreisschlüssel“ → größte Einwohnerzahl.
-// Spalten: 1 name, 2 asciiname, 3 alternatenames, 6 feature class, 12 admin3 (= Kreisschlüssel in DE), 14 population
+// Grundname für den Abgleich: „Freiburg im Breisgau“ → „Freiburg“, „Halle (Saale)“ → „Halle“, „Mühlhausen/Thüringen“ → „Mühlhausen“
+const grundname = n => String(n).replace(/\s*\(.*\)\s*$/, '').split('/')[0]
+  .replace(/ (an der|an den|am|im|in|bei|ob der|vor der|auf der|unter der) .*$/, '').trim();
+
+// Einwohner aus dem GeoNames-Ortsverzeichnis (dump). Spalten: 1 name, 2 asciiname, 6 feature class, 12 admin3 (= Kreisschlüssel),
+// 13 admin4 (= Gemeindeschlüssel), 14 population. Liefert eine Funktion (Name, Kreisschlüssel) → Einwohner:
+// zuerst genauer Name im Kreis, sonst gleicher Grundname im Kreis (größter Wert).
 function einwohnerAus(datei) {
-  const m = new Map();
-  if (!datei) return m;
-  for (const z of fs.readFileSync(datei, 'utf8').split(/\r?\n/)) {
+  const genau = new Map(), grund = new Map();
+  const merke = (m, k, ew) => { if (!(m.get(k) >= ew)) m.set(k, ew); };
+  if (datei) for (const z of fs.readFileSync(datei, 'utf8').split(/\r?\n/)) {
     const f = z.split('\t');
     if (f.length < 15 || f[6] !== 'P') continue;
     const ew = +f[14];
     if (!(ew > 0)) continue;
+    const kreis = f[12] || String(f[13] || '').slice(0, 5);
     for (const name of new Set([f[1], f[2]])) {
-      const k = name + '|' + (f[12] || String(f[13] || '').slice(0, 5));
-      if (!(m.get(k) >= ew)) m.set(k, ew);
+      merke(genau, name + '|' + kreis, ew);
+      merke(grund, grundname(name) + '|' + kreis, ew);
     }
   }
-  return m;
+  return (name, kreis) => genau.get(name + '|' + kreis) || grund.get(grundname(name) + '|' + kreis) || 0;
 }
 
 function erzeuge(datei, ortsdatei) {
@@ -119,7 +125,7 @@ function erzeuge(datei, ortsdatei) {
   for (const o of orte.values()) (namenJeKreis[o.kreis] ||= new Set()).add(o.name);
   const liste = [...orte.values()].map(o => {
     const teil = [...namenJeKreis[o.kreis]].some(n => n !== o.name && o.name.startsWith(n + ' '));
-    return [o.name, laender.indexOf(o.land), o.kreis || '', Math.round(o.lat / o.n * 1e4) / 1e4, Math.round(o.lon / o.n * 1e4) / 1e4, [...o.plz].sort().join(' '), teil ? 1 : 0, ew.get(o.name + '|' + o.kreis) || 0];
+    return [o.name, laender.indexOf(o.land), o.kreis || '', Math.round(o.lat / o.n * 1e4) / 1e4, Math.round(o.lon / o.n * 1e4) / 1e4, [...o.plz].sort().join(' '), teil ? 1 : 0, teil ? 0 : ew(o.name, o.kreis)];
   }).sort((a, b) => a[0].localeCompare(b[0], 'de'));
   const index = new Map(liste.map((o, i) => [o[0] + '|' + o[2], i]));
   // Postleitzahl-Punkte für die Umkehrsuche: [plz, ortIndex, lat, lon]
@@ -143,4 +149,4 @@ if (require.main === module) {
   console.log(`orte-de.json: ${d.anzahl.orte} Orte (${d.anzahl.mitEinwohnern} mit Einwohnerzahl), ${d.anzahl.plz} Postleitzahlen, ${Object.keys(d.kreise).length} Kreise, ${d.anzahl.ausgefiltert} Großkunden entfernt, ${(fs.statSync(ZIEL).size / 1024).toFixed(0)} KB`);
 }
 
-module.exports = { erzeuge, lies, kreisNamen, csvFelder, istFirma, einwohnerAus };
+module.exports = { erzeuge, lies, kreisNamen, csvFelder, istFirma, einwohnerAus, grundname };

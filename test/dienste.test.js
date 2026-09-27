@@ -203,3 +203,28 @@ test('Adapter Katalog: Seite „Woher kommen die Daten?“ nennt jeden Dienst mi
   assert.match(html, /<details>/);
   assert.equal(seite(null), '<p>Keine Angaben verfügbar.</p>');
 });
+
+test('Ortsbestand-Erzeugung: Einwohner über genauen Namen oder Grundnamen im selben Kreis', () => {
+  const fs = require('node:fs'), os = require('node:os');
+  const t = require('../tools/orte-daten');
+  assert.equal(t.grundname('Freiburg im Breisgau'), 'Freiburg');
+  assert.equal(t.grundname('Halle (Saale)'), 'Halle');
+  assert.equal(t.grundname('Mühlhausen/Thüringen'), 'Mühlhausen');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'orte-'));
+  const plz = path.join(dir, 'plz.txt'), orte = path.join(dir, 'orte.txt');
+  // GeoNames-Postleitzahlen (tabulatorgetrennt): Land, PLZ, Ort, Land, Code, Bezirk, Code, Kreis, Kreisschlüssel, lat, lon
+  fs.writeFileSync(plz, [
+    ['DE', '06108', 'Halle', 'Sachsen-Anhalt', 'ST', '', '', 'Halle', '15002', '51.48', '11.97'],
+    ['DE', '79098', 'Freiburg im Breisgau', 'Baden-Württemberg', 'BW', '', '', 'Freiburg', '08311', '47.99', '7.85'],
+    ['DE', '33790', 'Halle', 'Nordrhein-Westfalen', 'NW', '', '', 'Gütersloh', '05754', '52.06', '8.36'],
+    ['DE', '99999', 'Musterfirma GmbH', 'Sachsen', 'SN', '', '', 'Dresden', '14612', '51.05', '13.74']
+  ].map(z => z.join('\t')).join('\n'));
+  // GeoNames-Ortsverzeichnis: 19 Spalten, 6 = Klasse, 12 = Kreis, 13 = Gemeinde, 14 = Einwohner
+  const zeile = (name, kreis, ew) => ['1', name, name, '', '0', '0', 'P', 'PPL', 'DE', '', '', '', kreis, kreis + '000', String(ew), '', '', 'Europe/Berlin', ''].join('\t');
+  fs.writeFileSync(orte, [zeile('Halle (Saale)', '15002', 238762), zeile('Freiburg', '08311', 227590), zeile('Halle', '05754', 21393)].join('\n'));
+  const d = t.erzeuge(plz, orte);
+  const ew = Object.fromEntries(d.orte.map(o => [o[0] + '|' + o[2], o[7]]));
+  assert.deepEqual(ew, { 'Freiburg im Breisgau|08311': 227590, 'Halle|05754': 21393, 'Halle|15002': 238762 });
+  assert.equal(d.anzahl.ausgefiltert, 1);
+  assert.equal(d.anzahl.mitEinwohnern, 3);
+});
