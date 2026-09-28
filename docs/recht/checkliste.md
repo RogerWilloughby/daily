@@ -20,6 +20,7 @@ Kein Impressum, keine Datenschutzerklärung, keine Medienpflichten nötig. Aktue
 - Tankerkönig: CC BY 4.0, Quelle nennen – umgesetzt; Nutzungsbedingungen (Abfragehäufigkeit) beachten, Cache 5 min.
 - OpenHolidays: frei nutzbar, Quelle genannt (Dienst `feiertage`, Reiter „Ferien“, Impressum).
 - Namenstage (Dienst `namenstage`): eigene Liste von DAILY; Gedenktage der Heiligen sind Fakten des kirchlichen Kalenders, keine Übernahme fremder Zusammenstellungen oder Texte.
+- Termine (Dienst `termine`, nur privat): iCal-Links stehen nur im Browser (Einstellungen), gehen per POST an den Dienst, werden weder gespeichert noch zwischengespeichert noch protokolliert; Antwort `Cache-Control: private, no-store`.
 - Astronomy Engine (Dienst `himmel`): MIT-Lizenz – Lizenztext liegt mit dem npm-Paket bei; genannt in Impressum und Datenquellen. Sternschnuppen-Termine: Mittelwerte nach International Meteor Organization (Fakten, keine Übernahme von Texten).
 - GeoNames (Postleitzahlen und Orte Deutschland, CC BY 4.0): eigener Ortsbestand `services/daten/orte-de.json`, Quelle in Impressum, Katalog und Seite „Woher kommen die Daten?“ genannt. CC BY verlangt Namensnennung und Hinweis auf Änderungen (wir filtern und fassen zusammen – steht im Dienstblatt `docs/dienste/ort.md`).
 - Open-Meteo Geocoding (nur Ortssuche im Ausland, CC BY 4.0): kostenlos nur nicht kommerziell – vor kommerziellem Betrieb Tarif prüfen.

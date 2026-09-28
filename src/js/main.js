@@ -8,8 +8,8 @@ import { chooseLayout } from './core/tiles.js';
 import { settings } from './core/store.js';
 import { initDialogs } from './ui/dialogs.js';
 import { initOrt } from './ui/ort.js';
+import { betrieb } from './core/betrieb.js';
 import weather from './providers/weather.js';
-import calendar from './providers/calendar.js';
 import news from './providers/news.js';
 import markets from './providers/markets.js';
 import sport from './providers/sport.js';
@@ -24,12 +24,13 @@ import kalender from './providers/kalender.js';
 // Betriebsart vom Server: privat nur mit Vercel-Variable DAILY_PRIVATE=1 (Kalender, Schlagzeilen)
 let isPrivate = false;
 if (ONLINE) { try { isPrivate = !!(await getJson('/api/config', { timeout: 2500 })).private; } catch (e) { /* öffentlich */ } }
+betrieb.privat = isPrivate;
 const sichtbar = new Set(chooseLayout(isPrivate, settings.layout, settings.alleKacheln).filter(Boolean).map(t => t.id));
 
 // Welche Kacheln ein Anbieter füllt – Anbieter ausgeblendeter Kacheln starten gar nicht erst (keine Abrufe)
 const KACHELN = { local: ['tasks', 'usage'], content: ['play', 'food', 'travel', 'film', 'health', 'tech', 'saving', 'relation'] };
 // Reihenfolge = Priorität: was am häufigsten gebraucht wird, lädt zuerst
-const PROVIDERS = [local, links, weather, kalender, calendar, news, content, transit, markets, sport, knowledge, fuel]
+const PROVIDERS = [local, links, weather, kalender, news, content, transit, markets, sport, knowledge, fuel]
   .filter(p => (isPrivate || !p.private) && (KACHELN[p.id] || [p.id]).some(id => sichtbar.has(id)));
 const lastRun = new Map();
 

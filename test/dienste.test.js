@@ -268,7 +268,7 @@ test('Dienstblätter: vollständig, jedes Ausgabefeld beschrieben, docs/dienste 
 test('Adapter Katalog: Seite „Woher kommen die Daten?“ nennt jeden Dienst mit Quellen', async () => {
   const { seite } = await esm('src/js/adapter/katalog.js');
   const html = seite((await rufe('dienste')).body);
-  for (const d of dienste.DIENSTE) assert.ok(html.includes(`<h3>${d.titel} <small class="dversion">${d.id} ${d.programmversion}</small></h3>`), d.id);
+  for (const d of dienste.DIENSTE.filter(x => x.klasse !== 'privat')) assert.ok(html.includes(`<h3>${d.titel} <small class="dversion">${d.id} ${d.programmversion}</small></h3>`), d.id);
   assert.match(html, /GeoNames/);
   assert.match(html, /<details>/);
   assert.equal(seite(null), '<p>Keine Angaben verfügbar.</p>');
@@ -622,3 +622,68 @@ test('Namenstage: feste Liste plausibel, Dienst, Kachel und Antwort', async () =
   assert.equal(namenAntwort({ daten: { ...d, stand: null } }, jetzt), 'Die Namenstage werden gerade erst aufgebaut.');
 });
 
+
+test('Termine (privat): nur privat, Links nur per POST, Serien, ganztägig, abgesagt, Fehler je Kalender', async () => {
+  const post = async (koerper, privat = true) => {
+    if (privat) process.env.DAILY_PRIVATE = '1'; else delete process.env.DAILY_PRIVATE;
+    const r = { headers: {}, setHeader(k, v) { r.headers[k.toLowerCase()] = v; }, status(c) { r.code = c; return r; }, json(o) { r.body = o; } };
+    await router({ method: 'POST', query: { dienst: 'termine' }, body: koerper }, r);
+    delete process.env.DAILY_PRIVATE;
+    return r;
+  };
+  // öffentlich gesperrt; Links nie per GET
+  assert.equal((await post({ urls: ['https://calendar.test/a.ics'] }, false)).body.fehler.code, 'nur_privat');
+  process.env.DAILY_PRIVATE = '1';
+  assert.equal((await rufe('termine', { urls: 'https://calendar.test/a.ics' })).body.fehler.code, 'eingabe_ungueltig');
+  delete process.env.DAILY_PRIVATE;
+  // ohne Links: nicht verbunden
+  const leer = await post({});
+  assert.equal(leer.code, 200);
+  assert.equal(leer.body.daten.verbunden, false);
+  assert.equal(leer.headers['cache-control'], 'private, no-store');
+  // mit Link (Beispielkalender) und einem ungültigen/abgelehnten
+  const r = await post({ urls: ['https://calendar.test/a.ics', 'http://unsicher.test/x.ics', 'https://10.0.0.1/intern.ics'] });
+  assert.equal(r.code, 200);
+  gueltig(r.body, dienste.byId.termine.schema);
+  const t = r.body.daten.termine.map(x => x.titel);
+  assert.ok(t.includes('Geburtstag Anna') && t.includes('Wochenplanung'));
+  assert.equal(t.filter(x => x === 'Wochenplanung').length, 2);                   // Serie wöchentlich, 14 Tage → 2 Termine
+  assert.ok(r.body.daten.termine.find(x => x.titel === 'Geburtstag Anna').ganztag);
+  assert.deepEqual(dienste.byId.termine.links(['webcal://x.test/a.ics', 'http://x.test', 'https://localhost/a', 'x']), ['https://x.test/a.ics']);
+  // abgesagt und keine Kalenderdatei
+  const heute = new Date().toISOString().slice(0, 10), rahmen = { von: Date.now() - 864e5, bis: Date.now() + 3 * 864e5, heute };
+  const ics = ['BEGIN:VCALENDAR', 'BEGIN:VEVENT', 'UID:x', 'STATUS:CANCELLED', `DTSTART:${heute.replace(/-/g, '')}T230000Z`, 'SUMMARY:Abgesagt', 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+  assert.deepEqual(dienste.byId.termine.auswerten(ics, rahmen), []);
+  assert.throws(() => dienste.byId.termine.auswerten('<html>', rahmen), /keine Kalenderdatei/);
+});
+
+test('Adapter Kalender: eigene Termine – Kennzahl, Reiter, Antwort', async () => {
+  const { kachel, termineAntwort } = await esm('src/js/adapter/kalender.js');
+  const jetzt = Date.parse('2026-09-28T08:00:00Z');   // 10:00 in Berlin
+  const tEnv = { daten: { verbunden: true, heute: '2026-09-28', fehler: [{ kalender: 2, meldung: 'Server nicht erreichbar' }], termine: [
+    { titel: 'Geburtstag Anna', tag: '2026-09-28', beginn: '2026-09-27T22:00:00Z', ende: '2026-09-28T22:00:00Z', ganztag: true, kalender: 1 },
+    { titel: 'Frühstück', tag: '2026-09-28', beginn: '2026-09-28T06:00:00Z', ende: '2026-09-28T07:00:00Z', ganztag: false, kalender: 1 },
+    { titel: 'Zahnarzt', tag: '2026-09-28', beginn: '2026-09-28T12:00:00Z', ende: '2026-09-28T13:00:00Z', ganztag: false, kalender: 1 },
+    { titel: 'Sport', tag: '2026-09-28', beginn: '2026-09-28T16:00:00Z', ende: '2026-09-28T17:00:00Z', ganztag: false, kalender: 1 },
+    { titel: 'Elternabend', tag: '2026-09-30', beginn: '2026-09-30T17:00:00Z', ende: null, ganztag: false, kalender: 1 }
+  ] } };
+  const fe = { daten: { ...dienste.byId.feiertage.berechne('SN', '2026-09-28'), bundesland: 'Sachsen', kuerzel: 'SN', ferien: [] } };
+  const k = kachel(fe, null, jetzt, 'Europe/Berlin', null, tEnv);
+  assert.deepEqual([k.m, k.ms], ['14:00 Zahnarzt', '14:00']);                      // Frühstück ist vorbei
+  assert.match(k.x, /^Danach 18:00 Sport · Tag der Deutschen Einheit Sa\., 3\.10\./);
+  assert.deepEqual(k.tabs.map(t => t.id).slice(0, 2), ['naechste', 'termine']);
+  assert.match(k.tabs[1].html, /Geburtstag Anna.*ganztägig.*Zahnarzt.*Elternabend.*Kalender 2: Server nicht erreichbar/s);
+  // Nächste: Termine heute vor dem Rest, ganztägig zuerst
+  assert.match(k.tabs[0].html, /Geburtstag Anna.*Frühstück.*Zahnarzt/s);
+  // keine Termine heute → „Nächster Termin“ in der Zeile
+  const k2 = kachel(fe, null, jetzt, 'Europe/Berlin', null, { daten: { ...tEnv.daten, termine: tEnv.daten.termine.slice(4) } });
+  assert.equal(k2.m, 'Tag der Deutschen Einheit');
+  assert.match(k2.x, /Nächster Termin: Mi\., 30\.9\. 19:00 Elternabend/);
+  // nicht verbunden / öffentlich
+  assert.match(kachel(fe, null, jetzt, 'Europe/Berlin', null, { daten: { verbunden: false, heute: '2026-09-28', termine: [], fehler: [] } }).tabs[1].html, /Noch kein Kalender verbunden/);
+  assert.ok(!kachel(fe, null, jetzt).tabs.some(t => t.id === 'termine'));
+  // Frag DAILY
+  assert.equal(termineAntwort('Was steht heute an?', tEnv, jetzt), 'Heute: Geburtstag Anna, 08:00 Frühstück, 14:00 Zahnarzt, 18:00 Sport.');
+  assert.equal(termineAntwort('Was habe ich morgen?', tEnv, jetzt), 'Morgen stehen keine Termine an.');
+  assert.equal(termineAntwort('Termine?', null, jetzt), null);
+});

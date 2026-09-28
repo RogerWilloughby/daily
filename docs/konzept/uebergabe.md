@@ -27,6 +27,7 @@ Stand 27.09.2026. Für neue Chats: hier steht, woran gerade gearbeitet wird und 
 | Dienst | Stand |
 |---|---|
 | `ort` | ✅ fertig bis auf Rogers Test. Eigener Ortsbestand aus GeoNames (`services/daten/orte-de.json`, ≈ 14.700 Orte, Einwohnerzahlen, Großkunden gefiltert), feste Datei (keine Automatik). Suche wie eine Suchmaschine (Wörter einzeln, Kürzel Sa./Thür./Westf./Opf., Umlaute, Tippfehler, Doppelte zusammengefasst), Vorschläge beim Tippen (`land=DE`), Ausland über Open-Meteo nur, wenn kein deutscher Ort genau passt oder nur ein kleiner. Umkehrsuche (Gerätestandort) im eigenen Bestand. Ort hat seit 27.09. einen eigenen Knopf in der unteren Leiste mit eigenem Dialog (Standort ermitteln, Suche, Klick übernimmt sofort). |
+| `termine` | ✅ neu 28.09. (0.15.0): eigene Termine (iCal, nur privat) in der Kachel „Kalender“; Links per POST. Wartet auf Rogers Test. |
 | `feiertage`, `himmel` | ✅ neu 27.09. (0.12.0): Kachel „Kalender“ (Feiertage, Ferien, Brückentage, Zeitumstellung, KW, Aktionstage; Mond, Finsternisse, Sternschnuppen, Jahreszeiten). Ersetzt „Feiertage & Ferien“ und „Himmel“. Wartet auf Rogers Test. Als Nächstes: Namenstage (Wikidata), dann private Termine in der Kachel. |
 | `namenstage` | ✅ neu 27.09. (0.14.0): feste Liste nach dem kirchlichen Kalender, im Kalender. Wartet auf Rogers Test. |
 | `wetterhinweise` | ✅ neu 27.09. (0.10.0): amtliche DWD-Warnungen über Bright Sky in der Wetterkachel (Abzeichen, Hinweis, Reiter „Hinweise“ mit Alltagstipp) – ersetzt die Kachel „Warnungen“. Wartet auf Rogers Test. |
@@ -52,7 +53,7 @@ App-Seite „Woher kommen die Daten?“ (Fußzeile → Datenquellen) zeigt die D
 ## Nächste Schritte (in dieser Reihenfolge)
 1. Roger testet den Dienst `regen` (Radar-Reiter, Hinweis „Regen in X Min.“). Offen: Luftqualität/Pollen prüfen (DWD-Pollenflug-Gefahrenindex, Umweltbundesamt); Radarkarte ohne Landkarte darunter – ggf. später Umrisse/Orte.
 2. Roger testet mehrere Orte (Auswahlbox) und die neue aufgeklappte Kachel. Später: Kachelauswahl in den Einstellungen, ggf. Ort je Kachel.
-3. Roger testet Kalender und Namenstage. Danach: private Termine (iCal) in der Kachel.
+3. Roger testet die privaten Termine in der Kachel „Kalender“ (privater Betrieb, iCal-Link in den Einstellungen). Danach: nächste Kachel umziehen (Reihenfolge `dienste-katalog.md`) – vorher Plan vorlegen.
 3a. Roger testet die Wetterhinweise (im Testserver mit Beispielwarnungen; echt nur bei aktueller DWD-Warnung am Ort). Freie Plätze füllen sich mit jeder überarbeiteten Kachel.
 4. ~~Vercel oder AWS~~ entschieden 27.09.: Vercel; Performance-Maßnahmen 1–3 umgesetzt (0.9.0). **Vor dem öffentlichen Start:** eigene Daten Wetter/Radar (zentral), Lasttest, Vercel Pro.
 5. Übrige Dienste auf daily/1 umziehen (Reihenfolge `dienste-katalog.md`), je mit Dienstblatt.

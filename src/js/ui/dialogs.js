@@ -31,11 +31,11 @@ export function initDialogs(onSaved, isPrivate = false) {
     $('set-fuel').value = settings.fuel || 'e10';
     $('set-alle').checked = !!settings.alleKacheln;
     $('set-vorschau').hidden = !settings.alleKacheln;           // Einstellungen nur für sichtbare Kacheln
-    $('set-private').hidden = !isPrivate || !settings.alleKacheln;
+    $('set-private').hidden = !isPrivate;                      // Kalender-Links: im privaten Betrieb immer (Termine stehen in der Kachel „Kalender“)
     if (typeof dlg.showModal === 'function') dlg.showModal();
   });
 
-  $('set-alle').addEventListener('change', () => { $('set-vorschau').hidden = !$('set-alle').checked; $('set-private').hidden = !isPrivate || !$('set-alle').checked; });
+  $('set-alle').addEventListener('change', () => { $('set-vorschau').hidden = !$('set-alle').checked; });
 
   $('settings-form').addEventListener('submit', e => {
     e.preventDefault();

@@ -85,7 +85,7 @@ Ein Dienst `tagesinhalt?rubrik=<rubrik>&datum=<JJJJ-MM-TT>` liefert alle vorbere
 |---|---|---|
 | Nachrichten, Faktencheck, Kritik, Meckerecke, Politik, Abstimmungen, Kommentare, Tech-News | ⛔ öffentlich (Schlagzeilen nur privat) | kein journalistisches Angebot (MStV, AI Act) |
 | Mail, Social Media, Benachrichtigungen, Paketstatus | ⛔ | Nutzerdaten, Konten |
-| Kalender (iCal) | nur privat | Nutzerdaten |
+| Kalender (iCal) | nur privat – Dienst `termine` (✅ 0.15.0), in der Kachel „Kalender“ | Nutzerdaten |
 | Smartwatch, Schritte, Gewicht, Diät-Ticker | ⛔ | Gesundheitsdaten |
 | Angebote, Schnäppchen, Preisvergleich, Discounter-Angebote, Leasing, Reiseangebote | ⏸ | keine freie Quelle; später ggf. als gekennzeichnete Partnerangebote |
 | Discounter-Rezept aus aktuellen Angeboten | ⏸ | braucht Angebotsdaten |
@@ -95,7 +95,7 @@ Ein Dienst `tagesinhalt?rubrik=<rubrik>&datum=<JJJJ-MM-TT>` liefert alle vorbere
 | Social-Media-Ausspielung (Content Engine) | ⏸ | eigenes Produkt; kann später dieselben Dienste nutzen |
 
 ## Vorschlag Reihenfolge
-1. **Umzug** der laufenden Dienste auf daily/1: ~~`himmel`, `feiertage`, `warnungen`, `namenstage`~~ (erledigt), Termine (privat), `tanken`, `abfahrten`, `fussball`, `an-diesem-tag`, `tagesinhalt`, `kurse` (privat).
+1. **Umzug** der laufenden Dienste auf daily/1: ~~`himmel`, `feiertage`, `warnungen`, `namenstage`, `termine` (privat)~~ (erledigt), `tanken`, `abfahrten`, `fussball`, `an-diesem-tag`, `tagesinhalt`, `kurse` (privat).
 2. **Neue Live-Dienste mit freier Quelle:** `waehrungen`, `strompreis`, `verkehr`, `weltwetter`, `raumfahrt`, `krypto`, `klima`.
 3. **Neue Tagesinhalte:** weitere Rubriken in `tagesinhalt`, dazu `quiz`.
 4. **Lokale Dienste:** `countdowns`, `notizen`.

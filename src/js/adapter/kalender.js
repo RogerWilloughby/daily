@@ -1,4 +1,5 @@
-// Adapter „kalender“: macht aus den Diensten „feiertage“ und „himmel“ die Kachel „Kalender“ und die Antworten für „Frag DAILY“.
+// Adapter „kalender“: macht aus den Diensten „feiertage“, „himmel“, „namenstage“ und (privat) „termine“ die Kachel „Kalender“
+// und die Antworten für „Frag DAILY“.
 // Ohne DOM, testbar. Zeiten in der Zeitzone des Orts (Standard Europe/Berlin).
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -8,7 +9,9 @@ const PHASE_TEXT = { neumond: 'Neumond', erstes_viertel: 'Erstes Viertel', vollm
 const JAHRESZEIT = { fruehling: 'Frühlingsanfang', sommer: 'Sommeranfang', herbst: 'Herbstanfang', winter: 'Winteranfang' };
 const FINSTERNIS_TYP = { partiell: 'Partielle', total: 'Totale', ringfoermig: 'Ringförmige' };
 const ART_TEXT = { feiertag: 'Feiertag', brueckentag: 'Brückentag', ferien: 'Ferien', zeit: 'Zeitumstellung', aktion: 'Aktionstag',
-  mond: 'Mond', sterne: 'Sternschnuppen', finsternis: 'Finsternis', jahreszeit: 'Jahreszeit' };
+  mond: 'Mond', sterne: 'Sternschnuppen', finsternis: 'Finsternis', jahreszeit: 'Jahreszeit', termin: 'Termin' };
+// Reihenfolge an einem Tag: Feiertage/Ferien, dann eigene Termine (nach Uhrzeit), dann der Rest
+const RANG = { feiertag: 0, ferien: 0, brueckentag: 0, zeit: 0, termin: 1 };
 
 // Datums-Helfer
 const tagImOrt = (iso, zone) => new Intl.DateTimeFormat('en-CA', { timeZone: zone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(iso));
@@ -19,8 +22,11 @@ export const wann = n => n === 0 ? 'heute' : n === 1 ? 'morgen' : n === -1 ? 'ge
 const gross = s => s.charAt(0).toUpperCase() + s.slice(1);
 
 // Alle Ereignisse als eine zeitlich sortierte Liste: { datum, bis?, text, art, zusatz?, wichtig }
-export function termine(fEnv, hEnv, heute, zone = 'Europe/Berlin') {
-  const out = [], f = fEnv && fEnv.daten, h = hEnv && hEnv.daten;
+// tEnv (privat): eigene Termine aus dem Dienst „termine“
+export function termine(fEnv, hEnv, heute, zone = 'Europe/Berlin', tEnv = null) {
+  const out = [], f = fEnv && fEnv.daten, h = hEnv && hEnv.daten, t = tEnv && tEnv.daten;
+  if (t) t.termine.forEach(x => out.push({ datum: x.tag, text: x.titel, art: 'termin', wichtig: true, ganztag: x.ganztag, beginn: x.beginn, ende: x.ende,
+    zusatz: x.ganztag ? 'ganztägig' : `${uhr(x.beginn, zone)} Uhr` }));
   if (f) {
     f.feiertage.forEach(x => {
       out.push({ datum: x.datum, text: x.name, art: 'feiertag', zusatz: x.wochentag === 0 || x.wochentag === 6 ? 'am Wochenende' : '', wichtig: true });
@@ -38,7 +44,9 @@ export function termine(fEnv, hEnv, heute, zone = 'Europe/Berlin') {
       zusatz: `${uhr(x.maximum, zone)} Uhr, ${x.bedeckung} %${x.sichtbar === 'teilweise' ? ', nur teilweise zu sehen' : ''}`, art: 'finsternis', wichtig: true }));
     h.jahreszeiten.forEach(j => out.push({ datum: tagImOrt(j.zeit, zone), text: JAHRESZEIT[j.art], art: 'jahreszeit', wichtig: false }));
   }
-  return out.filter(t => (t.bis || t.datum) >= heute).sort((a, b) => a.datum.localeCompare(b.datum) || (b.wichtig - a.wichtig));
+  const rang = x => x.art in RANG ? RANG[x.art] : x.wichtig ? 2 : 3;
+  return out.filter(x => (x.bis || x.datum) >= heute).sort((a, b) => a.datum.localeCompare(b.datum) || rang(a) - rang(b)
+    || (a.art === 'termin' && b.art === 'termin' ? (b.ganztag - a.ganztag) || String(a.beginn).localeCompare(String(b.beginn)) : 0));
 }
 
 // Zeile einer Liste: „Sa., 3.10. · in 6 Tagen   Tag der Deutschen Einheit“
@@ -74,11 +82,25 @@ function namenReiter(n, heute) {
   return `<ul class="kl-liste">${z}</ul><p class="kl-quelle">Namenstage nach den Gedenktagen der Heiligen – eine Auswahl, Kalender unterscheiden sich je Region und Konfession.</p>`;
 }
 
+// Reiter „Termine“ (privat): eigene Termine, Hinweis zum Verbinden, Fehler je Kalender
+function termineReiter(tEnv, alle, heute) {
+  if (!tEnv || !tEnv.daten) return '<p class="kl-leer">Deine Kalender sind gerade nicht erreichbar.</p>';
+  const t = tEnv.daten;
+  if (!t.verbunden) return '<p class="kl-jetzt">Noch kein Kalender verbunden.</p><p class="kl-leer">Unten in der Leiste auf „Einstellungen“ → „Kalender“ den iCal-Link eintragen (Google: Kalender-Einstellungen → dein Kalender → „Privatadresse im iCal-Format“).</p>';
+  const fehler = t.fehler.map(x => `<p class="kl-quelle">Kalender ${x.kalender}: ${esc(x.meldung)}</p>`).join('');
+  return liste(alle.filter(x => x.art === 'termin').slice(0, t.fehler.length ? 7 : 9), heute, 'Keine Termine in den nächsten 14 Tagen.') + fehler;
+}
+
 // Die Kachel. fEnv (feiertage) kann fehlen (Ausland, Störung), hEnv (himmel) und nEnv (namenstage) ebenso.
-export function kachel(fEnv, hEnv, jetzt = Date.now(), zone = 'Europe/Berlin', nEnv = null) {
+// tEnv: nur im privaten Betrieb – { daten } vom Dienst „termine“ oder { daten: null } bei Störung; null = öffentlich (kein Reiter)
+export function kachel(fEnv, hEnv, jetzt = Date.now(), zone = 'Europe/Berlin', nEnv = null, tEnv = null) {
   const heute = tagImOrt(new Date(jetzt).toISOString(), zone);
   const f = fEnv && fEnv.daten, h = hEnv && hEnv.daten;
-  const alle = termine(fEnv, hEnv, heute, zone);
+  const alle = termine(fEnv, hEnv, heute, zone, tEnv);
+  // eigene Termine heute, die noch nicht vorbei sind (mit Uhrzeit zuerst, sonst ganztägige)
+  const jetztIso = new Date(jetzt).toISOString();
+  const offen = alle.filter(x => x.art === 'termin' && x.datum === heute && (x.ganztag || (x.ende || x.beginn) > jetztIso));
+  const terminHeute = offen.find(x => !x.ganztag) || offen[0];
   const kw = f ? f.kalenderwoche : null;
 
   // Kennzahl: heute Feiertag > laufende Ferien > nächstes wichtiges Ereignis (Feiertag, Ferien, Brückentag, Zeitumstellung)
@@ -87,15 +109,22 @@ export function kachel(fEnv, hEnv, jetzt = Date.now(), zone = 'Europe/Berlin', n
   const laufend = frei.find(t => t.laeuft);
   const naechst = heuteFrei || laufend || frei[0] || alle.find(t => t.wichtig) || alle[0];
   let m = naechst ? naechst.text : (h ? MOND_TEXT[h.mond.name] : 'Kalender'), ms = '–', lead = '';
-  if (naechst) {
+  if (terminHeute) {   // eigener Termin heute geht vor: „14:00 Zahnarzt“
+    m = terminHeute.ganztag ? terminHeute.text : `${uhr(terminHeute.beginn, zone)} ${terminHeute.text}`;
+    ms = terminHeute.ganztag ? 'heute' : uhr(terminHeute.beginn, zone);
+    const danach = offen.filter(x => x !== terminHeute && !x.ganztag)[0];
+    lead = danach ? `Danach ${uhr(danach.beginn, zone)} ${danach.text}` : offen.length > 1 ? `Heute ${offen.length} Termine` : '';
+  } else if (naechst) {
     const n = tageBis(heute, naechst.datum);
     if (naechst === laufend) { ms = 'Ferien'; lead = `bis ${wtag(naechst.bis)}`; }
     else { ms = n === 0 ? 'heute' : n === 1 ? 'morgen' : `${n} Tage`; lead = `${gross(wann(n))} (${wtag(naechst.datum)})`; }
   }
   // Zeile darunter: danach das nächste Freie und höchstens ein weiterer Termin der nächsten 7 Tage (Welttage nicht)
+  const kuenftig = !terminHeute && alle.find(x => x.art === 'termin' && x.datum > heute && tageBis(heute, x.datum) <= 7);
   const weitere = [
-    ...frei.filter(t => t !== naechst).slice(0, 1).map(t => t.art === 'ferien' ? `${t.text} ab ${wtag(t.datum)}` : `${t.text} ${wtag(t.datum)}`),
-    ...alle.filter(t => t !== naechst && !frei.includes(t) && tageBis(heute, t.datum) <= 7 && !/Welt|Tag der Erde/.test(t.text)).slice(0, 1)
+    ...(kuenftig ? [`Nächster Termin: ${tageBis(heute, kuenftig.datum) === 1 ? 'morgen' : wtag(kuenftig.datum)}${kuenftig.ganztag ? '' : ' ' + uhr(kuenftig.beginn, zone)} ${kuenftig.text}`] : []),
+    ...frei.filter(t => t !== naechst || terminHeute).slice(0, 1).map(t => t.art === 'ferien' ? `${t.text} ab ${wtag(t.datum)}` : `${t.text} ${wtag(t.datum)}`),
+    ...alle.filter(t => t !== naechst && !frei.includes(t) && t.art !== 'termin' && tageBis(heute, t.datum) <= 7 && !/Welt|Tag der Erde/.test(t.text)).slice(0, kuenftig ? 0 : 1)
       .map(t => `${t.text} ${tageBis(heute, t.datum) === 0 ? 'heute' : wtag(t.datum)}`)
   ];
   const heuteNamen = nEnv && nEnv.daten ? nEnv.daten.heute.namen : [];
@@ -104,6 +133,7 @@ export function kachel(fEnv, hEnv, jetzt = Date.now(), zone = 'Europe/Berlin', n
   const tabs = [
     { id: 'naechste', name: 'Nächste', html: (heuteNamen.length ? `<p class="kl-jetzt">Namenstag heute: <b>${esc(namenText(heuteNamen, 5))}</b></p>` : '') +
       liste(alle.slice(0, heuteNamen.length ? 8 : 9), heute, 'Keine Termine.') },
+    ...(tEnv ? [{ id: 'termine', name: 'Termine', html: termineReiter(tEnv, alle, heute) }] : []),
     ...(f ? [
       { id: 'feiertage', name: 'Feiertage', html: `<p class="kl-kopf">${esc(f.bundesland)} · landesweite Feiertage</p>` +
         liste(alle.filter(t => t.art === 'feiertag' || t.art === 'brueckentag').slice(0, 8), heute, 'Keine Feiertage.') },
@@ -129,6 +159,20 @@ export function namenAntwort(nEnv, jetzt = Date.now(), zone = 'Europe/Berlin') {
   if (!g.naechster) return `Für ${g.name} ist kein Namenstag eingetragen.`;
   const alle = g.tage.length > 1 ? ` (weitere: ${g.tage.filter(t => t !== g.naechster.slice(5)).map(t => `${+t.slice(3)}.${+t.slice(0, 2)}.`).join(', ')})` : '';
   return `${g.name} hat Namenstag am ${wtag(g.naechster)} (${wann(tageBis(heute, g.naechster))})${alle}.`;
+}
+
+// „Was steht heute an?“ / „Was habe ich morgen?“ aus dem Dienst „termine“
+export function termineAntwort(q, tEnv, jetzt = Date.now(), zone = 'Europe/Berlin') {
+  if (!tEnv) return null;
+  if (!tEnv.daten) return 'Deine Kalender sind gerade nicht erreichbar.';
+  if (!tEnv.daten.verbunden) return 'Es ist noch kein Kalender verbunden. Trag unten unter „Einstellungen“ deinen iCal-Link ein.';
+  const heute = tagImOrt(new Date(jetzt).toISOString(), zone), morgen = tagImOrt(new Date(jetzt + 864e5).toISOString(), zone);
+  const l = termine(null, null, heute, zone, tEnv), fmt = x => (x.ganztag ? '' : uhr(x.beginn, zone) + ' ') + x.text;
+  const am = d => l.filter(x => x.datum === d);
+  if (/morgen/i.test(q)) return am(morgen).length ? `Morgen: ${am(morgen).map(fmt).join(', ')}.` : 'Morgen stehen keine Termine an.';
+  let a = am(heute).length ? `Heute: ${am(heute).map(fmt).join(', ')}.` : 'Heute stehen keine Termine an.';
+  if (am(morgen).length) a += ` Morgen: ${am(morgen).map(fmt).join(', ')}.`;
+  return a;
 }
 
 // Antworten für „Frag DAILY“

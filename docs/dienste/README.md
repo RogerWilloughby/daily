@@ -12,5 +12,6 @@
 | [`feiertage`](feiertage.md) | Feiertage und Ferien | 1.0.0 | DAILY (Berechnung: Feiertage, Brückentage, Zeitumstellung, Aktionstage), OpenHolidays API (Schulferien) | DE | B |
 | [`himmel`](himmel.md) | Himmel | 1.0.0 | Astronomy Engine (Berechnung), Sternschnuppen: Termine der International Meteor Organization (Mittelwerte) | weltweit | A |
 | [`namenstage`](namenstage.md) | Namenstage | 1.1.0 | DAILY-Auswahl nach dem kirchlichen Kalender (Gedenktage der Heiligen) | weltweit | A |
+| [`termine`](termine.md) | Termine | 1.0.0 | Deine Kalender (iCal) | weltweit | D |
 
 Skalierungsklassen: **A** berechnet – ohne Quelle, beliebig oft · **B** für alle gleich – ein Abruf je Zeitraum reicht für alle Nutzer · **C** je Ort, rasterbar – Anfragen je gerundetem Ort bündelbar · **D** je Eingabe – jede Eingabe ist eigen (Suche, Liste)

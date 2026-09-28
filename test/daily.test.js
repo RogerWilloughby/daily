@@ -91,10 +91,10 @@ test('Datenschutz: Koordinaten werden auf ~1 km gerundet', () => {
   assert.equal(coord('200', 180), null);
 });
 
-test('Betriebsart: Kalender und Schlagzeilen nur privat', async () => {
+test('Betriebsart: Schlagzeilen nur privat', async () => {
   const res = () => { const r = { headers: {}, setHeader(k, v) { r.headers[k] = v; }, status(c) { r.code = c; return r; }, json(o) { r.body = o; } }; return r; };
   delete process.env.DAILY_PRIVATE;
-  for (const f of ['calendar', 'headlines']) {
+  for (const f of ['headlines']) {
     const r = res(); await require('../api/' + f)({ method: 'GET', query: {} }, r);
     assert.equal(r.code, 404, f + ' müsste öffentlich gesperrt sein');
   }
@@ -113,13 +113,13 @@ test('Layouts: öffentlich ohne private Kacheln, immer 20 Plätze (fehlende blei
   }
   assert.ok(LAYOUTS.public.every(id => byId[id].scope === 'public'));
   assert.ok(!CATALOG.some(t => t.id === 'mail' || t.id === 'parcels'));
-  const pub = chooseLayout(false, ['news', 'calendar', 'fuel', 'fuel', 'gibtsnicht'], true).map(t => t && t.id);
+  const pub = chooseLayout(false, ['news', 'fuel', 'fuel', 'gibtsnicht'], true).map(t => t && t.id);
   assert.equal(pub.length, SLOTS);
   assert.equal(pub.filter(x => x === null).length, SLOTS - LAYOUTS.public.length);   // freie Plätze am Ende
   assert.ok(!pub.includes('alerts'));                                                // Warnungen stecken jetzt in der Wetterkachel
   assert.equal(pub[0], 'fuel');
-  assert.ok(!pub.includes('news') && !pub.includes('calendar'));
-  assert.equal(chooseLayout(true, null, true).filter(Boolean).map(t => t.id)[2], 'calendar');
+  assert.ok(!pub.includes('news'));
+  assert.equal(chooseLayout(true, null, true).filter(Boolean).map(t => t.id)[2], 'news');
   // Standard: nur überarbeitete Kacheln, Rest freie Plätze; Vorschau zeigt alle
   const fertig = chooseLayout(false).map(t => t && t.id);
   assert.deepEqual(fertig.filter(Boolean), ['weather', 'kalender', 'links', 'tasks', 'usage']);

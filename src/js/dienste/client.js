@@ -72,6 +72,21 @@ export async function dienst(id, params = {}, { frisch = false } = {}) {
   }
 }
 
+// Privater Dienst per POST (z. B. „termine“ mit den Kalender-Links im Körper): nie zwischengespeichert, nie im Browser-Speicher
+export async function privatDienst(id, koerper = {}) {
+  const t0 = uhr();
+  let res, r = null;
+  try {
+    res = await fetch(`/api/v1/${id}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(koerper),
+      cache: 'no-store', signal: AbortSignal.timeout ? AbortSignal.timeout(20000) : undefined });
+    r = await res.json().catch(() => null);
+  } catch (e) { throw new DienstFehler({ code: 'nicht_erreichbar', meldung: e.message }); }
+  if (r && r.fehler) throw new DienstFehler(r.fehler);
+  if (!res.ok || !r || r.format !== 'daily/1') throw new DienstFehler({ code: 'antwort_ungueltig', meldung: 'HTTP ' + res.status });
+  melde(id, uhr() - t0, 'netz');
+  return r;
+}
+
 // Mehrere Dienste für denselben Ort mit einer Anfrage (/api/v1/paket). Liefert { id: Antwort | DienstFehler }.
 // Noch gültige Antworten kommen aus dem Speicher; nur die abgelaufenen werden geholt.
 export async function paket(ids, params = {}) {

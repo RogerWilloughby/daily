@@ -1,4 +1,4 @@
-// DAILY – ein Einstiegspunkt für alle Dienste: GET /api/v1/<dienst>?…
+// DAILY – ein Einstiegspunkt für alle Dienste: GET /api/v1/<dienst>?… (private Dienste auch POST mit JSON-Körper)
 // /api/v1/dienste liefert den Katalog. Jede Antwort hat den Rahmen daily/1 (services/_lib/rahmen.js).
 // Eine Funktion für alle Dienste hält uns unter der Funktionsgrenze des Vercel-Hobby-Tarifs.
 const { ausfuehren, paket, katalog, byId } = require('../../services');
@@ -12,7 +12,14 @@ module.exports = async (req, res) => {
   const privat = byId[id] && byId[id].klasse === 'privat';
   // Öffentliche Daten ohne Nutzerbezug dürfen auch andere Oberflächen lesen; private nie (und nie im CDN-Cache)
   if (!privat) res.setHeader('Access-Control-Allow-Origin', '*');
-  if (req.method !== 'GET') return send(res, fehlerAntwort(id, new DienstFehler('eingabe_ungueltig', 'Nur GET')), 0, 405);
+  delete q._post;
+  // Private Dienste nehmen zusätzlich POST (JSON-Körper), damit z. B. Kalender-Links nie in einer Adresse stehen
+  if (req.method === 'POST' && privat) {
+    let body = req.body;
+    if (typeof body === 'string') { try { body = JSON.parse(body); } catch (e) { body = null; } }
+    if (!body || typeof body !== 'object' || Array.isArray(body)) return send(res, fehlerAntwort(id, new DienstFehler('eingabe_ungueltig', 'JSON-Körper erwartet')), 0, 400);
+    Object.assign(q, body, { _post: true });
+  } else if (req.method !== 'GET') return send(res, fehlerAntwort(id, new DienstFehler('eingabe_ungueltig', privat ? 'Nur GET oder POST' : 'Nur GET')), 0, 405);
   try {
     if (id === 'dienste') {
       return send(res, antwort({ id: 'dienste', version: 1, ttl: 300, quellen: [] }, { daten: { app: require('../../services/_lib/version').APP, dienste: katalog() } }), 300);

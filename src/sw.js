@@ -4,11 +4,11 @@ const SHELL = [
   '/', '/app.css', '/manifest.webmanifest', '/content/daily.json',
   '/js/main.js', '/js/core/util.js', '/js/core/store.js', '/js/core/tiles.js', '/js/core/board.js',
   '/js/core/ask.js', '/js/core/status.js', '/js/core/version.js', '/js/ui/dialogs.js', '/js/ui/ort.js',
-  '/js/providers/weather.js', '/js/providers/calendar.js', '/js/providers/news.js', '/js/providers/markets.js',
+  '/js/providers/weather.js', '/js/providers/news.js', '/js/providers/markets.js',
   '/js/providers/sport.js', '/js/providers/transit.js', '/js/providers/content.js', '/js/providers/knowledge.js', '/js/providers/local.js',
   '/js/providers/links.js', '/js/providers/fuel.js', '/js/providers/kalender.js',
   '/js/lib/url.js',
-  '/js/dienste/client.js', '/js/adapter/wetter.js', '/js/adapter/diagramm.js', '/js/adapter/regen.js', '/js/adapter/hinweise.js', '/js/adapter/kalender.js', '/js/adapter/katalog.js',
+  '/js/dienste/client.js', '/js/core/betrieb.js', '/js/adapter/wetter.js', '/js/adapter/diagramm.js', '/js/adapter/regen.js', '/js/adapter/hinweise.js', '/js/adapter/kalender.js', '/js/adapter/katalog.js',
   '/fonts/bricolage-grotesque.woff2', '/fonts/figtree-400.woff2', '/fonts/figtree-500.woff2', '/fonts/figtree-600.woff2',
   '/icons/icon-192.png', '/icons/icon-512.png'
 ];

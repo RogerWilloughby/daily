@@ -27,7 +27,6 @@ export const CATALOG = [
   T('relation', 'Beziehung', 'Paar', 'pair', { state: 'content' }),
   T('usage', 'Deine Nutzung', 'Nutzung', 'bars', { state: 'local', fertig: true }),
   // nur privat
-  T('calendar', 'Kalender', 'Termine', 'cal', { scope: 'private' }),
   T('news', 'Schlagzeilen', 'News', 'news', { scope: 'private' })
 ];
 
@@ -42,10 +41,10 @@ export const LAYOUTS = {
     'health', 'tech', 'saving', 'relation', 'usage'
   ],
   private: [
-    'weather', 'kalender', 'calendar', 'news', 'tasks',
-    'transit', 'sport', 'money', 'play', 'food',
-    'knowledge', 'fuel', 'film', 'relation', 'links',
-    'tech', 'saving', 'travel', 'usage'
+    'weather', 'kalender', 'news', 'tasks', 'transit',
+    'sport', 'money', 'play', 'food', 'knowledge',
+    'fuel', 'film', 'relation', 'links', 'tech',
+    'saving', 'travel', 'usage'
   ]
 };
 
