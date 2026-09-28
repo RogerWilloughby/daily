@@ -30,7 +30,8 @@ export const CATALOG = [
   T('news', 'Schlagzeilen', 'News', 'news', { scope: 'private' })
 ];
 
-export const COLS = 5, ROWS = 4, SLOTS = COLS * ROWS;
+// Höchstens 20 Kacheln; ohne eigene Auswahl 12 (Testeinstellung: fertige zuerst, dann Vorschau-Kacheln).
+export const SLOTS = 20, STANDARD_ANZAHL = 12;
 
 // Standard-Belegung, Zeile für Zeile (Priorität nach Nutzung)
 export const LAYOUTS = {
@@ -50,21 +51,37 @@ export const LAYOUTS = {
 
 export const byId = Object.fromEntries(CATALOG.map(t => [t.id, t]));
 
-// Aktive Belegung (wird beim Start einmal gesetzt).
+// Aktive Belegung (wird beim Start einmal gesetzt) – nur echte Kacheln, das Raster richtet sich nach ihrer Zahl (raster()).
 // custom (Liste von Kachel-IDs aus Einstellungen → Kacheln): genau diese Kacheln in dieser Reihenfolge – auch „Vorschau“-Kacheln
 // (noch nicht überarbeitet); unbekannte, doppelte oder im öffentlichen Betrieb private werden übergangen.
-// Ohne eigene Belegung: die Standardbelegung, davon nur überarbeitete Kacheln (fertig: true).
-// Übrige Plätze bleiben frei (null → „Freier Platz“).
+// Ohne eigene Belegung: 12 Kacheln der Standardbelegung – überarbeitete (fertig: true) zuerst, dann Vorschau-Kacheln.
 export const TILES = [];
 export const erlaubt = (id, isPrivate) => !!byId[id] && (isPrivate || byId[id].scope === 'public');
 export function chooseLayout(isPrivate, custom) {
   const eigene = Array.isArray(custom);
-  const quelle = eigene ? custom : LAYOUTS[isPrivate ? 'private' : 'public'].filter(id => byId[id] && byId[id].fertig);
-  const ids = [];
+  const std = LAYOUTS[isPrivate ? 'private' : 'public'];
+  const quelle = eigene ? custom : [...std.filter(id => byId[id] && byId[id].fertig), ...std.filter(id => byId[id] && !byId[id].fertig)];
+  const max = eigene ? SLOTS : STANDARD_ANZAHL, ids = [];
   for (const id of quelle) {
-    if (ids.length >= SLOTS) break;
+    if (ids.length >= max) break;
     if (erlaubt(id, isPrivate) && !ids.includes(id)) ids.push(id);
   }
-  TILES.splice(0, TILES.length, ...ids.map(id => byId[id]), ...Array(SLOTS - ids.length).fill(null));
+  TILES.splice(0, TILES.length, ...ids.map(id => byId[id]));
   return TILES;
+}
+
+// Raster aus Kachelzahl und Fläche (rein, testbar): alle Spaltenzahlen durchprobieren; gewinnt die Aufteilung, in deren
+// Kacheln das größte Rechteck im Wunsch-Seitenverhältnis passt (Rechner 1,4 = leicht quer wie bisher, Handy 1 = quadratisch);
+// bei Gleichstand (±2 %) weniger freie Plätze.
+export function raster(n, breite, hoehe, abstand = 10, verhaeltnis = 1.4) {
+  if (n < 1 || !(breite > 0) || !(hoehe > 0)) return { cols: 1, rows: 1 };
+  let best = null;
+  for (let cols = 1; cols <= n; cols++) {
+    const rows = Math.ceil(n / cols);
+    if ((cols - 1) * rows >= n) continue;                       // eine Spalte wäre überflüssig
+    const w = (breite - (cols - 1) * abstand) / cols, h = (hoehe - (rows - 1) * abstand) / rows;
+    const k = { cols, rows, seite: Math.min(w / verhaeltnis, h), frei: cols * rows - n };
+    if (!best || k.seite > best.seite * 1.02 || (k.seite >= best.seite * 0.98 && k.frei < best.frei)) best = k;
+  }
+  return { cols: best.cols, rows: best.rows };
 }

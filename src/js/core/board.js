@@ -1,5 +1,5 @@
 // Das Kachelraster: Aufbau, „Raster wächst mit“, Handy-Vollbild und Aktualisieren einzelner Kacheln.
-import { TILES, byId, COLS, ROWS } from './tiles.js';
+import { TILES, byId, raster } from './tiles.js';
 import { esc, icon, rows } from './util.js';
 import { countClick } from './store.js';
 import { hatEinstellungen, formular, binden, offeneSpeichern, ZAHNRAD } from './einstellungen.js';
@@ -130,8 +130,22 @@ export function set(id, patch) {
   paint(id);
 }
 
+// Raster: Spalten × Zeilen aus Kachelzahl und Fläche (tiles.js → raster); übrige Felder = „Freier Platz“
+let COLS = 1, ROWS = 1;
+const HANDY = matchMedia('(max-width:760px),(max-height:520px)');
+function rasterNeu() {
+  const abstand = parseFloat(getComputedStyle(grid).rowGap) || 10;
+  const r = raster(TILES.length, grid.clientWidth, grid.clientHeight, abstand, HANDY.matches ? 1 : 1.4);
+  if (r.cols === COLS && r.rows === ROWS && grid.querySelectorAll('.tile.free').length === COLS * ROWS - TILES.length) return;
+  COLS = r.cols; ROWS = r.rows;
+  grid.querySelectorAll('.tile.free').forEach(x => x.remove());
+  for (let c = TILES.length; c < COLS * ROWS; c++) grid.insertAdjacentHTML('beforeend', `<div class="tile free" data-mode="rest" id="cell-${c}" aria-hidden="true"><span>Freier Platz</span></div>`);
+  grid.dataset.raster = `${COLS}x${ROWS}`;
+  layout();
+}
+
 function layout() {
-  const cells = TILES;
+  const cells = [...TILES, ...Array(Math.max(0, COLS * ROWS - TILES.length)).fill(null)];
   const pos = active === null ? -1 : cells.findIndex(t => t && t.id === active);
   const ar = pos < 0 ? -1 : Math.floor(pos / COLS), ac = pos < 0 ? -1 : pos % COLS;
   const tr = (n, a) => Array.from({ length: n }, (_, k) => `minmax(0,${k === a ? WEIGHT : 1}fr)`).join(' ');
@@ -141,6 +155,7 @@ function layout() {
     const r = Math.floor(c / COLS), col = c % COLS;
     const mode = pos < 0 ? 'rest' : c === pos ? 'active' : (r === ar || col === ac) ? 'lane' : 'small';
     const el = document.getElementById(t ? 'tile-' + t.id : 'cell-' + c);
+    if (!el) return;
     el.dataset.mode = mode;
     const h = el.querySelector('.head'); if (h) h.setAttribute('aria-expanded', String(mode === 'active'));
   });
@@ -210,12 +225,12 @@ function miniDichte(wurzel) {
 }
 
 export function initBoard() {
-  addEventListener('resize', () => requestAnimationFrame(() => miniDichte(grid)));
-  ORDER = TILES.filter(Boolean).map(t => t.id);
-  grid.innerHTML = TILES.map((t, c) => t ? tileHTML(t)
-    : `<div class="tile free" data-mode="rest" id="cell-${c}" aria-hidden="true"><span>Freier Platz</span></div>`).join('');
-  TILES.forEach(t => t && paint(t.id));
-  layout();
+  addEventListener('resize', () => requestAnimationFrame(() => { rasterNeu(); miniDichte(grid); }));
+  ORDER = TILES.map(t => t.id);
+  grid.innerHTML = TILES.map(tileHTML).join('');
+  TILES.forEach(t => paint(t.id));
+  rasterNeu();
+  requestAnimationFrame(() => miniDichte(grid));
 
   // (i): Überfahren zeigt das Info-Feld, Klick schaltet es fest ein/aus – ohne die Kachel zu öffnen
   const info = (knopf, an) => { const f = knopf.nextElementSibling; f.hidden = !an; knopf.setAttribute('aria-expanded', String(an)); };

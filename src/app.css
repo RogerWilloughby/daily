@@ -315,7 +315,7 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
 .set-results label:hover{background:var(--ground)}
 .set-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
 
-/* 8 Mobil: Kompaktraster 4 × 5, Vollbild pro Kachel */
+/* 8 Mobil: Kompaktraster (Spalten × Zeilen nach Kachelzahl, siehe tiles.js → raster), Vollbild pro Kachel */
 .sheet{display:none}
 @media (max-width:760px),(max-height:520px){
   .bar{gap:10px 12px;min-height:0}
@@ -330,7 +330,7 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
   .legal{order:5;flex-basis:100%;gap:12px;font-size:12px}
   .ask{order:6;flex-basis:100%;max-width:none}
   .spacer{display:none}
-  .grid{gap:7px;grid-template-columns:repeat(4,minmax(0,1fr)) !important;grid-template-rows:repeat(5,minmax(0,1fr)) !important}
+  .grid{gap:7px}
   .tile.free span{display:none}
   .tile .head{padding:9px 8px !important;justify-content:space-between;height:100%;box-sizing:border-box}
   .tile .label{font-family:var(--display);font-size:14px !important;font-weight:700;flex-direction:column;align-items:flex-start;gap:6px}

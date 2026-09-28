@@ -104,8 +104,8 @@ test('Betriebsart: Schlagzeilen nur privat', async () => {
   delete process.env.DAILY_PRIVATE;
 });
 
-test('Layouts: öffentlich ohne private Kacheln, immer 20 Plätze (fehlende bleiben frei)', async () => {
-  const { LAYOUTS, CATALOG, byId, chooseLayout, SLOTS } = await esm('src/js/core/tiles.js');
+test('Layouts: öffentlich ohne private Kacheln, Standard 12 (fertige zuerst), Raster nach Kachelzahl', async () => {
+  const { LAYOUTS, CATALOG, byId, chooseLayout, SLOTS, STANDARD_ANZAHL, raster } = await esm('src/js/core/tiles.js');
   for (const [mode, ids] of Object.entries(LAYOUTS)) {
     assert.ok(ids.length <= SLOTS, mode);
     assert.equal(new Set(ids).size, ids.length, mode + ': doppelte Kachel');
@@ -114,18 +114,24 @@ test('Layouts: öffentlich ohne private Kacheln, immer 20 Plätze (fehlende blei
   assert.ok(LAYOUTS.public.every(id => byId[id].scope === 'public'));
   assert.ok(!CATALOG.some(t => t.id === 'mail' || t.id === 'parcels'));
   // eigene Belegung: genau diese Kacheln in dieser Reihenfolge (auch Vorschau), ohne Doppelte, Unbekannte und öffentlich private
-  const pub = chooseLayout(false, ['news', 'fuel', 'fuel', 'gibtsnicht', 'weather']).map(t => t && t.id);
-  assert.equal(pub.length, SLOTS);
-  assert.deepEqual(pub.filter(Boolean), ['fuel', 'weather']);
-  assert.equal(pub.filter(x => x === null).length, SLOTS - 2);                       // freie Plätze am Ende
-  assert.deepEqual(chooseLayout(true, ['news', 'kalender']).filter(Boolean).map(t => t.id), ['news', 'kalender']);   // privat erlaubt
-  assert.equal(chooseLayout(false, []).filter(Boolean).length, 0);                    // leere eigene Belegung bleibt leer
-  // Standard (keine eigene Belegung): nur überarbeitete Kacheln
-  const fertig = chooseLayout(false).map(t => t && t.id);
-  assert.deepEqual(fertig.filter(Boolean), ['weather', 'kalender', 'links', 'tasks', 'usage']);
-  assert.equal(fertig.length, SLOTS);
-  assert.deepEqual(chooseLayout(true).filter(Boolean).map(t => t.id), ['weather', 'kalender', 'tasks', 'links', 'usage']);   // privat ebenso
-  assert.ok(!fertig.includes('alerts'));
+  assert.deepEqual(chooseLayout(false, ['news', 'fuel', 'fuel', 'gibtsnicht', 'weather']).map(t => t.id), ['fuel', 'weather']);
+  assert.deepEqual(chooseLayout(true, ['news', 'kalender']).map(t => t.id), ['news', 'kalender']);   // privat erlaubt
+  assert.equal(chooseLayout(false, []).length, 0);                                    // leere eigene Belegung bleibt leer
+  assert.equal(chooseLayout(true, LAYOUTS.private.concat(CATALOG.map(t => t.id))).length, Math.min(SLOTS, CATALOG.length));   // höchstens 20
+  // Standard (keine eigene Belegung): 12 Kacheln, überarbeitete zuerst, dann Vorschau-Kacheln in Standardreihenfolge
+  const pub = chooseLayout(false).map(t => t.id);
+  assert.equal(pub.length, STANDARD_ANZAHL);
+  assert.deepEqual(pub.slice(0, 5), ['weather', 'kalender', 'links', 'tasks', 'usage']);
+  assert.deepEqual(pub.slice(5, 7), ['transit', 'sport']);
+  assert.ok(!pub.includes('news') && !pub.includes('alerts'));
+  const priv = chooseLayout(true).map(t => t.id);
+  assert.deepEqual(priv.slice(0, 6), ['weather', 'kalender', 'tasks', 'links', 'usage', 'news']);
+  // Raster: Rechner (quer, Wunschform 1,4) und Handy (hochkant, quadratisch)
+  const r = (n, w, h, a, v) => { const x = raster(n, w, h, a, v); return `${x.cols}x${x.rows}`; };
+  assert.deepEqual([1, 2, 4, 6, 9, 12, 20].map(n => r(n, 1344, 700)), ['1x1', '2x1', '2x2', '3x2', '3x3', '4x3', '5x4']);
+  assert.deepEqual([2, 12].map(n => r(n, 1850, 900)), ['2x1', '4x3']);
+  assert.deepEqual([2, 4, 12, 20].map(n => r(n, 358, 560, 7, 1)), ['1x2', '2x2', '3x4', '4x5']);
+  assert.equal(r(0, 1344, 700), '1x1');
 });
 
 test('Meine Seiten: nur http(s)-Adressen', async () => {
