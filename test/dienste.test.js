@@ -224,11 +224,10 @@ test('Adapter Wetter: Kachel und Antwort aus dem Vertrag', async () => {
   assert.match(k.lglyph, /^<svg/);
   // Mini-Diagramm: Temperaturskala in 5er-Schritten, Regenskala rechts in mm, Legende
   assert.match(k.chart, /wd-miniskala wd-t-max"><div class="wd-sk"><span class="wd-g5"[^>]*>-5°<\/span>.*>25°<\/span><\/div>/);   // Temperatur orange
-  // jede Zahl hat ihren Strich: 7 Zahlen (-5 … 25), 6 orange Striche (der unterste ist die grüne Regen-Nulllinie), 2 grüne Striche
+  // gemeinsame graue Linien: 7 Linien (-5 … 25), jede mit Temperatur links und Regen rechts (Mock bis 12 mm → 2 mm je Linie)
   assert.equal((k.chart.match(/°<\/span>/g) || []).length, 7);
-  assert.equal((k.chart.match(/wd-gitter wd-gt/g) || []).length, 6);
-  assert.equal((k.chart.match(/wd-gitter wd-gr/g) || []).length, 2);
-  assert.match(k.chart, /wd-miniskala-r wd-t-regen"><div class="wd-sk"><span style="top:50\.0%">\d+ mm<\/span><span style="top:97\.1%">0<\/span>/);   // Regen grün
+  assert.equal((k.chart.match(/<line class="wd-gitter/g) || []).length, 7);
+  assert.match(k.chart, /wd-miniskala-r wd-t-regen"><div class="wd-sk"><span class="wd-g5"[^>]*>0<\/span><span[^>]*>2<\/span>.*<span class="wd-g5"[^>]*>12 mm<\/span><\/div>/);   // Regen grün
   assert.match(k.chart, /16 Tage: <b class="wd-t-max">Höchst<\/b> · <b class="wd-t-min">Tiefst<\/b> · <b class="wd-t-regen">Regen mm<\/b>/);
   assert.match(k.chart, /wd-marken"><span[^>]*>Mo<\/span><span[^>]*>Mi<\/span>/);   // Wochentage, bei 16 Tagen jeder zweite
   assert.match(k.chart, /wd-max.*wd-min.*wd-trend/);
@@ -742,15 +741,16 @@ test('Einstellungen: Kachel-Formular, Wetter-Optionen, Kachel-Listen', async () 
   const m = miniStunden(probe, iso => new Date(iso).getUTCHours());
   const balken = m.match(/<rect class="wd-regen"[^>]*>/g) || [];
   assert.equal(balken.length, 24);                                                   // jede Stunde ab 0,1 mm – egal wie wahrscheinlich
-  assert.match(balken[3], /height="16" rx="1" fill-opacity="0.84"/);                 // 2 mm = volle Regenhälfte (Skala 2 mm), 80 % → kräftig
+  assert.match(balken[3], /height="32" rx="1" fill-opacity="0.84"/);                 // 2 mm = oberste Linie (Skala 5–15°, 1 mm je Linie), 80 % → kräftig
   assert.match(balken[0], /fill-opacity="0.2"/);                                     // 0 % → ganz blass
   assert.equal((m.match(/wd-streifen/g) || []).length, 12);                          // jede zweite Stunde getönt
   assert.match(m, />3<\/span>.*>6<\/span>.*>9<\/span>.*>12<\/span>/s);              // Stunden alle 3 Std.
   assert.doesNotMatch(m, />jetzt</);
   assert.match(m, />5°<\/span><span class="wd-gi"[^>]*>10°<\/span><span class="wd-g5"[^>]*>15°</);   // 10–14° → Skala 5–15°
-  assert.equal((m.match(/wd-gitter wd-gt/g) || []).length, 2);                        // 10° und 15° (5° = Nulllinie Regen)
-  const { mmSkala, deckkraft } = await esm('src/js/adapter/diagramm.js');
-  assert.deepEqual([mmSkala(0.3, 2), mmSkala(3, 2), mmSkala(7, 10), mmSkala(34, 10)], [2, 5, 10, 50]);
+  assert.equal((m.match(/<line class="wd-gitter/g) || []).length, 3);                // 5°, 10°, 15° – gemeinsam für Temperatur und Regen
+  assert.match(m, /wd-t-regen"><div class="wd-sk"><span[^>]*>0<\/span><span[^>]*>1<\/span><span[^>]*>2 mm<\/span>/);
+  const { mmStufe, deckkraft } = await esm('src/js/adapter/diagramm.js');
+  assert.deepEqual([mmStufe(0.3, 2, 4), mmStufe(3, 2, 4), mmStufe(12, 10, 6), mmStufe(34, 10, 4), mmStufe(0, 2, 2)], [0.5, 1, 2, 10, 1]);
   assert.deepEqual([deckkraft(0), deckkraft(100), deckkraft(null)], [0.2, 1, 0.6]);
   assert.equal(mitOptionen(kachel(w, r, null), w, { mini: 16 }).chart, kachel(w, r, null).chart);
   const u = { daten: { gebiet: 'X', hoechsteStufe: 3, hinweise: [{ art: 'wind', stufe: 3, stufeName: 'unwetter', ereignis: 'ORKANBÖEN', titel: 'T', beginn: null, ende: null, aktiv: true, beschreibung: '', empfehlung: '', tipp: 't' }] } };

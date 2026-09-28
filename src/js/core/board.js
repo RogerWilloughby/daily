@@ -217,7 +217,7 @@ function miniDichte(wurzel) {
   wurzel.querySelectorAll('.wd-minibox').forEach(b => {
     const svg = b.querySelector('.wd-mini'), n = b.querySelectorAll('.wd-miniskala:not(.wd-miniskala-r) .wd-sk span').length;
     if (!svg || n < 2) return;
-    const h = svg.getBoundingClientRect().height, n10 = b.querySelectorAll('.wd-sk span:not(.wd-g5)').length - 2;   // ohne rechte Skala
+    const h = svg.getBoundingClientRect().height, n10 = b.querySelectorAll('.wd-miniskala:not(.wd-miniskala-r) .wd-sk span:not(.wd-g5)').length;
     const stufe = h / (n - 1) >= 13 ? 0 : n10 > 1 && h / (n10 - 1) >= 13 ? 1 : 2;
     b.classList.toggle('wd-eng', stufe === 1);   // Striche und Zahlen alle 10°
     b.classList.toggle('wd-eng2', stufe === 2);  // nur oberste und unterste Zahl mit Strich

@@ -154,9 +154,7 @@ b.wd-t-max,b.wd-t-min,b.wd-t-regen,b.wd-t-sonne{font-weight:700}
 .wd-miniskala-r .wd-sk span{right:auto;left:0}
 .wd-eng .wd-g5,.wd-eng2 .wd-gi{display:none}
 /* Mini-Diagramm: Striche alle 5°, jede zweite Stunde/jeder zweite Tag leicht getönt */
-.wd-mini .wd-gitter{stroke-width:1;vector-effect:non-scaling-stroke}
-.wd-mini .wd-gt{stroke:var(--wd-max);opacity:.35}
-.wd-mini .wd-gr{stroke:var(--wd-regen);opacity:.55;stroke-dasharray:3 3}
+.wd-mini .wd-gitter{stroke:currentColor;opacity:.2;stroke-width:1;vector-effect:non-scaling-stroke}
 .wd-mini .wd-streifen{fill:currentColor;opacity:.022}
 .wd-minilegende{font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wd-minilegende b{font-weight:600}

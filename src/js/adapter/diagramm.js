@@ -24,8 +24,9 @@ const bisVorTrend = tage => { const ab = tage.findIndex(t => t.trend); return ab
 // Links Temperaturskala in 5er-Schritten mit dünnen Strichen alle 5°, rechts Regenskala in mm (untere Hälfte).
 // Regenbalken: Höhe = Menge (mm), Füllstärke = Wahrscheinlichkeit (stufenlos). Jede zweite Stunde/jeder zweite Tag leicht getönt.
 // Zeitachse: Stunden alle 3 Std. bzw. Wochentage (16 Tage: jeder zweite).
-const MM_STUFEN = [1, 2, 5, 10, 20, 50, 100, 200, 500];
-export const mmSkala = (max, mindestens) => MM_STUFEN.find(v => v >= Math.max(max, mindestens)) || Math.ceil(max / 100) * 100;
+// Regen je Linie in runden Stufen: die kleinste, bei der der stärkste Regen (mind. „mindestens“) unter die oberste Linie passt
+const MM_STUFEN = [0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500];
+export const mmStufe = (max, mindestens, abstaende) => MM_STUFEN.find(v => v * abstaende >= Math.max(max, mindestens) - 1e-9) || Math.ceil(Math.max(max, mindestens) / abstaende / 100) * 100;
 export const deckkraft = p => (p == null ? 0.6 : Math.round((0.2 + 0.8 * Math.min(100, Math.max(0, p)) / 100) * 100) / 100);
 const mm = v => komma(Math.round(v * 10) / 10);
 function tempSkala(min, max) {
@@ -35,23 +36,25 @@ function tempSkala(min, max) {
 }
 // d = { n, linien: [{ werte, klasse, bisTrend }], regen: [{ mm, p }], mmMin, marken: [{ i, text }], legende, aria }
 function mini(d) {
-  const W = 160, H = 34, T0 = 1, T1 = H - 1, R1 = H - 1, R0 = H / 2, n = d.n, sp = W / n, x = i => (i + 0.5) * sp;
+  const W = 160, H = 34, T0 = 1, T1 = H - 1, n = d.n, sp = W / n, x = i => (i + 0.5) * sp;
   const alle = d.linien.flatMap(l => l.werte).filter(v => v != null && Number.isFinite(v));
   const { lo, hi } = tempSkala(Math.min(...alle), Math.max(...alle));
   const y = skala(lo, hi, T0, T1), pz = v => (v / H * 100).toFixed(1);
   const out = [];
   for (let i = 1; i < n; i += 2) out.push(`<rect class="wd-streifen" x="${(i * sp).toFixed(1)}" y="0" width="${sp.toFixed(1)}" height="${H}"/>`);
-  // Jede Zahl hat ihren Strich: Temperatur (orange) alle 5°, bei wenig Platz nur alle 10° (Klasse wd-g5 wird dann ausgeblendet)
+  // Ein gemeinsamer Satz grauer Linien alle 5°: links Temperatur (orange), rechts Regen (grün) – jede Zahl hat ihre Linie.
+  // Bei wenig Platz nur alle 10° (Klasse wd-g5) bzw. nur oberste/unterste Linie (wd-gi wird ausgeblendet).
   const werte = []; for (let v = lo; v <= hi; v += 5) werte.push(v);
   const g5 = v => (Math.abs(v) % 10 === 0 ? '' : ' wd-g5') + (v !== lo && v !== hi ? ' wd-gi' : '');
-  werte.forEach(v => { if (v !== lo) out.push(`<line class="wd-gitter wd-gt${g5(v)}" x1="0" x2="${W}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}"/>`); });
-  // Regen (grün, gestrichelt): 0 unten (zugleich Grundlinie) und Skalenwert auf halber Höhe
-  out.push(`<line class="wd-gitter wd-gr" x1="0" x2="${W}" y1="${R0}" y2="${R0}"/>`, `<line class="wd-gitter wd-gr" x1="0" x2="${W}" y1="${R1}" y2="${R1}"/>`);
-  const mmMax = Math.max(0, ...d.regen.map(r => r.mm || 0)), mmS = mmSkala(mmMax, d.mmMin), bw = Math.max(1.5, sp - 1.5);
+  werte.forEach(v => out.push(`<line class="wd-gitter${g5(v)}" x1="0" x2="${W}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}"/>`));
+  // Regen auf denselben Linien: unterste Linie = 0 mm, je Linie eine runde Stufe; Balken über die ganze Höhe
+  const abst = werte.length - 1, mmMax = Math.max(0, ...d.regen.map(r => r.mm || 0));
+  const stufe = mmStufe(mmMax, d.mmMin, abst), mmTop = stufe * abst, bw = Math.max(1.5, sp - 1.5);
+  const yR = skala(0, mmTop, T0, T1);
   d.regen.forEach((r, i) => {
     if (!(r.mm >= 0.1)) return;
-    const h = Math.max(1, Math.round(Math.min(1, r.mm / mmS) * (R1 - R0) * 10) / 10);
-    out.push(`<rect class="wd-regen" x="${(x(i) - bw / 2).toFixed(1)}" y="${(R1 - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h}" rx="1" fill-opacity="${deckkraft(r.p)}"/>`);
+    const h = Math.max(1, Math.round((T1 - yR(Math.min(r.mm, mmTop))) * 10) / 10);
+    out.push(`<rect class="wd-regen" x="${(x(i) - bw / 2).toFixed(1)}" y="${(T1 - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h}" rx="1" fill-opacity="${deckkraft(r.p)}"/>`);
   });
   const xs = Array.from({ length: n }, (_, i) => x(i));
   for (const l of d.linien) out.push(linie(xs, l.werte.map(v => (v == null ? null : y(v))), l.bisTrend ?? n, l.klasse));
@@ -59,7 +62,7 @@ function mini(d) {
   const marken = d.marken.filter(m => x(m.i) / W > 0.03 && x(m.i) / W < 0.97)
     .map(m => `<span style="left:${(x(m.i) / W * 100).toFixed(1)}%">${esc(m.text)}</span>`).join('');
   const links = werte.map(v => `<span class="${g5(v).trim()}" style="top:${pz(y(v))}%">${v}°</span>`).join('');
-  const rechts = `<span style="top:${pz(R0)}%">${mmS} mm</span><span style="top:${pz(R1)}%">0</span>`;
+  const rechts = werte.map((v, k) => `<span class="${g5(v).trim()}" style="top:${pz(y(v))}%">${mm(k * stufe)}${v === hi ? ' mm' : ''}</span>`).join('');
   return `<div class="wd-minibox" role="img" aria-label="${esc(d.aria)}, Temperaturskala ${lo}° bis ${hi}°, Regen bis ${mm(mmMax)} mm">` +
     `<div class="wd-miniskala wd-t-max"><div class="wd-sk">${links}</div></div>` +
     `<div class="wd-mini24">${svg}<div class="wd-marken">${marken}</div></div>` +
