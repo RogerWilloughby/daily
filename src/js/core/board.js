@@ -20,6 +20,8 @@ function tileHTML(t) {
       <span class="teaser"></span>
       <span class="mini" aria-hidden="true"></span>
     </button>
+    <button class="info-knopf" type="button" data-info aria-label="Info zu ${esc(t.name || t.title)}" aria-expanded="false">i</button>
+    <div class="info-feld" role="tooltip" hidden></div>
     <div class="body">
       <button class="close" type="button" data-close>Schließen</button>
       <div class="content"></div>
@@ -106,7 +108,9 @@ export function paint(id) {
   tz.classList.toggle('mit-liste', !!(t.liste && t.liste.length));
   // Kopf der kleinen Kachel: nur Inhalt (z. B. Ort und Temperaturen, KW) – der Name erscheint beim Überfahren
   el.querySelector('.label .kopf').innerHTML = t.kopf || '';
-  el.querySelector('.head').title = t.hover || t.name || t.title;
+  // Info-Feld hinter dem (i) unten rechts: Name (später auch Quelle, Stand …)
+  el.querySelector('.head').removeAttribute('title');
+  el.querySelector('.info-feld').innerHTML = [t.hover || t.name || t.title, ...(t.info || [])].map(z => `<span>${esc(z)}</span>`).join('');
   el.querySelector('.mini').innerHTML = t.chart || '';
   el.querySelector('.head').setAttribute('aria-label', [t.title, t.lglyphTip, t.m].filter(Boolean).join(': '));
   // Aufgeklappten Inhalt nur neu zeichnen, wenn er sichtbar ist – und nicht, während die Einstellungen offen sind (Eingaben bleiben)
@@ -184,7 +188,17 @@ export function initBoard() {
   TILES.forEach(t => t && paint(t.id));
   layout();
 
+  // (i): Überfahren zeigt das Info-Feld, Klick schaltet es fest ein/aus – ohne die Kachel zu öffnen
+  const info = (knopf, an) => { const f = knopf.nextElementSibling; f.hidden = !an; knopf.setAttribute('aria-expanded', String(an)); };
+  grid.addEventListener('pointerover', e => { const k = e.target.closest('[data-info]'); if (k) info(k, true); });
+  grid.addEventListener('pointerout', e => { const k = e.target.closest('[data-info]'); if (k && !k.classList.contains('fest')) info(k, false); });
+  document.addEventListener('click', e => {
+    const k = e.target.closest('[data-info]');
+    grid.querySelectorAll('[data-info].fest').forEach(x => { if (x !== k) { x.classList.remove('fest'); info(x, false); } });
+    if (k) { k.classList.toggle('fest'); info(k, k.classList.contains('fest')); }
+  });
   grid.addEventListener('click', e => {
+    if (e.target.closest('[data-info]')) return;
     if (e.target.closest('[data-close]')) { activate(null); return; }
     const head = e.target.closest('.head'); if (!head) return;
     const id = head.dataset.id;

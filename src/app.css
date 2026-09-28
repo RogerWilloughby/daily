@@ -473,3 +473,14 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
 @media (min-width:761px) and (min-height:521px){
   .tile:not([data-mode="active"]) .teaser.mit-liste{flex:1 1 auto;min-height:0}
 }
+
+/* (i) unten rechts in der kleinen Kachel: Info-Feld mit Name (später mehr) – nicht aufgeklappt, nicht am Handy */
+.info-knopf{position:absolute;right:8px;bottom:8px;width:16px;height:16px;border-radius:50%;border:1px solid var(--line);background:var(--surface);
+  color:var(--muted);font:600 10px/14px Georgia,serif;font-style:italic;text-align:center;padding:0;cursor:pointer;z-index:2;opacity:.7}
+.info-knopf:hover,.info-knopf:focus-visible,.info-knopf.fest{opacity:1;color:var(--ink);border-color:var(--muted)}
+.info-feld{position:absolute;right:8px;bottom:30px;z-index:3;max-width:calc(100% - 16px);padding:6px 10px;border-radius:8px;
+  background:var(--ink);color:var(--surface);font-size:12px;line-height:1.35;box-shadow:0 4px 14px rgba(0,0,0,.18);display:flex;flex-direction:column}
+.info-feld[hidden]{display:none}
+.info-feld span:first-child{font-weight:600}
+.tile[data-mode="active"] .info-knopf,.tile[data-mode="active"] .info-feld,.tile[data-mode="small"] .info-knopf{display:none}
+@media (max-width:760px),(max-height:520px){.info-knopf,.info-feld{display:none!important}}
