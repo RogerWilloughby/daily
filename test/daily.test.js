@@ -121,11 +121,11 @@ test('Layouts: öffentlich ohne private Kacheln, Standard 12 (fertige zuerst), R
   // Standard (keine eigene Belegung): 12 Kacheln, überarbeitete zuerst, dann Vorschau-Kacheln in Standardreihenfolge
   const pub = chooseLayout(false).map(t => t.id);
   assert.equal(pub.length, STANDARD_ANZAHL);
-  assert.deepEqual(pub.slice(0, 6), ['weather', 'kalender', 'links', 'tasks', 'money', 'usage']);
-  assert.deepEqual(pub.slice(6, 8), ['transit', 'sport']);
+  assert.deepEqual(pub.slice(0, 7), ['weather', 'kalender', 'links', 'tasks', 'money', 'tools', 'usage']);
+  assert.deepEqual(pub.slice(7, 9), ['transit', 'sport']);
   assert.ok(!pub.includes('news') && !pub.includes('alerts'));
   const priv = chooseLayout(true).map(t => t.id);
-  assert.deepEqual(priv.slice(0, 7), ['weather', 'kalender', 'tasks', 'money', 'links', 'usage', 'news']);
+  assert.deepEqual(priv.slice(0, 8), ['weather', 'kalender', 'tasks', 'money', 'links', 'tools', 'usage', 'news']);
   // Raster: Rechner (quer, Wunschform 1,4) und Handy (hochkant, quadratisch)
   const r = (n, w, h, a, v) => { const x = raster(n, w, h, a, v); return `${x.cols}x${x.rows}`; };
   assert.deepEqual([1, 2, 4, 6, 9, 12, 20].map(n => r(n, 1344, 700)), ['1x1', '2x1', '2x2', '3x2', '3x3', '4x3', '5x4']);
@@ -150,4 +150,24 @@ test('Service Worker: alle Module im Offline-Speicher', () => {
     const url = '/' + path.relative(root, f).split(path.sep).join('/');
     assert.ok(sw.includes(`'${url}'`), 'fehlt im Service Worker: ' + url);
   });
+});
+
+test('Tools: Verzeichnis, Kachel mit Links, Seiten ohne Google Fonts', async () => {
+  const fs = require('fs');
+  const { TOOLS } = await esm('src/js/tools/verzeichnis.js');
+  assert.deepEqual(TOOLS.map(t => t.id), ['arbeitszeit', 'setzkasten']);
+  for (const t of TOOLS) {
+    const html = fs.readFileSync(path.join(__dirname, '..', 'src', t.pfad), 'utf8');
+    assert.match(html, /^<!doctype html>/i, t.id);
+    assert.doesNotMatch(html, /fonts\.googleapis|fonts\.gstatic/, t.id + ': kein Google Fonts');
+    assert.match(html, /url\(\/fonts\/figtree-400\.woff2\)/, t.id + ': Schrift von DAILY');
+    assert.ok(fs.readFileSync(path.join(__dirname, '..', 'src', 'sw.js'), 'utf8').includes(t.pfad), t.id + ' offline (sw.js)');
+  }
+  const { kachel } = await esm('src/js/tools/verzeichnis.js');
+  {
+    const k = kachel(TOOLS);
+    assert.deepEqual(k.liste.map(z => [z.d, z.href]), [['Arbeitszeit', '/tools/arbeitszeit.html'], ['Setzkasten', '/tools/setzkasten.html']]);
+    assert.match(k.tabs[0].html, /href="\/tools\/setzkasten\.html" target="_blank" rel="noopener"/);
+    assert.equal(kachel([]).liste.length, 0);
+  }
 });

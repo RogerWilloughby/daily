@@ -25,6 +25,7 @@ export const CATALOG = [
   T('tech', 'Tech', 'Tech', 'chip', { state: 'content' }),
   T('saving', 'Sparen', 'Sparen', 'piggy', { state: 'content' }),
   T('relation', 'Beziehung', 'Paar', 'pair', { state: 'content' }),
+  T('tools', 'Tools', 'Tools', 'tool', { state: 'local', fertig: true, hover: 'Tools' }),   // eigenständige Werkzeuge (src/tools/), öffnen im neuen Tab
   T('usage', 'Deine Nutzung', 'Nutzung', 'bars', { state: 'local', fertig: true }),
   // nur privat
   T('news', 'Schlagzeilen', 'News', 'news', { scope: 'private' })
@@ -39,13 +40,13 @@ export const LAYOUTS = {
     'weather', 'kalender', 'links', 'tasks', 'transit',
     'sport', 'money', 'play', 'food', 'knowledge',
     'fuel', 'travel', 'film',
-    'health', 'tech', 'saving', 'relation', 'usage'
+    'health', 'tech', 'saving', 'relation', 'tools', 'usage'
   ],
   private: [
     'weather', 'kalender', 'news', 'tasks', 'transit',
     'sport', 'money', 'play', 'food', 'knowledge',
     'fuel', 'film', 'relation', 'links', 'tech',
-    'saving', 'travel', 'usage'
+    'saving', 'travel', 'tools', 'usage'
   ]
 };
 

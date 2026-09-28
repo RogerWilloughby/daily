@@ -81,7 +81,12 @@ function hinweise(el) {
 
 // Liste für die kleine Kachel: [{ d, t, gruppe }] – zwischen Gruppen ein kleiner Abstand
 function listeHtml(l) {
-  return l.map((z, i) => `<span class="tl-z${i && z.gruppe !== l[i - 1].gruppe ? ' tl-neu' : ''}"><span class="tl-d">${esc(z.d)}</span> <span class="tl-t">${esc(z.t)}</span></span>`).join('');
+  // z.href: Zeile ist ein Link (neuer Tab, klappt die Kachel nicht auf); z.ico: Symbol-HTML davor (nur aus eigenem Code)
+  return l.map((z, i) => {
+    const cls = `tl-z${i && z.gruppe !== l[i - 1].gruppe ? ' tl-neu' : ''}${z.href ? ' tl-link' : ''}`;
+    const inhalt = `${z.ico || ''}<span class="tl-d">${esc(z.d)}</span> <span class="tl-t">${esc(z.t)}</span>`;
+    return z.href ? `<a class="${cls}" href="${esc(z.href)}" target="_blank" rel="noopener">${inhalt}</a>` : `<span class="${cls}">${inhalt}</span>`;
+  }).join('');
 }
 
 export function paint(id) {
@@ -242,7 +247,7 @@ export function initBoard() {
     if (k) { k.classList.toggle('fest'); info(k, k.classList.contains('fest')); }
   });
   grid.addEventListener('click', e => {
-    if (e.target.closest('[data-info], [data-mini-wahl]')) return;   // (i) und Diagramm-Umschalter öffnen die Kachel nicht
+    if (e.target.closest('[data-info], [data-mini-wahl], a[href]')) return;   // (i), Diagramm-Umschalter und Links öffnen die Kachel nicht
     if (e.target.closest('[data-close]')) { activate(null); return; }
     const head = e.target.closest('.head'); if (!head) return;
     const id = head.dataset.id;

@@ -83,6 +83,15 @@ Ein Dienst `tagesinhalt?rubrik=<rubrik>&datum=<JJJJ-MM-TT>` liefert alle vorbere
 |---|---|---|---|
 | `quiz` | Quiz, Länderquiz, Filmquiz, Musikquiz, Wissenschaftsquiz, Reisequiz | Inhalt (Fragen mit Antworten) | 🆕 |
 
+## 6a. Tools (kein Dienst – eigenständige Seiten)
+
+Kachel „Tools“ (seit App 0.23.0): Werkzeuge als eigene Seiten in `src/tools/`, öffnen im neuen Tab, arbeiten nur im Browser mit Dateien auf dem eigenen Rechner (keine Daten an DAILY oder Dritte, keine Google Fonts). Verzeichnis: `src/js/tools/verzeichnis.js`.
+
+| Tool | Zweck | Datei | Status |
+|---|---|---|---|
+| Arbeitszeit | Arbeitszeiterfassung mit Gleitzeitkonto, Urlaub/Krank/Feiertag, CSV, Drucken | `src/tools/arbeitszeit.html` | ✅ (0.23.0) |
+| Setzkasten | HTML-/Markdown-Editor mit PDF über Druckdialog | `src/tools/setzkasten.html` | ✅ (0.23.0) |
+
 ## 7. Später oder ausgeschlossen
 | Idee | Entscheidung | Grund |
 |---|---|---|

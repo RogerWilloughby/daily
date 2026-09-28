@@ -1,0 +1,1399 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Setzkasten</title>
+<!-- DAILY-Tool: Schriften von DAILY selbst (kein Abruf bei Google Fonts), Code in der Monospace-Schrift des Systems -->
+<style>
+@font-face{font-family:"Bricolage Grotesque";src:url(/fonts/bricolage-grotesque.woff2) format("woff2");font-weight:200 800;font-display:swap}
+@font-face{font-family:"Figtree";src:url(/fonts/figtree-400.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Figtree";src:url(/fonts/figtree-500.woff2) format("woff2");font-weight:500;font-display:swap}
+@font-face{font-family:"Figtree";src:url(/fonts/figtree-600.woff2) format("woff2");font-weight:600 700;font-display:swap}
+:root{
+  --desk:#DCE1DA;
+  --chrome:#F1F4EF;
+  --chrome-2:#E7EBE4;
+  --paper:#ffffff;
+  --ink:#14201D;
+  --ink-soft:#5C6963;
+  --rule:#C8CFC6;
+  --rule-soft:#D8DDD4;
+  --accent:#0B6E5F;
+  --accent-ink:#ffffff;
+  --accent-soft:rgba(11,110,95,.11);
+  --mark:#C88A12;
+  --danger:#A8341F;
+  --shadow:0 1px 2px rgba(20,32,29,.09), 0 14px 34px rgba(20,32,29,.11);
+  --radius:7px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --desk:#0E1412;
+    --chrome:#18211E;
+    --chrome-2:#1F2A26;
+    --paper:#ffffff;
+    --ink:#E3EAE6;
+    --ink-soft:#8FA09A;
+    --rule:#2B3733;
+    --rule-soft:#232E2A;
+    --accent:#4FC2A8;
+    --accent-ink:#0B1614;
+    --accent-soft:rgba(79,194,168,.15);
+    --mark:#E0B450;
+    --danger:#E8836A;
+    --shadow:0 1px 2px rgba(0,0,0,.45), 0 18px 44px rgba(0,0,0,.5);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --desk:#0E1412;
+  --chrome:#18211E;
+  --chrome-2:#1F2A26;
+  --paper:#ffffff;
+  --ink:#E3EAE6;
+  --ink-soft:#8FA09A;
+  --rule:#2B3733;
+  --rule-soft:#232E2A;
+  --accent:#4FC2A8;
+  --accent-ink:#0B1614;
+  --accent-soft:rgba(79,194,168,.15);
+  --mark:#E0B450;
+  --shadow:0 1px 2px rgba(0,0,0,.45), 0 18px 44px rgba(0,0,0,.5);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; height:100dvh; overflow:hidden;
+  background:var(--desk); color:var(--ink);
+  font-family:"Figtree",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:14px; line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+.app{display:grid; grid-template-rows:auto auto minmax(0,1fr) auto; height:100dvh}
+
+/* ---------- top bar ---------- */
+.bar{
+  display:flex; align-items:center; gap:14px;
+  padding:9px 14px; background:var(--chrome);
+  border-bottom:1px solid var(--rule);
+}
+.mark{
+  font-family:"Bricolage Grotesque","Figtree",sans-serif;
+  font-weight:700; font-size:15px; letter-spacing:-.015em;
+  display:flex; align-items:center; gap:8px; white-space:nowrap;
+}
+.mark .glyph{display:inline-grid; place-items:center; width:22px; height:22px; color:var(--accent)}
+.mark .glyph svg{width:22px; height:22px}
+.filename{
+  flex:1; min-width:60px; max-width:420px;
+  background:transparent; border:1px solid transparent; border-radius:5px;
+  padding:4px 7px; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12.5px; color:var(--ink-soft);
+}
+.filename:hover{border-color:var(--rule-soft)}
+.filename:focus{border-color:var(--accent); color:var(--ink); outline:none; background:var(--paper)}
+:root[data-theme="dark"] .filename:focus, :root:not([data-theme="light"]) .filename:focus{background:var(--chrome-2)}
+.dot{width:6px; height:6px; border-radius:50%; background:var(--mark); flex:none; opacity:0; transition:opacity .2s}
+.dot.on{opacity:1}
+.actions{display:flex; gap:7px; align-items:center}
+
+.btn{
+  border:1px solid var(--rule); background:transparent; border-radius:var(--radius);
+  padding:6px 11px; cursor:pointer; font-size:13px; font-weight:500;
+  display:inline-flex; align-items:center; gap:6px; white-space:nowrap;
+}
+.btn:hover{background:var(--chrome-2)}
+.btn.primary{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn svg{width:15px; height:15px}
+
+/* ---------- toolbar ---------- */
+.tools{
+  display:flex; flex-wrap:wrap; align-items:center; gap:3px;
+  padding:6px 12px; background:var(--chrome-2);
+  border-bottom:1px solid var(--rule);
+}
+.tool{
+  min-width:30px; height:30px; padding:0 7px;
+  border:1px solid transparent; background:transparent; border-radius:6px;
+  cursor:pointer; display:inline-grid; place-items:center;
+  font-size:13.5px; line-height:1;
+}
+.tool:hover{background:var(--chrome); border-color:var(--rule-soft)}
+.tool[aria-pressed="true"]{background:var(--accent-soft); border-color:transparent; color:var(--accent)}
+.tool svg{width:16px; height:16px; display:block}
+.tool .b{font-weight:700}
+.tool .i{font-style:italic; font-family:"Bricolage Grotesque",serif}
+.tool .u{text-decoration:underline; text-underline-offset:2px}
+.tool .s{text-decoration:line-through}
+.tool .m{font-family:ui-monospace,Menlo,Consolas,monospace; font-size:11.5px; letter-spacing:.02em}
+.sep{width:1px; height:19px; background:var(--rule); margin:0 6px; flex:none}
+.blockpick{
+  height:30px; border:1px solid var(--rule); background:var(--chrome);
+  border-radius:6px; padding:0 6px; font-size:13px; cursor:pointer; min-width:132px;
+}
+.spacer{flex:1}
+.hint{font-size:11.5px; color:var(--ink-soft); font-family:ui-monospace,Menlo,Consolas,monospace}
+
+/* ---------- desk / paper ---------- */
+.desk{position:relative; overflow:auto; padding:26px 26px 34px; display:flex; justify-content:center}
+.sheet{
+  width:100%; max-width:900px; background:var(--paper);
+  border-radius:3px; box-shadow:var(--shadow); overflow:hidden;
+  min-height:100%; display:flex; align-self:flex-start;
+}
+iframe{border:0; width:100%; min-height:520px; display:block; background:var(--paper)}
+
+/* ---------- status ---------- */
+.status{
+  display:flex; align-items:center; gap:12px;
+  padding:6px 14px; background:var(--chrome); border-top:1px solid var(--rule);
+  font-family:ui-monospace,Menlo,Consolas,monospace; font-size:11.5px; color:var(--ink-soft);
+  min-height:30px;
+}
+.path{display:flex; align-items:center; gap:5px; overflow:hidden; white-space:nowrap; flex:1}
+.path button{
+  border:0; background:transparent; padding:1px 4px; border-radius:4px; cursor:pointer;
+  font-family:inherit; font-size:inherit; color:inherit;
+}
+.path button:hover{background:var(--accent-soft); color:var(--accent)}
+.path .arrow{opacity:.45}
+.path .last{color:var(--mark)}
+.count{font-variant-numeric:tabular-nums; white-space:nowrap}
+.savestate{white-space:nowrap}
+.savestate.warn{color:var(--mark)}
+.btn.danger{color:var(--danger); border-color:var(--danger)}
+.btn.danger:hover{background:var(--danger); color:#fff}
+
+/* ---------- drop overlay ---------- */
+.drop{
+  position:fixed; inset:0; z-index:40; display:none; place-items:center;
+  background:color-mix(in srgb, var(--desk) 82%, transparent); backdrop-filter:blur(2px);
+}
+.drop.on{display:grid}
+.drop .box{
+  border:2px dashed var(--accent); border-radius:12px; padding:38px 54px;
+  background:var(--chrome); text-align:center;
+  font-family:"Bricolage Grotesque",sans-serif; font-weight:600; font-size:17px;
+}
+.drop .box small{display:block; margin-top:6px; font-family:"Figtree",sans-serif; font-weight:400; font-size:13px; color:var(--ink-soft)}
+
+/* ---------- panels / dialogs ---------- */
+.scrim{position:fixed; inset:0; z-index:50; background:rgba(10,16,14,.42); display:none}
+.scrim.on{display:block}
+.sheetpanel{
+  position:fixed; top:0; right:0; bottom:0; width:min(680px,92vw); z-index:51;
+  background:var(--chrome); border-left:1px solid var(--rule);
+  display:none; grid-template-rows:auto minmax(0,1fr); box-shadow:var(--shadow);
+}
+.sheetpanel.on{display:grid}
+.panelhead{display:flex; align-items:center; gap:10px; padding:12px 14px; border-bottom:1px solid var(--rule)}
+.panelhead h2{margin:0; font-family:"Bricolage Grotesque",sans-serif; font-size:15px; font-weight:600; flex:1}
+.source{
+  margin:0; padding:14px; overflow:auto; background:var(--desk);
+  font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; line-height:1.6;
+  white-space:pre-wrap; word-break:break-word; color:var(--ink);
+}
+.dialog{
+  position:fixed; z-index:52; left:50%; top:88px; transform:translateX(-50%);
+  background:var(--chrome); border:1px solid var(--rule); border-radius:10px;
+  box-shadow:var(--shadow); padding:14px; width:min(440px,92vw); display:none;
+}
+.dialog.on{display:block}
+.dialog label{display:block; font-size:12px; color:var(--ink-soft); margin-bottom:6px}
+.dialog .row{display:flex; gap:8px; margin-top:10px}
+.dialog input, .paste textarea{
+  width:100%; border:1px solid var(--rule); border-radius:6px; padding:8px 9px;
+  background:var(--paper); color:#14201D; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12.5px;
+}
+.paste textarea{min-height:220px; resize:vertical; line-height:1.5}
+.toast{
+  position:fixed; bottom:44px; left:50%; transform:translateX(-50%) translateY(8px);
+  background:var(--ink); color:var(--desk); padding:8px 14px; border-radius:999px;
+  font-size:12.5px; z-index:60; opacity:0; pointer-events:none; transition:opacity .18s, transform .18s;
+}
+.toast.on{opacity:1; transform:translateX(-50%) translateY(0)}
+/* ---------- mode chip + selects ---------- */
+.chip{
+  border:1px solid var(--rule); background:transparent; border-radius:999px;
+  padding:3px 11px 4px; cursor:pointer; font-size:11.5px; font-weight:500;
+  font-family:ui-monospace,Menlo,Consolas,monospace; letter-spacing:.04em; color:var(--ink-soft);
+  display:inline-flex; align-items:center; gap:6px; white-space:nowrap;
+}
+.chip:hover{border-color:var(--accent); color:var(--accent)}
+.chip .swap{opacity:.5; font-size:10px}
+.tool.hidden{display:none}
+.btn.ghost{border-color:transparent; color:var(--ink-soft); padding:6px 9px}
+.btn.ghost:hover{border-color:var(--rule); color:var(--ink); background:var(--chrome-2)}
+.btn.ghost svg{width:13px; height:13px; opacity:.8}
+.tip{
+  position:fixed; z-index:70; max-width:280px; padding:9px 11px;
+  background:var(--ink); color:var(--desk); border-radius:8px;
+  font-size:12px; line-height:1.5; box-shadow:var(--shadow);
+  pointer-events:none; opacity:0; transform:translateY(-3px);
+  transition:opacity .13s ease, transform .13s ease;
+}
+.tip.on{opacity:1; transform:translateY(0)}
+.tip .head{display:block; font-weight:600; margin-bottom:2px}
+.field{display:flex; flex-direction:column; gap:5px; flex:1}
+.field select{
+  height:32px; border:1px solid var(--rule); background:var(--chrome-2); color:var(--ink);
+  border-radius:6px; padding:0 7px; font:inherit; font-size:13px; cursor:pointer;
+}
+.dialog .cols{display:flex; gap:10px}
+.dialog .check{
+  display:flex; align-items:center; gap:8px; margin-top:11px;
+  font-size:12.5px; color:var(--ink); cursor:pointer;
+}
+.dialog .check input{width:15px; height:15px; accent-color:var(--accent); cursor:pointer}
+.dialog .preview{
+  margin-top:9px; padding:7px 9px; border-radius:6px; background:var(--chrome-2);
+  font-family:ui-monospace,Menlo,Consolas,monospace; font-size:11.5px; color:var(--ink-soft);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.dialog p.note{margin:10px 0 0; font-size:12px; color:var(--ink-soft); line-height:1.5}
+@media (prefers-reduced-motion: reduce){*{transition:none !important; animation:none !important}}
+@media (max-width:720px){
+  .mark span.word{display:none}
+  .desk{padding:12px}
+  .btn{padding:6px 9px}
+}
+</style>
+</head>
+<body style="margin:0">
+
+<div class="app">
+  <header class="bar">
+    <div class="mark"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2.2" y="3.2" width="15.6" height="13.6" rx="1.6"/><path d="M2.2 8.4h15.6M8.6 3.2v5.2M12.4 8.4v8.4"/></svg></span><span class="word">Setzkasten</span></div>
+    <input class="filename" id="fname" value="dokument.html" spellcheck="false" aria-label="Dateiname">
+    <span class="dot" id="dirty" title="Nicht gespeicherte Änderungen"></span>
+    <button class="btn ghost" id="closeBtn" data-tip="Schließen|Öffnet ein leeres Blatt. Sind noch ungespeicherte Änderungen da, wird vorher gefragt — der Editor hält nichts im Browser fest, gesichert ist nur, was als Datei auf der Platte liegt.">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5h9M4 12h9M4 18.5h9"/><path d="M16.5 9 20 12l-3.5 3"/></svg>
+      Schließen
+    </button>
+    <button class="chip" id="modeBtn" data-tip="Format wechseln|Wandelt das Dokument zwischen HTML und Markdown um. Vor der Umwandlung wird gefragt, denn jede Richtung lässt etwas zurück: HTML verliert sein CSS, Markdown seine Formatierung im Quelltext.">HTML<span class="swap">⇄</span></button>
+    <div class="actions">
+      <button class="btn" id="openBtn">Öffnen</button>
+      <button class="btn" id="pasteBtn">Einfügen</button>
+      <button class="btn" id="srcBtn">Quelltext</button>
+      <button class="btn" id="pdfBtn">PDF</button>
+      <button class="btn primary" id="saveBtn">Speichern</button>
+    </div>
+  </header>
+
+  <div class="tools" id="tools"></div>
+
+  <main class="desk" id="desk">
+    <div class="sheet"><iframe id="canvas" title="Dokument"></iframe></div>
+  </main>
+
+  <footer class="status">
+    <div class="path" id="path"><span class="arrow">Klick ins Dokument, um zu schreiben</span></div>
+    <div class="savestate" id="savedInfo">neues Dokument</div>
+    <div class="count" id="count"></div>
+  </footer>
+</div>
+
+<input type="file" id="fileIn" accept=".html,.htm,.md,.markdown,.mdown,.txt,text/html,text/markdown" hidden>
+<input type="file" id="imgIn" accept="image/*" hidden>
+
+<div class="drop" id="drop"><div class="box">Datei hier ablegen<small>.html, .htm, .md oder .markdown — wird lokal in deinem Browser geöffnet</small></div></div>
+
+<div class="scrim" id="scrim"></div>
+
+<aside class="sheetpanel" id="srcPanel" aria-label="Quelltext">
+  <div class="panelhead">
+    <h2 id="srcTitle">Quelltext</h2>
+    <button class="btn" id="copySrc">Kopieren</button>
+    <button class="btn" id="closeSrc">Schließen</button>
+  </div>
+  <pre class="source" id="srcOut"></pre>
+</aside>
+
+<div class="dialog" id="linkDlg">
+  <label for="linkUrl">Adresse des Links</label>
+  <input id="linkUrl" placeholder="https://" spellcheck="false">
+  <div class="row">
+    <button class="btn primary" id="linkOk">Verlinken</button>
+    <button class="btn" id="linkCancel">Abbrechen</button>
+  </div>
+</div>
+
+<div class="dialog paste" id="pasteDlg">
+  <label for="pasteArea">Text einfügen — ersetzt das aktuelle Dokument</label>
+  <textarea id="pasteArea" spellcheck="false" placeholder="&lt;!doctype html&gt; … oder # Überschrift"></textarea>
+  <div class="row">
+    <button class="btn primary" id="pasteHtml">Als HTML</button>
+    <button class="btn" id="pasteMd">Als Markdown</button>
+    <button class="btn" id="pasteNew">Leeres Dokument</button>
+    <button class="btn" id="pasteDemo">Beispiel</button>
+    <button class="btn" id="pasteCancel">Abbrechen</button>
+  </div>
+</div>
+
+<div class="dialog" id="guardDlg">
+  <label>Ungespeicherte Änderungen</label>
+  <p class="note">Der Editor merkt sich nichts über diesen Moment hinaus — was jetzt nicht als Datei gespeichert ist, geht verloren.</p>
+  <div class="row">
+    <button class="btn primary" id="guardSave">Speichern, dann weiter</button>
+    <button class="btn danger" id="guardDrop">Verwerfen</button>
+    <button class="btn" id="guardCancel">Abbrechen</button>
+  </div>
+</div>
+
+<div class="dialog" id="saveDlg">
+  <label for="saveName">Als Datei speichern</label>
+  <input id="saveName" spellcheck="false" autocomplete="off">
+  <label class="check"><input type="checkbox" id="saveStamp" checked> Zeitstempel anhängen — sekundengenau, damit nichts überschrieben wird</label>
+  <p class="note">Der Name wandert mit: Unter <strong>Zuletzt</strong> steht das Dokument danach genauso da. Die Datei selbst legt der Browser in deinem Download-Ordner ab.</p>
+  <div class="row">
+    <button class="btn primary" id="saveOk">Speichern</button>
+    <button class="btn" id="saveCancel">Abbrechen</button>
+  </div>
+</div>
+
+<div class="dialog" id="pdfDlg">
+  <div class="cols">
+    <span class="field">
+      <label for="pdfSize">Seitenformat</label>
+      <select id="pdfSize">
+        <option value="A4">A4</option>
+        <option value="Letter">Letter</option>
+        <option value="A5">A5</option>
+        <option value="A4 landscape">A4 quer</option>
+      </select>
+    </span>
+    <span class="field">
+      <label for="pdfMargin">Ränder</label>
+      <select id="pdfMargin">
+        <option value="12mm">Schmal — 12 mm</option>
+        <option value="18mm" selected>Normal — 18 mm</option>
+        <option value="25mm">Breit — 25 mm</option>
+      </select>
+    </span>
+  </div>
+  <p class="note">Es öffnet sich der Druckdialog des Browsers — dort als Ziel <strong>„Als PDF speichern"</strong> wählen. Überschriften und Bilder werden nicht über Seitenumbrüche getrennt.</p>
+  <div class="row">
+    <button class="btn primary" id="pdfOk">Druckdialog öffnen</button>
+    <button class="btn" id="pdfCancel">Abbrechen</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+  var $ = function(id){ return document.getElementById(id); };
+  var canvas = $("canvas"), fname = $("fname"), dirtyDot = $("dirty");
+  var doc = null, dirty = false, savedRange = null;
+
+  /* ---------- icons ---------- */
+  function svg(d, extra){
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + (extra||"") + '</svg>';
+  }
+  var ICON = {
+    undo: svg('<path d="M4 9h11a5 5 0 0 1 0 10h-6"/><path d="M8 5 4 9l4 4"/>'),
+    redo: svg('<path d="M20 9H9a5 5 0 0 0 0 10h6"/><path d="m16 5 4 4-4 4"/>'),
+    ul:   svg('<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.3" fill="currentColor" stroke="none"/><circle cx="4.5" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="4.5" cy="18" r="1.3" fill="currentColor" stroke="none"/>'),
+    ol:   svg('<path d="M10 6h10M10 12h10M10 18h10"/><path d="M4 8V4l-1 .8M3 12h2.4L3 16h2.6"/>'),
+    link: svg('<path d="M10.5 13.5a4 4 0 0 0 5.7 0l2.6-2.6a4 4 0 0 0-5.7-5.7l-1.3 1.3"/><path d="M13.5 10.5a4 4 0 0 0-5.7 0l-2.6 2.6a4 4 0 1 0 5.7 5.7l1.3-1.3"/>'),
+    unlink: svg('<path d="M11 13.6a4 4 0 0 0 5.2-.4l2.2-2.2a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M13 10.4a4 4 0 0 0-5.2.4l-2.2 2.2a4 4 0 0 0 5.7 5.7l1-1"/><path d="m3 3 18 18" stroke-width="1.4"/>'),
+    img:  svg('<rect x="3" y="4.5" width="18" height="15" rx="2"/><circle cx="8.5" cy="10" r="1.6"/><path d="m4 17 4.5-4.5 3.5 3.5 3-2.5L20 17"/>'),
+    hr:   svg('<path d="M3 12h18"/><path d="M6 7h12M6 17h12" opacity=".38"/>'),
+    left: svg('<path d="M4 6h16M4 12h10M4 18h14"/>'),
+    center: svg('<path d="M4 6h16M7 12h10M5 18h14"/>'),
+    right: svg('<path d="M4 6h16M10 12h10M6 18h14"/>')
+  };
+
+  /* ---------- toolbar ---------- */
+  var TOOLS = [
+    {type:"block"},
+    {sep:1},
+    {cmd:"bold", html:'<span class="b">B</span>', title:"Fett (Strg+B)"},
+    {cmd:"italic", html:'<span class="i">I</span>', title:"Kursiv (Strg+I)"},
+    {cmd:"underline", html:'<span class="u">U</span>', title:"Unterstrichen (Strg+U)", md:false},
+    {cmd:"strikeThrough", html:'<span class="s">S</span>', title:"Durchgestrichen"},
+    {act:"mark", html:'<span class="m">MRK</span>', title:"Hervorheben"},
+    {act:"code", html:'<span class="m">&lt;/&gt;</span>', title:"Code (inline)"},
+    {sep:1},
+    {cmd:"insertUnorderedList", html:ICON.ul, title:"Aufzählung"},
+    {cmd:"insertOrderedList", html:ICON.ol, title:"Nummerierte Liste"},
+    {cmd:"outdent", html:'<span class="m">&larr;</span>', title:"Ausrücken"},
+    {cmd:"indent", html:'<span class="m">&rarr;</span>', title:"Einrücken"},
+    {sep:1, md:false},
+    {cmd:"justifyLeft", html:ICON.left, title:"Linksbündig", md:false},
+    {cmd:"justifyCenter", html:ICON.center, title:"Zentriert", md:false},
+    {cmd:"justifyRight", html:ICON.right, title:"Rechtsbündig", md:false},
+    {sep:1},
+    {act:"link", html:ICON.link, title:"Link setzen"},
+    {cmd:"unlink", html:ICON.unlink, title:"Link entfernen"},
+    {act:"image", html:ICON.img, title:"Bild einfügen"},
+    {cmd:"insertHorizontalRule", html:ICON.hr, title:"Trennlinie"},
+    {sep:1},
+    {cmd:"removeFormat", html:'<span class="m">T&times;</span>', title:"Formatierung entfernen"},
+    {sep:1},
+    {cmd:"undo", html:ICON.undo, title:"Rückgängig"},
+    {cmd:"redo", html:ICON.redo, title:"Wiederholen"}
+  ];
+  var BLOCKS = [["P","Absatz"],["H1","Überschrift 1"],["H2","Überschrift 2"],["H3","Überschrift 3"],["H4","Überschrift 4"],["BLOCKQUOTE","Zitat"],["PRE","Code-Block"]];
+  var blockSel, stateBtns = [], mdHidden = [];
+
+  (function buildTools(){
+    var bar = $("tools");
+    TOOLS.forEach(function(t){
+      if (t.sep){
+        var s = document.createElement("span"); s.className = "sep";
+        if (t.md === false) mdHidden.push(s);
+        bar.appendChild(s); return;
+      }
+      if (t.type === "block"){
+        blockSel = document.createElement("select");
+        blockSel.className = "blockpick";
+        blockSel.setAttribute("aria-label","Absatzformat");
+        BLOCKS.forEach(function(b){
+          var o = document.createElement("option"); o.value = b[0]; o.textContent = b[1]; blockSel.appendChild(o);
+        });
+        blockSel.addEventListener("change", function(){ exec("formatBlock", "<" + blockSel.value.toLowerCase() + ">"); });
+        bar.appendChild(blockSel);
+        return;
+      }
+      var b = document.createElement("button");
+      b.className = "tool"; b.type = "button"; b.innerHTML = t.html;
+      b.title = t.title; b.setAttribute("aria-label", t.title);
+      b.addEventListener("mousedown", function(e){ e.preventDefault(); });
+      b.addEventListener("click", function(){
+        if (t.cmd) exec(t.cmd, null);
+        else if (t.act === "link") openLink();
+        else if (t.act === "image") $("imgIn").click();
+        else if (t.act === "mark") wrapInline("mark");
+        else if (t.act === "code") wrapInline("code");
+      });
+      if (t.cmd) { b.dataset.cmd = t.cmd; stateBtns.push(b); }
+      if (t.md === false) mdHidden.push(b);
+      bar.appendChild(b);
+    });
+    var sp = document.createElement("span"); sp.className = "spacer"; bar.appendChild(sp);
+    var h = document.createElement("span"); h.className = "hint"; h.textContent = "Strg+S sichert"; bar.appendChild(h);
+  })();
+
+  /* =========================================================
+     Markdown — eingebaute Konverter (kein CDN, offline nutzbar)
+     ========================================================= */
+  function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+  function inlineMd(text){
+    var codes = [], escs = [], S = String.fromCharCode(1);
+    text = text.replace(/\\([\\`*_{}\[\]()#+\-.!>~|])/g, function(_, c){ escs.push(c); return S + "E" + (escs.length-1) + S; });
+    text = text.replace(/(`+)([\s\S]*?)\1/g, function(_, t, body){ codes.push(body.replace(/^ | $/g,"")); return S + "C" + (codes.length-1) + S; });
+    text = esc(text);
+    text = text.replace(/!\[([^\]]*)\]\(\s*([^()\s]+)(?:\s+"([^"]*)")?\s*\)/g, function(_, alt, src, title){
+      return '<img src="' + src + '" alt="' + alt + '"' + (title ? ' title="' + title + '"' : '') + '>';
+    });
+    text = text.replace(/\[([^\]]*)\]\(\s*([^()\s]*)(?:\s+"([^"]*)")?\s*\)/g, function(_, t, href, title){
+      return '<a href="' + href + '"' + (title ? ' title="' + title + '"' : '') + '>' + t + '</a>';
+    });
+    text = text.replace(/&lt;((?:https?:\/\/|mailto:)[^\s&]+)&gt;/g, '<a href="$1">$1</a>');
+    text = text.replace(/~~([\s\S]+?)~~/g, "<del>$1</del>");
+    text = text.replace(/\*\*([\s\S]+?)\*\*/g, "<strong>$1</strong>");
+    text = text.replace(/(^|[^\w])__([\s\S]+?)__(?![\w])/g, "$1<strong>$2</strong>");
+    text = text.replace(/(^|[^\w*\\])\*([^*\s](?:[\s\S]*?[^*\s])?)\*(?!\*)/g, "$1<em>$2</em>");
+    text = text.replace(/(^|[^\w_\\])_([^_\s](?:[\s\S]*?[^_\s])?)_(?![\w])/g, "$1<em>$2</em>");
+    text = text.replace(/ {2,}\n/g, "<br>\n");
+    text = text.replace(new RegExp(S + "C(\\d+)" + S, "g"), function(_, i){ return "<code>" + esc(codes[+i]) + "</code>"; });
+    text = text.replace(new RegExp(S + "E(\\d+)" + S, "g"), function(_, i){ return esc(escs[+i]); });
+    return text;
+  }
+
+  function splitRow(line){
+    var s = line.trim().replace(/^\|/, "").replace(/\|$/, "");
+    var cells = [], cur = "";
+    for (var i = 0; i < s.length; i++){
+      if (s[i] === "\\" && s[i+1] === "|"){ cur += "|"; i++; continue; }
+      if (s[i] === "|"){ cells.push(cur.trim()); cur = ""; continue; }
+      cur += s[i];
+    }
+    cells.push(cur.trim());
+    return cells;
+  }
+
+  function mdToHtml(md){
+    md = String(md).replace(/\r\n?/g, "\n").replace(/\t/g, "    ");
+    var lines = md.split("\n"), out = [], i = 0;
+    var blank = function(s){ return /^\s*$/.test(s); };
+    var isHr = function(s){ return /^ {0,3}([-*_])[ \t]*(?:\1[ \t]*){2,}$/.test(s); };
+    var isItem = function(s){ return /^(\s*)([-*+]|\d+[.)])\s+/.test(s); };
+    var isHead = function(s){ return /^ {0,3}#{1,6}\s/.test(s); };
+    var isFence = function(s){ return /^ {0,3}(```|~~~)/.test(s); };
+
+    function parseList(start, indent){
+      var first = lines[start].match(/^(\s*)([-*+]|(\d+)[.)])\s+/);
+      var ordered = !/^[-*+]$/.test(first[2]);
+      var startNo = ordered ? parseInt(first[3], 10) : 1;
+      var items = [], j = start, cur = null, sawBlank = false;
+      while (j < lines.length){
+        var l = lines[j];
+        if (blank(l)){ sawBlank = true; if (cur) cur.push(""); j++; continue; }
+        var ind = (l.match(/^\s*/) || [""])[0].length;
+        var m = l.match(/^(\s*)([-*+]|\d+[.)])\s+([\s\S]*)$/);
+        if (m && m[1].length <= indent + 1){
+          if (ind < indent) break;
+          if (!/^[-*+]$/.test(m[2]) !== ordered) break;
+          cur = [m[3]]; items.push(cur); sawBlank = false; j++; continue;
+        }
+        if (!cur) break;
+        if (ind >= indent + 2){ cur.push(l.slice(indent + 2)); sawBlank = false; j++; continue; }
+        if (sawBlank) break;
+        cur.push(l.trim()); j++;
+      }
+      var html = items.map(function(it){
+        var body = mdToHtml(it.join("\n").replace(/\s+$/, ""));
+        body = body.replace(/^<p>([\s\S]*?)<\/p>\s*/, "$1\n").replace(/\s+$/, "");
+        return "<li>" + body + "</li>";
+      }).join("\n");
+      var open = ordered ? ("<ol" + (startNo !== 1 ? ' start="' + startNo + '"' : "") + ">") : "<ul>";
+      return { html: open + "\n" + html + "\n" + (ordered ? "</ol>" : "</ul>"), i: j };
+    }
+
+    while (i < lines.length){
+      var line = lines[i];
+      if (blank(line)){ i++; continue; }
+
+      var f = line.match(/^ {0,3}(```|~~~)\s*([\w+#-]*)\s*$/);
+      if (f){
+        var buf = []; i++;
+        while (i < lines.length && !(new RegExp("^ {0,3}" + f[1])).test(lines[i])){ buf.push(lines[i]); i++; }
+        i++;
+        out.push("<pre><code" + (f[2] ? ' class="language-' + f[2] + '"' : "") + ">" + esc(buf.join("\n")) + "</code></pre>");
+        continue;
+      }
+      var h = line.match(/^ {0,3}(#{1,6})\s+(.*?)\s*#*\s*$/);
+      if (h){ out.push("<h" + h[1].length + ">" + inlineMd(h[2]) + "</h" + h[1].length + ">"); i++; continue; }
+      if (isHr(line)){ out.push("<hr>"); i++; continue; }
+
+      if (/^ {0,3}>/.test(line)){
+        var q = [];
+        while (i < lines.length && !blank(lines[i])){
+          if (!/^ {0,3}>/.test(lines[i]) && q.length === 0) break;
+          q.push(lines[i].replace(/^ {0,3}>[ \t]?/, "")); i++;
+        }
+        out.push("<blockquote>\n" + mdToHtml(q.join("\n")) + "\n</blockquote>");
+        continue;
+      }
+
+      if (line.indexOf("|") >= 0 && i + 1 < lines.length && /^ {0,3}\|?[\s:|-]*-[\s:|-]*$/.test(lines[i+1]) && lines[i+1].indexOf("|") >= 0){
+        var head = splitRow(line);
+        var align = splitRow(lines[i+1]).map(function(c){
+          if (/^:-+:$/.test(c)) return "center";
+          if (/-+:$/.test(c)) return "right";
+          return "";
+        });
+        i += 2;
+        var body = [];
+        while (i < lines.length && !blank(lines[i]) && lines[i].indexOf("|") >= 0){ body.push(splitRow(lines[i])); i++; }
+        var th = head.map(function(c, k){ return "<th" + (align[k] ? ' style="text-align:' + align[k] + '"' : "") + ">" + inlineMd(c) + "</th>"; }).join("");
+        var tb = body.map(function(r){
+          return "<tr>" + head.map(function(_, k){
+            return "<td" + (align[k] ? ' style="text-align:' + align[k] + '"' : "") + ">" + inlineMd(r[k] || "") + "</td>";
+          }).join("") + "</tr>";
+        }).join("\n");
+        out.push("<table>\n<thead><tr>" + th + "</tr></thead>\n<tbody>\n" + tb + "\n</tbody>\n</table>");
+        continue;
+      }
+
+      if (isItem(line)){
+        var r = parseList(i, (line.match(/^\s*/) || [""])[0].length);
+        out.push(r.html); i = r.i; continue;
+      }
+
+      if (/^ {0,3}<(\/?)(html|head|body|div|section|article|main|header|footer|nav|aside|figure|figcaption|table|thead|tbody|tr|td|th|ul|ol|li|p|pre|blockquote|hr|h[1-6]|iframe|video|audio|details|summary|style|script)\b/i.test(line)){
+        var raw = [];
+        while (i < lines.length && !blank(lines[i])){ raw.push(lines[i]); i++; }
+        out.push(raw.join("\n"));
+        continue;
+      }
+
+      var para = [];
+      while (i < lines.length && !blank(lines[i])){
+        var nx = lines[i];
+        if (para.length && /^ {0,3}(=+|-+)\s*$/.test(nx)){
+          var lvl = nx.trim().charAt(0) === "=" ? 1 : 2;
+          out.push("<h" + lvl + ">" + inlineMd(para.join(" ")) + "</h" + lvl + ">");
+          para = null; i++; break;
+        }
+        if (para.length && (isHead(nx) || isFence(nx) || /^ {0,3}>/.test(nx) || isItem(nx) || isHr(nx))) break;
+        para.push(nx.trim()); i++;
+      }
+      if (para && para.length) out.push("<p>" + inlineMd(para.join("\n")) + "</p>");
+    }
+    return out.length ? out.join("\n\n") : "<p><br></p>";
+  }
+
+  /* ---------- HTML -> Markdown ---------- */
+  var INLINE_TAGS = "a,abbr,b,bdi,bdo,big,cite,code,del,em,i,img,ins,kbd,mark,q,s,samp,small,span,strike,strong,sub,sup,time,tt,u,var,br,font,label".split(",");
+  var SKIP_TAGS = "script,style,link,meta,title,noscript,template".split(",");
+
+  function mdEscape(s){
+    return s.replace(/([\\`*_\[\]])/g, "\\$1");
+  }
+  function tight(inner, mk){
+    var m = inner.match(/^(\s*)([\s\S]*?)(\s*)$/);
+    if (!m || !m[2]) return inner;
+    return m[1] + mk + m[2] + mk + m[3];
+  }
+  function inlineOf(node){
+    var s = "", kids = node.childNodes;
+    for (var i = 0; i < kids.length; i++){
+      var c = kids[i];
+      if (c.nodeType === 3){ s += mdEscape(c.nodeValue.replace(/\s+/g, " ")); continue; }
+      if (c.nodeType !== 1) continue;
+      var tag = c.tagName.toLowerCase();
+      if (SKIP_TAGS.indexOf(tag) >= 0) continue;
+      var inner = inlineOf(c);
+      if (tag === "strong" || tag === "b") s += tight(inner, "**");
+      else if (tag === "em" || tag === "i") s += tight(inner, "*");
+      else if (tag === "del" || tag === "s" || tag === "strike") s += tight(inner, "~~");
+      else if (tag === "code"){ var t = c.textContent; var f = t.indexOf("`") >= 0 ? "``" : "`"; s += f + (t.indexOf("`") >= 0 ? " " + t + " " : t) + f; }
+      else if (tag === "a"){ var href = c.getAttribute("href"); s += href ? "[" + inner + "](" + href + ")" : inner; }
+      else if (tag === "img") s += "![" + (c.getAttribute("alt") || "") + "](" + (c.getAttribute("src") || "") + ")";
+      else if (tag === "br") s += "  \n";
+      else if (tag === "mark" || tag === "sup" || tag === "sub" || tag === "kbd") s += "<" + tag + ">" + inner + "</" + tag + ">";
+      else s += inner;
+    }
+    return s;
+  }
+
+  function listMd(list, indent){
+    var ordered = list.tagName === "OL";
+    var n = parseInt(list.getAttribute("start") || "1", 10);
+    var s = "", kids = list.children;
+    for (var i = 0; i < kids.length; i++){
+      if (kids[i].tagName !== "LI") continue;
+      var marker = ordered ? (n++) + ". " : "- ";
+      var pad = new Array(marker.length + 1).join(" ");
+      var content = blocksOf(kids[i], "").replace(/\s+$/, "");
+      content = content.replace(/\n{2,}(?=\s*(?:[-*+]|\d+\.)\s)/g, "\n");
+      var rows = content.split("\n");
+      s += indent + marker + (rows.shift() || "") + "\n";
+      for (var k = 0; k < rows.length; k++) s += (rows[k] ? indent + pad + rows[k] : "") + "\n";
+    }
+    return s;
+  }
+
+  function tableMd(tbl, indent){
+    var rows = tbl.querySelectorAll("tr"), body = [], head = null, aligns = [];
+    for (var i = 0; i < rows.length; i++){
+      var cells = rows[i].children, row = [], al = [];
+      for (var j = 0; j < cells.length; j++){
+        row.push(inlineOf(cells[j]).replace(/\|/g, "\\|").replace(/\n/g, " ").trim());
+        al.push((cells[j].style && cells[j].style.textAlign) || cells[j].getAttribute("align") || "");
+      }
+      if (!head && rows[i].querySelector("th")){ head = row; aligns = al; }
+      else { body.push(row); if (!aligns.length) aligns = al; }
+    }
+    if (!head){ head = body.shift() || []; }
+    var width = head.length;
+    var line = function(r){ var o = []; for (var k = 0; k < width; k++) o.push(r[k] || ""); return indent + "| " + o.join(" | ") + " |"; };
+    var sep = [];
+    for (var k = 0; k < width; k++){
+      var a = aligns[k] || "";
+      sep.push(a === "right" ? "---:" : a === "center" ? ":---:" : a === "left" ? ":---" : "---");
+    }
+    var out = [line(head), indent + "| " + sep.join(" | ") + " |"];
+    body.forEach(function(r){ out.push(line(r)); });
+    return out.join("\n") + "\n\n";
+  }
+
+  function blocksOf(el, indent){
+    var out = "", kids = el.childNodes, buf = [];
+    function flush(){
+      if (!buf.length) return;
+      var wrap = el.ownerDocument.createElement("span");
+      for (var k = 0; k < buf.length; k++) wrap.appendChild(buf[k].cloneNode(true));
+      buf = [];
+      var s = inlineOf(wrap).replace(/^\s+|\s+$/g, "");
+      if (s) out += indent + s + "\n\n";
+    }
+    for (var i = 0; i < kids.length; i++){
+      var c = kids[i];
+      if (c.nodeType === 3){
+        if (c.nodeValue.trim() || buf.length) buf.push(c);
+        continue;
+      }
+      if (c.nodeType !== 1) continue;
+      var tag = c.tagName.toLowerCase();
+      if (SKIP_TAGS.indexOf(tag) >= 0) continue;
+      if (INLINE_TAGS.indexOf(tag) >= 0){ buf.push(c); continue; }
+      flush();
+      if (/^h[1-6]$/.test(tag)){
+        var txt = inlineOf(c).trim();
+        if (txt) out += indent + new Array(+tag[1] + 1).join("#") + " " + txt + "\n\n";
+      }
+      else if (tag === "p"){
+        if (c.querySelector("ul,ol,blockquote,pre,table,hr,h1,h2,h3,h4,h5,h6,div")) out += blocksOf(c, indent);
+        else { var p = inlineOf(c).trim(); if (p) out += indent + p + "\n\n"; }
+      }
+      else if (tag === "ul" || tag === "ol") out += listMd(c, indent) + "\n";
+      else if (tag === "blockquote"){
+        var q = blocksOf(c, "").replace(/\s+$/, "").split("\n");
+        out += q.map(function(l){ return indent + (l ? "> " + l : ">"); }).join("\n") + "\n\n";
+      }
+      else if (tag === "pre"){
+        var code = c.querySelector("code");
+        var lang = "";
+        if (code){ var cl = (code.getAttribute("class") || "").match(/language-([\w+#-]+)/); if (cl) lang = cl[1]; }
+        var body = (code ? code.textContent : c.textContent).replace(/\n+$/, "");
+        out += indent + "```" + lang + "\n" + body.split("\n").map(function(l){ return indent + l; }).join("\n") + "\n" + indent + "```\n\n";
+      }
+      else if (tag === "hr") out += indent + "---\n\n";
+      else if (tag === "table") out += tableMd(c, indent);
+      else out += blocksOf(c, indent);
+    }
+    flush();
+    return out;
+  }
+
+  function htmlToMd(root){
+    return blocksOf(root, "").replace(/\n{3,}/g, "\n\n").replace(/^\n+/, "").replace(/\s+$/, "") + "\n";
+  }
+
+  /* ---------- Markdown-Ansicht ---------- */
+  var MD_CSS =
+    'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif;max-width:46rem;margin:0 auto;padding:3rem 1.75rem;line-height:1.65;color:#1c2321;background:#fff}' +
+    'h1,h2,h3,h4,h5,h6{line-height:1.22;margin:2rem 0 .6rem;letter-spacing:-.01em}h1{font-size:2rem;margin-top:0}h2{font-size:1.45rem}h3{font-size:1.18rem}h4{font-size:1.02rem}' +
+    'p,ul,ol,blockquote,pre,table{margin:0 0 1rem}ul,ol{padding-left:1.4rem}li{margin:.25rem 0}li>ul,li>ol{margin:.25rem 0}' +
+    'a{color:#0b6e5f}' +
+    'code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em;background:#f1f4ef;padding:.12em .35em;border-radius:3px}' +
+    'pre{background:#f1f4ef;padding:.9rem 1rem;border-radius:6px;overflow:auto}pre code{background:none;padding:0;font-size:.86em;line-height:1.5}' +
+    'blockquote{border-left:3px solid #cfd8d2;padding-left:1rem;margin-left:0;color:#4a5854}' +
+    'hr{border:0;border-top:1px solid #dfe4dd;margin:2rem 0}' +
+    'table{border-collapse:collapse;width:100%}th,td{border:1px solid #dfe4dd;padding:.4rem .6rem;text-align:left}th{background:#f5f7f3}' +
+    'img{max-width:100%;height:auto}mark{background:#fdedb8;padding:0 .15em}';
+
+  function wrapDoc(bodyHtml, styleId, title){
+    return '<!doctype html>\n<html lang="de">\n<head>\n<meta charset="utf-8">\n<title>' + title + '</title>\n' +
+      '<style' + (styleId ? ' id="' + styleId + '"' : "") + '>' + MD_CSS + '</style>\n</head>\n<body>\n' + bodyHtml + '\n</body>\n</html>';
+  }
+
+  /* ---------- document plumbing ---------- */
+  var CHROME_CSS =
+    '[data-sk-active]{outline:1.5px solid rgba(200,138,18,.55); outline-offset:3px; border-radius:2px}' +
+    'img{max-width:100%; height:auto}';
+
+  function neutralize(html){
+    var parsed = new DOMParser().parseFromString(html, "text/html");
+    var scripts = parsed.querySelectorAll("script");
+    for (var i = 0; i < scripts.length; i++){
+      var s = scripts[i];
+      s.setAttribute("data-sk-type", s.getAttribute("type") || "");
+      s.setAttribute("type", "text/sk-inert");
+    }
+    var dt = "<!doctype html>";
+    if (parsed.doctype && parsed.doctype.name) dt = "<!DOCTYPE " + parsed.doctype.name + ">";
+    return { dt: dt, html: dt + "\n" + parsed.documentElement.outerHTML, scripts: scripts.length };
+  }
+
+  var docType = "<!doctype html>";
+
+  function loadHTML(html, name){
+    var n = neutralize(html);
+    docType = n.dt;
+    var d = null;
+    try { d = canvas.contentDocument; } catch(e){}
+    if (!d){
+      $("desk").innerHTML = '<div style="max-width:38rem;margin:auto;text-align:center;padding:2rem;line-height:1.6">' +
+        '<strong>Die Bearbeitungsfläche lässt sich hier nicht öffnen.</strong><br>' +
+        'Dieser Browser-Kontext blockiert eingebettete Dokumente. Lade die Editor-Datei herunter und öffne sie direkt im Browser.</div>';
+      return;
+    }
+    d.open(); d.write(n.html); d.close();
+    doc = canvas.contentDocument;
+    var st = doc.createElement("style");
+    st.id = "__sk_chrome"; st.textContent = CHROME_CSS;
+    (doc.head || doc.documentElement).appendChild(st);
+    doc.designMode = "on";
+    try { doc.execCommand("styleWithCSS", false, false); } catch(e){}
+    doc.addEventListener("input", onEdit);
+    doc.addEventListener("selectionchange", syncState);
+    doc.addEventListener("keydown", onDocKey);
+    doc.addEventListener("click", function(e){
+      var a = e.target && e.target.closest ? e.target.closest("a") : null;
+      if (a) e.preventDefault();
+    });
+    if (name) { fname.value = name; }
+    savedAt = 0;
+    fitHeight(); syncState(); setDirty(false);
+    if (n.scripts) toast(n.scripts + " Script-Tag(s) beim Bearbeiten stillgelegt — im Export wieder aktiv.");
+  }
+
+  function fitHeight(){
+    if (!doc || !doc.documentElement || !doc.body) return;
+    var desk = $("desk");
+    var keep = desk.scrollTop;
+    var floor = Math.max(360, desk.clientHeight - 62);
+    canvas.style.height = "0px";
+    var content = Math.max(doc.documentElement.scrollHeight, doc.body.scrollHeight);
+    var h = Math.max(content + 2, floor);
+    canvas.style.height = h + "px";
+    desk.scrollTop = keep;
+  }
+
+  function serialize(){
+    if (!doc) return "";
+    var clone = doc.documentElement.cloneNode(true);
+    ["#__sk_chrome", "#__sk_print"].forEach(function(sel){
+      var el = clone.querySelector(sel);
+      if (el) el.parentNode.removeChild(el);
+    });
+    var act = clone.querySelectorAll("[data-sk-active]");
+    for (var i = 0; i < act.length; i++) act[i].removeAttribute("data-sk-active");
+    var sc = clone.querySelectorAll("script[data-sk-type]");
+    for (var j = 0; j < sc.length; j++){
+      var orig = sc[j].getAttribute("data-sk-type");
+      sc[j].removeAttribute("data-sk-type");
+      if (orig) sc[j].setAttribute("type", orig); else sc[j].removeAttribute("type");
+    }
+    return docType + "\n" + clone.outerHTML + "\n";
+  }
+
+  /* ---------- Modus: HTML oder Markdown ---------- */
+  var mode = "html", frontmatter = "";
+
+  function baseName(){
+    return (fname.value || "dokument").replace(/\.(html?|markdown|mdown|md|txt)$/i, "");
+  }
+  function applyMode(){
+    var md = mode === "md";
+    $("modeBtn").innerHTML = (md ? "MARKDOWN" : "HTML") + '<span class="swap">⇄</span>';
+    $("srcTitle").textContent = md ? "Markdown" : "Quelltext";
+    for (var i = 0; i < mdHidden.length; i++) mdHidden[i].classList.toggle("hidden", md);
+  }
+  function currentSource(){
+    if (!doc) return "";
+    if (mode !== "md") return serialize();
+    return (frontmatter ? frontmatter.replace(/\s*$/, "\n\n") : "") + htmlToMd(doc.body);
+  }
+  function loadMarkdown(md, name){
+    md = String(md).replace(new RegExp("^" + String.fromCharCode(65279)), "");
+    var m = md.match(/^---\r?\n[\s\S]*?\r?\n---[ \t]*\r?\n?/);
+    frontmatter = m ? m[0] : "";
+    var text = m ? md.slice(m[0].length) : md;
+    mode = "md";
+    loadHTML(wrapDoc(mdToHtml(text), "__sk_mdcss", "Markdown"), name || "dokument.md");
+    applyMode();
+    if (frontmatter) toast("Frontmatter erkannt — wird beim Speichern unverändert erhalten.");
+  }
+  function loadHtmlDoc(html, name){
+    mode = "html"; frontmatter = "";
+    loadHTML(html, name);
+    applyMode();
+  }
+  function switchMode(){
+    if (!doc) return;
+    var ok = true;
+    if (mode === "html"){
+      try { ok = confirm("Nach Markdown umwandeln?\n\nText, Überschriften, Listen, Links und Bilder bleiben erhalten. Das CSS und alle Layout-Auszeichnungen der HTML-Datei gehen dabei verloren."); } catch(e){}
+      if (!ok) return;
+      var md = htmlToMd(doc.body);
+      loadMarkdown(md, baseName() + ".md");
+      toast("In Markdown umgewandelt — Styles entfallen.");
+    } else {
+      try { ok = confirm("Nach HTML umwandeln?\n\nDas Dokument wird zu einer eigenständigen HTML-Datei mit dem Stylesheet der Markdown-Ansicht."); } catch(e){}
+      if (!ok) return;
+      var hadFm = !!frontmatter;
+      loadHtmlDoc(wrapDoc(doc.body.innerHTML, null, baseName()), baseName() + ".html");
+      toast(hadFm ? "In HTML umgewandelt — Stylesheet eingebettet, Frontmatter entfällt." : "In HTML umgewandelt — Stylesheet eingebettet.");
+    }
+  }
+  $("modeBtn").addEventListener("click", switchMode);
+
+  /* ---------- editing commands ---------- */
+  function focusDoc(){
+    try { canvas.contentWindow.focus(); } catch(e){}
+    try { if (doc && doc.body && doc.body.focus) doc.body.focus({preventScroll:true}); } catch(e){}
+  }
+
+  function tidy(){
+    if (!doc || !doc.body) return;
+    var nested = doc.body.querySelectorAll("p > ul, p > ol, p > p, p > blockquote");
+    for (var i = 0; i < nested.length; i++){
+      var node = nested[i], p = node.parentNode;
+      if (!p || !p.parentNode) continue;
+      p.parentNode.insertBefore(node, p);
+      if (!p.textContent.trim() && !p.querySelector("img")) p.parentNode.removeChild(p);
+    }
+  }
+
+  function exec(cmd, val){
+    if (!doc) return;
+    focusDoc();
+    try { doc.execCommand(cmd, false, val); } catch(e){}
+    tidy(); onEdit(); syncState();
+  }
+
+  function wrapInline(tag){
+    if (!doc) return;
+    var sel = doc.getSelection();
+    if (!sel || sel.isCollapsed) { toast("Zuerst Text markieren."); return; }
+    var range = sel.getRangeAt(0);
+    var host = doc.createElement("div");
+    host.appendChild(range.cloneContents());
+    var inner = host.innerHTML;
+    var open = "<" + tag + ">", close = "</" + tag + ">";
+    if (host.querySelector(tag) && host.textContent === (host.querySelector(tag).textContent || "")){
+      doc.execCommand("insertHTML", false, host.querySelector(tag).innerHTML);
+    } else {
+      doc.execCommand("insertHTML", false, open + inner + close);
+    }
+    onEdit(); syncState();
+  }
+
+  function openLink(){
+    if (!doc) return;
+    var sel = doc.getSelection();
+    if (!sel || sel.rangeCount === 0 || sel.isCollapsed){ toast("Zuerst den Text markieren, der verlinkt werden soll."); return; }
+    savedRange = sel.getRangeAt(0).cloneRange();
+    var node = sel.anchorNode;
+    var a = node && (node.nodeType === 1 ? node : node.parentNode);
+    a = a && a.closest ? a.closest("a") : null;
+    $("linkUrl").value = a ? a.getAttribute("href") : "https://";
+    $("linkDlg").classList.add("on");
+    $("linkUrl").focus(); $("linkUrl").select();
+  }
+  function applyLink(){
+    var url = $("linkUrl").value.trim();
+    $("linkDlg").classList.remove("on");
+    if (!url || !savedRange) return;
+    var sel = doc.getSelection();
+    sel.removeAllRanges(); sel.addRange(savedRange);
+    focusDoc();
+    doc.execCommand("createLink", false, url);
+    onEdit(); syncState();
+  }
+
+  $("imgIn").addEventListener("change", function(e){
+    var f = e.target.files && e.target.files[0];
+    if (!f || !doc) return;
+    var r = new FileReader();
+    r.onload = function(){
+      focusDoc();
+      doc.execCommand("insertHTML", false, '<img src="' + r.result + '" alt="">');
+      onEdit(); syncState();
+    };
+    r.readAsDataURL(f);
+    e.target.value = "";
+  });
+
+  /* ---------- state sync ---------- */
+  function syncState(){
+    if (!doc) return;
+    for (var i = 0; i < stateBtns.length; i++){
+      var c = stateBtns[i].dataset.cmd, on = false;
+      try { on = doc.queryCommandState(c); } catch(e){}
+      stateBtns[i].setAttribute("aria-pressed", on ? "true" : "false");
+    }
+    var sel = doc.getSelection();
+    var node = sel && sel.anchorNode;
+    var el = node ? (node.nodeType === 1 ? node : node.parentNode) : null;
+    if (el){
+      var b = el.closest("h1,h2,h3,h4,h5,h6,blockquote,pre,p,li,td,th,div,body");
+      var tag = b ? b.tagName : "P";
+      var opt = BLOCKS.filter(function(x){ return x[0] === tag; });
+      blockSel.value = opt.length ? tag : "P";
+      var prev = doc.querySelectorAll("[data-sk-active]");
+      for (var k = 0; k < prev.length; k++) prev[k].removeAttribute("data-sk-active");
+      if (b && b.tagName !== "BODY" && b.tagName !== "HTML") b.setAttribute("data-sk-active","");
+      renderPath(el);
+    }
+    var txt = doc.body ? (doc.body.innerText || "").trim() : "";
+    $("count").textContent = (txt ? txt.split(/\s+/).length : 0) + " Wörter";
+  }
+
+  function renderPath(el){
+    var chain = [], n = el;
+    while (n && n.nodeType === 1 && n.tagName !== "HTML"){ chain.unshift(n); n = n.parentNode; }
+    chain = chain.slice(-6);
+    var box = $("path"); box.innerHTML = "";
+    chain.forEach(function(node, i){
+      if (i){ var s = document.createElement("span"); s.className = "arrow"; s.textContent = "›"; box.appendChild(s); }
+      var b = document.createElement("button");
+      b.type = "button";
+      var label = node.tagName.toLowerCase();
+      if (node.id) label += "#" + node.id;
+      else if (node.className && typeof node.className === "string" && node.className.trim()) label += "." + node.className.trim().split(/\s+/)[0];
+      b.textContent = label;
+      if (i === chain.length - 1) b.className = "last";
+      b.title = "Element auswählen";
+      b.addEventListener("click", function(){
+        var r = doc.createRange(); r.selectNodeContents(node);
+        var s2 = doc.getSelection(); s2.removeAllRanges(); s2.addRange(r);
+        focusDoc(); syncState();
+      });
+      box.appendChild(b);
+    });
+  }
+
+  /* ---------- Änderungsstand ---------- */
+  var savedAt = 0, pending = null, afterSave = null;
+
+  function setDirty(v){
+    dirty = v;
+    dirtyDot.classList.toggle("on", !!v);
+    renderSaveState();
+  }
+  function onEdit(){ setDirty(true); fitHeight(); }
+
+  function clockTime(ts){
+    var d = new Date(ts);
+    return two(d.getHours()) + ":" + two(d.getMinutes()) + ":" + two(d.getSeconds());
+  }
+  function renderSaveState(){
+    var el = $("savedInfo");
+    if (!el) return;
+    if (savedAt) el.textContent = "gespeichert " + clockTime(savedAt) + (dirty ? " · seitdem geändert" : "");
+    else el.textContent = dirty ? "noch nicht gespeichert" : "neues Dokument";
+    el.className = "savestate" + (dirty ? " warn" : "");
+  }
+
+  /* Schutzabfrage vor allem, was das Dokument ersetzt */
+  function guard(fn){
+    if (!dirty){ fn(); return; }
+    pending = fn;
+    $("guardDlg").classList.add("on"); $("scrim").classList.add("on");
+    $("guardSave").focus();
+  }
+  $("guardSave").addEventListener("click", function(){
+    hideAll(); afterSave = pending; pending = null; save();
+  });
+  $("guardDrop").addEventListener("click", function(){
+    var f = pending; pending = null; hideAll(); if (f) f();
+  });
+  $("guardCancel").addEventListener("click", function(){ pending = null; afterSave = null; hideAll(); });
+
+  window.addEventListener("beforeunload", function(e){
+    if (!dirty) return;
+    var msg = "Ungespeicherte Änderungen gehen verloren.";
+    e.preventDefault(); e.returnValue = msg;
+    return msg;
+  });
+
+  function closeDoc(){
+    guard(function(){
+      if (mode === "md") loadMarkdown("", "unbenannt.md");
+      else loadHtmlDoc(BLANK, "unbenannt.html");
+      setDirty(false);
+      toast("Leeres Blatt.");
+    });
+  }
+  $("closeBtn").addEventListener("click", closeDoc);
+
+  /* ---------- import / export ---------- */
+  function readFile(f){
+    if (!f) return;
+    var r = new FileReader();
+    r.onload = function(){
+      var text = String(r.result);
+      if (/\.(md|markdown|mdown|txt)$/i.test(f.name)) loadMarkdown(text, f.name);
+      else loadHtmlDoc(text, f.name);
+      toast("„" + f.name + "“ geöffnet.");
+    };
+    r.readAsText(f);
+  }
+  $("fileIn").addEventListener("change", function(e){
+    var f = e.target.files[0]; e.target.value = "";
+    guard(function(){ readFile(f); });
+  });
+  $("openBtn").addEventListener("click", function(){ $("fileIn").click(); });
+
+  var dragDepth = 0;
+  window.addEventListener("dragenter", function(e){ e.preventDefault(); dragDepth++; $("drop").classList.add("on"); });
+  window.addEventListener("dragover", function(e){ e.preventDefault(); });
+  window.addEventListener("dragleave", function(){ dragDepth = Math.max(0, dragDepth-1); if (!dragDepth) $("drop").classList.remove("on"); });
+  window.addEventListener("drop", function(e){
+    e.preventDefault(); dragDepth = 0; $("drop").classList.remove("on");
+    var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) guard(function(){ readFile(f); });
+  });
+
+  var downloads = null, hosted = !!(window.claude && window.claude.use), dlReady = null;
+  if (hosted){
+    dlReady = window.claude.use("downloads").then(function(d){ downloads = d; }).catch(function(){});
+  }
+
+  var UMLAUT = { "ä":"ae", "ö":"oe", "ü":"ue", "Ä":"Ae", "Ö":"Oe", "Ü":"Ue", "ß":"ss" };
+  function asciiName(n){
+    var s = n.replace(/[äöüÄÖÜß]/g, function(c){ return UMLAUT[c]; });
+    try { s = s.normalize("NFD").replace(new RegExp("[" + String.fromCharCode(768) + "-" + String.fromCharCode(879) + "]", "g"), ""); } catch(e){}
+    s = s.replace(/[^\x20-\x7E]/g, "-").replace(/-{2,}/g, "-").replace(/^[-\s]+|[-\s]+$/g, "");
+    return s || "dokument.html";
+  }
+
+  /* ---------- Namensvorschlag ---------- */
+  function two(n){ return (n < 10 ? "0" : "") + n; }
+  function stamp(){
+    var d = new Date();
+    return d.getFullYear() + "-" + two(d.getMonth() + 1) + "-" + two(d.getDate()) +
+      "_" + two(d.getHours()) + two(d.getMinutes()) + two(d.getSeconds());
+  }
+  var STAMP_RE = /-\d{4}-\d{2}-\d{2}_\d{6}$/;
+  var PLACEHOLDER = /^(unbenannt|neu|eingefuegt|eingefügt|beispiel)$/i;
+  var saveBase = "dokument", saveExt = ".html";
+
+  function nameParts(n){
+    var m = String(n || "").match(/^(.*?)(\.[A-Za-z0-9]{1,8})?$/);
+    var base = (m && m[1]) || "";
+    var ext = (m && m[2]) || "";
+    base = base.replace(STAMP_RE, "");
+    if (!base || PLACEHOLDER.test(base)) base = "dokument";
+    return { base: base, ext: ext };
+  }
+  function defaultExt(){ return mode === "md" ? ".md" : ".html"; }
+  function buildName(base, withStamp, ext){
+    return base + (withStamp ? "-" + stamp() : "") + (ext || defaultExt());
+  }
+
+  function openSave(){
+    var p = nameParts(fname.value), ext = p.ext;
+    if (!/^\.(html?|md|markdown|mdown|txt)$/i.test(ext)) ext = defaultExt();
+    if (mode === "md" && /^\.html?$/i.test(ext)) ext = ".md";
+    if (mode !== "md" && /^\.(md|markdown|mdown|txt)$/i.test(ext)) ext = ".html";
+    saveBase = p.base; saveExt = ext;
+    var inp = $("saveName");
+    inp.value = buildName(saveBase, $("saveStamp").checked, saveExt);
+    $("saveDlg").classList.add("on"); $("scrim").classList.add("on");
+    inp.focus();
+    try { inp.setSelectionRange(0, inp.value.length - saveExt.length); } catch(e){}
+  }
+  function confirmSave(){
+    var n = $("saveName").value.trim();
+    if (!n) return;
+    if (!/\.[A-Za-z0-9]{1,8}$/.test(n)) n += saveExt;
+    hideAll();
+    fname.value = n;
+    doSave();
+  }
+  $("saveStamp").addEventListener("change", function(){
+    var cur = nameParts($("saveName").value);
+    $("saveName").value = buildName(cur.base, $("saveStamp").checked, saveExt);
+  });
+  $("saveOk").addEventListener("click", confirmSave);
+  $("saveCancel").addEventListener("click", hideAll);
+  $("saveName").addEventListener("keydown", function(e){
+    if (e.key === "Enter"){ e.preventDefault(); confirmSave(); }
+    if (e.key === "Escape") hideAll();
+  });
+
+  function save(){
+    if (hosted && dlReady){ var p = dlReady; dlReady = null; p.then(openSave); return; }
+    openSave();
+  }
+
+  function runAfterSave(){
+    var f = afterSave; afterSave = null;
+    if (f) setTimeout(f, 60);
+  }
+
+  function doSave(){
+    var data = currentSource();
+    var label = mode === "md" ? "Markdown" : "HTML";
+    var name = (fname.value || "dokument").trim();
+    if (mode === "md"){ if (!/\.(md|markdown|mdown)$/i.test(name)) name = baseName() + ".md"; }
+    else if (!/\.html?$/i.test(name)) name = baseName() + ".html";
+    fname.value = name;
+    if (downloads){
+      downloads.save({ filename: name, data: data }).then(function(){
+        savedAt = Date.now(); setDirty(false);
+        toast("Als „" + name + "“ gesichert.");
+        runAfterSave();
+      }).catch(function(err){
+        var code = err && err.code;
+        if (code === "declined") return;
+        copySource(data, "Speichern hier nicht möglich — " + label + " in die Zwischenablage kopiert.");
+      });
+    } else if (hosted){
+      copySource(data, label + " in die Zwischenablage kopiert — Downloads sind in dieser Ansicht nicht möglich.");
+    } else {
+      var a = document.createElement("a");
+      try {
+        var blob = new Blob([data], { type: mode === "md" ? "text/markdown" : "text/html" });
+        var dlName = asciiName(name);
+        a.href = URL.createObjectURL(blob); a.download = dlName;
+        document.body.appendChild(a); a.click();
+        setTimeout(function(){ URL.revokeObjectURL(a.href); if (a.parentNode) a.parentNode.removeChild(a); }, 1500);
+        savedAt = Date.now(); setDirty(false); runAfterSave();
+        toast(dlName === name
+          ? "Als „" + name + "“ gespeichert."
+          : "Als „" + dlName + "“ gespeichert — Browser übernehmen keine Umlaute in Dateinamen.");
+      } catch(e){
+        copySource(data, label + " in die Zwischenablage kopiert.");
+      }
+    }
+  }
+
+  /* ---------- PDF über den Druckdialog ---------- */
+  function doPrint(){
+    hideAll();
+    if (!doc) return;
+    var st = doc.getElementById("__sk_print");
+    if (!st){ st = doc.createElement("style"); st.id = "__sk_print"; (doc.head || doc.documentElement).appendChild(st); }
+    st.textContent =
+      "@page{size:" + $("pdfSize").value + "; margin:" + $("pdfMargin").value + "}" +
+      "@media print{" +
+        "[data-sk-active]{outline:none !important}" +
+        "html,body{background:#fff !important; max-width:none !important; margin:0 !important; padding:0 !important}" +
+        "h1,h2,h3,h4,h5,h6{break-after:avoid-page; page-break-after:avoid}" +
+        "img,pre,blockquote,table,figure{break-inside:avoid; page-break-inside:avoid}" +
+        "p,li{orphans:3; widows:3}" +
+        "a{color:inherit; text-decoration:underline}" +
+      "}";
+    try {
+      canvas.contentWindow.focus();
+      canvas.contentWindow.print();
+    } catch(e){
+      toast("Der Druckdialog lässt sich in diesem Fenster nicht öffnen.");
+    }
+    setTimeout(function(){ if (st && st.parentNode) st.parentNode.removeChild(st); }, 1200);
+  }
+  $("pdfBtn").addEventListener("click", function(){
+    $("pdfDlg").classList.add("on"); $("scrim").classList.add("on");
+  });
+  $("pdfOk").addEventListener("click", doPrint);
+  $("pdfCancel").addEventListener("click", hideAll);
+
+  function copySource(html, msg){
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(html).then(function(){ toast(msg); }, function(){ showSource(); });
+    } else { showSource(); }
+  }
+
+  $("saveBtn").addEventListener("click", save);
+
+  /* ---------- source panel ---------- */
+  function showSource(){
+    $("srcOut").textContent = currentSource();
+    $("srcPanel").classList.add("on"); $("scrim").classList.add("on");
+  }
+  function hideAll(){
+    $("srcPanel").classList.remove("on"); $("scrim").classList.remove("on");
+    $("linkDlg").classList.remove("on"); $("pasteDlg").classList.remove("on");
+    $("pdfDlg").classList.remove("on"); $("saveDlg").classList.remove("on");
+    $("guardDlg").classList.remove("on");
+  }
+  $("srcBtn").addEventListener("click", showSource);
+  $("closeSrc").addEventListener("click", hideAll);
+  $("scrim").addEventListener("click", hideAll);
+  $("copySrc").addEventListener("click", function(){ copySource(currentSource(), mode === "md" ? "Markdown kopiert." : "Quelltext kopiert."); });
+  $("linkOk").addEventListener("click", applyLink);
+  $("linkCancel").addEventListener("click", hideAll);
+  $("linkUrl").addEventListener("keydown", function(e){ if (e.key === "Enter") applyLink(); if (e.key === "Escape") hideAll(); });
+
+  $("pasteBtn").addEventListener("click", function(){
+    $("pasteArea").value = "";
+    $("pasteDlg").classList.add("on"); $("scrim").classList.add("on");
+    $("pasteArea").focus();
+  });
+  $("pasteHtml").addEventListener("click", function(){
+    var v = $("pasteArea").value.trim();
+    if (!v) return;
+    hideAll();
+    guard(function(){ loadHtmlDoc(v, "eingefuegt.html"); toast("Dokument ersetzt."); });
+  });
+  $("pasteMd").addEventListener("click", function(){
+    var v = $("pasteArea").value;
+    if (!v.trim()) return;
+    hideAll();
+    guard(function(){ loadMarkdown(v, "eingefuegt.md"); toast("Markdown übernommen."); });
+  });
+  $("pasteNew").addEventListener("click", function(){
+    hideAll();
+    guard(function(){
+      if (mode === "md") loadMarkdown("", "neu.md");
+      else loadHtmlDoc(BLANK, "neu.html");
+      toast("Leeres Dokument.");
+    });
+  });
+  $("pasteDemo").addEventListener("click", function(){
+    hideAll();
+    guard(function(){ loadHtmlDoc(DEMO, "beispiel.html"); setDirty(false); toast("Beispieldokument geladen."); });
+  });
+  $("pasteCancel").addEventListener("click", hideAll);
+
+  /* ---------- keys ---------- */
+  function onDocKey(e){
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s"){ e.preventDefault(); save(); }
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k"){ e.preventDefault(); openLink(); }
+  }
+  document.addEventListener("keydown", function(e){
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s"){ e.preventDefault(); save(); }
+    if (e.key === "Escape") hideAll();
+  });
+  fname.addEventListener("input", function(){ setDirty(true); });
+
+  /* ---------- Erklär-Tooltips ---------- */
+  var tipEl = null, tipTimer = null;
+  function showTip(el){
+    var raw = el.getAttribute("data-tip");
+    if (!raw) return;
+    if (!tipEl){
+      tipEl = document.createElement("div");
+      tipEl.className = "tip"; tipEl.setAttribute("role", "tooltip");
+      document.body.appendChild(tipEl);
+    }
+    var parts = raw.split("|");
+    tipEl.innerHTML = "";
+    if (parts.length > 1){
+      var h = document.createElement("span"); h.className = "head"; h.textContent = parts.shift();
+      tipEl.appendChild(h);
+    }
+    tipEl.appendChild(document.createTextNode(parts.join("|")));
+    tipEl.classList.add("on");
+    tipEl.style.left = "0px"; tipEl.style.top = "0px";
+    var r = el.getBoundingClientRect(), tw = tipEl.offsetWidth, th = tipEl.offsetHeight;
+    var left = Math.min(Math.max(8, r.left + r.width / 2 - tw / 2), window.innerWidth - tw - 8);
+    var top = r.bottom + 8;
+    if (top + th > window.innerHeight - 8) top = Math.max(8, r.top - th - 8);
+    tipEl.style.left = left + "px"; tipEl.style.top = top + "px";
+  }
+  function hideTip(){ clearTimeout(tipTimer); if (tipEl) tipEl.classList.remove("on"); }
+  function tipTarget(e){ return e.target && e.target.closest ? e.target.closest("[data-tip]") : null; }
+  document.addEventListener("mouseover", function(e){
+    var el = tipTarget(e);
+    if (!el) return;
+    clearTimeout(tipTimer);
+    tipTimer = setTimeout(function(){ showTip(el); }, 280);
+  });
+  document.addEventListener("mouseout", function(e){ if (tipTarget(e)) hideTip(); });
+  document.addEventListener("focusin", function(e){ var el = tipTarget(e); if (el) showTip(el); });
+  document.addEventListener("focusout", hideTip);
+  window.addEventListener("scroll", hideTip, true);
+
+  /* ---------- toast ---------- */
+  var toastTimer = null;
+  function toast(msg){
+    var t = $("toast"); t.textContent = msg; t.classList.add("on");
+    clearTimeout(toastTimer); toastTimer = setTimeout(function(){ t.classList.remove("on"); }, 3200);
+  }
+
+  /* ---------- starting document ---------- */
+  var BLANK = '<!doctype html>\n<html lang="de">\n<head>\n<meta charset="utf-8">\n<title>Neues Dokument</title>\n<style>\nbody{font-family:Georgia,serif;line-height:1.6;color:#1a1a1a;max-width:42rem;margin:0 auto;padding:3rem 1.5rem}\nh1{font-size:2rem;line-height:1.15}\n</style>\n</head>\n<body>\n<h1>Überschrift</h1>\n<p>Hier schreiben.</p>\n</body>\n</html>';
+
+  var DEMO = '<!doctype html>\n<html lang="de">\n<head>\n<meta charset="utf-8">\n<title>Beispielseite</title>\n<style>\nbody{font-family:"Iowan Old Style",Georgia,serif;line-height:1.62;color:#1c2321;background:#fff;max-width:44rem;margin:0 auto;padding:3.5rem 1.75rem}\nh1{font-size:2.1rem;line-height:1.12;margin:0 0 .3rem;letter-spacing:-.01em}\n.lede{color:#5d6b66;font-size:1.05rem;margin-top:0}\nh2{font-size:1.25rem;margin-top:2.2rem;border-top:1px solid #e2e7e0;padding-top:1.1rem}\nblockquote{margin:1.4rem 0;padding-left:1.1rem;border-left:3px solid #0b6e5f;color:#3c4a45;font-style:italic}\ncode{font-family:ui-monospace,Menlo,monospace;font-size:.9em;background:#f1f4ef;padding:.1em .35em;border-radius:3px}\na{color:#0b6e5f}\nul{padding-left:1.2rem}\n</style>\n</head>\n<body>\n<h1>Beispielseite</h1>\n<p class="lede">Klick irgendwo hinein und schreib los — was du hier siehst, ist das Dokument selbst.</p>\n<h2>Was hier funktioniert</h2>\n<ul>\n<li>Text ändern, löschen, ergänzen — direkt im Layout</li>\n<li>Absatzformat oben links umstellen, etwa zu einer <em>Überschrift</em></li>\n<li>Markieren und <strong>fett</strong>, <em>kursiv</em> oder <code>Code</code> setzen</li>\n<li>Links, Bilder und Trennlinien einfügen</li>\n</ul>\n<blockquote>Die Fußzeile zeigt, wo der Cursor im Dokument steht — ein Klick auf ein Element dort wählt es komplett aus.</blockquote>\n<h2>Eigene Datei</h2>\n<p>Oben auf <strong>Öffnen</strong> klicken oder eine Datei irgendwo auf dieses Fenster ziehen — <code>.html</code> ebenso wie <code>.md</code>. Das eigene CSS einer HTML-Datei bleibt erhalten; <a href="https://example.com">Links</a> werden beim Bearbeiten nicht gefolgt.</p>\n<h2>Markdown und PDF</h2>\n<p>Der Knopf <strong>HTML ⇄</strong> oben schaltet das Dokument zwischen HTML und Markdown um; <code>.md</code>-Dateien werden beim Öffnen automatisch als Markdown geführt und auch wieder als Markdown gespeichert. <strong>PDF</strong> öffnet den Druckdialog — dort als Ziel „Als PDF speichern" wählen.</p>\n<h2>Speichern</h2>\n<p>Der Editor legt nichts im Browser ab — kein Zwischenspeicher, keine Liste, nichts, was jemand später auslesen könnte. Gesichert ist allein, was du über <strong>Speichern</strong> als Datei auf die Platte legst; der Vorschlag dort trägt auf Wunsch einen sekundengenauen Zeitstempel.</p>\n<p>Deshalb fragt der Editor nach, bevor ein Dokument ersetzt oder geschlossen wird, solange Änderungen offen sind — und der Browser fragt noch einmal, wenn du den Tab schließen willst. Rechts unten steht jederzeit, wann zuletzt gespeichert wurde.</p>\n</body>\n</html>';
+
+  (function boot(){
+    try { ["setzkasten:docs:v1", "setzkasten:state:v1", "setzkasten:doc:v1"].forEach(function(k){ localStorage.removeItem(k); }); } catch(e){}
+    loadHtmlDoc(BLANK, "unbenannt.html");
+    setDirty(false);
+  })();
+
+  window.addEventListener("resize", fitHeight);
+  setInterval(fitHeight, 1500);
+})();
+</script>
+
+</body>
+</html>

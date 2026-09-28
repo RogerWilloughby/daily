@@ -1,6 +1,6 @@
 # DAILY – Übergabe: aktueller Arbeitsstand
 
-Stand 28.09.2026 (App 0.22.0). Für neue Chats: hier steht, woran gerade gearbeitet wird und wie es weitergeht. Verbindliche Entscheidungen stehen in `entscheidungen.md`, die Architektur in `../architektur/dienste.md`.
+Stand 28.09.2026 (App 0.23.0). Für neue Chats: hier steht, woran gerade gearbeitet wird und wie es weitergeht. Verbindliche Entscheidungen stehen in `entscheidungen.md`, die Architektur in `../architektur/dienste.md`.
 
 ## Vorgehen (Rogers Vorgaben)
 - **Erst Plan, dann Umsetzung (Rogers Vorgabe vom 27.09.2026):** Vor jeder Umsetzung und vor jedem Schreiben ins Repo einen kurzen Plan vorlegen – was und warum, welche Dateien (neu/geändert/gelöscht), was Roger danach tun muss, was offen/unsicher ist – und auf Rogers OK warten. Nicht einfach loslegen.
@@ -25,7 +25,7 @@ Stand 28.09.2026 (App 0.22.0). Für neue Chats: hier steht, woran gerade gearbei
 - Tests in der Desktop-VM: dort fehlt `node_modules`, `npm test` scheitert an `node-ical`; `node --test test/dienste.test.js` läuft. Vollständig läuft `npm test` im Cloud-Container.
 
 ## Stand der Dienste
-Oberfläche: Standardbelegung = nur überarbeitete Kacheln (`fertig: true` in `src/js/core/tiles.js`) – **Wetter**, **Kalender**, **Finanzen**, Meine Seiten, Mein Daily, Deine Nutzung; übrige Felder „Freier Platz“. Seit 0.16.0 wählt man die Kacheln in Einstellungen → „Kacheln“ (Aktiv/Verfügbar, Doppelklick, Ziehen); alte Kacheln stehen dort als „Vorschau“. Einstellungen einer Kachel: Zahnrad-Reiter in der Kachel (Wetter, Kalender, Tanken, Abfahrten, Sport). Details `entscheidungen.md` → 3a.
+Oberfläche: Standardbelegung = nur überarbeitete Kacheln (`fertig: true` in `src/js/core/tiles.js`) – **Wetter**, **Kalender**, **Finanzen**, **Tools**, Meine Seiten, Mein Daily, Deine Nutzung; übrige Felder „Freier Platz“. Seit 0.16.0 wählt man die Kacheln in Einstellungen → „Kacheln“ (Aktiv/Verfügbar, Doppelklick, Ziehen); alte Kacheln stehen dort als „Vorschau“. Einstellungen einer Kachel: Zahnrad-Reiter in der Kachel (Wetter, Kalender, Tanken, Abfahrten, Sport). Details `entscheidungen.md` → 3a.
 
 | Dienst | Kachel | Stand |
 |---|---|---|

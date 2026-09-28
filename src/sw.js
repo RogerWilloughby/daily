@@ -6,7 +6,7 @@ const SHELL = [
   '/js/core/ask.js', '/js/core/status.js', '/js/core/version.js', '/js/ui/dialogs.js', '/js/ui/ort.js',
   '/js/providers/weather.js', '/js/providers/news.js', '/js/providers/finanzen.js',
   '/js/providers/sport.js', '/js/providers/transit.js', '/js/providers/content.js', '/js/providers/knowledge.js', '/js/providers/local.js',
-  '/js/providers/links.js', '/js/providers/fuel.js', '/js/providers/kalender.js',
+  '/js/providers/links.js', '/js/providers/tools.js', '/js/tools/verzeichnis.js', '/tools/arbeitszeit.html', '/tools/setzkasten.html', '/js/providers/fuel.js', '/js/providers/kalender.js',
   '/js/lib/url.js',
   '/js/dienste/client.js', '/js/core/betrieb.js', '/js/core/einstellungen.js', '/js/ui/kacheln.js', '/js/adapter/wetter.js', '/js/adapter/diagramm.js', '/js/adapter/regen.js', '/js/adapter/hinweise.js', '/js/adapter/kalender.js', '/js/adapter/finanzen.js', '/js/adapter/katalog.js',
   '/fonts/bricolage-grotesque.woff2', '/fonts/figtree-400.woff2', '/fonts/figtree-500.woff2', '/fonts/figtree-600.woff2',

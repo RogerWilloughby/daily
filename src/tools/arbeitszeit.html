@@ -1,0 +1,1128 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arbeitszeiterfassung</title>
+<!-- DAILY-Tool: Schriften von DAILY selbst (kein Abruf bei Google Fonts), Zahlen in der Monospace-Schrift des Systems -->
+<style>
+@font-face{font-family:"Figtree";src:url(/fonts/figtree-400.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Figtree";src:url(/fonts/figtree-500.woff2) format("woff2");font-weight:500;font-display:swap}
+@font-face{font-family:"Figtree";src:url(/fonts/figtree-600.woff2) format("woff2");font-weight:600 700;font-display:swap}
+:root{
+  --bg:#EAEEF2; --surface:#FFFFFF; --surface-2:#F4F7F9; --surface-3:#EDF2F5;
+  --ink:#16212B; --muted:#657180; --faint:#93A0AC; --line:#D9E0E7;
+  --accent:#12697B; --accent-ink:#0D4E5C; --accent-soft:#E0EEF1;
+  --weekend:#F5F0E7; --weekend-line:#EAE1D0;
+  --pos:#1C875A; --neg:#C0472F;
+  --urlaub-bg:#E9F4ED; --urlaub-pill:#CFE8D8; --urlaub-ink:#1B7A47;
+  --au-bg:#FBEEE2; --au-pill:#F4DEC7; --au-ink:#AF611A;
+  --feiertag-bg:#ECEAF6; --feiertag-pill:#DAD5EF; --feiertag-ink:#5847AE;
+  --frei-bg:#EDF1F5; --frei-pill:#DBE2EA; --frei-ink:#4C5C6C;
+  --shadow:0 1px 2px rgba(18,33,43,.04),0 6px 20px rgba(18,33,43,.06);
+  --radius:14px;
+  --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+  --sans:"Figtree",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0E161C; --surface:#151F27; --surface-2:#1A2731; --surface-3:#1F2E39;
+  --ink:#E6ECF1; --muted:#93A1AD; --faint:#6C7A87; --line:#26333F;
+  --accent:#4CB4C8; --accent-ink:#8FD4E1; --accent-soft:#153039;
+  --weekend:#20262B; --weekend-line:#2C343B;
+  --pos:#47B57F; --neg:#E17660;
+  --urlaub-bg:#16271E; --urlaub-pill:#203B2A; --urlaub-ink:#69C894;
+  --au-bg:#2A2117; --au-pill:#3B2D1C; --au-ink:#D99C5C;
+  --feiertag-bg:#1E1E31; --feiertag-pill:#2B2949; --feiertag-ink:#AA9CE7;
+  --frei-bg:#1B222A; --frei-pill:#28313B; --frei-ink:#9FB0C0;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35);
+}}
+:root[data-theme="dark"]{
+  --bg:#0E161C; --surface:#151F27; --surface-2:#1A2731; --surface-3:#1F2E39;
+  --ink:#E6ECF1; --muted:#93A1AD; --faint:#6C7A87; --line:#26333F;
+  --accent:#4CB4C8; --accent-ink:#8FD4E1; --accent-soft:#153039;
+  --weekend:#20262B; --weekend-line:#2C343B;
+  --pos:#47B57F; --neg:#E17660;
+  --urlaub-bg:#16271E; --urlaub-pill:#203B2A; --urlaub-ink:#69C894;
+  --au-bg:#2A2117; --au-pill:#3B2D1C; --au-ink:#D99C5C;
+  --feiertag-bg:#1E1E31; --feiertag-pill:#2B2949; --feiertag-ink:#AA9CE7;
+  --frei-bg:#1B222A; --frei-pill:#28313B; --frei-ink:#9FB0C0;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:var(--sans); font-size:14px; line-height:1.4;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  height:100dvh; overflow:hidden;
+}
+.wrap{max-width:1380px; margin:0 auto; height:100dvh; display:flex; flex-direction:column; padding:8px 16px; gap:8px}
+.body{flex:1 1 auto; min-height:0; display:flex; gap:12px; align-items:stretch}
+.rail{flex:none; width:158px; display:flex; flex-direction:column; gap:12px}
+.railgroup{display:flex; flex-direction:column; gap:6px; background:var(--surface); border:1px solid var(--line);
+  border-radius:12px; padding:9px; box-shadow:var(--shadow)}
+.railtitle{font-size:9.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); font-weight:700; padding:1px 3px 4px}
+.railbtn{width:100%; justify-content:flex-start}
+.railstatus{margin-top:auto; padding:8px 10px; background:var(--surface); border:1px solid var(--line);
+  border-radius:12px; box-shadow:var(--shadow); line-height:1.35}
+.railstatus .hint{white-space:normal}
+
+/* ---------- top bar ---------- */
+.topbar{
+  display:flex; flex-wrap:wrap; align-items:center; gap:6px 20px; flex:none;
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+  padding:6px 16px; box-shadow:var(--shadow);
+}
+.brand{display:flex; align-items:center; gap:11px; margin-right:auto}
+.brand .mark{
+  width:32px;height:32px;border-radius:9px;flex:none;
+  background:linear-gradient(150deg,var(--accent),var(--accent-ink));
+  display:grid;place-items:center;color:#fff;
+}
+.brand .mark svg{width:19px;height:19px;display:block}
+.brand h1{font-size:15px;font-weight:600;letter-spacing:-.01em;margin:0;line-height:1.1}
+.brand p{margin:1px 0 0;font-size:11px;color:var(--muted);letter-spacing:.02em}
+
+.monthnav{display:flex;align-items:center;gap:7px}
+.navbtn{
+  width:30px;height:30px;border-radius:8px;border:1px solid var(--line);
+  background:var(--surface-2);color:var(--ink);font-size:15px;cursor:pointer;
+  display:grid;place-items:center;transition:.15s;
+}
+.navbtn:hover{background:var(--accent-soft);border-color:var(--accent)}
+.selects{display:flex;gap:7px}
+select{
+  font-family:var(--sans);font-size:13.5px;font-weight:600;color:var(--ink);
+  background:var(--surface-2);border:1px solid var(--line);border-radius:8px;
+  padding:6px 28px 6px 11px;cursor:pointer;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23657180' stroke-width='3'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;
+}
+select:focus-visible,input:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.today-btn{
+  font-family:var(--sans);font-size:12px;font-weight:600;color:var(--accent-ink);
+  background:var(--accent-soft);border:1px solid transparent;border-radius:8px;
+  padding:6px 10px;cursor:pointer;
+}
+.today-btn:hover{border-color:var(--accent)}
+
+.hstats{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:flex-end}
+.hstat{display:flex;flex-direction:column;align-items:flex-end;line-height:1.15}
+.hstat .l{font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600}
+.hstat .v{font-family:var(--mono);font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
+.balance{
+  display:flex;flex-direction:column;align-items:flex-end;
+  padding-left:14px;border-left:1px solid var(--line);
+}
+.balance .lbl{font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.balance .val{font-family:var(--mono);font-size:19px;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums}
+.pos{color:var(--pos)} .neg{color:var(--neg)}
+
+/* ---------- KPI strip ---------- */
+.kpis{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0;flex:none;
+}
+.kpi{
+  background:var(--surface);border:1px solid var(--line);border-radius:10px;
+  padding:5px 12px;box-shadow:var(--shadow);
+}
+.kpi .lbl{font-size:9.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600}
+.kpi .val{font-family:var(--mono);font-size:15px;font-weight:600;margin-top:0;font-variant-numeric:tabular-nums;line-height:1.25}
+.kpi.hl{background:linear-gradient(160deg,var(--accent-soft),var(--surface))}
+
+/* ---------- table ---------- */
+.card{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow);overflow:hidden;
+  flex:1 1 auto;min-height:0;display:flex;flex-direction:column;
+}
+.tablescroll{flex:1;min-height:0;overflow:auto}
+table{border-collapse:collapse;width:100%;min-width:820px}
+thead th{
+  background:var(--surface-3);color:var(--muted);font-weight:600;font-size:10px;
+  text-transform:uppercase;letter-spacing:.05em;text-align:left;
+  padding:6px 10px;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;
+}
+thead th.num{text-align:right}
+thead th.ctr{text-align:center}
+th.wk,td.wk{border-left:2px solid var(--line);background:var(--surface-2)}
+tbody tr{height:var(--rowh,26px)}
+tbody td{padding:0 10px;border-bottom:1px solid var(--line);height:var(--rowh,26px);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+.date-cell{white-space:nowrap;font-variant-numeric:tabular-nums;font-size:var(--cellfs,13px)}
+.dow{display:inline-block;width:22px;font-weight:600;color:var(--muted)}
+.daynum{font-family:var(--mono);color:var(--ink)}
+tr.weekend td{background:var(--weekend)}
+tr.weekend td.wk{background:var(--surface-2)}
+tr.weekend .dow{color:#b08968}
+tr.today td{box-shadow:inset 0 0 0 9999px rgba(18,105,123,.05)}
+tr.today .daynum{color:var(--accent-ink);font-weight:600}
+/* absence rows (Urlaub / AU / Feiertag) */
+tr.abs-urlaub td:not(.wk){background:var(--urlaub-bg)}
+tr.abs-au td:not(.wk){background:var(--au-bg)}
+tr.abs-feiertag td:not(.wk){background:var(--feiertag-bg)}
+tr.abs-frei td:not(.wk){background:var(--frei-bg)}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-family:var(--sans);
+  font-size:11px;font-weight:600;letter-spacing:.02em;line-height:1.5}
+.pill.urlaub{background:var(--urlaub-pill);color:var(--urlaub-ink)}
+.pill.au{background:var(--au-pill);color:var(--au-ink)}
+.pill.feiertag{background:var(--feiertag-pill);color:var(--feiertag-ink)}
+.pill.frei{background:var(--frei-pill);color:var(--frei-ink)}
+td.saldo{text-align:right}
+
+/* inputs inside cells */
+.cellinput{
+  width:100%;border:none;background:transparent;color:var(--ink);
+  font-family:var(--mono);font-size:var(--cellfs,13px);padding:1px 4px;border-radius:6px;
+  font-variant-numeric:tabular-nums;line-height:1.15;
+}
+input[type="time"].cellinput{padding:1px 2px}
+.cellinput{height:calc(var(--rowh,26px) - 3px);min-height:0;box-sizing:border-box}
+td.themen .cellinput{font-family:var(--sans);font-size:var(--cellfs,13px)}
+.cellinput::placeholder{color:var(--faint)}
+.cellinput:hover{background:var(--surface-2)}
+.cellinput:focus{background:var(--accent-soft);outline:none;box-shadow:inset 0 0 0 1px var(--accent)}
+input[type="time"].cellinput{text-align:center}
+/* time cell with custom clock button */
+.tw{display:flex;align-items:center;gap:1px;height:calc(var(--rowh,26px) - 1px);font-size:var(--cellfs,13px);line-height:1}
+.tw .cellinput{flex:1;min-width:0;cursor:pointer}
+input[type="time"].cellinput::-webkit-calendar-picker-indicator{display:none;-webkit-appearance:none;opacity:0}
+.nowbtn{
+  flex:none;border:none;background:transparent;color:var(--faint);cursor:pointer;
+  padding:0 1px;height:calc(var(--rowh,26px) - 4px);border-radius:4px;display:grid;place-items:center;transition:.12s;
+}
+.nowbtn:hover{background:var(--accent-soft);color:var(--accent)}
+.nowbtn svg{width:12px;height:12px;display:block}
+td.time{width:100px}
+td.themen{min-width:170px}
+td.calc{font-family:var(--mono);text-align:right;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;font-size:var(--cellfs,13px)}
+td.std{color:var(--ink);font-weight:500}
+td.saldo{font-weight:600}
+
+/* weekly summary cells (rowspan) */
+td.wk{vertical-align:middle;text-align:center;font-family:var(--mono);font-variant-numeric:tabular-nums;line-height:1.3}
+td.wk .kw{font-size:10.5px;color:var(--accent-ink);font-weight:600;letter-spacing:.03em;font-family:var(--sans);text-transform:uppercase;display:block;margin-bottom:2px}
+td.wk .wrow{display:flex;justify-content:space-between;gap:10px;font-size:11px;padding:0 2px}
+td.wk .wrow span:first-child{color:var(--muted)}
+td.wk .wsaldo{font-weight:600;margin-top:2px;border-top:1px dashed var(--line);padding-top:2px}
+
+/* ---------- toolbar ---------- */
+.toolsrow{display:flex;flex-wrap:wrap;gap:7px;margin:0;align-items:center;flex:none}
+.ghost{
+  font-family:var(--sans);font-size:12.5px;font-weight:500;color:var(--ink);
+  background:var(--surface);border:1px solid var(--line);border-radius:8px;
+  padding:6px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:.15s;
+}
+.ghost:hover{border-color:var(--accent);color:var(--accent-ink)}
+.ghost svg{width:15px;height:15px}
+.spacer{flex:1}
+.hint{font-size:12px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.hint.warn{color:var(--neg);font-weight:600}
+.ghost.accent{border-color:var(--accent);color:var(--accent-ink);background:var(--accent-soft)}
+.ghost.accent:hover{background:var(--accent);color:#fff}
+.ghost.accent:hover svg{stroke:#fff}
+.ghost.danger{color:var(--neg);border-color:var(--neg)}
+.ghost.danger:hover{background:var(--neg);color:#fff;border-color:var(--neg)}
+.reopenbar{display:flex;align-items:center;gap:10px;margin:0 0 8px;flex:none;
+  background:var(--accent-soft);border:1px solid var(--accent);border-radius:12px;padding:9px 14px}
+.reopenbar[hidden]{display:none}
+.reopenbar svg{width:18px;height:18px;color:var(--accent-ink);flex:none}
+.reopenbar span{font-size:13px;flex:1;color:var(--ink)}
+.reopenbar .primary,.reopenbar .ghost{flex:none;padding:6px 12px}
+.modeopts{display:flex;flex-direction:column;gap:6px;margin:0 0 12px}
+.modeopts label{font-size:12.5px;color:var(--ink);display:flex;gap:8px;align-items:flex-start;cursor:pointer;line-height:1.35}
+.modeopts input{margin-top:2px;flex:none}
+
+dialog{
+  border:1px solid var(--line);border-radius:var(--radius);padding:0;max-width:520px;width:92vw;
+  background:var(--surface);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.3);
+}
+dialog::backdrop{background:rgba(10,18,24,.5);backdrop-filter:blur(2px)}
+.dlg-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--line)}
+.dlg-head h2{margin:0;font-size:16px;font-weight:600}
+.dlg-body{padding:20px 22px}
+.dlg-x{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;padding:2px 6px;border-radius:6px}
+.dlg-x:hover{background:var(--surface-2)}
+.setgrid{display:grid;grid-template-columns:1fr auto;gap:9px 14px;align-items:center;margin-bottom:6px}
+.setgrid label{font-size:13.5px;color:var(--ink)}
+.setgrid input[type="time"],.setgrid input[type="number"]{
+  font-family:var(--mono);font-size:14px;text-align:center;
+  background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:7px 8px;width:110px;color:var(--ink);
+}
+.sub{font-size:11.5px;color:var(--muted);margin:2px 0 14px}
+.dlg-sec{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
+.dlg-sec h3{margin:0 0 4px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.btnrow{display:flex;flex-wrap:wrap;gap:9px;margin-top:10px}
+.primary{
+  font-family:var(--sans);font-weight:600;font-size:13px;color:#fff;
+  background:var(--accent);border:1px solid var(--accent);border-radius:9px;padding:9px 16px;cursor:pointer;
+}
+.primary:hover{background:var(--accent-ink)}
+textarea{
+  width:100%;height:120px;font-family:var(--mono);font-size:12px;
+  background:var(--surface-2);color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:10px;resize:vertical;
+}
+.toast{
+  position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:10px;font-size:13px;font-weight:500;
+  opacity:0;pointer-events:none;transition:.25s;z-index:100;box-shadow:0 8px 24px rgba(0,0,0,.25);
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.footer{margin-top:18px;font-size:11.5px;color:var(--faint);text-align:center;line-height:1.6}
+
+@media (max-width:880px){
+  .body{flex-direction:column}
+  .rail{width:auto}
+  .railgroup{flex-direction:row; flex-wrap:wrap; align-items:center}
+  .railtitle{width:100%; padding-bottom:2px}
+  .railbtn{width:auto; flex:1 1 auto; justify-content:center}
+  .railstatus{margin-top:0}
+}
+@media print{
+  body{background:#fff}
+  .topbar,.rail,.navbtn,.today-btn{display:none!important}
+  .card{box-shadow:none;border-color:#ccc}
+  @page{size:landscape;margin:12mm}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="reopenbar" id="reopenBar" hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+    <span>Zuletzt verwendete Datei: <b id="reopenName"></b></span>
+    <button class="primary" id="reopenBtn">Laden</button>
+    <button class="ghost" id="reopenDismiss">Nicht jetzt</button>
+  </div>
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      </div>
+      <div>
+        <h1>Arbeitszeiterfassung</h1>
+        <p id="subtitle">Gleitzeit &amp; Monatsübersicht</p>
+      </div>
+    </div>
+
+    <div class="monthnav">
+      <button class="navbtn" id="prevBtn" title="Vorheriger Monat" aria-label="Vorheriger Monat">‹</button>
+      <div class="selects">
+        <select id="monthSel" aria-label="Monat"></select>
+        <select id="yearSel" aria-label="Jahr"></select>
+      </div>
+      <button class="navbtn" id="nextBtn" title="Nächster Monat" aria-label="Nächster Monat">›</button>
+      <button class="today-btn" id="todayBtn">Heute</button>
+    </div>
+
+    <div class="hstats">
+      <div class="hstat"><span class="l">Übertrag</span><span class="v" id="kpiCarry">0,00 h</span></div>
+      <div class="hstat"><span class="l">Ist Monat</span><span class="v" id="kpiIst">0:00</span></div>
+      <div class="hstat"><span class="l">Soll Monat</span><span class="v" id="kpiSoll">0:00</span></div>
+      <div class="hstat"><span class="l">Saldo Monat</span><span class="v" id="kpiSaldo">0,00 h</span></div>
+      <div class="balance">
+        <span class="lbl">Gleitzeitkonto</span>
+        <span class="val" id="totalBalance">0,00 h</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="body">
+    <aside class="rail rail-left">
+      <div class="railgroup">
+        <div class="railtitle">Datei</div>
+        <button class="ghost accent railbtn" id="openBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Datei öffnen</button>
+        <button class="ghost accent railbtn" id="saveBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>Speichern</button>
+      </div>
+      <div class="railstatus"><span class="hint" id="saveHint">Keine Datei verbunden</span></div>
+      <input type="file" id="openFallback" accept="application/json,.json,.txt" style="display:none">
+    </aside>
+
+    <div class="card">
+      <div class="tablescroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Datum</th>
+              <th class="ctr">Beginn</th>
+              <th class="ctr">Ende</th>
+              <th class="ctr">Pause</th>
+              <th>Themen</th>
+              <th class="num">Stunden</th>
+              <th class="num">Soll</th>
+              <th class="num">Saldo</th>
+              <th class="wk ctr">Woche</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <aside class="rail rail-right">
+      <div class="railgroup">
+        <div class="railtitle">Ansicht &amp; Daten</div>
+        <button class="ghost railbtn" id="settingsBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Einstellungen</button>
+        <button class="ghost railbtn" id="backupBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>Import / Export</button>
+        <button class="ghost railbtn" id="printBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>Drucken</button>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- Settings dialog -->
+<dialog id="settingsDlg">
+  <div class="dlg-head"><h2>Einstellungen</h2><button class="dlg-x" data-close>×</button></div>
+  <div class="dlg-body">
+    <h3 style="margin:0 0 4px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">Soll pro Wochentag</h3>
+    <p class="sub">Wie viele Stunden gelten an einem Tag als Soll. Wochenende üblicherweise 00:00.</p>
+    <div class="setgrid" id="sollGrid"></div>
+    <div class="dlg-sec">
+      <h3>Startsaldo</h3>
+      <p class="sub">Bestehendes Gleitzeit-Guthaben vor dem ersten erfassten Tag (in Stunden, z.&nbsp;B. 12,5 oder -3).</p>
+      <div class="setgrid"><label for="startSaldo">Startsaldo (h)</label><input type="number" id="startSaldo" step="0.25"></div>
+    </div>
+    <div class="dlg-sec">
+      <h3>Zeit-Auswahl</h3>
+      <p class="sub">Welche Minutenwerte die Uhrzeit-Auswahl anbietet.</p>
+      <div class="setgrid">
+        <label for="stepSel">Minuten-Schritte</label>
+        <select id="stepSel" style="width:150px">
+          <option value="1">Alle Minuten</option>
+          <option value="5">5-Minuten-Schritte</option>
+          <option value="15">Viertelstunden</option>
+        </select>
+      </div>
+    </div>
+    <div class="btnrow"><button class="primary" data-close>Fertig</button></div>
+  </div>
+</dialog>
+
+<!-- Import / Export dialog -->
+<dialog id="backupDlg">
+  <div class="dlg-head"><h2>Import / Export</h2><button class="dlg-x" data-close>×</button></div>
+  <div class="dlg-body">
+    <p class="sub" style="margin-top:0">Deine Daten liegen in deiner Datei (Schaltflächen <b>Datei öffnen</b> / <b>Speichern</b>). Hier gibt es zusätzlich Zweit-Backup, Textkopie und den CSV-Import.</p>
+    <h3 style="margin:0 0 4px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">Zweit-Backup (JSON)</h3>
+    <p class="sub">Eine zusätzliche Kopie aller Daten als Datei herunterladen oder als Text kopieren.</p>
+    <div class="btnrow">
+      <button class="primary" id="downloadJson">Kopie herunterladen</button>
+      <button class="ghost" id="copyJson">Text kopieren</button>
+    </div>
+    <textarea id="jsonArea" readonly style="margin-top:12px"></textarea>
+    <div class="dlg-sec">
+      <h3>Daten aus Datei/Text laden</h3>
+      <p class="sub">JSON-Datei auswählen oder Text oben einfügen und „Übernehmen“ klicken. <b>Achtung:</b> ersetzt die aktuellen Daten.</p>
+      <div class="btnrow">
+        <label class="ghost" for="fileInput" style="cursor:pointer">JSON-Datei…</label>
+        <input type="file" id="fileInput" accept="application/json,.json" style="display:none">
+        <button class="ghost" id="applyText">Text übernehmen</button>
+      </div>
+    </div>
+    <div class="dlg-sec">
+      <h3>CSV – Import &amp; Export</h3>
+      <p class="sub">Spalten werden automatisch erkannt. Fehlt im Datum das Jahr, wird das oben gewählte Jahr verwendet.</p>
+      <div class="modeopts">
+        <label><input type="radio" name="csvmode" value="merge" checked> <b>Zusammenführen</b> – bestehende Tage aktualisieren, neue ergänzen</label>
+        <label><input type="radio" name="csvmode" value="replace"> <b>Ersetzen</b> – die im CSV enthaltenen Monate vorher komplett leeren</label>
+      </div>
+      <div class="btnrow">
+        <label class="ghost" for="csvInput" style="cursor:pointer">CSV importieren…</label>
+        <input type="file" id="csvInput" accept=".csv,text/csv,text/plain" style="display:none">
+        <button class="ghost" id="csvBtn">Monat als CSV exportieren</button>
+      </div>
+    </div>
+    <div class="dlg-sec">
+      <h3>Aufräumen</h3>
+      <p class="sub">Löscht alle Einträge des aktuell angezeigten Monats – nützlich, um vor einem Neu-Import sauber zu starten.</p>
+      <div class="btnrow">
+        <button class="ghost danger" id="clearMonthBtn">Aktuellen Monat leeren…</button>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+  const KEY="az_tracker_v1";
+  const MONTHS=["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+  const DOW=["Mo","Di","Mi","Do","Fr","Sa","So"];
+  const $=id=>document.getElementById(id);
+  const CLOCK_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg>';
+  function timeCell(k,f,val,withNow){
+    const step=`step="${(state.minuteStep||5)*60}"`;
+    const inp=`<input class="cellinput timein" type="time" ${step} data-k="${k}" data-f="${f}" value="${val||""}">`;
+    const now=withNow?`<button class="nowbtn" data-now="${k}" data-f="${f}" title="Aktuelle Zeit eintragen" tabindex="-1">${CLOCK_SVG}</button>`:"";
+    return `<td class="time"><div class="tw">${inp}${now}</div></td>`;
+  }
+
+  /* ---------- state ---------- */
+  const today=new Date();
+  const defaultState=()=>({
+    entries:{},                                   // "YYYY-MM-DD": {b,e,p,t}
+    soll:[240,240,240,240,240,0,0],               // minutes Mo..So
+    startSaldo:0,
+    minuteStep:5,                                 // 1 | 5 | 15  -> time picker granularity
+    sel:{y:today.getFullYear(), m:today.getMonth()}
+  });
+  const normStep=v=>([1,5,15].indexOf(+v)>=0?+v:5);
+  function coerceState(s){
+    const d=defaultState();
+    if(!s||typeof s!=="object") return d;
+    return {
+      entries:(s.entries&&typeof s.entries==="object")?s.entries:{},
+      soll:(s.soll&&s.soll.length===7)?s.soll.map(Number):d.soll,
+      startSaldo:typeof s.startSaldo==="number"?s.startSaldo:0,
+      minuteStep:normStep(s.minuteStep),
+      sel:(s.sel&&typeof s.sel.y==="number")?s.sel:d.sel
+    };
+  }
+
+  /* ---------- persistence: a file on the computer (no browser storage) ---------- */
+  const HAS_FSA = (typeof window.showSaveFilePicker==="function" && typeof window.showOpenFilePicker==="function");
+  let state=defaultState();
+  let groups=[];
+  let firstCountTS=null;
+  let fileHandle=null;         // FileSystemFileHandle when a file is connected (Chrome/Edge)
+  let fileName="";
+  let hasUnsaved=false;
+  let writeTimer=null;
+
+  async function writeToFile(){
+    if(!fileHandle) return false;
+    try{
+      updateFileStatus("saving");
+      const w=await fileHandle.createWritable();
+      await w.write(JSON.stringify(state,null,2));
+      await w.close();
+      hasUnsaved=false; updateFileStatus("saved");
+      return true;
+    }catch(e){ updateFileStatus("error"); return false; }
+  }
+  function scheduleWrite(){
+    if(!(fileHandle&&HAS_FSA)) return;
+    clearTimeout(writeTimer);
+    // quiet debounce: write only after a short typing pause, no per-keystroke status flicker
+    writeTimer=setTimeout(writeToFile,1000);
+  }
+  function flushWrite(){
+    if(fileHandle&&HAS_FSA&&hasUnsaved){ clearTimeout(writeTimer); writeToFile(); }
+  }
+  // called after every data change
+  function save(){
+    firstCountTS=null;
+    hasUnsaved=true;
+    if(fileHandle&&HAS_FSA) scheduleWrite();
+    else updateFileStatus("dirty");
+  }
+  // navigation only (no data change): quietly persist selection where auto-save exists
+  function persistNav(){ if(fileHandle&&HAS_FSA) scheduleWrite(); }
+
+  function afterConnect(handleMode){
+    hasUnsaved=false;
+    updateFileStatus(handleMode||"saved");
+  }
+
+  async function connectNewFile(){
+    if(!HAS_FSA){ manualDownload(); return; }
+    try{
+      const h=await window.showSaveFilePicker({
+        suggestedName:"Arbeitszeit.json",
+        types:[{description:"Arbeitszeit-Daten (JSON)",accept:{"application/json":[".json"]}}]
+      });
+      fileHandle=h; fileName=h.name; rememberHandle(h);
+      await writeToFile(); afterConnect("saved");
+      toast("Datei verbunden – wird automatisch gespeichert");
+    }catch(e){
+      if(e&&e.name==="AbortError") return;           // user cancelled
+      manualDownload();                               // FSA blocked here → download instead
+    }
+  }
+  async function openExistingFile(){
+    if(!HAS_FSA){ $("openFallback").click(); return; }
+    try{
+      const [h]=await window.showOpenFilePicker({
+        types:[{description:"Arbeitszeit-Daten",accept:{"application/json":[".json",".txt"]}}],
+        multiple:false
+      });
+      await ensureRW(h);   // request WRITE permission now (during the click) → no save popup later
+      const f=await h.getFile(); const text=await f.text();
+      state=coerceState(JSON.parse(text));
+      fileHandle=h; fileName=h.name; rememberHandle(h);
+      afterConnect("saved"); render();
+      toast("Datei geladen – wird automatisch gespeichert");
+    }catch(e){
+      if(e&&e.name==="AbortError") return;            // user cancelled
+      if(e instanceof SyntaxError){ toast("Datei ist kein gültiges JSON"); return; }
+      $("openFallback").click();                       // FSA blocked here → upload instead
+    }
+  }
+
+  // fallback for browsers without the File System Access API: download / upload
+  function manualDownload(){
+    doDownload(fileName||("Arbeitszeit-"+new Date().toISOString().slice(0,10)+".json"),
+               JSON.stringify(state,null,2));
+    afterConnect("manual");
+  }
+  function manualLoadText(text){
+    try{ state=coerceState(JSON.parse(text)); afterConnect("manual"); render(); toast("Daten geladen ✓"); }
+    catch(e){ toast("Datei/Text nicht lesbar (kein gültiges JSON)"); }
+  }
+
+  // request read+write permission (call inside a user gesture the first time)
+  async function ensureRW(h){
+    try{
+      if(!h||!h.queryPermission) return true;
+      if((await h.queryPermission({mode:"readwrite"}))==="granted") return true;
+      if(h.requestPermission && (await h.requestPermission({mode:"readwrite"}))==="granted") return true;
+    }catch(e){}
+    return false;
+  }
+
+  // remember the last used file HANDLE (a pointer, not the data) in IndexedDB, so it can be
+  // reopened next time. The timesheet data itself still lives only in your file.
+  function idb(cb){
+    try{
+      const req=indexedDB.open("az_fs",1);
+      req.onupgradeneeded=()=>{ try{ req.result.createObjectStore("kv"); }catch(e){} };
+      req.onsuccess=()=>cb(req.result);
+      req.onerror=()=>cb(null);
+    }catch(e){ cb(null); }
+  }
+  function rememberHandle(h){ idb(db=>{ if(!db)return; try{ db.transaction("kv","readwrite").objectStore("kv").put(h,"lastFile"); }catch(e){} }); }
+  function getHandle(){ return new Promise(res=>{ idb(db=>{ if(!db)return res(null);
+    try{ const r=db.transaction("kv","readonly").objectStore("kv").get("lastFile"); r.onsuccess=()=>res(r.result||null); r.onerror=()=>res(null); }catch(e){ res(null); } }); }); }
+
+  async function loadFromHandle(h){
+    try{
+      const f=await h.getFile(); const text=await f.text();
+      state=coerceState(JSON.parse(text));
+      fileHandle=h; fileName=h.name;
+      afterConnect("saved"); render();
+      return true;
+    }catch(e){ return false; }
+  }
+
+  // on start: reopen the last file automatically if permission still holds; otherwise offer a
+  // one-click reload (browsers forbid silently reading a file without a user gesture)
+  async function tryRestore(){
+    if(!HAS_FSA) return;
+    let h=null; try{ h=await getHandle(); }catch(e){}
+    if(!h) return;
+    let perm="prompt";
+    try{ perm=h.queryPermission?await h.queryPermission({mode:"readwrite"}):"prompt"; }catch(e){}
+    if(perm==="granted"){ await loadFromHandle(h); return; }
+    const bar=$("reopenBar"); if(!bar) return;
+    $("reopenName").textContent=h.name||"zuletzt verwendete Datei";
+    bar.hidden=false;
+    $("reopenBtn").onclick=async()=>{ if(await ensureRW(h) && await loadFromHandle(h)){ bar.hidden=true; } else { toast("Zugriff nicht erlaubt"); } };
+    $("reopenDismiss").onclick=()=>{ bar.hidden=true; };
+  }
+
+  function updateFileStatus(mode){
+    const el=$("saveHint"); if(!el) return;
+    const t=new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});
+    let cls="hint", txt="";
+    if(fileHandle){
+      if(mode==="saving") txt="📄 "+fileName+" · speichere …";
+      else if(mode==="error"){ txt="⚠ Speichern fehlgeschlagen"; cls="hint warn"; }
+      else txt="📄 "+fileName+" · gespeichert "+t;
+    } else if(mode==="manual"){
+      txt="Gespeichert "+t+(HAS_FSA?"":" (Download)");
+    } else if(hasUnsaved){
+      txt="⚠ Nicht gespeichert"; cls="hint warn";
+    } else {
+      txt="Keine Datei verbunden";
+    }
+    el.className=cls; el.textContent=txt;
+  }
+
+  /* ---------- helpers ---------- */
+  const pad=n=>String(n).padStart(2,"0");
+  const key=(y,m,d)=>`${y}-${pad(m+1)}-${pad(d)}`;
+  const dowIndex=dt=>(dt.getDay()+6)%7;                 // 0=Mo..6=So
+  function parseHM(v){ if(!v||typeof v!=="string"||v.indexOf(":")<0) return null;
+    const [h,mi]=v.split(":").map(Number); if(isNaN(h)||isNaN(mi)) return null; return h*60+mi; }
+  function fmtHM(mins){ if(mins==null) return ""; const s=mins<0?"-":""; mins=Math.abs(Math.round(mins));
+    return `${s}${Math.floor(mins/60)}:${pad(mins%60)}`; }
+  function fmtH(mins){ const h=mins/60; const s=(h>0?"+":h<0?"−":"");
+    return `${s}${Math.abs(h).toLocaleString("de-DE",{minimumFractionDigits:2,maximumFractionDigits:2})} h`; }
+  function isoWeek(dt){
+    const d=new Date(Date.UTC(dt.getFullYear(),dt.getMonth(),dt.getDate()));
+    const day=(d.getUTCDay()+6)%7; d.setUTCDate(d.getUTCDate()-day+3);
+    const firstThu=new Date(Date.UTC(d.getUTCFullYear(),0,4));
+    const firstDay=(firstThu.getUTCDay()+6)%7; firstThu.setUTCDate(firstThu.getUTCDate()-firstDay+3);
+    return 1+Math.round((d-firstThu)/(7*86400000));
+  }
+  // detect Urlaub / AU (Krank) / Feiertag from the Themen text
+  function absenceType(t){
+    if(!t) return null;
+    const s=String(t).toLowerCase();
+    if(/urlaub/.test(s)) return "Urlaub";
+    if(/feiertag/.test(s)) return "Feiertag";
+    if(/\bfrei\b|freizeit|freigestellt/.test(s)) return "Frei";
+    if(/krank|arbeitsunf|\bau\b/.test(s)) return "AU";
+    return null;
+  }
+  function todayMid(){ const d=new Date(); d.setHours(0,0,0,0); return d.getTime(); }
+  // per-day derived: {ist, soll, saldo, counts, type, abs}
+  //   type: "logged" | "absence" | "due" | "none"
+  function dayCalc(y,m,d){
+    const dt=new Date(y,m,d);
+    const soll=state.soll[dowIndex(dt)];
+    const e=state.entries[key(y,m,d)]||{};
+    const abs=absenceType(e.t);
+    const b=parseHM(e.b), en=parseHM(e.e), p=parseHM(e.p)||0;
+    if(b!=null&&en!=null){
+      let ist=en-b-p; if(ist<0) ist=0;
+      return {ist,soll,saldo:ist-soll,counts:true,type:"logged",abs};
+    }
+    if(abs) return {ist:0,soll,saldo:0,counts:false,type:"absence",abs};
+    if(soll>0 && dt.getTime()<todayMid() && dt.getTime()>=firstCountStart())
+      return {ist:0,soll,saldo:-soll,counts:true,type:"due",abs:null};
+    return {ist:0,soll,saldo:0,counts:false,type:"none",abs:null};
+  }
+  // earliest tracked day (ISO keys sort lexicographically)
+  function firstTrackedKey(){
+    let min=null; for(const k in state.entries){ if(min===null||k<min) min=k; } return min;
+  }
+  // start of counting = first day of the month that contains the earliest entry
+  // (before that, only the Startsaldo applies). Infinity = no entries yet.
+  function firstCountStart(){
+    if(firstCountTS!==null) return firstCountTS;
+    const fk=firstTrackedKey();
+    if(!fk){ firstCountTS=Infinity; return firstCountTS; }
+    const [y,m]=fk.split("-").map(Number);
+    firstCountTS=new Date(y,m-1,1).getTime();
+    return firstCountTS;
+  }
+  // sum of counted saldo (minutes) from the counting start up to (excl.) firstOfMonth
+  function carryBefore(y,m){
+    let sum=state.startSaldo*60;
+    const start=firstCountStart(); if(start===Infinity) return sum;
+    const cur=new Date(start);
+    const end=new Date(y,m,1).getTime();
+    let guard=0;
+    while(cur.getTime()<end && guard++<20000){
+      const c=dayCalc(cur.getFullYear(),cur.getMonth(),cur.getDate());
+      if(c.counts) sum+=c.saldo;
+      cur.setDate(cur.getDate()+1);
+    }
+    return sum;
+  }
+
+  /* ---------- build selects ---------- */
+  function buildSelects(){
+    const ms=$("monthSel"); ms.innerHTML="";
+    MONTHS.forEach((n,i)=>{const o=document.createElement("option");o.value=i;o.textContent=n;ms.appendChild(o);});
+    const ys=$("yearSel"); ys.innerHTML="";
+    const y0=today.getFullYear();
+    for(let y=y0-6;y<=y0+3;y++){const o=document.createElement("option");o.value=y;o.textContent=y;ys.appendChild(o);}
+  }
+
+  /* ---------- render month ---------- */
+  function render(){
+    const {y,m}=state.sel;
+    $("monthSel").value=m; $("yearSel").value=y;
+    $("subtitle").textContent=`${MONTHS[m]} ${y}`;
+    document.title=`${MONTHS[m]} ${y} · Arbeitszeiterfassung`;
+
+    const ndays=new Date(y,m+1,0).getDate();
+    // week groups
+    groups=[]; let cur=null;
+    for(let d=1;d<=ndays;d++){
+      const w=isoWeek(new Date(y,m,d));
+      if(!cur||cur.week!==w){ cur={week:w,days:[]}; groups.push(cur); }
+      cur.days.push(d);
+    }
+    const groupOf={}; groups.forEach(g=>g.days.forEach((d,i)=>groupOf[d]={g,first:i===0}));
+
+    const tb=$("tbody"); tb.innerHTML="";
+    const tstr=key(today.getFullYear(),today.getMonth(),today.getDate());
+    for(let d=1;d<=ndays;d++){
+      const dt=new Date(y,m,d); const wd=dowIndex(dt); const k=key(y,m,d);
+      const e=state.entries[k]||{};
+      const tr=document.createElement("tr");
+      tr.id="row-"+k;
+      if(wd>=5) tr.className="weekend";
+      if(k===tstr) tr.className+=" today";
+
+      tr.innerHTML=
+        `<td class="date-cell"><span class="dow">${DOW[wd]}</span><span class="daynum">${pad(d)}.${pad(m+1)}.</span></td>`+
+        timeCell(k,"b",e.b,true)+
+        timeCell(k,"e",e.e,true)+
+        timeCell(k,"p",e.p,false)+
+        `<td class="themen"><input class="cellinput" type="text" placeholder="…" data-k="${k}" data-f="t" value="${(e.t||"").replace(/"/g,"&quot;")}"></td>`+
+        `<td class="calc std" id="std-${k}"></td>`+
+        `<td class="calc soll" id="soll-${k}"></td>`+
+        `<td class="calc saldo" id="sal-${k}"></td>`+
+        (groupOf[d].first
+          ? `<td class="wk" rowspan="${groupOf[d].g.days.length}"><span class="kw">KW ${groupOf[d].g.week}</span><div id="wk-${groupOf[d].g.week}"></div></td>`
+          : "");
+      tb.appendChild(tr);
+    }
+    recalc();
+    fitRows();
+  }
+
+  /* ---------- fit the whole month into the viewport (no scrolling) ---------- */
+  function fitRows(){
+    const sc=document.querySelector(".tablescroll"); if(!sc) return;
+    const thead=sc.querySelector("thead");
+    const n=new Date(state.sel.y,state.sel.m+1,0).getDate();
+    const headH=thead?thead.offsetHeight:28;
+    const avail=sc.clientHeight-headH-2;
+    const root=document.documentElement.style;
+    const applyRow=r=>{
+      root.setProperty("--rowh",r+"px");
+      const fs=r>=26?13.5:r>=22?12.5:r>=19?11.8:r>=17?11:r>=16?10.4:9.8;
+      root.setProperty("--cellfs",fs+"px");
+    };
+    let rh=Math.max(16,Math.min(34,Math.floor(avail/n)));
+    applyRow(rh);
+    // correction: shrink until the whole month fits (or minimum readable row height)
+    requestAnimationFrame(()=>{
+      let guard=0;
+      while(sc.scrollHeight>sc.clientHeight+1 && rh>16 && guard++<10){ rh--; applyRow(rh); }
+    });
+  }
+  let fitTimer=null;
+  window.addEventListener("resize",()=>{ clearTimeout(fitTimer); fitTimer=setTimeout(fitRows,120); });
+  window.addEventListener("load",()=>setTimeout(fitRows,60));   // re-fit once fonts are ready
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>setTimeout(fitRows,0));
+
+  /* ---------- recompute derived (no input rebuild) ---------- */
+  function recalc(){
+    firstCountTS=null;   // recompute the counting start freshly (fixes carry after loading a file)
+    const {y,m}=state.sel;
+    const ndays=new Date(y,m+1,0).getDate();
+    let monIst=0,monSoll=0,monSaldo=0,monSollFull=0;
+    const wk={}; // week -> {ist,soll,saldo}
+    for(let d=1;d<=ndays;d++){
+      const k=key(y,m,d); const c=dayCalc(y,m,d);
+      const stdEl=$("std-"+k), sollEl=$("soll-"+k), salEl=$("sal-"+k), row=$("row-"+k);
+      stdEl.textContent=(c.type==="logged")?fmtHM(c.ist):"";
+      sollEl.textContent=c.soll?fmtHM(c.soll):"";
+      if(row){
+        row.classList.toggle("abs-urlaub",c.abs==="Urlaub");
+        row.classList.toggle("abs-au",c.abs==="AU");
+        row.classList.toggle("abs-feiertag",c.abs==="Feiertag");
+        row.classList.toggle("abs-frei",c.abs==="Frei");
+      }
+      if(c.type==="absence"){
+        const cls={Urlaub:"urlaub",Feiertag:"feiertag",Frei:"frei",AU:"au"}[c.abs]||"au";
+        salEl.innerHTML=`<span class="pill ${cls}">${c.abs}</span>`;
+        salEl.className="calc saldo";
+      } else if(c.counts){
+        salEl.textContent=fmtH(c.saldo);
+        salEl.className="calc saldo "+(c.saldo>=0?"pos":"neg");
+      } else { salEl.textContent=""; salEl.className="calc saldo"; }
+      if(c.counts){ monIst+=c.ist; monSoll+=c.soll; monSaldo+=c.saldo; }
+      if(c.type!=="absence") monSollFull+=c.soll;   // full monthly target (excl. Urlaub/AU)
+      const w=isoWeek(new Date(y,m,d));
+      (wk[w]||(wk[w]={ist:0,soll:0,saldo:0}));
+      if(c.counts){ wk[w].ist+=c.ist; wk[w].soll+=c.soll; wk[w].saldo+=c.saldo; }
+    }
+    for(const w in wk){
+      const el=$("wk-"+w); if(!el) continue; const s=wk[w];
+      el.innerHTML=
+        `<div class="wrow"><span>Ist</span><span>${fmtHM(s.ist)}</span></div>`+
+        `<div class="wrow"><span>Soll</span><span>${fmtHM(s.soll)}</span></div>`+
+        `<div class="wrow wsaldo"><span>Saldo</span><span class="${s.saldo>=0?'pos':'neg'}">${fmtH(s.saldo)}</span></div>`;
+    }
+    const carry=carryBefore(y,m);
+    const total=carry+monSaldo;
+    $("kpiCarry").innerHTML=spanBal(carry);
+    $("kpiIst").textContent=fmtHM(monIst);
+    $("kpiSoll").textContent=fmtHM(monSollFull);
+    $("kpiSaldo").innerHTML=spanBal(monSaldo);
+    const tb=$("totalBalance"); tb.textContent=fmtH(total); tb.className="val "+(total>=0?"pos":"neg");
+  }
+  function spanBal(mins){ return `<span class="${mins>=0?'pos':'neg'}">${fmtH(mins)}</span>`; }
+
+  /* ---------- input handling ---------- */
+  $("tbody").addEventListener("input",ev=>{
+    const el=ev.target; if(!el.dataset||!el.dataset.k) return;
+    const k=el.dataset.k, f=el.dataset.f;
+    const e=state.entries[k]||(state.entries[k]={});
+    e[f]=el.value;
+    if(!e.b&&!e.e&&!e.p&&!e.t) delete state.entries[k];
+    save(); recalc();
+  });
+  // save promptly once a field is left (committed), not on every keystroke
+  $("tbody").addEventListener("change",()=>flushWrite());
+
+  // click: clock button = stamp current time; time field = open picker
+  function nowValue(){
+    const d=new Date(); let mins=d.getHours()*60+d.getMinutes();
+    const step=state.minuteStep||5;
+    if(step>1) mins=Math.round(mins/step)*step;
+    if(mins>1439) mins=1439;
+    return pad(Math.floor(mins/60))+":"+pad(mins%60);
+  }
+  $("tbody").addEventListener("click",ev=>{
+    const nb=ev.target.closest(".nowbtn");
+    if(nb){
+      const inp=nb.parentElement.querySelector("input.timein");
+      if(inp){ inp.value=nowValue(); inp.dispatchEvent(new Event("input",{bubbles:true})); }
+      return;
+    }
+    const ti=ev.target.closest("input.timein");
+    if(ti){ try{ ti.showPicker(); }catch(e){} }
+  });
+
+  /* ---------- navigation ---------- */
+  function shift(delta){
+    let {y,m}=state.sel; m+=delta;
+    if(m<0){m=11;y--;} if(m>11){m=0;y++;}
+    state.sel={y,m}; render();
+  }
+  $("prevBtn").onclick=()=>shift(-1);
+  $("nextBtn").onclick=()=>shift(1);
+  $("todayBtn").onclick=()=>{state.sel={y:today.getFullYear(),m:today.getMonth()};render();};
+  $("monthSel").onchange=e=>{state.sel.m=+e.target.value;render();};
+  $("yearSel").onchange=e=>{state.sel.y=+e.target.value;render();};
+
+  /* ---------- settings ---------- */
+  function buildSettings(){
+    const g=$("sollGrid"); g.innerHTML="";
+    const names=["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"];
+    names.forEach((n,i)=>{
+      const lab=document.createElement("label"); lab.textContent=n;
+      const inp=document.createElement("input"); inp.type="time"; inp.value=fmtHMpad(state.soll[i]);
+      inp.addEventListener("input",()=>{ const v=parseHM(inp.value); state.soll[i]=v==null?0:v; save(); recalc(); });
+      g.appendChild(lab); g.appendChild(inp);
+    });
+    const ss=$("startSaldo"); ss.value=state.startSaldo;
+    ss.oninput=()=>{ state.startSaldo=parseFloat(ss.value)||0; save(); recalc(); };
+    const st=$("stepSel"); st.value=String(state.minuteStep||5);
+    st.onchange=()=>{ state.minuteStep=normStep(st.value); save(); render(); };
+  }
+  function fmtHMpad(mins){ return `${pad(Math.floor(mins/60))}:${pad(mins%60)}`; }
+  $("settingsBtn").onclick=()=>{ buildSettings(); $("settingsDlg").showModal(); };
+
+  /* ---------- file open / save ---------- */
+  $("openBtn").onclick=openExistingFile;
+  $("saveBtn").onclick=()=>{
+    if(fileHandle&&HAS_FSA) writeToFile().then(ok=>{ if(ok) toast("Gespeichert ✓"); });
+    else if(HAS_FSA) connectNewFile();
+    else manualDownload();
+  };
+  $("openFallback").onchange=e=>{
+    const f=e.target.files[0]; if(!f) return;
+    const r=new FileReader(); r.onload=()=>manualLoadText(r.result); r.readAsText(f,"UTF-8"); e.target.value="";
+  };
+
+  /* ---------- import / export dialog ---------- */
+  $("backupBtn").onclick=()=>{ $("jsonArea").value=JSON.stringify(state,null,2); $("backupDlg").showModal(); };
+  function doDownload(name,text,type){
+    try{
+      const blob=new Blob([text],{type:type||"application/json"});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement("a"); a.href=url; a.download=name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),1500);
+    }catch(e){ toast("Download hier nicht möglich – bitte Text kopieren"); }
+  }
+  $("downloadJson").onclick=()=>doDownload(`Arbeitszeit-backup-${new Date().toISOString().slice(0,10)}.json`, JSON.stringify(state,null,2));
+  $("copyJson").onclick=async()=>{
+    const t=$("jsonArea").value;
+    try{ await navigator.clipboard.writeText(t); toast("In Zwischenablage kopiert"); }
+    catch(e){ $("jsonArea").select(); document.execCommand&&document.execCommand("copy"); toast("Text markiert – Strg+C zum Kopieren"); }
+  };
+  function applyImport(text){
+    try{ const s=JSON.parse(text); if(!s||typeof s!=="object") throw 0; state=coerceState(s); }
+    catch(e){ toast("Ungültiges Format"); return; }
+    afterConnect("manual"); render(); $("backupDlg").close(); toast("Daten geladen ✓");
+  }
+  $("fileInput").onchange=e=>{
+    const f=e.target.files[0]; if(!f) return;
+    const r=new FileReader(); r.onload=()=>applyImport(r.result); r.readAsText(f); e.target.value="";
+  };
+  $("applyText").onclick=()=>applyImport($("jsonArea").value);
+
+  /* ---------- CSV import (heuristic, no AI) ---------- */
+  function parseCSV(text){
+    text=text.replace(/^﻿/,"");
+    const first=(text.split(/\r?\n/).find(l=>l.trim()!=="")||"");
+    const cand={";":0,",":0,"\t":0};
+    for(const ch of first){ if(ch in cand) cand[ch]++; }
+    let delim=";",best=-1; for(const d in cand){ if(cand[d]>best){best=cand[d];delim=d;} }
+    if(best<=0) delim=(first.indexOf("\t")>=0?"\t":(first.indexOf(",")>=0?",":";"));
+    const rows=[]; let row=[],cur="",q=false;
+    for(let i=0;i<text.length;i++){ const c=text[i];
+      if(q){ if(c==='"'){ if(text[i+1]==='"'){cur+='"';i++;} else q=false; } else cur+=c; }
+      else{
+        if(c==='"') q=true;
+        else if(c===delim){ row.push(cur); cur=""; }
+        else if(c==="\n"){ row.push(cur); rows.push(row); row=[]; cur=""; }
+        else if(c==="\r"){ /* skip */ }
+        else cur+=c;
+      }
+    }
+    if(cur!==""||row.length){ row.push(cur); rows.push(row); }
+    return rows.map(r=>r.map(x=>x.trim())).filter(r=>r.some(x=>x!==""));
+  }
+  // parse a date cell into {y, mo, da}; y is null when the text has no year
+  function parseDateParts(s){
+    s=String(s||"").trim(); if(!s) return null;
+    // drop a leading weekday token like "Mo", "Di,", "Montag"
+    s=s.replace(/^(mo|di|mi|do|fr|sa|so|montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)\.?,?\s+/i,"").trim();
+    let m;
+    if(m=s.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/)){ const mo=+m[2],da=+m[3]; if(mo<1||mo>12||da<1||da>31) return null; return {y:+m[1],mo,da}; }
+    if(m=s.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{2,4})/)){ let y=+m[3]; if(y<100)y+=2000; const mo=+m[2],da=+m[1]; if(mo<1||mo>12||da<1||da>31) return null; return {y,mo,da}; }
+    if(m=s.match(/^(\d{1,2})[.\/](\d{1,2})\.?$/)){ const mo=+m[2],da=+m[1]; if(mo<1||mo>12||da<1||da>31) return null; return {y:null,mo,da}; } // day.month, no year
+    return null;
+  }
+  function partsKey(pp, fbYear){
+    if(!pp) return null;
+    const y=(pp.y==null)?fbYear:pp.y;
+    if(!y) return null;
+    return `${y}-${pad(pp.mo)}-${pad(pp.da)}`;
+  }
+  // returns a key only when the text carries an explicit year (used for column detection)
+  function parseDateStr(s){ const pp=parseDateParts(s); return (pp&&pp.y!=null)?partsKey(pp,null):null; }
+  function parseTimeLoose(s){
+    s=String(s||"").trim(); if(!s) return null;
+    const ap=(s.match(/(am|pm)/i)||[])[1];
+    let m=s.match(/(\d{1,2})[:.h](\d{2})/);
+    let hh,mm;
+    if(m){ hh=+m[1]; mm=+m[2]; }
+    else { const h=s.match(/^(\d{1,2})$/); if(!h) return null; hh=+h[1]; mm=0; }
+    if(mm>59) return null;
+    if(ap){ const l=ap.toLowerCase(); if(l==="pm"&&hh<12)hh+=12; if(l==="am"&&hh===12)hh=0; }
+    if(hh>23) return null;
+    return pad(hh)+":"+pad(mm);
+  }
+  function colScore(rows,pred,skip){
+    const ncol=rows.reduce((a,r)=>Math.max(a,r.length),0);
+    let bestC=-1,bestHits=-1;
+    for(let c=0;c<ncol;c++){ if(skip&&skip.indexOf(c)>=0) continue;
+      let hits=0,tot=0; rows.forEach(r=>{ const v=(r[c]||"").trim(); if(v){tot++; if(pred(v))hits++;} });
+      if(tot&&hits/tot>=0.6&&hits>bestHits){ bestHits=hits; bestC=c; }
+    }
+    return bestC;
+  }
+  function importCSV(text){
+    const rows=parseCSV(text);
+    if(!rows.length){ toast("CSV ist leer oder unlesbar"); return; }
+    const norm=s=>String(s||"").trim().toLowerCase();
+    const header=rows[0].map(norm);
+    const looksHeader=header.some(h=>/(datum|date|beginn|ende|pause|them|thema|start|von|bis|kommen|gehen|notiz|tätigkeit|taetigkeit|beschreib|kommentar)/.test(h))
+                      && !parseDateParts(rows[0][0]);
+    let idx={date:-1,b:-1,e:-1,p:-1,t:-1}, data;
+    if(looksHeader){
+      header.forEach((h,i)=>{
+        if(idx.date<0 && /(datum|date)/.test(h) && !/wochentag|tag$/.test(h)) idx.date=i;
+        else if(idx.b<0 && /(beginn|^start|^von$|kommen)/.test(h)) idx.b=i;
+        else if(idx.e<0 && /(ende|^end|^bis$|gehen)/.test(h)) idx.e=i;
+        else if(idx.p<0 && /(pause|break)/.test(h)) idx.p=i;
+        else if(idx.t<0 && /(them|thema|notiz|tätigkeit|taetigkeit|beschreib|kommentar|aufgabe|projekt)/.test(h)) idx.t=i;
+      });
+      data=rows.slice(1);
+    } else { data=rows; }
+    // fallbacks by content
+    if(idx.date<0) idx.date=colScore(data,v=>!!parseDateParts(v));
+    const used=[idx.date,idx.b,idx.e,idx.p,idx.t].filter(x=>x>=0);
+    if(idx.b<0||idx.e<0||idx.p<0){
+      const ncol=data.reduce((a,r)=>Math.max(a,r.length),0);
+      const timeCols=[];
+      for(let c=0;c<ncol;c++){ if(used.indexOf(c)>=0) continue;
+        let hits=0,tot=0; data.forEach(r=>{const v=(r[c]||"").trim(); if(v){tot++; if(parseTimeLoose(v)!=null && !parseDateParts(v))hits++;}});
+        if(tot&&hits/tot>=0.6) timeCols.push(c);
+      }
+      timeCols.forEach(c=>{ if(idx.b<0)idx.b=c; else if(idx.e<0)idx.e=c; else if(idx.p<0)idx.p=c; });
+    }
+    if(idx.t<0){
+      const skip=[idx.date,idx.b,idx.e,idx.p].filter(x=>x>=0);
+      idx.t=colScore(data,v=>v.length>0 && !parseTimeLoose(v) && !parseDateParts(v) && !/^[\d.,:+\-]+$/.test(v),skip);
+    }
+    if(idx.date<0){ toast("Keine Datumsspalte gefunden"); return; }
+    const fbYear=state.sel.y;                 // year used for dates without a year in the file
+    const mode=(document.querySelector('input[name="csvmode"]:checked')||{}).value||"merge";
+    if(mode==="replace"){
+      // clear every month that occurs in the file, so the CSV becomes the sole content there
+      const months=new Set();
+      data.forEach(r=>{ const dk=partsKey(parseDateParts(r[idx.date]),fbYear); if(dk) months.add(dk.slice(0,7)); });
+      for(const k in state.entries){ if(months.has(k.slice(0,7))) delete state.entries[k]; }
+    }
+    let n=0,skipped=0,usedFallback=false,earliest=null; const yearsUsed=new Set();
+    data.forEach(r=>{
+      const pp=parseDateParts(r[idx.date]); const dk=partsKey(pp,fbYear); if(!dk){ skipped++; return; }
+      const obj=Object.assign({},state.entries[dk]||{}); let touched=false;
+      if(idx.b>=0){ const v=parseTimeLoose(r[idx.b]); if(v){obj.b=v;touched=true;} }
+      if(idx.e>=0){ const v=parseTimeLoose(r[idx.e]); if(v){obj.e=v;touched=true;} }
+      if(idx.p>=0){ const v=parseTimeLoose(r[idx.p]); if(v){obj.p=v;touched=true;} }
+      if(idx.t>=0){ const v=(r[idx.t]||"").trim(); if(v){obj.t=v;touched=true;} }
+      if(touched){ state.entries[dk]=obj; n++; yearsUsed.add(dk.slice(0,4)); if(pp.y==null) usedFallback=true; if(!earliest||dk<earliest) earliest=dk; }
+    });
+    if(n>0 && earliest){ const p2=earliest.split("-").map(Number); state.sel={y:p2[0],m:p2[1]-1}; }
+    save(); render();
+    let msg;
+    if(n>0){
+      msg=`${n} Tag(e) importiert · Jahr${yearsUsed.size>1?"e":""}: ${[...yearsUsed].sort().join(", ")}`;
+      if(usedFallback) msg+=` (Datum ohne Jahr → ${fbYear})`;
+      if(mode==="replace") msg+=` · Monate ersetzt`;
+      if(skipped) msg+=` · ${skipped} übersprungen`;
+    } else { msg="Keine gültigen Zeilen gefunden"; }
+    toast(msg, 5000);
+  }
+  $("csvInput").onchange=e=>{
+    const f=e.target.files[0]; if(!f) return;
+    const r=new FileReader(); r.onload=()=>{ importCSV(r.result); $("backupDlg").close(); };
+    r.readAsText(f,"UTF-8"); e.target.value="";
+  };
+
+  /* ---------- clear a whole month ---------- */
+  $("clearMonthBtn").onclick=()=>{
+    const {y,m}=state.sel; const label=`${MONTHS[m]} ${y}`; const prefix=`${y}-${pad(m+1)}-`;
+    let cnt=0; for(const k in state.entries){ if(k.indexOf(prefix)===0) cnt++; }
+    if(cnt===0){ toast(`${label}: keine Einträge vorhanden`); return; }
+    if(!window.confirm(`Wirklich alle ${cnt} Einträge aus ${label} löschen?`)) return;
+    for(const k in state.entries){ if(k.indexOf(prefix)===0) delete state.entries[k]; }
+    save(); render(); $("backupDlg").close(); toast(`${label} geleert – ${cnt} Tag(e) entfernt`, 4000);
+  };
+
+  /* ---------- CSV export ---------- */
+  $("csvBtn").onclick=()=>{
+    const {y,m}=state.sel; const ndays=new Date(y,m+1,0).getDate();
+    let rows=["Datum;Wochentag;Beginn;Ende;Pause;Themen;Stunden;Soll;Saldo(h)"];
+    for(let d=1;d<=ndays;d++){
+      const k=key(y,m,d); const e=state.entries[k]||{}; const c=dayCalc(y,m,d);
+      const dt=new Date(y,m,d);
+      rows.push([`${pad(d)}.${pad(m+1)}.${y}`,DOW[dowIndex(dt)],e.b||"",e.e||"",e.p||"",
+        (e.t||"").replace(/;/g,","), (c.type==="logged")?fmtHM(c.ist):"", c.soll?fmtHM(c.soll):"",
+        c.counts?(c.saldo/60).toFixed(2).replace(".",","):""].join(";"));
+    }
+    doDownload(`arbeitszeit-${y}-${pad(m+1)}.csv`, "﻿"+rows.join("\r\n"), "text/csv");
+  };
+
+  /* ---------- print ---------- */
+  $("printBtn").onclick=()=>window.print();
+
+  /* ---------- dialogs close ---------- */
+  document.querySelectorAll("[data-close]").forEach(b=>b.onclick=e=>e.target.closest("dialog").close());
+  document.querySelectorAll("dialog").forEach(dl=>dl.addEventListener("click",e=>{ if(e.target===dl) dl.close(); }));
+
+  /* ---------- toast ---------- */
+  let toastTimer=null;
+  function toast(msg,ms){ const t=$("toast"); t.textContent=msg; t.classList.add("show");
+    clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),ms||2200); }
+
+  /* ---------- warn before losing unsaved data ---------- */
+  window.addEventListener("beforeunload",e=>{ if(hasUnsaved){ e.preventDefault(); e.returnValue=""; } });
+
+  /* ---------- init ---------- */
+  buildSelects();
+  render();
+  updateFileStatus("init");
+  tryRestore();     // reopen last file (auto if permitted, else one-click)
+})();
+</script>
+</body>
+</html>

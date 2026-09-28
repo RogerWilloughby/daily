@@ -21,6 +21,7 @@ import local from './providers/local.js';
 import links from './providers/links.js';
 import fuel from './providers/fuel.js';
 import kalender from './providers/kalender.js';
+import tools from './providers/tools.js';
 
 // Betriebsart vom Server: privat nur mit Vercel-Variable DAILY_PRIVATE=1 (Kalender, Schlagzeilen)
 let isPrivate = false;
@@ -33,7 +34,7 @@ const sichtbar = new Set(chooseLayout(isPrivate, settings.layout).filter(Boolean
 // Welche Kacheln ein Anbieter füllt – Anbieter ausgeblendeter Kacheln starten gar nicht erst (keine Abrufe)
 const KACHELN = { local: ['tasks', 'usage'], content: ['play', 'food', 'travel', 'film', 'health', 'tech', 'saving', 'relation'] };
 // Reihenfolge = Priorität: was am häufigsten gebraucht wird, lädt zuerst
-const PROVIDERS = [local, links, weather, kalender, news, content, transit, finanzen, sport, knowledge, fuel]
+const PROVIDERS = [local, links, weather, kalender, news, content, transit, finanzen, sport, knowledge, fuel, tools]
   .filter(p => (isPrivate || !p.private) && (KACHELN[p.id] || [p.id]).some(id => sichtbar.has(id)));
 const lastRun = new Map();
 
