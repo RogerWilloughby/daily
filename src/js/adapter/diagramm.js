@@ -42,6 +42,30 @@ export function miniDiagramm(tage) {
     `<div class="wd-minilegende">${n} Tage: <b class="wd-t-max">Höchst</b> · <b class="wd-t-min">Tiefst</b> · <b class="wd-t-regen">Regen</b></div>`;
 }
 
+// Mini-Diagramm „24 Std.“ für die kleine Kachel: Temperaturlinie (Farbe Höchst), Balken = Regenwahrscheinlichkeit je Stunde
+// (Höhe = Wahrscheinlichkeit ab 10 %; kräftig ab 1 mm Menge, sonst blass), Zeitmarken alle 6 Stunden. stunde(iso) → Stunde als Zahl (Ortszeit).
+export function miniStunden(stunden, stunde) {
+  const l = (stunden || []).slice(0, 24);
+  if (l.length < 2) return '';
+  const W = 160, H = 34, n = l.length, T0 = 2, T1 = 22, B = H;
+  const temps = l.map(s => s.tempC).filter(v => v != null);
+  const tmin = Math.min(...temps), tmax = Math.max(...temps);
+  const y = skala(tmin, tmax, T0, T1), x = i => 2 + i * (W - 4) / (n - 1), bw = Math.max(2, (W - 4) / n - 1.5);
+  const balken = l.map((s, i) => {
+    const p = s.regenProzent || 0, h = p < 10 ? 0 : Math.round((p / 100) * 10 * 10) / 10;   // unter 10 % kein Balken (sonst Rauschen)
+    return h > 0 ? `<rect class="wd-regen${(s.niederschlagMm || 0) >= 1 ? '' : ' wd-blass'}" x="${Math.min(W - bw, Math.max(0, x(i) - bw / 2)).toFixed(1)}" y="${(B - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h}" rx="1"/>` : '';
+  }).join('');
+  const linie1 = `<path class="wd-max" d="${pfad(l.map((s, i) => [x(i), s.tempC == null ? null : y(s.tempC)]))}"/>`;
+  const svg = `<svg class="wd wd-mini" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">${linie1}${balken}</svg>`;
+  // Zeitmarken: jetzt und dann jede volle 6. Stunde (0, 6, 12, 18)
+  const marken = l.map((s, i) => ({ i, h: stunde(s.zeit) })).filter(m => m.i === 0 || (m.h % 6 === 0 && m.i > 1 && m.i < n - 1))
+    .map(m => `<span style="left:${(x(m.i) / W * 100).toFixed(1)}%">${m.i === 0 ? 'jetzt' : m.h}</span>`).join('');
+  const regenMax = Math.max(...l.map(s => s.regenProzent || 0));
+  return `<div class="wd-minibox" role="img" aria-label="24 Stunden: Temperatur ${r0(tmin)}° bis ${r0(tmax)}°, Regenwahrscheinlichkeit bis ${regenMax} %">` +
+    `<div class="wd-miniskala"><b class="wd-t-max">${r0(tmax)}°</b><b class="wd-t-max">${r0(tmin)}°</b></div><div class="wd-mini24">${svg}<div class="wd-marken">${marken}</div></div></div>` +
+    `<div class="wd-minilegende">24 Std.: <b class="wd-t-max">Temperatur</b> · <b class="wd-t-regen">Regen %</b></div>`;
+}
+
 // Hover-Hinweis für ein Diagramm (Text je Spalte steht in data-tip)
 const hinweisFeld = '<div class="wd-tip" hidden></div>';
 

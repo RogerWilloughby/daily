@@ -716,6 +716,17 @@ test('Einstellungen: Kachel-Formular, Wetter-Optionen, Kachel-Listen', async () 
   assert.equal(k.startReiter, 'tage');
   assert.match(k.chart, /7 Tage: /);
   assert.equal(mitOptionen(kachel(w, r, null), w, { start: 'radar', radar: false }).startReiter, 'heute');   // ausgeblendeter Start → Heute
+  // Standard: Mini-Diagramm 24 Stunden (Temperatur + Regenwahrscheinlichkeit, kräftig ab 1 mm)
+  const k24 = mitOptionen(kachel(w, r, null), w, {});
+  assert.match(k24.chart, /24 Std\.: <b class="wd-t-max">Temperatur<\/b> · <b class="wd-t-regen">Regen %<\/b>/);
+  assert.match(k24.chart, /<span style="left:[\d.]+%">jetzt<\/span>/);
+  const { miniStunden } = await esm('src/js/adapter/diagramm.js');
+  const probe = Array.from({ length: 30 }, (_, i) => ({ zeit: new Date(Date.UTC(2026, 8, 28, i)).toISOString(), tempC: 10 + i % 5, regenProzent: i === 3 ? 80 : i === 4 ? 40 : 0, niederschlagMm: i === 3 ? 2 : 0.2 }));
+  const m = miniStunden(probe, iso => new Date(iso).getUTCHours());
+  assert.equal((m.match(/<rect /g) || []).length, 2);                               // nur Stunden mit Regenwahrscheinlichkeit
+  assert.equal((m.match(/wd-regen wd-blass/g) || []).length, 1);                    // unter 1 mm blass
+  assert.match(m, />6<\/span>.*>12<\/span>.*>18<\/span>/s);                        // Zeitmarken alle 6 Stunden
+  assert.equal(mitOptionen(kachel(w, r, null), w, { mini: 16 }).chart, kachel(w, r, null).chart);
   const u = { daten: { gebiet: 'X', hoechsteStufe: 3, hinweise: [{ art: 'wind', stufe: 3, stufeName: 'unwetter', ereignis: 'ORKANBÖEN', titel: 'T', beginn: null, ende: null, aktiv: true, beschreibung: '', empfehlung: '', tipp: 't' }] } };
   const ku = mitOptionen(kachel(w, r, u), w, { hinweise: false, start: 'mehr' });
   assert.deepEqual([ku.tabs[0].id, ku.startReiter], ['hinweise', 'hinweise']);

@@ -49,7 +49,7 @@ kachelEinstellungen('weather', {
       { typ: 'hinweis', label: '„Heute“ ist immer da. Bei einer Unwetterwarnung erscheint „Hinweise“ trotzdem.' },
       ...REITER.map(([k, n]) => ({ typ: 'check', key: k, label: n, wert: o[k] !== false })),
       { typ: 'select', key: 'start', label: 'Beim Aufklappen zuerst', wert: o.start, optionen: [['heute', 'Heute'], ...REITER] },
-      { typ: 'select', key: 'mini', label: 'Diagramm in der kleinen Kachel', wert: o.mini, optionen: [['16', '16 Tage'], ['7', '7 Tage']] }
+      { typ: 'select', key: 'mini', label: 'Diagramm in der kleinen Kachel', wert: o.mini, optionen: [['24', '24 Stunden'], ['7', '7 Tage'], ['16', '16 Tage']] }
     ];
   },
   speichern: w => {

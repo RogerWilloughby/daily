@@ -1,7 +1,7 @@
 {
   "name": "daily",
   "private": true,
-  "version": "0.17.5",
+  "version": "0.18.0",
   "description": "DAILY – Dein Tag auf einer Seite (PWA)",
   "scripts": {
     "build": "node build.js",
