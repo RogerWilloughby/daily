@@ -411,8 +411,7 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
 .ke-check input{width:15px;height:15px;accent-color:var(--accent);margin:0}
 .ke .field{font-size:13px;padding:5px 8px;width:100%}
 .ke textarea.field{min-height:44px}
-.ke .btn.primary{background:var(--active-ink);color:var(--active-bg);border-color:var(--active-ink)}
-.ke-aktionen{display:flex;align-items:center;justify-content:flex-end;gap:10px}
+.ke-aktionen{display:flex;align-items:center;justify-content:flex-end;gap:10px;min-height:16px}
 .ke-ok{font-size:12px;color:var(--active-muted)}
 
 /* Einstellungen → Kacheln: zwei Listen */

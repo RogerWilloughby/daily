@@ -28,7 +28,7 @@ Kein Impressum, keine Datenschutzerklärung, keine Medienpflichten nötig. Aktue
 - OpenPLZ und Nominatim werden nicht mehr genutzt (seit Umstellung auf den eigenen Ortsbestand).
 - Gerätestandort: nur nach Knopfdruck und Browser-Erlaubnis, auf ~1 km gerundet; die Suche nach dem nächsten Ort läuft im eigenen Bestand (keine Weitergabe an Dritte); gespeichert wird nur der gefundene Ort (im Browser). Im Datenschutz-Entwurf beschrieben.
 - „Meine Seiten“: nur vom Nutzer selbst angelegte Links, keine fremden Inhalte.
-- Geld: Yahoo-Daten nur privat; öffentlich andere Quelle.
+- Geld: Yahoo-Daten nur privat; öffentlich andere Quelle – Lizenzlage und Alternativen in [../recherche/finanzdaten.md](../recherche/finanzdaten.md).
 
 ## Nachrichten & Co. – Entscheidung: kein journalistisches Angebot
 Ein journalistisch-redaktionelles Angebot (eigene Auswahl, Gewichtung, Zusammenfassung oder Bewertung meinungsbildender Themen) würde auslösen:

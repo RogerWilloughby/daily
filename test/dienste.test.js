@@ -719,7 +719,8 @@ test('Einstellungen: Kachel-Formular, Wetter-Optionen, Kachel-Listen', async () 
     { typ: 'select', key: 's', label: 'S', wert: '7', optionen: [['16', '16 Tage'], ['7', '7 Tage']] }, { typ: 'text', key: 't', label: 'T', wert: 'x"y' }], speichern() {} });
   const html = ke.formular('probe');
   assert.ok(ke.hatEinstellungen('probe') && !ke.hatEinstellungen('gibtsnicht'));
-  assert.match(html, /<form class="ke" data-ke="probe">.*type="checkbox" name="a" checked> A &lt;b&gt;.*<option value="7" selected>.*value="x&quot;y".*Speichern/s);
+  assert.match(html, /<form class="ke" data-ke="probe">.*type="checkbox" name="a" checked> A &lt;b&gt;.*<option value="7" selected>.*value="x&quot;y"/s);
+  assert.doesNotMatch(html, /Speichern|type="submit"/);                              // kein Knopf – Änderungen gelten sofort
   // Wetter: Reiter aus, Start-Reiter, Mini-Diagramm 7 Tage; Unwetter bleibt vorn
   const { kachel, mitOptionen } = await esm('src/js/adapter/wetter.js');
   const w = (await rufe('wetter', { ort: 'Berlin' })).body, r = (await rufe('regen', { lat: '52.52', lon: '13.41' })).body;

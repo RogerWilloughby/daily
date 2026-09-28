@@ -2,7 +2,7 @@
 import { TILES, byId, COLS, ROWS } from './tiles.js';
 import { esc, icon, rows } from './util.js';
 import { countClick } from './store.js';
-import { hatEinstellungen, formular, binden, ZAHNRAD } from './einstellungen.js';
+import { hatEinstellungen, formular, binden, offeneSpeichern, ZAHNRAD } from './einstellungen.js';
 
 const WEIGHT = 4;
 const mobileMQ = window.matchMedia('(max-width:760px), (max-height:520px)');
@@ -57,8 +57,9 @@ function fillContent(t, el) {
     el.querySelectorAll('[data-tab]').forEach(b => b.addEventListener('click', e => {
       e.stopPropagation();
       reiterWahl[t.id] = b.dataset.tab;
-      el.querySelectorAll('[data-tab]').forEach(x => x.setAttribute('aria-selected', String(x === b)));
-      el.querySelectorAll('[data-feld]').forEach(f => { f.hidden = f.dataset.feld !== b.dataset.tab; });
+      const box = b.closest('.reiter').parentElement;   // nicht „el“: Reiter können nach dem Speichern umgehängt sein
+      box.querySelectorAll('[data-tab]').forEach(x => x.setAttribute('aria-selected', String(x === b)));
+      box.querySelectorAll('[data-feld]').forEach(f => { f.hidden = f.dataset.feld !== b.dataset.tab; });
     }));
   }
   else el.innerHTML = (t.big || '') + rows(t.rows);
@@ -146,11 +147,13 @@ function layout() {
 
 export function activate(id) {
   if (active === id) return;
+  offeneSpeichern();
   active = id; layout();
   if (id) { const t = byId[id]; fillContent(t, document.querySelector(`#tile-${id} .content`)); }
 }
 export const isAnyOpen = () => active !== null || open !== null;
 export function closeAll() {
+  offeneSpeichern();                                   // Texteingabe ohne Tipp-Pause nicht verlieren
   if (open !== null) { hideSheet(); return true; }
   if (active !== null) { activate(null); return true; }
   return false;
@@ -158,6 +161,7 @@ export function closeAll() {
 
 // ---- Handy: Vollbild pro Kachel ----
 function showSheet(id) {
+  offeneSpeichern();
   open = id;
   const t = byId[id], i = ORDER.indexOf(id), n = ORDER.length;
   document.getElementById('s-label').innerHTML = icon(t.icon) + (t.lglyph ? `<span class="lglyph">${t.lglyph}</span>` : '') + (t.titleHtml || esc(t.title));
@@ -169,17 +173,25 @@ function showSheet(id) {
   document.getElementById('s-next').textContent = byId[ORDER[(i + 1) % n]].short + ' ›';
   sheet.classList.add('open');
 }
-function hideSheet() { open = null; sheet.classList.remove('open'); }
+function hideSheet() { offeneSpeichern(); open = null; sheet.classList.remove('open'); }
 function step(d) { const n = ORDER.length; showSheet(ORDER[(ORDER.indexOf(open) + d + n) % n]); }
 
-// Nach dem Speichern von Kachel-Einstellungen: Inhalt neu zeichnen (Reiter können sich ändern), Zahnrad-Reiter bleibt offen
+// Nach dem Speichern von Kachel-Einstellungen: Reiterleiste und übrige Reiter neu zeichnen (Reiter können sich ändern).
+// Der Zahnrad-Reiter selbst bleibt stehen – sonst spränge beim Tippen der Cursor aus dem Feld.
 document.addEventListener('daily:einstellungen', e => {
   const id = e.detail, t = byId[id]; if (!t) return;
   const ziele = [active === id && document.querySelector(`#tile-${id} .content`), open === id && document.getElementById('s-content')].filter(Boolean);
   ziele.forEach(el => {
-    fillContent(t, el);
+    const alt = el.querySelector(`:scope > [data-feld="${EINST}"]`);
+    if (!alt) fillContent(t, el);
+    else {                                               // neu aufbauen, dann alles außer dem Formular austauschen (Fokus bleibt)
+      const tmp = document.createElement('div');
+      fillContent(t, tmp);
+      [...el.children].forEach(c => { if (c !== alt) c.remove(); });
+      [...tmp.children].forEach(c => { if (c.dataset.feld !== EINST) el.insertBefore(c, alt); });
+    }
     const ok = el.querySelector('.ke-ok');
-    if (ok) { ok.textContent = 'Gespeichert ✓'; setTimeout(() => { ok.textContent = ''; }, 2500); }
+    if (ok) { ok.textContent = 'Gespeichert ✓'; clearTimeout(ok._t); ok._t = setTimeout(() => { ok.textContent = ''; }, 2000); }
   });
 });
 

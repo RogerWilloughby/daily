@@ -1,5 +1,6 @@
 // Einstellungen je Kachel: Jede Kachel (bzw. ihr Anbieter) meldet hier ihre Felder an. Das Raster zeigt dann in der
 // aufgeklappten Kachel einen Reiter mit Zahnrad (nur Symbol) – Formular und „Speichern“ entstehen von selbst.
+// Kein „Speichern“-Knopf: Häkchen und Auswahl gelten sofort, Textfelder nach 1 s Tipp-Pause oder beim Verlassen des Felds.
 // Nach dem Speichern: Ereignis „daily:einstellungen“ (detail = Kachel-ID) → main.js lädt den passenden Anbieter neu.
 import { esc } from './util.js';
 
@@ -36,7 +37,7 @@ export function formular(id) {
     else teile.push(f.typ === 'check' ? { checks: [f] } : f);
   }
   return `<form class="ke" data-ke="${esc(id)}">${teile.map(t => t.checks ? `<div class="ke-checks ke-breit">${t.checks.map(feld).join('')}</div>` : feld(t)).join('')}` +
-    `<div class="ke-aktionen ke-breit"><span class="ke-ok" role="status"></span><button type="submit" class="btn primary">Speichern</button></div></form>`;
+    `<div class="ke-aktionen ke-breit"><span class="ke-ok" role="status"></span></div></form>`;
 }
 
 // Werte aus dem Formular lesen (Kontrollkästchen → true/false)
@@ -46,13 +47,29 @@ export function werte(form) {
   return out;
 }
 
-// Formular in einer Kachel verbinden
+// Formular in einer Kachel verbinden: jede Änderung sofort speichern
+export const TIPP_PAUSE_MS = 1000;
+const offen = new Map();                       // Kachel-ID → { timer, form } für noch nicht gespeicherte Texteingaben
+function speichere(id, form) {
+  const o = offen.get(id); if (o) { clearTimeout(o.timer); offen.delete(id); }
+  const w = werte(form), stand = JSON.stringify(w);
+  if (form.dataset.stand === stand) return;    // nichts geändert (z. B. Feld nach der Tipp-Pause verlassen)
+  form.dataset.stand = stand;
+  REG[id].speichern(w);
+  document.dispatchEvent(new CustomEvent('daily:einstellungen', { detail: id }));   // Raster zeichnet neu, main.js lädt den Anbieter neu
+}
+// Noch ausstehende Texteingaben sofort speichern (z. B. beim Schließen der Kachel)
+export function offeneSpeichern() { for (const [id, o] of [...offen]) speichere(id, o.form); }
 export function binden(id, el) {
   const form = el.querySelector(`form[data-ke="${id}"]`); if (!form) return;
+  const text = e => e.target.matches('input[type="text"], textarea');
+  form.dataset.stand = JSON.stringify(werte(form));
   form.addEventListener('click', e => e.stopPropagation());
-  form.addEventListener('submit', e => {
-    e.preventDefault();
-    REG[id].speichern(werte(form));
-    document.dispatchEvent(new CustomEvent('daily:einstellungen', { detail: id }));   // Raster zeichnet neu, main.js lädt den Anbieter neu
+  form.addEventListener('submit', e => { e.preventDefault(); speichere(id, form); });          // Enter im Textfeld
+  form.addEventListener('change', () => speichere(id, form));                                   // Häkchen, Auswahl, Textfeld verlassen
+  form.addEventListener('input', e => {
+    if (!text(e)) return;
+    const o = offen.get(id); if (o) clearTimeout(o.timer);
+    offen.set(id, { form, timer: setTimeout(() => speichere(id, form), TIPP_PAUSE_MS) });
   });
 }

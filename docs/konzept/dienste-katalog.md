@@ -43,11 +43,14 @@ Status: ✅ fertig in daily/1 · 🔁 läuft, noch alte Schnittstelle · 🆕 ne
 | – | Pendelzeit | Live | **Start und Ziel** | Routing-Dienste meist kostenpflichtig | ⏸ braucht persönliche Adressen |
 
 ## 4. Geld
+
+Quellen und Lizenzlage: siehe [Recherche Finanzdaten](../recherche/finanzdaten.md) (Stand 28.09.2026).
+
 | Dienst | Ideen | Art | Eingabe | Quelle | Status |
 |---|---|---|---|---|---|
 | `waehrungen` | Währungen | Live | Basiswährung | EZB-Referenzkurse | 🆕 |
 | `krypto` | Crypto-Kurse | Live | Liste von Coins | CoinGecko (kostenloser Schlüssel) | 🆕 |
-| `kurse` | Börsenindizes, Aktienkurse, Gold | Live | Liste von Werten | Yahoo (nur privat); öffentlich lizenzierte Quelle nötig | 🔁 (privat) |
+| `kurse` | Börsenindizes, Aktienkurse, Gold | Live | Liste von Werten | Yahoo (nur privat); öffentlich lizenzierte Quelle nötig (z. B. Vortagesschluss) | 🔁 (privat) |
 | – | Kontenübersicht, Portfolio, Versicherungen, Crypto Assets | – | persönliche Konten | – | ⛔ Nutzerdaten |
 | – | Finanz-Tipp, Crypto-Tipp | Inhalt | – | → `tagesinhalt` (nur allgemein, keine Anlageempfehlung) | 🆕 |
 
