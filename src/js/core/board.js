@@ -115,6 +115,7 @@ export function paint(id) {
   el.querySelector('.head').removeAttribute('title');
   el.querySelector('.info-feld').innerHTML = [t.hover || t.name || t.title, ...(t.info || [])].map(z => `<span>${esc(z)}</span>`).join('');
   el.querySelector('.mini').innerHTML = t.chart || '';
+  requestAnimationFrame(() => miniDichte(el));        // wenig Höhe → Striche alle 10°
   el.querySelector('.head').setAttribute('aria-label', [t.title, t.lglyphTip, t.m].filter(Boolean).join(': '));
   // Aufgeklappten Inhalt nur neu zeichnen, wenn er sichtbar ist – und nicht, während die Einstellungen offen sind (Eingaben bleiben)
   const imFormular = reiterWahl[id] === EINST;
@@ -149,6 +150,7 @@ export function activate(id) {
   if (active === id) return;
   offeneSpeichern();
   active = id; layout();
+  requestAnimationFrame(() => miniDichte(grid));
   if (id) { const t = byId[id]; fillContent(t, document.querySelector(`#tile-${id} .content`)); }
 }
 export const isAnyOpen = () => active !== null || open !== null;
@@ -195,7 +197,20 @@ document.addEventListener('daily:einstellungen', e => {
   });
 });
 
+// Wenig Höhe: Striche und Zahlen nur alle 10° (jede Zahl behält ihren Strich). Aufruf nach dem Zeichnen und bei Größenänderung.
+function miniDichte(wurzel) {
+  wurzel.querySelectorAll('.wd-minibox').forEach(b => {
+    const svg = b.querySelector('.wd-mini'), n = b.querySelectorAll('.wd-miniskala:not(.wd-miniskala-r) .wd-sk span').length;
+    if (!svg || n < 2) return;
+    const h = svg.getBoundingClientRect().height, n10 = b.querySelectorAll('.wd-sk span:not(.wd-g5)').length - 2;   // ohne rechte Skala
+    const stufe = h / (n - 1) >= 13 ? 0 : n10 > 1 && h / (n10 - 1) >= 13 ? 1 : 2;
+    b.classList.toggle('wd-eng', stufe === 1);   // Striche und Zahlen alle 10°
+    b.classList.toggle('wd-eng2', stufe === 2);  // nur oberste und unterste Zahl mit Strich
+  });
+}
+
 export function initBoard() {
+  addEventListener('resize', () => requestAnimationFrame(() => miniDichte(grid)));
   ORDER = TILES.filter(Boolean).map(t => t.id);
   grid.innerHTML = TILES.map((t, c) => t ? tileHTML(t)
     : `<div class="tile free" data-mode="rest" id="cell-${c}" aria-hidden="true"><span>Freier Platz</span></div>`).join('');

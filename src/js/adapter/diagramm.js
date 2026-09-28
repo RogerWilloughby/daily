@@ -35,13 +35,18 @@ function tempSkala(min, max) {
 }
 // d = { n, linien: [{ werte, klasse, bisTrend }], regen: [{ mm, p }], mmMin, marken: [{ i, text }], legende, aria }
 function mini(d) {
-  const W = 160, H = 34, T0 = 2, T1 = H - 2, R1 = H, R0 = H / 2, n = d.n, sp = W / n, x = i => (i + 0.5) * sp;
+  const W = 160, H = 34, T0 = 1, T1 = H - 1, R1 = H - 1, R0 = H / 2, n = d.n, sp = W / n, x = i => (i + 0.5) * sp;
   const alle = d.linien.flatMap(l => l.werte).filter(v => v != null && Number.isFinite(v));
   const { lo, hi } = tempSkala(Math.min(...alle), Math.max(...alle));
-  const y = skala(lo, hi, T0, T1);
+  const y = skala(lo, hi, T0, T1), pz = v => (v / H * 100).toFixed(1);
   const out = [];
   for (let i = 1; i < n; i += 2) out.push(`<rect class="wd-streifen" x="${(i * sp).toFixed(1)}" y="0" width="${sp.toFixed(1)}" height="${H}"/>`);
-  for (let v = lo + 5; v < hi; v += 5) out.push(`<line class="wd-gitter" x1="0" x2="${W}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}"/>`);
+  // Jede Zahl hat ihren Strich: Temperatur (orange) alle 5°, bei wenig Platz nur alle 10° (Klasse wd-g5 wird dann ausgeblendet)
+  const werte = []; for (let v = lo; v <= hi; v += 5) werte.push(v);
+  const g5 = v => (Math.abs(v) % 10 === 0 ? '' : ' wd-g5') + (v !== lo && v !== hi ? ' wd-gi' : '');
+  werte.forEach(v => { if (v !== lo) out.push(`<line class="wd-gitter wd-gt${g5(v)}" x1="0" x2="${W}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}"/>`); });
+  // Regen (grün, gestrichelt): 0 unten (zugleich Grundlinie) und Skalenwert auf halber Höhe
+  out.push(`<line class="wd-gitter wd-gr" x1="0" x2="${W}" y1="${R0}" y2="${R0}"/>`, `<line class="wd-gitter wd-gr" x1="0" x2="${W}" y1="${R1}" y2="${R1}"/>`);
   const mmMax = Math.max(0, ...d.regen.map(r => r.mm || 0)), mmS = mmSkala(mmMax, d.mmMin), bw = Math.max(1.5, sp - 1.5);
   d.regen.forEach((r, i) => {
     if (!(r.mm >= 0.1)) return;
@@ -53,10 +58,12 @@ function mini(d) {
   const svg = `<svg class="wd wd-mini" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">${out.join('')}</svg>`;
   const marken = d.marken.filter(m => x(m.i) / W > 0.03 && x(m.i) / W < 0.97)
     .map(m => `<span style="left:${(x(m.i) / W * 100).toFixed(1)}%">${esc(m.text)}</span>`).join('');
+  const links = werte.map(v => `<span class="${g5(v).trim()}" style="top:${pz(y(v))}%">${v}°</span>`).join('');
+  const rechts = `<span style="top:${pz(R0)}%">${mmS} mm</span><span style="top:${pz(R1)}%">0</span>`;
   return `<div class="wd-minibox" role="img" aria-label="${esc(d.aria)}, Temperaturskala ${lo}° bis ${hi}°, Regen bis ${mm(mmMax)} mm">` +
-    `<div class="wd-miniskala"><span>${hi}°</span><span>${lo}°</span></div>` +
+    `<div class="wd-miniskala wd-t-max"><div class="wd-sk">${links}</div></div>` +
     `<div class="wd-mini24">${svg}<div class="wd-marken">${marken}</div></div>` +
-    `<div class="wd-miniskala wd-miniskala-r wd-t-regen"><span></span><span>${mmS} mm</span><span>0</span></div></div>` +
+    `<div class="wd-miniskala wd-miniskala-r wd-t-regen"><div class="wd-sk">${rechts}</div></div></div>` +
     `<div class="wd-minilegende" title="Balkenhöhe = Regenmenge in mm, Farbe kräftiger = Regen wahrscheinlicher">${d.legende} · <b class="wd-t-regen">Regen mm</b> (kräftiger = wahrscheinlicher)</div>`;
 }
 const wtagKurz = datum => new Date(datum + 'T12:00:00Z').toLocaleDateString('de-DE', { weekday: 'short', timeZone: 'UTC' }).replace('.', '');

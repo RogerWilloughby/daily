@@ -147,13 +147,16 @@ dl.kompakt dd{margin:0}
 b.wd-t-max,b.wd-t-min,b.wd-t-regen,b.wd-t-sonne{font-weight:700}
 .wd text.wd-t-max{fill:var(--wd-max-text)}.wd text.wd-t-min{fill:var(--wd-min-text)}
 .wd-minibox{display:flex;gap:4px;align-items:stretch;height:calc(100% - 18px);min-height:28px}
-.wd-miniskala{display:flex;flex-direction:column;justify-content:space-between;font-size:10px;line-height:1;padding:0 0 11px;color:var(--muted);white-space:nowrap}
-.wd-miniskala span{transform:translateY(-1px)}
-.wd-miniskala span:last-child{transform:translateY(4px)}
-.wd-miniskala-r{text-align:left}
-.wd-miniskala-r span:nth-child(2){transform:translateY(-4px)}
+.wd-miniskala{font-size:10px;line-height:1;padding:0 0 11px;white-space:nowrap;min-width:2.3em}
+.wd-miniskala-r{min-width:3.2em}
+.wd-sk{position:relative;height:100%}
+.wd-sk span{position:absolute;right:0;transform:translateY(-50%);font-weight:600}
+.wd-miniskala-r .wd-sk span{right:auto;left:0}
+.wd-eng .wd-g5,.wd-eng2 .wd-gi{display:none}
 /* Mini-Diagramm: Striche alle 5°, jede zweite Stunde/jeder zweite Tag leicht getönt */
-.wd-mini .wd-gitter{stroke:currentColor;opacity:.16;stroke-width:1;vector-effect:non-scaling-stroke}
+.wd-mini .wd-gitter{stroke-width:1;vector-effect:non-scaling-stroke}
+.wd-mini .wd-gt{stroke:var(--wd-max);opacity:.35}
+.wd-mini .wd-gr{stroke:var(--wd-regen);opacity:.55;stroke-dasharray:3 3}
 .wd-mini .wd-streifen{fill:currentColor;opacity:.022}
 .wd-minilegende{font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wd-minilegende b{font-weight:600}
