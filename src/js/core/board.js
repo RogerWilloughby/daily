@@ -15,7 +15,7 @@ let open = null;   // offene Kachel (Handy)
 function tileHTML(t) {
   return `<article class="tile" data-mode="rest" data-state="${t.state}" id="tile-${t.id}">
     <button class="head" type="button" data-id="${t.id}" aria-expanded="false">
-      <span class="label">${icon(t.icon)}<span class="lglyph" hidden></span><span class="long"></span><span class="short">${esc(t.short)}</span><span class="tag" hidden></span></span>
+      <span class="label">${icon(t.icon)}<span class="lglyph" hidden></span><span class="long"></span><span class="kopf"></span><span class="short">${esc(t.short)}</span><span class="tag" hidden></span></span>
       <span class="metric"><span class="glyph"></span><span class="m-long"></span><span class="m-short"></span></span>
       <span class="teaser"></span>
       <span class="mini" aria-hidden="true"></span>
@@ -76,6 +76,11 @@ function hinweise(el) {
   });
 }
 
+// Liste für die kleine Kachel: [{ d, t, gruppe }] – zwischen Gruppen ein kleiner Abstand
+function listeHtml(l) {
+  return l.map((z, i) => `<span class="tl-z${i && z.gruppe !== l[i - 1].gruppe ? ' tl-neu' : ''}"><span class="tl-d">${esc(z.d)}</span> <span class="tl-t">${esc(z.t)}</span></span>`).join('');
+}
+
 export function paint(id) {
   const t = byId[id], el = document.getElementById('tile-' + id);
   if (!t || !el) return;
@@ -94,7 +99,13 @@ export function paint(id) {
   mEl.toggleAttribute('data-leer', !t.m && !t.glyph);   // keine große Zeile (Handy zeigt trotzdem die Kurzform)
   mEl.dataset.len = String(t.m).length > 13 ? 'long' : 'short';
   el.querySelector('.m-short').textContent = t.ms ?? t.m;
-  el.querySelector('.teaser').textContent = t.x;
+  // Unterzeile: als Text (aufgeklappt) und – falls die Kachel eine Liste liefert – als Liste untereinander (kleine Kachel)
+  const tz = el.querySelector('.teaser');
+  tz.innerHTML = `<span class="t-text">${esc(t.x)}</span>` + (t.liste && t.liste.length ? `<span class="t-liste">${listeHtml(t.liste)}</span>` : '');
+  tz.classList.toggle('mit-liste', !!(t.liste && t.liste.length));
+  // Kopf der kleinen Kachel: nur Inhalt (z. B. Ort und Temperaturen, KW) – der Name erscheint beim Überfahren
+  el.querySelector('.label .kopf').innerHTML = t.kopf || '';
+  el.querySelector('.head').title = t.hover || t.name || t.title;
   el.querySelector('.mini').innerHTML = t.chart || '';
   el.querySelector('.head').setAttribute('aria-label', [t.title, t.lglyphTip, t.m].filter(Boolean).join(': '));
   // Aufgeklappten Inhalt nur neu zeichnen, wenn er sichtbar ist – und nicht, während die Einstellungen offen sind (Eingaben bleiben)

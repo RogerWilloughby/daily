@@ -428,3 +428,25 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
 .k-leer{color:var(--muted);cursor:default!important}
 .k-meldung{margin:6px 0 0;font-size:13px;color:var(--muted);min-height:1em}
 @media (max-width:560px){.k-listen{grid-template-columns:1fr}}
+
+/* Kleine Kacheln: Name nur beim Überfahren (Hinweistext), im Kopf nur Inhalt (Wetter: Ort/Temperaturen, Kalender: KW).
+   Am Handy (siehe unten) bleibt der Kurzname. Aufgeklappt bleibt die Überschrift mit Namen. */
+.label .kopf:empty{display:none}
+.tile[data-mode="active"] .label .kopf{display:none}
+.teaser .t-liste{display:none}
+@media (min-width:761px) and (min-height:521px){
+  .tile:not([data-mode="active"]) .label > .ico,.tile:not([data-mode="active"]) .label .long{display:none}
+  .tile:not([data-mode="active"]) .label:not(:has(.kopf:not(:empty),.tag:not([hidden]),.lglyph:not([hidden]))){display:none}
+  .tile:not([data-mode="active"]) .teaser.mit-liste .t-text{display:none}
+  .tile:not([data-mode="active"]) .teaser.mit-liste{display:block;-webkit-line-clamp:unset;overflow:hidden}
+  .tile:not([data-mode="active"]) .teaser.mit-liste .t-liste{display:flex;flex-direction:column;gap:1px}
+}
+.tl-z{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tl-z.tl-neu{margin-top:6px}
+.tl-d{font-weight:600;color:var(--ink)}
+@media (max-width:760px),(max-height:520px){.label .kopf{display:none}}
+@media (min-width:761px) and (min-height:521px){
+  .tile:not([data-mode="active"]) .head:has(.teaser.mit-liste) .metric{font-size:clamp(18px,1.5vw,24px)}
+  .tile:not([data-mode="active"]) .head:has(.teaser.mit-liste) .metric .m-long{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+}
+.teaser .t-liste{font-size:13px;line-height:1.35}

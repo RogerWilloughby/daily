@@ -675,10 +675,18 @@ test('Adapter Kalender: eigene Termine – Kennzahl, Reiter, Antwort', async () 
   assert.match(k.tabs[1].html, /Geburtstag Anna.*ganztägig.*Zahnarzt.*Elternabend.*Kalender 2: Server nicht erreichbar/s);
   // Nächste: Termine heute vor dem Rest, ganztägig zuerst
   assert.match(k.tabs[0].html, /Geburtstag Anna.*Frühstück.*Zahnarzt/s);
-  // keine Termine heute → „Nächster Termin“ in der Zeile
+  // kleine Kachel: KW im Kopf, Liste untereinander – erst Termine (mit großer Zeile höchstens 3), dann Freies
+  assert.equal(k.kopf, 'KW 40');
+  assert.deepEqual(k.liste.map(z => [z.d, z.t, z.gruppe]).slice(0, 3), [['heute', 'Geburtstag Anna', 1], ['18:00', 'Sport', 1], ['Sa., 3.10.', 'Tag der Deutschen Einheit', 2]]);
+  assert.ok(!k.liste.some(z => z.t === 'Frühstück' || z.t === 'Zahnarzt'));        // vorbei bzw. schon in der großen Zeile
+  // keine Termine heute → der nächste Termin steht trotzdem vorn
   const k2 = kachel(fe, null, jetzt, 'Europe/Berlin', null, { daten: { ...tEnv.daten, termine: tEnv.daten.termine.slice(4) } });
-  assert.equal(k2.m, 'Tag der Deutschen Einheit');
-  assert.match(k2.x, /Nächster Termin: Mi\., 30\.9\. 19:00 Elternabend/);
+  assert.deepEqual([k2.m, k2.ms], ['Mi., 30.9. 19:00 Elternabend', 'Mi., 30.9.']);
+  assert.equal(k2.liste[0].t, 'Tag der Deutschen Einheit');
+  // öffentlich (ohne Termine): große Zeile = Feiertag, Liste ohne ihn
+  const k3 = kachel(fe, null, jetzt);
+  assert.equal(k3.m, 'Tag der Deutschen Einheit');
+  assert.ok(!k3.liste.some(z => z.t === 'Tag der Deutschen Einheit'));
   // nicht verbunden / öffentlich
   assert.match(kachel(fe, null, jetzt, 'Europe/Berlin', null, { daten: { verbunden: false, heute: '2026-09-28', termine: [], fehler: [] } }).tabs[1].html, /Noch kein Kalender verbunden/);
   assert.ok(!kachel(fe, null, jetzt).tabs.some(t => t.id === 'termine'));

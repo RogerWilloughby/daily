@@ -9,7 +9,7 @@ const T = (id, title, short, icon, extra = {}) => ({ id, title, name: title, sho
 
 export const CATALOG = [
   T('weather', 'Wetter', 'Wetter', null, { fertig: true }),   // kein festes Symbol: das Wettersymbol neben dem Wert zeigt das aktuelle Wetter
-  T('kalender', 'Kalender', 'Kalender', 'cal', { fertig: true }),   // Feiertage, Ferien, Aktionstage, Mond, Finsternisse (ersetzt „Feiertage & Ferien“ und „Himmel“)
+  T('kalender', 'Kalender', 'Kalender', 'cal', { fertig: true, hover: 'Kalender / Termine' }),   // Feiertage, Ferien, Aktionstage, Mond, Finsternisse (ersetzt „Feiertage & Ferien“ und „Himmel“)
   T('links', 'Meine Seiten', 'Seiten', 'link', { state: 'local', fertig: true }),
   T('tasks', 'Mein Daily', 'Aufgaben', 'list', { state: 'local', fertig: true }),
   T('transit', 'Abfahrten', 'ÖPNV', 'tram'),

@@ -101,6 +101,12 @@ export function kachel(fEnv, hEnv, jetzt = Date.now(), zone = 'Europe/Berlin', n
   const jetztIso = new Date(jetzt).toISOString();
   const offen = alle.filter(x => x.art === 'termin' && x.datum === heute && (x.ganztag || (x.ende || x.beginn) > jetztIso));
   const terminHeute = offen.find(x => !x.ganztag) || offen[0];
+  // kein Termin mehr heute → der nächste eigene Termin der nächsten 14 Tage steht trotzdem vorn
+  const terminSpaeter = !terminHeute && alle.find(x => x.art === 'termin' && x.datum > heute);
+  const kurzTag = (t, mitUhr = true) => {           // „14:00“, „morgen 9:00“, „Mi., 30.9. 19:00“
+    const n = tageBis(heute, t.datum), zeit = mitUhr && t.art === 'termin' && !t.ganztag ? uhr(t.beginn, zone) : '';
+    return [n === 0 ? (zeit ? '' : 'heute') : n === 1 ? 'morgen' : wtag(t.datum), zeit].filter(Boolean).join(' ');
+  };
   const kw = f ? f.kalenderwoche : null;
 
   // Kennzahl: heute Feiertag > laufende Ferien > nächstes wichtiges Ereignis (Feiertag, Ferien, Brückentag, Zeitumstellung)
@@ -114,16 +120,19 @@ export function kachel(fEnv, hEnv, jetzt = Date.now(), zone = 'Europe/Berlin', n
     ms = terminHeute.ganztag ? 'heute' : uhr(terminHeute.beginn, zone);
     const danach = offen.filter(x => x !== terminHeute && !x.ganztag)[0];
     lead = danach ? `Danach ${uhr(danach.beginn, zone)} ${danach.text}` : offen.length > 1 ? `Heute ${offen.length} Termine` : '';
+  } else if (terminSpaeter) {
+    m = `${kurzTag(terminSpaeter)} ${terminSpaeter.text}`;
+    ms = tageBis(heute, terminSpaeter.datum) === 1 ? 'morgen' : wtag(terminSpaeter.datum);
   } else if (naechst) {
     const n = tageBis(heute, naechst.datum);
     if (naechst === laufend) { ms = 'Ferien'; lead = `bis ${wtag(naechst.bis)}`; }
     else { ms = n === 0 ? 'heute' : n === 1 ? 'morgen' : `${n} Tage`; lead = `${gross(wann(n))} (${wtag(naechst.datum)})`; }
   }
   // Zeile darunter: danach das nächste Freie und höchstens ein weiterer Termin der nächsten 7 Tage (Welttage nicht)
-  const kuenftig = !terminHeute && alle.find(x => x.art === 'termin' && x.datum > heute && tageBis(heute, x.datum) <= 7);
+  const kuenftig = !terminHeute && !terminSpaeter && alle.find(x => x.art === 'termin' && x.datum > heute && tageBis(heute, x.datum) <= 7);
   const weitere = [
     ...(kuenftig ? [`Nächster Termin: ${tageBis(heute, kuenftig.datum) === 1 ? 'morgen' : wtag(kuenftig.datum)}${kuenftig.ganztag ? '' : ' ' + uhr(kuenftig.beginn, zone)} ${kuenftig.text}`] : []),
-    ...frei.filter(t => t !== naechst || terminHeute).slice(0, 1).map(t => t.art === 'ferien' ? `${t.text} ab ${wtag(t.datum)}` : `${t.text} ${wtag(t.datum)}`),
+    ...frei.filter(t => t !== naechst || terminHeute || terminSpaeter).slice(0, 1).map(t => t.art === 'ferien' ? `${t.text} ab ${wtag(t.datum)}` : `${t.text} ${wtag(t.datum)}`),
     ...alle.filter(t => t !== naechst && !frei.includes(t) && t.art !== 'termin' && tageBis(heute, t.datum) <= 7 && !/Welt|Tag der Erde/.test(t.text)).slice(0, kuenftig ? 0 : 1)
       .map(t => `${t.text} ${tageBis(heute, t.datum) === 0 ? 'heute' : wtag(t.datum)}`)
   ];
@@ -146,7 +155,17 @@ export function kachel(fEnv, hEnv, jetzt = Date.now(), zone = 'Europe/Berlin', n
   ];
   const titel = kw ? `Kalender · KW ${kw}` : 'Kalender';
   const rows = alle.slice(0, 12).map(t => [wtag(t.datum), t.text + (t.zusatz ? ` (${t.zusatz})` : '')]);
-  return { state: 'live', title: titel, m, ms, x, tabs, rows };
+  // Kleine Kachel: untereinander – erst eigene Termine (mit der großen Zeile höchstens 3), kleiner Abstand,
+  // dann Freies (Feiertag, Ferien, Brückentag, Zeitumstellung), ein Aktionstag der nächsten 7 Tage und der Namenstag
+  const gross1 = terminHeute || terminSpaeter;
+  const termineWeiter = alle.filter(t => t.art === 'termin' && t !== gross1 && !(t.datum === heute && !t.ganztag && (t.ende || t.beginn) <= jetztIso))
+    .slice(0, gross1 ? 2 : 3).map(t => ({ d: kurzTag(t), t: t.text, gruppe: 1 }));
+  const freiWeiter = frei.filter(t => t !== (gross1 ? null : naechst)).slice(0, 3)
+    .map(t => ({ d: t.laeuft ? `bis ${wtag(t.bis)}` : kurzTag(t, false), t: t.text, gruppe: 2 }));
+  const aktion = alle.find(t => t.art === 'aktion' && tageBis(heute, t.datum) <= 7 && !/Welt|Tag der Erde/.test(t.text));
+  const liste2 = [...termineWeiter, ...freiWeiter, ...(aktion ? [{ d: kurzTag(aktion, false), t: aktion.text, gruppe: 2 }] : []),
+    ...(heuteNamen.length ? [{ d: 'Namenstag', t: namenText(heuteNamen, 3), gruppe: 2 }] : [])].slice(0, 5);   // 5 Zeilen passen in die kleine Kachel
+  return { state: 'live', title: titel, kopf: kw ? `KW ${kw}` : '', m, ms, x, liste: liste2, tabs, rows };
 }
 
 // Antwort auf „Wann hat Josef Namenstag?“ aus der Dienstantwort mit name=… (nEnv) bzw. „Wer hat heute Namenstag?“
