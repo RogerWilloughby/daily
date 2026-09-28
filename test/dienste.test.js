@@ -222,9 +222,11 @@ test('Adapter Wetter: Kachel und Antwort aus dem Vertrag', async () => {
   assert.equal(k.ms, '15°');                                    // Handy: Kurzform
   assert.equal(k.lglyphTip, 'Teilweise bewölkt');               // Symbol in der Kopfzeile mit Erklärung
   assert.match(k.lglyph, /^<svg/);
-  // Mini-Diagramm beschriftet: Skala in Linienfarbe und Legende
-  assert.match(k.chart, /wd-miniskala"><b class="wd-t-max">21°<\/b><b class="wd-t-min">-3°<\/b>/);
-  assert.match(k.chart, /16 Tage: <b class="wd-t-max">Höchst<\/b> · <b class="wd-t-min">Tiefst<\/b> · <b class="wd-t-regen">Regen<\/b>/);
+  // Mini-Diagramm: Temperaturskala in 5er-Schritten, Regenskala rechts in mm, Legende
+  assert.match(k.chart, /wd-miniskala"><span>25°<\/span><span>-5°<\/span>/);
+  assert.match(k.chart, /wd-miniskala-r wd-t-regen"><span><\/span><span>\d+ mm<\/span><span>0<\/span>/);
+  assert.match(k.chart, /16 Tage: <b class="wd-t-max">Höchst<\/b> · <b class="wd-t-min">Tiefst<\/b> · <b class="wd-t-regen">Regen mm<\/b>/);
+  assert.match(k.chart, /wd-marken"><span[^>]*>Mo<\/span><span[^>]*>Mi<\/span>/);   // Wochentage, bei 16 Tagen jeder zweite
   assert.match(k.chart, /wd-max.*wd-min.*wd-trend/);
   // Kopfzeile mit farbigen Zahlen
   assert.match(k.titleHtml, /^Berlin 15° · <b class="wd-t-min">9°<\/b> <small class="wd-um">\d{1,2} Uhr<\/small> \/ <b class="wd-t-max">16°<\/b> <small class="wd-um">\d{1,2} Uhr<\/small>$/);
@@ -728,14 +730,23 @@ test('Einstellungen: Kachel-Formular, Wetter-Optionen, Kachel-Listen', async () 
   assert.equal(mitOptionen(kachel(w, r, null), w, { start: 'radar', radar: false }).startReiter, 'heute');   // ausgeblendeter Start → Heute
   // Standard: Mini-Diagramm 24 Stunden (Temperatur + Regenwahrscheinlichkeit, kräftig ab 1 mm)
   const k24 = mitOptionen(kachel(w, r, null), w, {});
-  assert.match(k24.chart, /24 Std\.: <b class="wd-t-max">Temperatur<\/b> · <b class="wd-t-regen">Regen %<\/b>/);
-  assert.match(k24.chart, /<span style="left:[\d.]+%">jetzt<\/span>/);
+  assert.match(k24.chart, /24 Std\.: <b class="wd-t-max">Temperatur<\/b> · <b class="wd-t-regen">Regen mm<\/b>/);
+  assert.doesNotMatch(k24.chart, />jetzt</);
   const { miniStunden } = await esm('src/js/adapter/diagramm.js');
   const probe = Array.from({ length: 30 }, (_, i) => ({ zeit: new Date(Date.UTC(2026, 8, 28, i)).toISOString(), tempC: 10 + i % 5, regenProzent: i === 3 ? 80 : i === 4 ? 40 : 0, niederschlagMm: i === 3 ? 2 : 0.2 }));
   const m = miniStunden(probe, iso => new Date(iso).getUTCHours());
-  assert.equal((m.match(/<rect /g) || []).length, 2);                               // nur Stunden mit Regenwahrscheinlichkeit
-  assert.equal((m.match(/wd-regen wd-blass/g) || []).length, 1);                    // unter 1 mm blass
-  assert.match(m, />6<\/span>.*>12<\/span>.*>18<\/span>/s);                        // Zeitmarken alle 6 Stunden
+  const balken = m.match(/<rect class="wd-regen"[^>]*>/g) || [];
+  assert.equal(balken.length, 24);                                                   // jede Stunde ab 0,1 mm – egal wie wahrscheinlich
+  assert.match(balken[3], /height="17" rx="1" fill-opacity="0.84"/);                 // 2 mm = volle Regenhälfte (Skala 2 mm), 80 % → kräftig
+  assert.match(balken[0], /fill-opacity="0.2"/);                                     // 0 % → ganz blass
+  assert.equal((m.match(/wd-streifen/g) || []).length, 12);                          // jede zweite Stunde getönt
+  assert.match(m, />3<\/span>.*>6<\/span>.*>9<\/span>.*>12<\/span>/s);              // Stunden alle 3 Std.
+  assert.doesNotMatch(m, />jetzt</);
+  assert.match(m, /<span>15°<\/span><span>5°<\/span>/);                             // 10–14° → Skala 5–15°, mind. ein Strich
+  assert.equal((m.match(/wd-gitter/g) || []).length, 1);
+  const { mmSkala, deckkraft } = await esm('src/js/adapter/diagramm.js');
+  assert.deepEqual([mmSkala(0.3, 2), mmSkala(3, 2), mmSkala(7, 10), mmSkala(34, 10)], [2, 5, 10, 50]);
+  assert.deepEqual([deckkraft(0), deckkraft(100), deckkraft(null)], [0.2, 1, 0.6]);
   assert.equal(mitOptionen(kachel(w, r, null), w, { mini: 16 }).chart, kachel(w, r, null).chart);
   const u = { daten: { gebiet: 'X', hoechsteStufe: 3, hinweise: [{ art: 'wind', stufe: 3, stufeName: 'unwetter', ereignis: 'ORKANBÖEN', titel: 'T', beginn: null, ende: null, aktiv: true, beschreibung: '', empfehlung: '', tipp: 't' }] } };
   const ku = mitOptionen(kachel(w, r, u), w, { hinweise: false, start: 'mehr' });

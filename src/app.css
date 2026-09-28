@@ -146,8 +146,15 @@ dl.kompakt dd{margin:0}
 .wd-t-max{color:var(--wd-max-text)}.wd-t-min{color:var(--wd-min-text)}.wd-t-regen{color:var(--wd-regen-text)}.wd-t-sonne{color:var(--wd-sonne-text)}
 b.wd-t-max,b.wd-t-min,b.wd-t-regen,b.wd-t-sonne{font-weight:700}
 .wd text.wd-t-max{fill:var(--wd-max-text)}.wd text.wd-t-min{fill:var(--wd-min-text)}
-.wd-minibox{display:flex;gap:6px;align-items:stretch;height:calc(100% - 18px);min-height:28px}
-.wd-miniskala{display:flex;flex-direction:column;justify-content:space-between;font-size:11px;line-height:1;padding:1px 0 8px}
+.wd-minibox{display:flex;gap:4px;align-items:stretch;height:calc(100% - 18px);min-height:28px}
+.wd-miniskala{display:flex;flex-direction:column;justify-content:space-between;font-size:10px;line-height:1;padding:0 0 11px;color:var(--muted);white-space:nowrap}
+.wd-miniskala span{transform:translateY(-1px)}
+.wd-miniskala span:last-child{transform:translateY(4px)}
+.wd-miniskala-r{text-align:left}
+.wd-miniskala-r span:nth-child(2){transform:translateY(-4px)}
+/* Mini-Diagramm: Striche alle 5°, jede zweite Stunde/jeder zweite Tag leicht getönt */
+.wd-mini .wd-gitter{stroke:currentColor;opacity:.16;stroke-width:1;vector-effect:non-scaling-stroke}
+.wd-mini .wd-streifen{fill:currentColor;opacity:.022}
 .wd-minilegende{font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wd-minilegende b{font-weight:600}
 .wd .wd-temp{stroke:currentColor;opacity:.85}
@@ -489,7 +496,6 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
 .wd-mini24 .wd-mini{flex:1;min-height:0}
 .wd-marken{position:relative;height:11px;font-size:9px;line-height:11px;color:var(--muted)}
 .wd-marken span{position:absolute;transform:translateX(-50%);white-space:nowrap}
-.wd-marken span:first-child{transform:none}
 
 /* Wetter klein: Regen in einer eigenen Zeile (Schirm-Symbol). Aufgeklappt und am Handy läuft er im Text weiter. */
 .teaser .t-zeile2::before{content:' '}
