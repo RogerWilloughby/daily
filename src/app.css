@@ -490,3 +490,13 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
 .wd-marken{position:relative;height:11px;font-size:9px;line-height:11px;color:var(--muted)}
 .wd-marken span{position:absolute;transform:translateX(-50%);white-space:nowrap}
 .wd-marken span:first-child{transform:none}
+
+/* Wetter klein: Regen in einer eigenen Zeile (Schirm-Symbol). Aufgeklappt und am Handy läuft er im Text weiter. */
+.teaser .t-zeile2::before{content:' '}
+@media (min-width:761px) and (min-height:521px){
+  .tile:is([data-mode="rest"],[data-mode="lane"]) .teaser.mit-zeile2,.tile[data-mode="rest"] .head:has(.kopf .wh-badge):has(.mini:not(:empty)) .teaser.mit-zeile2{display:block;-webkit-line-clamp:unset;overflow:hidden;flex:0 0 auto}
+  .tile:is([data-mode="rest"],[data-mode="lane"]) .teaser.mit-zeile2 .t-text{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+  .tile:is([data-mode="rest"],[data-mode="lane"]) .head:has(.mini:not(:empty)) .teaser.mit-zeile2 .t-text{-webkit-line-clamp:1}
+  .tile:is([data-mode="rest"],[data-mode="lane"]) .teaser .t-zeile2{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+  .tile:is([data-mode="rest"],[data-mode="lane"]) .teaser .t-zeile2::before{content:none}
+}

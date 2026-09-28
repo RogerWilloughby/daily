@@ -60,6 +60,17 @@ export function auswerten(env) {
   return { z, heute, morgen, regenMax, regenUm: regenMax >= 25 ? regenUm : null, pollen };
 }
 
+// Regen in den nächsten 24 Stunden (wie das kleine Diagramm) – für die Regenzeile der kleinen Kachel (rein, testbar)
+// „Regen möglich gegen 17 Uhr.“ / „Regen möglich morgen gegen 7 Uhr.“ / „Kein Regen in den nächsten 24 Std.“
+export function regen24(env) {
+  const z = zeitFmt(env.ort.zeitzone || 'Europe/Berlin'), heute = (env.daten.tage[0] || {}).datum;
+  let max = 0, bei = null;
+  for (const s of env.daten.stunden.slice(0, 24)) if (s.regenProzent != null && s.regenProzent > max) { max = s.regenProzent; bei = s; }
+  if (max < 25 || !bei) return { max, text: 'Kein Regen in den nächsten 24 Std.' };
+  const morgen = heute && z.tag(bei.zeit) !== heute ? 'morgen ' : '';
+  return { max, text: `Regen möglich ${morgen}gegen ${+z.h(bei.zeit)} Uhr.` };
+}
+
 // Zahlen in den Farben der Diagrammlinien (Tiefst blau, Höchst orange)
 const tmin = v => `<b class="wd-t-min">${r0(v)}°</b>`, tmax = v => `<b class="wd-t-max">${r0(v)}°</b>`;
 // Zeilen mit fertigem HTML als Wert (Schlüssel wird maskiert)
@@ -139,7 +150,6 @@ function trendText(tage) {
 // hinweisEnv (optional): Antwort des Dienstes „wetterhinweise“ – Abzeichen und kurzer Hinweis nur, wenn es etwas gibt; Reiter „Hinweise“ immer
 export function kachel(env, regenEnv = null, hinweisEnv = null) {
   const d = env.daten, a = d.aktuell, { z, heute, regenMax, regenUm, pollen } = auswerten(env);
-  const regenText = regenMax >= 25 ? `Regen möglich gegen ${regenUm} Uhr.` : 'Kein Regen zu erwarten.';
   const wind = `${r0(a.windKmh)} km/h${a.windRichtung ? ' aus ' + a.windRichtung : ''}${a.boeenKmh ? `, Böen ${r0(a.boeenKmh)} km/h` : ''}`;
   const sonne = [`${z.hm(heute.sonnenaufgang)} bis ${z.hm(heute.sonnenuntergang)}`,
     heute.sonnenstunden != null ? `${String(heute.sonnenstunden).replace('.', ',')} Std. Sonne` : null,
@@ -175,14 +185,17 @@ export function kachel(env, regenEnv = null, hinweisEnv = null) {
     ...(hTop && hTop.stufe >= 3 ? [] : [hReiter]),
     { id: 'mehr', name: 'Mehr', html: zeilen(mehrZeilen(env, pollen)) }
   ];
-  const wetterText = `${zustandText(a.zustand, a.code)}, gefühlt ${r0(a.gefuehltC)}°.`, regenZeile = regenHinweis(regenEnv) || regenText;
+  const wetterText = `${zustandText(a.zustand, a.code)}, gefühlt ${r0(a.gefuehltC)}°.`;
+  // Regen: eigene Zeile in der kleinen Kachel (Radar geht vor der 24-Stunden-Vorhersage)
+  const regenZeile = regenHinweis(regenEnv) || regen24(env).text;
   // Kopfzeile: Ort, jetzt, Tiefst/Höchst von heute – alles in einer Zeile
   return {
     state: 'live', title: kopfzeile(env) + (hTop ? ` · ${hKurz}` : ''), titleHtml: kopfzeileHtml(env) + abzeichen(hinweisEnv), kopf: kopfzeileHtml(env, true) + abzeichen(hinweisEnv), zeileIcon: true, tabs,
     lglyph: glyph(bild(a.zustand, a.tag)), lglyphTip: zustandText(a.zustand, a.code),   // Symbol in der Kopfzeile, Erklärung beim Überfahren
     glyph: '', m: '', ms: r0(a.tempC) + '°',                                               // keine große Zeile – Platz fürs Diagramm
-    // Unwetter zuerst, sonst Wetter · Hinweis · Regen (Radar geht vor der Stundenvorhersage)
-    x: (hTop && hTop.stufe >= 3 ? [hKurz, wetterText, regenZeile] : [wetterText, hKurz, regenZeile]).filter(Boolean).join(' '),
+    // Unwetter zuerst, sonst Wetter · Hinweis; der Regen steht darunter in einer eigenen Zeile (Schirm-Symbol)
+    x: (hTop && hTop.stufe >= 3 ? [hKurz, wetterText] : [wetterText, hKurz]).filter(Boolean).join(' '),
+    zeile2: { glyph: glyph('schirm'), text: regenZeile },
     chart: miniDiagramm(d.tage),
     rows
   };

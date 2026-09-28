@@ -243,7 +243,17 @@ test('Adapter Wetter: Kachel und Antwort aus dem Vertrag', async () => {
   const { tageDiagramm } = await esm('src/js/adapter/diagramm.js');
   const ohneSonne = env.daten.tage.map((t, i) => (i === 2 ? { ...t, sonnenstunden: null } : t));
   assert.match(tageDiagramm(ohneSonne, d => d), /Sonne: keine Angabe/);
-  assert.equal(k.x, 'Teilweise bewölkt, gefühlt 14°. Regen möglich gegen 17 Uhr.');
+  assert.equal(k.x, 'Teilweise bewölkt, gefühlt 14°.');                    // Regen steht in einer eigenen Zeile
+  assert.match(k.zeile2.text, /^(Regen möglich (morgen )?gegen \d{1,2} Uhr\.|Kein Regen in den nächsten 24 Std\.)$/);
+  assert.match(k.zeile2.glyph, /^<svg/);
+  // Regenzeile: nächste 24 Stunden, „morgen“ nach Mitternacht, Stunde ohne führende Null
+  const { regen24 } = await esm('src/js/adapter/wetter.js');
+  const std = (start, werte) => werte.map((p, i) => ({ zeit: new Date(Date.parse(start) + i * 3600e3).toISOString(), regenProzent: p }));
+  const r = (werte, start = '2026-09-28T18:00:00Z') => regen24({ ort: { zeitzone: 'Europe/Berlin' }, daten: { tage: [{ datum: '2026-09-28' }], stunden: std(start, werte) } }).text;
+  assert.equal(r(Array(30).fill(10)), 'Kein Regen in den nächsten 24 Std.');
+  assert.equal(r([0, 30, 60, 10]), 'Regen möglich gegen 22 Uhr.');                        // 20 Uhr UTC = 22 Uhr
+  assert.equal(r([...Array(11).fill(0), 70]), 'Regen möglich morgen gegen 7 Uhr.');      // 5 Uhr UTC = 7 Uhr
+  assert.equal(r([...Array(24).fill(0), 90]), 'Kein Regen in den nächsten 24 Std.');     // Stunde 25 zählt nicht
   assert.ok(k.rows.some(([l]) => l === 'Luftqualität'));
   assert.ok(k.rows.some(([l]) => l === 'Morgen'));
   const zeile = l => (k.rows.find(([x]) => x.startsWith(l)) || [])[1];
@@ -374,7 +384,7 @@ test('Adapter Regen: Hinweis in der Wetterkachel und Reiter „Radar“', async 
   const wetter = (await rufe('wetter', { ort: 'Berlin' })).body;
   const k = kachel(wetter, regen);
   assert.deepEqual(k.tabs.map(t => t.id), ['heute', 'radar', 'tage', 'stunden', 'hinweise', 'mehr']);
-  assert.match(k.x, /Regen in 20 Min\./);
+  assert.equal(k.zeile2.text, "Regen in 20 Min. (leicht)."); assert.doesNotMatch(k.x, /Regen in/);   // Radar geht vor, eigene Zeile
   assert.deepEqual(kachel(wetter, null).tabs.map(t => t.id), ['heute', 'tage', 'stunden', 'hinweise', 'mehr']);   // ohne Radar
   assert.match(text(wetter, regen), /Radar: Regen in 20 Min\./);
 });

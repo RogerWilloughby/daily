@@ -104,8 +104,10 @@ export function paint(id) {
   // Unterzeile: als Text (aufgeklappt) und – falls die Kachel eine Liste liefert – als Liste untereinander (kleine Kachel)
   const tz = el.querySelector('.teaser');
   // zeileIcon: das Symbol (z. B. Wetterlage) steht in der kleinen Kachel vor dem Text statt im Kopf
-  tz.innerHTML = `<span class="t-text">${t.zeileIcon && t.lglyph ? `<span class="t-icon" title="${esc(t.lglyphTip || '')}">${t.lglyph}</span>` : ''}${esc(t.x)}</span>` + (t.liste && t.liste.length ? `<span class="t-liste">${listeHtml(t.liste)}</span>` : '');
+  tz.innerHTML = `<span class="t-text">${t.zeileIcon && t.lglyph ? `<span class="t-icon" title="${esc(t.lglyphTip || '')}">${t.lglyph}</span>` : ''}${esc(t.x)}</span>` +
+    (t.zeile2 && t.zeile2.text ? `<span class="t-zeile2">${t.zeile2.glyph ? `<span class="t-icon">${t.zeile2.glyph}</span>` : ''}${esc(t.zeile2.text)}</span>` : '') + (t.liste && t.liste.length ? `<span class="t-liste">${listeHtml(t.liste)}</span>` : '');
   tz.classList.toggle('mit-liste', !!(t.liste && t.liste.length));
+  tz.classList.toggle('mit-zeile2', !!(t.zeile2 && t.zeile2.text));   // zweite Zeile (Wetter: Regen) – klein eigene Zeile, sonst im Text
   // Kopf der kleinen Kachel: nur Inhalt (z. B. Ort und Temperaturen, KW) – der Name erscheint beim Überfahren
   el.querySelector('.label .kopf').innerHTML = t.kopf || '';
   // Info-Feld hinter dem (i) unten rechts: Name (später auch Quelle, Stand …)

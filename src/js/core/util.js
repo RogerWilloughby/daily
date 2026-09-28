@@ -40,6 +40,7 @@ const GLYPHS = {
   fog: '<path d="M4 9h16M3 13h18M5 17h14"/>',
   rain: '<path d="M6.5 15h11a4.5 4.5 0 0 0 .7-8.9A6 6 0 0 0 6.6 7.4 3.8 3.8 0 0 0 6.5 15zM8 18l-1 3M12 18l-1 3M16 18l-1 3"/>',
   snow: '<path d="M6.5 14h11a4.5 4.5 0 0 0 .7-8.9A6 6 0 0 0 6.6 6.4 3.8 3.8 0 0 0 6.5 14zM8 18h.01M12 20h.01M16 18h.01M10 22h.01M14 22h.01" stroke-width="2.4"/>',
+  schirm: '<path d="M3 12a9 9 0 0 1 18 0zM12 12v6.5a2 2 0 0 0 4 0M12 3v0"/>',
   storm: '<path d="M6.5 14h11a4.5 4.5 0 0 0 .7-8.9A6 6 0 0 0 6.6 6.4 3.8 3.8 0 0 0 6.5 14zM13 14l-3 4h4l-3 4"/>'
 };
 export const glyph = k => GLYPHS[k] ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${GLYPHS[k]}</svg>` : '';
