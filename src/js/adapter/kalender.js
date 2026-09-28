@@ -165,7 +165,8 @@ export function kachel(fEnv, hEnv, jetzt = Date.now(), zone = 'Europe/Berlin', n
   const aktion = alle.find(t => t.art === 'aktion' && tageBis(heute, t.datum) <= 7 && !/Welt|Tag der Erde/.test(t.text));
   const liste2 = [...termineWeiter, ...freiWeiter, ...(aktion ? [{ d: kurzTag(aktion, false), t: aktion.text, gruppe: 2 }] : []),
     ...(heuteNamen.length ? [{ d: 'Namenstag', t: namenText(heuteNamen, 3), gruppe: 2 }] : [])].slice(0, 5);   // 5 Zeilen passen in die kleine Kachel
-  return { state: 'live', title: titel, kopf: kw ? `KW ${kw}` : '', m, ms, x, liste: liste2, tabs, rows };
+  // KW klein unten in der kleinen Kachel (Fußzeile)
+  return { state: 'live', title: titel, m, ms, x, liste: liste2, chart: kw ? `<span class="kl-fuss">KW ${kw}</span>` : '', tabs, rows };
 }
 
 // Antwort auf „Wann hat Josef Namenstag?“ aus der Dienstantwort mit name=… (nEnv) bzw. „Wer hat heute Namenstag?“

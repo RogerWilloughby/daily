@@ -446,7 +446,7 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
 .tl-d{font-weight:600;color:var(--ink)}
 @media (max-width:760px),(max-height:520px){.label .kopf{display:none}}
 @media (min-width:761px) and (min-height:521px){
-  .tile:not([data-mode="active"]) .head:has(.teaser.mit-liste) .metric{font-size:clamp(18px,1.5vw,24px)}
+  .tile:not([data-mode="active"]) .head:has(.teaser.mit-liste) .metric{font-size:13px;font-family:inherit;font-weight:700;line-height:1.35;letter-spacing:0}
   .tile:not([data-mode="active"]) .head:has(.teaser.mit-liste) .metric .m-long{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 }
 .teaser .t-liste{font-size:13px;line-height:1.35}
@@ -465,4 +465,11 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
 @media (min-width:761px) and (min-height:521px){
   /* mit Hinweis-Abzeichen wird der Kopf zweizeilig – dann die Unterzeile einzeilig, damit das Diagramm Platz hat */
   .tile[data-mode="rest"] .head:has(.kopf .wh-badge):has(.mini:not(:empty)) .teaser{-webkit-line-clamp:1}
+}
+
+/* Kalender klein: KW unten */
+.kl-fuss{font-size:11px;color:var(--muted);letter-spacing:.04em}
+.mini:has(.kl-fuss){flex:0 0 auto;min-height:0;padding-top:4px}
+@media (min-width:761px) and (min-height:521px){
+  .tile:not([data-mode="active"]) .teaser.mit-liste{flex:1 1 auto;min-height:0}
 }

@@ -678,7 +678,8 @@ test('Adapter Kalender: eigene Termine – Kennzahl, Reiter, Antwort', async () 
   // Nächste: Termine heute vor dem Rest, ganztägig zuerst
   assert.match(k.tabs[0].html, /Geburtstag Anna.*Frühstück.*Zahnarzt/s);
   // kleine Kachel: KW im Kopf, Liste untereinander – erst Termine (mit großer Zeile höchstens 3), dann Freies
-  assert.equal(k.kopf, 'KW 40');
+  assert.equal(k.kopf, undefined);
+  assert.match(k.chart, /KW 40/);                                                    // KW unten in der kleinen Kachel
   assert.deepEqual(k.liste.map(z => [z.d, z.t, z.gruppe]).slice(0, 3), [['heute', 'Geburtstag Anna', 1], ['18:00', 'Sport', 1], ['Sa., 3.10.', 'Tag der Deutschen Einheit', 2]]);
   assert.ok(!k.liste.some(z => z.t === 'Frühstück' || z.t === 'Zahnarzt'));        // vorbei bzw. schon in der großen Zeile
   // keine Termine heute → der nächste Termin steht trotzdem vorn
