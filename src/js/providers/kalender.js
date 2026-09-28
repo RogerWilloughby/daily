@@ -22,20 +22,30 @@ function zeige(f, h, n, t) {
 }
 const stand = e => (e && (e.veraltet || Date.parse(e.gueltigBis) < Date.now()) ? `Stand ${hm(e.erstellt)}` : '');
 
-// Feiertage, Namenstage (Takt 1 Tag) und Himmel (Takt 1 Stunde) zusammen; beim Öffnen sofort der gespeicherte Stand.
-// Feiertage gibt es nur in Deutschland – im Ausland zeigt die Kachel nur den Himmel.
+// Feiertage, Namenstage (Takt 1 Tag) und Himmel (Takt 1 Stunde) zusammen; öffentlich beim Öffnen sofort der gespeicherte Stand.
+// Privat NICHT: Termine werden nie gespeichert – ein Zwischenstand ohne Termine sähe anders aus und „spränge“ dann um.
+// Stattdessen warten, bis Paket und Termine da sind (höchstens 3 s, dann ohne Termine; Termine werden nachgereicht).
+// Beim regelmäßigen Auffrischen bleiben bis dahin die bisherigen Termine stehen. Feiertage gibt es nur in Deutschland.
+export const WARTEN_MS = 3000;
+const zeichne = () => set('kalender', { ...zeige(fe, hi, na, te), tag: stand(hi || fe) });
 export async function load() {
   const p = ortParams(settings.place);
-  const altF = gespeichert('feiertage', p), altH = gespeichert('himmel', p), altN = gespeichert('namenstage', p);
-  if ((altF || altH) && !fe && !hi) set('kalender', { ...zeige(altF, altH, altN, te), tag: stand(altH || altF) });
+  if (!betrieb.privat) {
+    const altF = gespeichert('feiertage', p), altH = gespeichert('himmel', p), altN = gespeichert('namenstage', p);
+    if ((altF || altH) && !fe && !hi) set('kalender', { ...zeige(altF, altH, altN, null), tag: stand(altH || altF) });
+  }
   // Termine (nur privat) parallel zum Paket; bei Störung zeigt der Reiter „nicht erreichbar“
   const termineHolen = betrieb.privat
     ? privatDienst('termine', { urls: settings.icsUrls || [], zeitzone: zone() }).catch(() => ({ daten: null }))
     : Promise.resolve(null);
-  const [r, t] = await Promise.all([paket(['feiertage', 'himmel', 'namenstage'], p), termineHolen]);
-  fe = oder(r.feiertage); hi = oder(r.himmel); na = oder(r.namenstage); te = t;
+  const r = await paket(['feiertage', 'himmel', 'namenstage'], p);
+  fe = oder(r.feiertage); hi = oder(r.himmel); na = oder(r.namenstage);
   if (!fe && !hi) throw r.himmel;
-  set('kalender', { ...zeige(fe, hi, na, te), tag: stand(hi || fe) });
+  const zuSpaet = Symbol('zu spät');
+  const t = await Promise.race([termineHolen, new Promise(ok => setTimeout(() => ok(zuSpaet), WARTEN_MS))]);
+  if (t !== zuSpaet) { te = t; zeichne(); return; }
+  zeichne();                                            // ohne neue Termine (bisherige bleiben, beim ersten Mal keine)
+  te = await termineHolen; zeichne();                   // Termine nachreichen
 }
 
 // „Wann hat Josef Namenstag?“ fragt den Dienst mit dem Namen; „Wer hat heute Namenstag?“ nimmt die geladenen Daten
