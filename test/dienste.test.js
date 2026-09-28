@@ -774,3 +774,67 @@ test('Einstellungen: Kachel-Formular, Wetter-Optionen, Kachel-Listen', async () 
   assert.ok(!frei.includes('weather') && !frei.includes('news'));                   // aktive und private fehlen
   assert.equal(frei[0], 'kalender');                                                 // fertige zuerst
 });
+
+test('Finanzen: EZB-Kurse, Leitzinsen, Inflation; Kurse (Yahoo) nur privat; Kachel und Frag DAILY', async () => {
+  const f = require('../services/finanzen');
+  // Kursdatei: neuester Tag zuerst → aufsteigend, fehlende Kurse null
+  const roh = f.kurseAus('<Cube><Cube time="2026-09-28"><Cube currency="USD" rate="1.14"/><Cube currency="XYZ" rate="2"/></Cube><Cube time="2026-09-25"><Cube currency="USD" rate="1.12"/></Cube></Cube>');
+  assert.deepEqual(roh.tage, ['2026-09-25', '2026-09-28']);
+  assert.deepEqual(roh.kurse.XYZ, [null, 2]);
+  const usd = f.waehrungenAus(roh)[0];
+  assert.deepEqual([usd.code, usd.name, usd.zeichen, usd.kurs, usd.vortag, usd.aenderungProzent, usd.tief90, usd.hoch90], ['USD', 'US-Dollar', '$', 1.14, 1.12, 1.79, 1.12, 1.14]);
+  assert.equal(f.waehrungenAus(roh)[1].zeichen, 'XYZ');                            // unbekannte Währung behält ihren Code
+  // SDMX-CSV mit Anführungszeichen; Leitzins mit Änderungsdatum, ohne (Tagesreihe) nur Satz
+  assert.deepEqual(f.csvAus('KEY,TIME_PERIOD,OBS_VALUE,T\nA,2026-01,1.5,"x, y"')[0], { KEY: 'A', TIME_PERIOD: '2026-01', OBS_VALUE: '1.5', T: 'x, y' });
+  const z = f.zinsenAus(require('../tools/fixtures').ezbZinsen());
+  assert.deepEqual(z[0], { art: 'einlagen', name: 'Einlagesatz', satzProzent: 2, seit: '2025-06-11', vorherProzent: 2.5 });
+  assert.equal(f.zinsenAus(require('../tools/fixtures').ezbZinsen(), false)[0].seit, null);
+  assert.throws(() => f.csvAus('<html>Fehler</html>'), /Format/);
+  // Router: öffentlich, gültiger Vertrag, für alle gleich (keine Eingabe)
+  const r = await rufe('finanzen');
+  assert.equal(r.code || 200, 200);
+  gueltig(r.body, f.schema);
+  const d = r.body.daten;
+  assert.equal(d.basis, 'EUR');
+  assert.equal(d.waehrungen[0].code, 'USD');
+  assert.equal(d.waehrungen[0].verlauf.length, d.tage.length);
+  assert.deepEqual(d.inflation.map(i => [i.gebiet, i.monat, i.rateProzent]), [['DE', '2026-08', 2.1], ['U2', '2026-08', 2.2]]);
+  assert.match(r.headers['cache-control'], /s-maxage=\d+/);
+  // Kurse: öffentlich gesperrt, privat da
+  delete process.env.DAILY_PRIVATE;
+  assert.equal((await rufe('kurse')).body.fehler.code, 'nur_privat');
+  process.env.DAILY_PRIVATE = '1';
+  const k = await rufe('kurse');
+  delete process.env.DAILY_PRIVATE;
+  gueltig(k.body, require('../services/kurse').schema);
+  assert.deepEqual(k.body.daten.werte.map(x => x.id), ['dax', 'sp500', 'world', 'btc', 'eth', 'gold']);
+  assert.equal(k.body.daten.werte[0].aenderungProzent, 0.42);
+  // Kachel
+  const a = await esm('src/js/adapter/finanzen.js');
+  const kk = a.kachel(r.body, null, {});
+  assert.match(kk.kopf, /^<span class="fi-kopf">1 € = <b>1,\d{4} \$<\/b> <small class="fi-aend fi-(plus|minus)">[▲▼] 0,\d\d %<\/small><\/span>$/);
+  assert.deepEqual(kk.liste.map(l => l.d), ['£', 'CHF', 'zł', 'Kč']);
+  assert.deepEqual(kk.tabs.map(t => t.id), ['kurse', 'zinsen', 'inflation']);                       // öffentlich ohne „Märkte“
+  assert.match(kk.chart, /data-mini-wahl="30" aria-pressed="true">30 Tage<.*data-mini-wahl="90"/);
+  assert.match(kk.chart, /class="wd-kurs"/);
+  assert.match(kk.x, /^1 € = 1,\d{4} \$ \([▲▼] 0,\d\d %\)\. Leitzins 2,00 %, Inflation 2,1 % \(August\)\. Stand /);
+  assert.match(kk.tabs[1].html, /Einlagesatz<\/dt><dd><b>2,00 %<\/b> seit 11\.6\.2025 <small>\(vorher 2,50 %\)/);
+  const opt = a.kachel(r.body, k.body, { haupt: 'CHF', weitere: ['USD'], zinsen: false, tage: 90 });
+  assert.match(opt.kopf, /1 € = <b>0,\d{4} CHF<\/b>/);
+  assert.deepEqual(opt.tabs.map(t => t.id), ['kurse', 'inflation', 'maerkte']);
+  assert.match(opt.chart, /data-mini-wahl="90" aria-pressed="true"/);
+  assert.match(opt.tabs[2].html, /DAX<\/dt><dd><b>24\.312 Pkt<\/b>/);
+  assert.equal(a.kachel(null).state, 'error');
+  // Frag DAILY
+  assert.match(a.antwort('Wie steht der Dollar?', r.body), /^1 € = 1,\d{4} \$ \(US-Dollar\)/);
+  assert.match(a.antwort('Was kosten 100 Franken?', r.body), /^100,00 CHF sind 10\d,\d\d € \(Referenzkurs der EZB/);
+  assert.match(a.antwort('50 Euro in Pfund', r.body), /^50,00 € sind 4\d,\d\d £/);
+  assert.match(a.antwort('Wie hoch ist der Leitzins?', r.body), /Einlagesatz\) liegt bei 2,00 %, seit 11\.6\.2025/);
+  assert.match(a.antwort('Wie hoch ist die Inflation?', r.body), /^Deutschland: 2,1 % im August 2026, Euroraum: 2,2 %/);
+  assert.match(a.antwort('Wie steht der DAX?', r.body, k.body), /^DAX: 24\.312 Pkt \(▲ 0,42 % zum Vortag\)/);
+  assert.match(a.antwort('Wie steht der DAX?', r.body, null), /nur im privaten Betrieb/);
+  assert.equal(a.antwort('Wie wird das Wetter?', r.body), null);
+  const { kursSkala } = await esm('src/js/adapter/diagramm.js');
+  assert.deepEqual(kursSkala(1.117, 1.163), { lo: 1.1, hi: 1.18, stufe: 0.02, stellen: 2 });
+  assert.deepEqual(kursSkala(170, 181), { lo: 170, hi: 185, stufe: 5, stellen: 0 });
+});

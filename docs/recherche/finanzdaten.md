@@ -32,7 +32,7 @@ Vor der Umsetzung sind die unter „Offene Prüfpunkte“ genannten Bedingungen 
 
 ## Offene Prüfpunkte vor der Umsetzung
 
-- EZB: genaue Bedingungen zur Weiterverwendung der Referenzkurse (Quellenangabe, Hinweis „nur zu Informationszwecken“).
+- ~~EZB: Bedingungen zur Weiterverwendung~~ – geklärt 28.09.2026: alle öffentlichen ESZB-Statistiken kostenlos, auch kommerziell, mit Quellenangabe („Quelle: EZB“) und ohne Veränderung der Werte; Referenzkurse nur zur Information, nicht für Geschäfte. Umgesetzt im Dienst `finanzen` (App 0.22.0). Quelle: [EZB – Policy regarding the reuse of ESCB statistics](https://www.ecb.europa.eu/stats/ecb_statistics/governance_and_quality_framework/html/usage_policy.en.html)
 - Deutsche Börse/Xetra: Dürfen Schlusskurse vom Vortag ohne Lizenz öffentlich gezeigt werden? Welche Anbieter liefern sie mit Weitergaberecht?
 - Alpha Vantage / Finnhub: aktuelle Gratis-Grenzen und Bedingungen für die private Nutzung.
 - CoinGecko: Wortlaut der API-Bedingungen zur Quellenangabe.

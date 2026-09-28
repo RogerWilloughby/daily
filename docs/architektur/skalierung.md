@@ -41,6 +41,8 @@ Hinweis: Vercel Hobby und das freie Open-Meteo sind nur für **nicht kommerziell
 | `feiertage` | B | OpenHolidays frei, ohne Grenze; Rest gerechnet | Takt 1 Tag, je Bundesland höchstens 1 Ferien-Abruf am Tag (16 Länder) | Stufe 1–2 |
 | `himmel` | A | keine Quelle (Astronomy Engine) | Takt 1 Stunde, ≈ 20–40 ms Rechenzeit je Ort; bei Bedarf je 1°-Feld vorrechnen | Stufe 1 |
 | `namenstage` | A | keine (feste Liste beim Dienst) | Takt 1 Tag, für alle gleich | Stufe 1 |
+| `finanzen` | B | EZB (Kursdatei + 2 CSV), frei | Takt 1 Std., für alle gleich → 72 EZB-Abrufe/Tag | Stufe 1 |
+| `kurse` | B | Yahoo, inoffiziell | nur privat, kein CDN-Cache, alle 15 min | – (nicht öffentlich) |
 | `termine` | D | Kalender-Server der Nutzer, je Abruf 1 Anfrage je Kalender | nur privat, kein Cache (private Daten), alle 10 min | – (nicht öffentlich) |
 
 Weitere Dienste werden beim Umzug auf daily/1 hier eingetragen.

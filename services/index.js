@@ -12,7 +12,9 @@ const DIENSTE = [
   require('./feiertage'),
   require('./himmel'),
   require('./namenstage'),
-  require('./termine')
+  require('./termine'),
+  require('./finanzen'),
+  require('./kurse')
 ];
 const byId = Object.fromEntries(DIENSTE.map(d => [d.id, d]));
 

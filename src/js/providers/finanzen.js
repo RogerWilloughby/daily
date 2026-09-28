@@ -1,0 +1,69 @@
+// Kachel „Finanzen“: Dienst „finanzen“ (EZB: Wechselkurse, Leitzinsen, Inflation – für alle) und im privaten Betrieb
+// zusätzlich „kurse“ (DAX, Krypto, Gold über Yahoo – nur privat). Reine Kursangaben, keine Anlageempfehlung.
+import { set } from '../core/board.js';
+import { kachelOpt, kachelOptSpeichern } from '../core/store.js';
+import { kachelEinstellungen } from '../core/einstellungen.js';
+import { addAnswer } from '../core/ask.js';
+import { dienst, gespeichert } from '../dienste/client.js';
+import { kachel, antwort, FINANZ_STANDARD, AUSWAHL } from '../adapter/finanzen.js';
+import { betrieb } from '../core/betrieb.js';
+import { hm } from '../core/util.js';
+
+let fe = null, ku = null;
+const oder = x => (x instanceof Error ? null : x);
+const opt = () => kachelOpt('money', FINANZ_STANDARD);
+const stand = e => (e && (e.veraltet || Date.parse(e.gueltigBis) < Date.now()) ? `Stand ${hm(e.erstellt)}` : '');
+const zeichne = () => set('money', { ...kachel(fe, ku, opt()), tag: stand(fe) });
+
+// EZB-Daten (Takt 1 Stunde, für alle gleich) – beim Öffnen sofort der gespeicherte Stand; privat die Kurse parallel
+export async function load() {
+  const alt = gespeichert('finanzen');
+  if (alt && !fe) set('money', { ...kachel(alt, null, opt()), tag: stand(alt) });
+  const [f, k] = await Promise.all([
+    dienst('finanzen').catch(e => e),
+    betrieb.privat ? dienst('kurse').catch(e => e) : Promise.resolve(null)
+  ]);
+  if (f instanceof Error) { if (!fe && !alt) throw f; }
+  else fe = f;
+  if (!fe) fe = alt;
+  ku = oder(k) || ku;
+  zeichne();
+}
+
+addAnswer(/leitzins|zins|inflation|teuerung|preissteigerung|dollar|pfund|franken|zloty|złoty|krone|yen|yuan|forint|lira|wechselkurs|währung|waehrung|kurs|euro|dax|börse|boerse|aktie|bitcoin|krypto|ethereum|gold/i,
+  q => antwort(q, fe, ku));
+
+// Umschalter im Mini-Diagramm (30 / 90 Tage): dieselbe Einstellung wie im Zahnrad-Reiter, sofort ohne Abruf
+document.addEventListener('click', e => {
+  const b = e.target.closest('#tile-money [data-mini-wahl]'); if (!b) return;
+  kachelOptSpeichern('money', { ...opt(), tage: +b.dataset.miniWahl });
+  if (fe) zeichne();
+});
+
+// Einstellungen der Kachel (Zahnrad-Reiter)
+const NAME = { USD: 'US-Dollar', GBP: 'Brit. Pfund', CHF: 'Schweizer Franken', PLN: 'Poln. Złoty', CZK: 'Tschech. Krone', JPY: 'Yen', CNY: 'Yuan',
+  SEK: 'Schwed. Krone', NOK: 'Norw. Krone', DKK: 'Dän. Krone', HUF: 'Forint', TRY: 'Türk. Lira', CAD: 'Kanad. Dollar', AUD: 'Austral. Dollar' };
+kachelEinstellungen('money', {
+  felder: () => {
+    const o = opt();
+    return [
+      { typ: 'select', key: 'haupt', label: 'Hauptwährung (1 € = …)', wert: o.haupt, optionen: AUSWAHL.map(c => [c, NAME[c]]) },
+      { typ: 'select', key: 'tage', label: 'Diagramm in der kleinen Kachel', wert: String(o.tage), optionen: [['30', '30 Tage'], ['90', '90 Tage']] },
+      { typ: 'titel', label: 'Weitere Währungen (klein: die ersten 4)' },
+      ...AUSWAHL.map(c => ({ typ: 'check', key: 'w_' + c, label: c, wert: o.weitere.includes(c) })),
+      { typ: 'titel', label: 'Reiter anzeigen' },
+      { typ: 'check', key: 'zinsen', label: 'Leitzinsen', wert: o.zinsen !== false },
+      { typ: 'check', key: 'inflation', label: 'Inflation', wert: o.inflation !== false },
+      ...(betrieb.privat ? [{ typ: 'check', key: 'maerkte', label: 'Märkte (DAX, Krypto, Gold – privat)', wert: o.maerkte !== false }] : [])
+    ];
+  },
+  speichern: w => {
+    kachelOptSpeichern('money', {
+      haupt: w.haupt, tage: +w.tage, weitere: AUSWAHL.filter(c => w['w_' + c] && c !== w.haupt),
+      zinsen: !!w.zinsen, inflation: !!w.inflation, ...('maerkte' in w ? { maerkte: !!w.maerkte } : {})
+    });
+    if (fe) zeichne();
+  }
+});
+
+export default { id: 'money', name: 'Finanzen', every: 15 * 60e3, load };

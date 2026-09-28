@@ -162,4 +162,24 @@ function radar(jetzt = now) {
   return { radar, geometry: { type: 'Polygon', coordinates: [] }, bbox: [400, 500, 452, 552], latlon_position: { x: 26.2, y: 25.9 } };
 }
 
-module.exports = { rss, atom, yahoo, table1, table2, matches2, pointfinder, departures, onthisday, ics, alerts, school, fuel, forecast, airQuality, geocoding, radar };
+
+// EZB: Referenzkurse der letzten 90 Tage (neuester Tag zuerst, wie im Original), Leitzinsen und HVPI als SDMX-CSV
+const EZB_BASIS = { USD: 1.14, GBP: 0.858, CHF: 0.936, PLN: 4.27, CZK: 24.4, JPY: 178.5, CNY: 8.12 };
+function ezbKurse() {
+  const tage = [];
+  for (let d = 0; tage.length < 64; d++) {
+    const t = new Date(now - d * 864e5);
+    if (t.getUTCDay() % 6 !== 0) tage.push(t.toISOString().slice(0, 10));
+  }
+  const cubes = tage.map((tag, i) => `<Cube time="${tag}">` + Object.entries(EZB_BASIS).map(([c, b]) =>
+    `<Cube currency="${c}" rate="${+(b * (1 + 0.02 * Math.sin(i / 7) + (i === 0 ? 0.002 : 0))).toFixed(c === 'JPY' ? 2 : 4)}"/>`).join('') + '</Cube>').join('');
+  return `<?xml version="1.0" encoding="UTF-8"?><gesmes:Envelope xmlns:gesmes="http://www.gesmes.org/xml/2002-08-01" xmlns="http://www.ecb.int/vocabulary/2002-08-01/eurofxref"><gesmes:subject>Reference rates</gesmes:subject><Cube>${cubes}</Cube></gesmes:Envelope>`;
+}
+const ezbZinsen = () => 'KEY,FREQ,REF_AREA,CURRENCY,PROVIDER_FM,INSTRUMENT_FM,PROVIDER_FM_ID,DATA_TYPE_FM,TIME_PERIOD,OBS_VALUE,TITLE\n' +
+  [['DFR', '2025-03-12', 2.5], ['DFR', '2025-06-11', 2.0], ['MRR_FR', '2025-03-12', 2.65], ['MRR_FR', '2025-06-11', 2.15], ['MLFR', '2025-03-12', 2.9], ['MLFR', '2025-06-11', 2.4]]
+    .map(([k, t, v]) => `FM.D.U2.EUR.4F.KR.${k}.LEV,D,U2,EUR,4F,KR,${k},LEV,${t},${v},"Satz, Stand"`).join('\n');
+const ezbInflation = () => 'KEY,FREQ,REF_AREA,ADJUSTMENT,ICP_ITEM,STS_INSTITUTION,ICP_SUFFIX,TIME_PERIOD,OBS_VALUE\n' +
+  [['DE', '2026-07', 2.0], ['DE', '2026-08', 2.1], ['U2', '2026-07', 2.0], ['U2', '2026-08', 2.2]]
+    .map(([g, m, v]) => `ICP.M.${g}.N.000000.4.ANR,M,${g},N,000000,4,ANR,${m},${v}`).join('\n');
+
+module.exports = { ezbKurse, ezbZinsen, ezbInflation, rss, atom, yahoo, table1, table2, matches2, pointfinder, departures, onthisday, ics, alerts, school, fuel, forecast, airQuality, geocoding, radar };

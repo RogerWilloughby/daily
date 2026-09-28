@@ -121,11 +121,11 @@ test('Layouts: öffentlich ohne private Kacheln, Standard 12 (fertige zuerst), R
   // Standard (keine eigene Belegung): 12 Kacheln, überarbeitete zuerst, dann Vorschau-Kacheln in Standardreihenfolge
   const pub = chooseLayout(false).map(t => t.id);
   assert.equal(pub.length, STANDARD_ANZAHL);
-  assert.deepEqual(pub.slice(0, 5), ['weather', 'kalender', 'links', 'tasks', 'usage']);
-  assert.deepEqual(pub.slice(5, 7), ['transit', 'sport']);
+  assert.deepEqual(pub.slice(0, 6), ['weather', 'kalender', 'links', 'tasks', 'money', 'usage']);
+  assert.deepEqual(pub.slice(6, 8), ['transit', 'sport']);
   assert.ok(!pub.includes('news') && !pub.includes('alerts'));
   const priv = chooseLayout(true).map(t => t.id);
-  assert.deepEqual(priv.slice(0, 6), ['weather', 'kalender', 'tasks', 'links', 'usage', 'news']);
+  assert.deepEqual(priv.slice(0, 7), ['weather', 'kalender', 'tasks', 'money', 'links', 'usage', 'news']);
   // Raster: Rechner (quer, Wunschform 1,4) und Handy (hochkant, quadratisch)
   const r = (n, w, h, a, v) => { const x = raster(n, w, h, a, v); return `${x.cols}x${x.rows}`; };
   assert.deepEqual([1, 2, 4, 6, 9, 12, 20].map(n => r(n, 1344, 700)), ['1x1', '2x1', '2x2', '3x2', '3x3', '4x3', '5x4']);

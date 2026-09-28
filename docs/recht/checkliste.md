@@ -6,7 +6,7 @@ Kein Impressum, keine Datenschutzerklärung, keine Medienpflichten nötig. Aktue
 ## Öffentliche Website
 - Impressum nach § 5 DDG (Name, ladungsfähige Anschrift, E-Mail, schnelle Kontaktmöglichkeit, ggf. USt-IdNr.); leicht erkennbar, unmittelbar erreichbar, ständig verfügbar (BGH: max. 2 Klicks als Faustregel).
 - DSGVO-Datenschutzerklärung; jede externe Anfrage (Wetter-API, Kurse) überträgt die IP → nennen oder serverseitig bündeln.
-  - Stand: Direkt aus dem Browser nur Open-Meteo (Wetter, Luft, Ortssuche). Über eigene Server-Funktionen (IP bleibt beim Hoster): Kurse (Yahoo), Fußball (OpenLigaDB), Abfahrten (VVO), „An diesem Tag“ (Wikimedia), Schulferien (OpenHolidays), Wetterhinweise (Bright Sky/DWD), Tankpreise (Tankerkönig); privat zusätzlich Schlagzeilen und Kalender. Für Wetterhinweise und Tanken nur auf ~1 km gerundete Koordinaten. Entwurf in der App (Dialog „Datenschutz“) listet das bereits.
+  - Stand: Direkt aus dem Browser nur Open-Meteo (Wetter, Luft, Ortssuche). Über eigene Server-Funktionen (IP bleibt beim Hoster): Wechselkurse/Leitzinsen/Inflation (EZB), privat Kurse (Yahoo), Fußball (OpenLigaDB), Abfahrten (VVO), „An diesem Tag“ (Wikimedia), Schulferien (OpenHolidays), Wetterhinweise (Bright Sky/DWD), Tankpreise (Tankerkönig); privat zusätzlich Schlagzeilen und Kalender. Für Wetterhinweise und Tanken nur auf ~1 km gerundete Koordinaten. Entwurf in der App (Dialog „Datenschutz“) listet das bereits.
 - Wikipedia-Inhalte (CC BY-SA 4.0): Quelle + Lizenz + Link nennen (umgesetzt in der Kachel Wissen).
 - KI-erstellte Service-Texte (Rezept, Rätsel, Tipps …) sind keine Nachrichten; im Impressum-Entwurf als „mit KI erstellt“ vermerkt.
 - Gesundheit/Sparen: nur allgemeine Anregungen mit Hinweis „keine Beratung“.
@@ -28,7 +28,7 @@ Kein Impressum, keine Datenschutzerklärung, keine Medienpflichten nötig. Aktue
 - OpenPLZ und Nominatim werden nicht mehr genutzt (seit Umstellung auf den eigenen Ortsbestand).
 - Gerätestandort: nur nach Knopfdruck und Browser-Erlaubnis, auf ~1 km gerundet; die Suche nach dem nächsten Ort läuft im eigenen Bestand (keine Weitergabe an Dritte); gespeichert wird nur der gefundene Ort (im Browser). Im Datenschutz-Entwurf beschrieben.
 - „Meine Seiten“: nur vom Nutzer selbst angelegte Links, keine fremden Inhalte.
-- Geld: Yahoo-Daten nur privat; öffentlich andere Quelle – Lizenzlage und Alternativen in [../recherche/finanzdaten.md](../recherche/finanzdaten.md).
+- Geld: öffentlich nur EZB-Daten (frei, auch kommerziell, „Quelle: EZB“, Werte unverändert, Referenzkurse „nur zur Information“) – umgesetzt in 0.22.0; Yahoo-Daten nur privat (Dienst `kurse`). Lizenzlage und Alternativen in [../recherche/finanzdaten.md](../recherche/finanzdaten.md).
 
 ## Nachrichten & Co. – Entscheidung: kein journalistisches Angebot
 Ein journalistisch-redaktionelles Angebot (eigene Auswahl, Gewichtung, Zusammenfassung oder Bewertung meinungsbildender Themen) würde auslösen:

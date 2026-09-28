@@ -8,6 +8,9 @@ module.exports = async function fetchStub(url, opts = {}) {
   if (u.includes('mdr.de')) return reply(F.rss('MDR Sachsen'), 'application/rss+xml');
   if (u.includes('heise.de')) return reply(F.atom('heise'), 'application/atom+xml');
   if (u.includes('finance.yahoo.com')) return reply(F.yahoo(u));
+  if (u.includes('eurofxref-hist-90d.xml')) return reply(F.ezbKurse(), 'text/xml');
+  if (u.includes('data-api.ecb.europa.eu/service/data/FM/D.')) return reply(F.ezbZinsen(), 'text/csv');
+  if (u.includes('data-api.ecb.europa.eu/service/data/ICP/')) return reply(F.ezbInflation(), 'text/csv');
   if (u.includes('openligadb.de/getbltable/bl1')) return reply(F.table1());
   if (u.includes('openligadb.de/getbltable/bl2')) return reply(F.table2());
   if (u.includes('openligadb.de/getbltable/bl3')) return reply([]);

@@ -14,7 +14,7 @@ export const CATALOG = [
   T('tasks', 'Mein Daily', 'Aufgaben', 'list', { state: 'local', fertig: true }),
   T('transit', 'Abfahrten', 'ÖPNV', 'tram'),
   T('sport', 'Sport', 'Sport', 'ball'),
-  T('money', 'Geld', 'Geld', 'money'),
+  T('money', 'Finanzen', 'Finanzen', 'money', { fertig: true, hover: 'Finanzen' }),   // Wechselkurse, Leitzinsen, Inflation (EZB); privat zusätzlich Märkte
   T('play', 'Rätsel & Witz', 'Rätsel', 'dice', { state: 'content' }),
   T('food', 'Essen', 'Essen', 'food', { state: 'content' }),
   T('knowledge', 'Wissen', 'Wissen', 'book'),

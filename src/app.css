@@ -513,3 +513,11 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
   .tile:is([data-mode="rest"],[data-mode="lane"]) .teaser .t-zeile2{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
   .tile:is([data-mode="rest"],[data-mode="lane"]) .teaser .t-zeile2::before{content:none}
 }
+
+/* Finanzen: Kopf „1 € = 1,1423 $ ▲ 0,21 %“, Kurslinie im Mini-Diagramm, Zahlen der Skala neutral */
+.fi-kopf b{font-weight:700}
+.fi-aend{font-size:.8em;font-weight:600;white-space:nowrap}
+.fi-plus{color:var(--up)}.fi-minus{color:var(--down)}
+.tile[data-mode="active"] .fi-plus{color:var(--active-up)}.tile[data-mode="active"] .fi-minus{color:var(--active-down)}
+.wd .wd-kurs{stroke:var(--accent);fill:none}
+.fi-skala{color:var(--muted);min-width:3.4em}
