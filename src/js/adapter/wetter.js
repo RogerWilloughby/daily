@@ -104,9 +104,10 @@ function mehrZeilen(env, pollen) {
 
 // Uhrzeit des Tiefst-/Höchstwerts: „6 Uhr“ (leer, wenn unbekannt)
 const uhrVon = (iso, zone) => iso ? `${+new Date(iso).toLocaleTimeString('de-DE', { timeZone: zone, hour: '2-digit' }).slice(0, 2)} Uhr` : '';
-export function kopfzeileHtml(env) {
+// klammern: kleine Kachel „9° (2 Uhr)“, aufgeklappt „9° 2 Uhr“
+export function kopfzeileHtml(env, klammern = false) {
   const a = env.daten.aktuell, h = env.daten.tage[0] || {}, zone = env.ort.zeitzone || 'Europe/Berlin';
-  const um = iso => (uhrVon(iso, zone) ? ` <small class="wd-um">${uhrVon(iso, zone)}</small>` : '');
+  const um = iso => (uhrVon(iso, zone) ? ` <small class="wd-um">${klammern ? '(' : ''}${uhrVon(iso, zone)}${klammern ? ')' : ''}</small>` : '');
   return `${esc(env.ort.name || 'Wetter')} ${r0(a.tempC)}° · ${tmin(h.minC)}${um(h.minZeit)} / ${tmax(h.maxC)}${um(h.maxZeit)}`;
 }
 
@@ -177,7 +178,7 @@ export function kachel(env, regenEnv = null, hinweisEnv = null) {
   const wetterText = `${zustandText(a.zustand, a.code)}, gefühlt ${r0(a.gefuehltC)}°.`, regenZeile = regenHinweis(regenEnv) || regenText;
   // Kopfzeile: Ort, jetzt, Tiefst/Höchst von heute – alles in einer Zeile
   return {
-    state: 'live', title: kopfzeile(env) + (hTop ? ` · ${hKurz}` : ''), titleHtml: kopfzeileHtml(env) + abzeichen(hinweisEnv), kopf: kopfzeileHtml(env) + abzeichen(hinweisEnv), zeileIcon: true, tabs,
+    state: 'live', title: kopfzeile(env) + (hTop ? ` · ${hKurz}` : ''), titleHtml: kopfzeileHtml(env) + abzeichen(hinweisEnv), kopf: kopfzeileHtml(env, true) + abzeichen(hinweisEnv), zeileIcon: true, tabs,
     lglyph: glyph(bild(a.zustand, a.tag)), lglyphTip: zustandText(a.zustand, a.code),   // Symbol in der Kopfzeile, Erklärung beim Überfahren
     glyph: '', m: '', ms: r0(a.tempC) + '°',                                               // keine große Zeile – Platz fürs Diagramm
     // Unwetter zuerst, sonst Wetter · Hinweis · Regen (Radar geht vor der Stundenvorhersage)

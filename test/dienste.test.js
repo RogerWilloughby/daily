@@ -229,6 +229,7 @@ test('Adapter Wetter: Kachel und Antwort aus dem Vertrag', async () => {
   // Kopfzeile mit farbigen Zahlen
   assert.match(k.titleHtml, /^Berlin 15° · <b class="wd-t-min">9°<\/b> <small class="wd-um">\d{1,2} Uhr<\/small> \/ <b class="wd-t-max">16°<\/b> <small class="wd-um">\d{1,2} Uhr<\/small>$/);
   assert.equal(k.zeileIcon, true);
+  assert.match(k.kopf, /9°<\/b> <small class="wd-um">\(\d{1,2} Uhr\)<\/small> \/ <b class="wd-t-max">16°<\/b> <small class="wd-um">\(\d{1,2} Uhr\)<\/small>/);   // kleine Kachel: Uhrzeit in Klammern
   // Aufgeklappt: Reiter
   assert.deepEqual(k.tabs.map(t => t.name), ['Heute', '16 Tage', '48 Std.', 'Hinweise', 'Mehr']);
   const tab = id => k.tabs.find(t => t.id === id).html;
