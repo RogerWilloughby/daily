@@ -1,6 +1,6 @@
 # DAILY – Dienstkatalog (aus der Ideenliste)
 
-Stand 27.09.2026. Quelle der Ideen: `daily-konzept.html`. Jede Idee ist hier einem **Dienst** im Format daily/1 zugeordnet (siehe `../architektur/dienste.md`) oder begründet zurückgestellt.
+Stand 28.09.2026. Quelle der Ideen: `daily-konzept.html`. Jede Idee ist hier einem **Dienst** im Format daily/1 zugeordnet (siehe `../architektur/dienste.md`) oder begründet zurückgestellt.
 Welche Dienste später zu welchen Kacheln, Listen oder Oberflächen zusammengefasst werden, entscheiden wir erst, wenn die Dienste laufen.
 
 **Filter (Strategie, `entscheidungen.md` Abschnitt 0):** öffentlich keine Nutzerdaten außer dem Ort, keine Nachrichten.
@@ -95,7 +95,7 @@ Ein Dienst `tagesinhalt?rubrik=<rubrik>&datum=<JJJJ-MM-TT>` liefert alle vorbere
 | Social-Media-Ausspielung (Content Engine) | ⏸ | eigenes Produkt; kann später dieselben Dienste nutzen |
 
 ## Vorschlag Reihenfolge
-1. **Umzug** der laufenden Dienste auf daily/1: ~~`himmel`, `feiertage`, `warnungen`, `namenstage`, `termine` (privat)~~ (erledigt), `tanken`, `abfahrten`, `fussball`, `an-diesem-tag`, `tagesinhalt`, `kurse` (privat).
+1. **Umzug** der laufenden Dienste auf daily/1: ~~`himmel`, `feiertage`, `warnungen`, `namenstage`, `termine` (privat)~~ (erledigt, Kacheln „Wetter“ und „Kalender“), offen: `tanken`, `abfahrten`, `fussball`, `an-diesem-tag`, `tagesinhalt`, `kurse` (privat), `schlagzeilen` (privat). Roger wählt die Reihenfolge; vor jedem Umzug ein Plan.
 2. **Neue Live-Dienste mit freier Quelle:** `waehrungen`, `strompreis`, `verkehr`, `weltwetter`, `raumfahrt`, `krypto`, `klima`.
 3. **Neue Tagesinhalte:** weitere Rubriken in `tagesinhalt`, dazu `quiz`.
 4. **Lokale Dienste:** `countdowns`, `notizen`.

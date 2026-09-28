@@ -687,3 +687,34 @@ test('Adapter Kalender: eigene Termine – Kennzahl, Reiter, Antwort', async () 
   assert.equal(termineAntwort('Was habe ich morgen?', tEnv, jetzt), 'Morgen stehen keine Termine an.');
   assert.equal(termineAntwort('Termine?', null, jetzt), null);
 });
+
+test('Einstellungen: Kachel-Formular, Wetter-Optionen, Kachel-Listen', async () => {
+  // Formular je Kachel (rein)
+  const ke = await esm('src/js/core/einstellungen.js');
+  ke.kachelEinstellungen('probe', { felder: () => [{ typ: 'titel', label: 'Anzeigen' }, { typ: 'check', key: 'a', label: 'A <b>', wert: true },
+    { typ: 'select', key: 's', label: 'S', wert: '7', optionen: [['16', '16 Tage'], ['7', '7 Tage']] }, { typ: 'text', key: 't', label: 'T', wert: 'x"y' }], speichern() {} });
+  const html = ke.formular('probe');
+  assert.ok(ke.hatEinstellungen('probe') && !ke.hatEinstellungen('gibtsnicht'));
+  assert.match(html, /<form class="ke" data-ke="probe">.*type="checkbox" name="a" checked> A &lt;b&gt;.*<option value="7" selected>.*value="x&quot;y".*Speichern/s);
+  // Wetter: Reiter aus, Start-Reiter, Mini-Diagramm 7 Tage; Unwetter bleibt vorn
+  const { kachel, mitOptionen } = await esm('src/js/adapter/wetter.js');
+  const w = (await rufe('wetter', { ort: 'Berlin' })).body, r = (await rufe('regen', { lat: '52.52', lon: '13.41' })).body;
+  const k = mitOptionen(kachel(w, r, null), w, { radar: false, stunden: false, start: 'tage', mini: 7 });
+  assert.deepEqual(k.tabs.map(t => t.id), ['heute', 'tage', 'hinweise', 'mehr']);
+  assert.equal(k.startReiter, 'tage');
+  assert.match(k.chart, /7 Tage: /);
+  assert.equal(mitOptionen(kachel(w, r, null), w, { start: 'radar', radar: false }).startReiter, 'heute');   // ausgeblendeter Start → Heute
+  const u = { daten: { gebiet: 'X', hoechsteStufe: 3, hinweise: [{ art: 'wind', stufe: 3, stufeName: 'unwetter', ereignis: 'ORKANBÖEN', titel: 'T', beginn: null, ende: null, aktiv: true, beschreibung: '', empfehlung: '', tipp: 't' }] } };
+  const ku = mitOptionen(kachel(w, r, u), w, { hinweise: false, start: 'mehr' });
+  assert.deepEqual([ku.tabs[0].id, ku.startReiter], ['hinweise', 'hinweise']);
+  // Kachel-Listen (rein)
+  const kl = await esm('src/js/ui/kacheln.js');
+  assert.deepEqual(kl.verschieben(['weather'], 'kalender').aktiv, ['weather', 'kalender']);
+  assert.deepEqual(kl.verschieben(['weather', 'kalender'], 'weather').aktiv, ['kalender']);
+  assert.match(kl.verschieben(['a', 'b'], 'c', 2).meldung, /Höchstens 2/);
+  assert.deepEqual(kl.umsortieren(['a', 'b', 'c'], 'c', 0), ['c', 'a', 'b']);
+  assert.deepEqual(kl.umsortieren(['a', 'b', 'c'], 'a', 5), ['b', 'c', 'a']);
+  const frei = kl.verfuegbar(['weather'], false);
+  assert.ok(!frei.includes('weather') && !frei.includes('news'));                   // aktive und private fehlen
+  assert.equal(frei[0], 'kalender');                                                 // fertige zuerst
+});

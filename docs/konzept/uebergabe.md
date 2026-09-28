@@ -1,6 +1,6 @@
 # DAILY – Übergabe: aktueller Arbeitsstand
 
-Stand 27.09.2026. Für neue Chats: hier steht, woran gerade gearbeitet wird und wie es weitergeht. Verbindliche Entscheidungen stehen in `entscheidungen.md`, die Architektur in `../architektur/dienste.md`.
+Stand 28.09.2026 (App 0.16.0). Für neue Chats: hier steht, woran gerade gearbeitet wird und wie es weitergeht. Verbindliche Entscheidungen stehen in `entscheidungen.md`, die Architektur in `../architektur/dienste.md`.
 
 ## Vorgehen (Rogers Vorgaben)
 - **Erst Plan, dann Umsetzung (Rogers Vorgabe vom 27.09.2026):** Vor jeder Umsetzung und vor jedem Schreiben ins Repo einen kurzen Plan vorlegen – was und warum, welche Dateien (neu/geändert/gelöscht), was Roger danach tun muss, was offen/unsicher ist – und auf Rogers OK warten. Nicht einfach loslegen.
@@ -16,25 +16,28 @@ Stand 27.09.2026. Für neue Chats: hier steht, woran gerade gearbeitet wird und 
 - **Versionen (seit 27.09.2026, App 0.6.0):** bei jeder Änderung App-Nummer (`package.json` + `src/js/core/version.js`) und betroffene Dienst-`programmversion` + `aenderungen` erhöhen. Details `../architektur/dienste.md` → Versionen.
 - Hochladen nur über `hochladen.cmd` (siehe Wegweiser im Projekt). Claude schreibt Dateien ins lokale Repo und legt `.commit-msg.txt` an; lokal nie git-Befehle.
 - `hochladen.cmd` lädt seit 27.09. auch liegengebliebene Commits nach (wenn ein Push fehlschlug und nichts Neues zu committen ist).
-- **Dateien unter `.github/workflows/` darf Claude nicht schreiben** (von der Desktop-App geschützt). Claude legt sie unter `tools/` ab, Roger verschiebt sie von Hand (`move tools\x.yml .github\workflows\x.yml`).
-- Für Workflow-Dateien braucht die GitHub-Anmeldung das Recht `workflow`. Eingerichtet am 27.09.: `gh auth refresh -h github.com -s workflow` und `gh auth setup-git` (Git meldet sich jetzt über die GitHub-Kommandozeile an).
-- **Keine Workflows mehr (seit 27.09., Rogers Entscheidung):** Selten geänderte Daten (Ortsbestand, Namenstage) sind feste Dateien in `services/daten/`. Keine GitHub Actions, keine Erzeuger-Skripte, nichts von Hand zu starten. `.github/workflows` ist leer.
+- **Keine Workflows mehr (seit 27.09., Rogers Entscheidung):** Selten geänderte Daten (Ortsbestand, Namenstage) sind feste Dateien in `services/daten/`. Keine GitHub Actions, keine Erzeuger-Skripte, nichts von Hand zu starten. `.github/workflows` ist leer (für Claude ohnehin gesperrt). Rogers Git-Anmeldung hat seit 27.09. das Recht `workflow` (`gh auth`), falls doch einmal nötig.
 - Warum Dateien statt Datenbank: kleine, selten geänderte Daten liegen im Speicher der Funktion (< 1 ms); eine Datenbank kostete je Anfrage 5–20 ms und bräuchte trotzdem einen Abrufjob. Datenbank erst für große/oft geänderte Daten (zentrales Wetter/Radar).
 - Netz: Cloud-Container und Desktop-VM erreichen nur GitHub, npm und PyPI – nicht Open-Meteo, GeoNames, DWD, destatis. Neu erzeugte Datenbestände (selten) daher auf einem Rechner mit Netz; im Alltag sind es feste Dateien.
 - **Vercel baut nicht nach dem Hochladen (28.09.):** Der Push kam auf GitHub an, Vercel hat ihn verpasst. „Redeploy“ auf einem alten Eintrag baut nur **diesen alten Stand** neu – stattdessen „Create Deployment“ mit `main` oder einfach neu hochladen (ein neuer Push löst Vercel aus).
+- **Privater Betrieb:** Vercel-Variable `DAILY_PRIVATE=1` (Production) – gesetzt am 28.09. Ohne sie läuft die Seite öffentlich: keine Termine, keine Schlagzeilen, kein Feld für Kalender-Links. Environment Variables liegen in der Vercel-Oberfläche in der **Seitenleiste des Projekts** (nicht unter Settings), direkt: https://vercel.com/rogerwilloughbys-projects/daily/settings/environment-variables. Nach dem Ändern einer Variable: Redeploy des obersten (aktuellen) Eintrags.
+- Roger arbeitet unter Windows meist in **PowerShell** (nicht cmd): Befehle immer mit vorherigem `cd` in den Projektordner – oder besser eine `.cmd`-Datei zum Doppelklicken.
 - Tests in der Desktop-VM: dort fehlt `node_modules`, `npm test` scheitert an `node-ical`; `node --test test/dienste.test.js` läuft. Vollständig läuft `npm test` im Cloud-Container.
 
 ## Stand der Dienste
-| Dienst | Stand |
-|---|---|
-| `ort` | ✅ fertig bis auf Rogers Test. Eigener Ortsbestand aus GeoNames (`services/daten/orte-de.json`, ≈ 14.700 Orte, Einwohnerzahlen, Großkunden gefiltert), feste Datei (keine Automatik). Suche wie eine Suchmaschine (Wörter einzeln, Kürzel Sa./Thür./Westf./Opf., Umlaute, Tippfehler, Doppelte zusammengefasst), Vorschläge beim Tippen (`land=DE`), Ausland über Open-Meteo nur, wenn kein deutscher Ort genau passt oder nur ein kleiner. Umkehrsuche (Gerätestandort) im eigenen Bestand. Ort hat seit 27.09. einen eigenen Knopf in der unteren Leiste mit eigenem Dialog (Standort ermitteln, Suche, Klick übernimmt sofort). |
-| `termine` | ✅ neu 28.09. (0.15.0): eigene Termine (iCal, nur privat) in der Kachel „Kalender“; Links per POST. Wartet auf Rogers Test. |
-| `feiertage`, `himmel` | ✅ neu 27.09. (0.12.0): Kachel „Kalender“ (Feiertage, Ferien, Brückentage, Zeitumstellung, KW, Aktionstage; Mond, Finsternisse, Sternschnuppen, Jahreszeiten). Ersetzt „Feiertage & Ferien“ und „Himmel“. Wartet auf Rogers Test. Als Nächstes: Namenstage (Wikidata), dann private Termine in der Kachel. |
-| `namenstage` | ✅ neu 27.09. (0.14.0): feste Liste nach dem kirchlichen Kalender, im Kalender. Wartet auf Rogers Test. |
-| `wetterhinweise` | ✅ neu 27.09. (0.10.0): amtliche DWD-Warnungen über Bright Sky in der Wetterkachel (Abzeichen, Hinweis, Reiter „Hinweise“ mit Alltagstipp) – ersetzt die Kachel „Warnungen“. Wartet auf Rogers Test. |
-| `regen` | ✅ neu 27.09.: DWD-Radar über Bright Sky, 2 h Verlauf, Nähe, Karte; in der Wetterkachel. Wartet auf Rogers Test. |
-| `wetter` | ✅ überarbeitet 27.09. (siehe unten): Open-Meteo, 16 Tage (ab Tag 8 Trend), Zusatzwerte, Cache-Takt :00/:30. Wartet auf Rogers Test. |
-| alle anderen | noch alte Schnittstelle (`api/*.js`), Reihenfolge in `dienste-katalog.md`. **Seit 0.11.0 ausgeblendet**, nur über Einstellungen → „Alle Kacheln zeigen (Vorschau)“. Nach dem Umzug in `tiles.js` `fertig: true` setzen. |
+Oberfläche: Standardbelegung = nur überarbeitete Kacheln (`fertig: true` in `src/js/core/tiles.js`) – **Wetter**, **Kalender**, Meine Seiten, Mein Daily, Deine Nutzung; übrige Felder „Freier Platz“. Seit 0.16.0 wählt man die Kacheln in Einstellungen → „Kacheln“ (Aktiv/Verfügbar, Doppelklick, Ziehen); alte Kacheln stehen dort als „Vorschau“. Einstellungen einer Kachel: Zahnrad-Reiter in der Kachel (Wetter, Kalender, Tanken, Abfahrten, Sport). Details `entscheidungen.md` → 3a.
+
+| Dienst | Kachel | Stand |
+|---|---|---|
+| `ort` | Leiste (Ort-Auswahl) | ✅ getestet. Eigener Ortsbestand aus GeoNames (feste Datei, ≈ 14.700 Orte), Suche wie eine Suchmaschine, Vorschläge beim Tippen, Ausland über Open-Meteo, Gerätestandort; mehrere Orte (bis 10) in der Auswahlbox. |
+| `wetter` | Wetter | ✅ getestet. Open-Meteo, 16 Tage (ab Tag 8 Trend), Zusatzwerte, Takt :00/:30, Diagramme, Reiter. |
+| `regen` | Wetter | ✅ getestet. DWD-Radar über Bright Sky, Reiter „Radar“, „Regen in X Min.“. |
+| `wetterhinweise` | Wetter | ✅ getestet (0.11.1). Amtliche DWD-Warnungen, Abzeichen und Hinweis nur bei Warnung, Reiter „Hinweise“ immer. |
+| `feiertage` | Kalender | ✅ getestet (0.12.0). Feiertage, Schulferien (OpenHolidays), Brückentage, Zeitumstellung, KW, Aktionstage; Bundesland aus dem Ort. |
+| `himmel` | Kalender | ✅ getestet (0.12.0). Mond, Supermond, Sternschnuppen, Finsternisse am Ort, Jahreszeiten (Astronomy Engine). |
+| `namenstage` | Kalender | ✅ getestet (0.14.0). Feste Liste nach dem kirchlichen Kalender – Korrekturen direkt in `services/daten/namenstage.json`. |
+| `termine` | Kalender (nur privat) | ✅ getestet (0.15.0). Eigene Termine aus iCal, 14 Tage, Links per POST, nie zwischengespeichert. |
+| übrige | – | noch alte Schnittstelle (`api/*.js`), ausgeblendet: Tanken, Abfahrten, Sport (Fußball), Geld (Kurse, privat), Wissen (Wort, „An diesem Tag“), Tagesinhalte (Rätsel, Essen, Land, Film, Gesundheit, Tech, Sparen, Beziehung), Schlagzeilen (privat). Nach dem Umzug in `tiles.js` `fertig: true` setzen. |
 
 App-Seite „Woher kommen die Daten?“ (Fußzeile → Datenquellen) zeigt die Dienstblätter aus dem Katalog `/api/v1/dienste`.
 
@@ -47,15 +50,14 @@ App-Seite „Woher kommen die Daten?“ (Fußzeile → Datenquellen) zeigt die D
 5. **Regen und Radar werden ein eigener Dienst `regen`** (DWD-Radar alle 5 min + RADVOR 2 h, frei auch kommerziell; weltweit RainViewer nur nicht kommerziell). Die Wetterkachel kann beide Dienste zusammen zeigen.
 6. Später zu besprechen: „Immer meinen aktuellen Standort verwenden“; Trend über Tag 16 hinaus nicht nötig.
 
-## Zuletzt offen (27.09.2026)
-1. Roger testet den überarbeiteten Wetterdienst in der App.
-2. Bekannte Kleinigkeiten Ort: 130 Kreisnamen ohne Typ („Zwickau“ statt „Landkreis Zwickau“); Stadtteilnamen der Quelle teils doppelt („Stuttgart Stuttgart-Mitte“); ~~Warnung Node.js 20 in der Action~~ (0.13.0: v5/Node 22; `orte-daten.yml` installiert jetzt auch die Abhängigkeiten, weil die Tests `astronomy-engine` brauchen).
+## Offen / bekannte Kleinigkeiten (28.09.2026)
+- Ort: 130 Kreisnamen ohne Typ („Zwickau“ statt „Landkreis Zwickau“); Stadtteilnamen der Quelle teils doppelt („Stuttgart Stuttgart-Mitte“).
+- Wetter: Luftqualität/Pollen aus DWD/UBA prüfen; Radarkarte ohne Landkarte darunter (ggf. Umrisse/Orte).
+- Namenstage: kleinere Tage aus dem Gedächtnis zusammengestellt – Roger meldet falsche Namen, Korrektur direkt in der Liste.
+- Vercel hat einmal einen Push verpasst (28.09.) – beobachten; wiederholt es sich, Git-Verbindung in Vercel prüfen.
+- Später zu besprechen: „Immer meinen aktuellen Standort verwenden“, Ort je Kachel, Kachelauswahl in den Einstellungen.
 
 ## Nächste Schritte (in dieser Reihenfolge)
-1. Roger testet den Dienst `regen` (Radar-Reiter, Hinweis „Regen in X Min.“). Offen: Luftqualität/Pollen prüfen (DWD-Pollenflug-Gefahrenindex, Umweltbundesamt); Radarkarte ohne Landkarte darunter – ggf. später Umrisse/Orte.
-2. Roger testet mehrere Orte (Auswahlbox) und die neue aufgeklappte Kachel. Später: Kachelauswahl in den Einstellungen, ggf. Ort je Kachel.
-3. Roger testet die privaten Termine in der Kachel „Kalender“ (privater Betrieb, iCal-Link in den Einstellungen). Danach: nächste Kachel umziehen (Reihenfolge `dienste-katalog.md`) – vorher Plan vorlegen.
-3a. Roger testet die Wetterhinweise (im Testserver mit Beispielwarnungen; echt nur bei aktueller DWD-Warnung am Ort). Freie Plätze füllen sich mit jeder überarbeiteten Kachel.
-4. ~~Vercel oder AWS~~ entschieden 27.09.: Vercel; Performance-Maßnahmen 1–3 umgesetzt (0.9.0). **Vor dem öffentlichen Start:** eigene Daten Wetter/Radar (zentral), Lasttest, Vercel Pro.
-5. Übrige Dienste auf daily/1 umziehen (Reihenfolge `dienste-katalog.md`), je mit Dienstblatt.
-6. Neue Dienst-Ideen von Roger aufnehmen.
+1. **Nächste Kachel auf daily/1 umziehen** – Roger wählt aus: Tanken, Abfahrten, Sport, Geld (privat), Wissen, Tagesinhalte, Schlagzeilen (privat). Vorschlag laut `dienste-katalog.md`: `tanken`, `abfahrten`, `fussball`, `an-diesem-tag`, `tagesinhalt`, `kurse`. **Vorher Plan vorlegen.** Je Dienst: Dienstblatt, Version, Tests, Frag DAILY, Kachel mit `fertig: true`, Einstellungen im Zahnrad-Reiter der Kachel.
+2. Neue Dienst-Ideen von Roger aufnehmen (`dienste-katalog.md`).
+3. **Vor dem öffentlichen Start:** eigene Daten Wetter/Radar (zentral, Stufe 4), Lasttest, Vercel Pro, Recht (`../recht/checkliste.md`).

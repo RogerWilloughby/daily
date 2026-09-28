@@ -2,6 +2,7 @@
 import { TILES, byId, COLS, ROWS } from './tiles.js';
 import { esc, icon, rows } from './util.js';
 import { countClick } from './store.js';
+import { hatEinstellungen, formular, binden, ZAHNRAD } from './einstellungen.js';
 
 const WEIGHT = 4;
 const mobileMQ = window.matchMedia('(max-width:760px), (max-height:520px)');
@@ -29,14 +30,28 @@ function tileHTML(t) {
 // Inhalt einer Kachel (aufgeklappt) in ein Element schreiben: eigene Darstellung oder Zeilen
 // t.big: optionale Grafik (HTML/SVG) über den Zeilen; Elemente mit data-tip zeigen beim Überfahren einen Hinweis
 // t.tabs: [{ id, name, html }] – Reiter statt langer Liste; der gewählte Reiter bleibt je Kachel erhalten
+// t.startReiter: Reiter, der beim ersten Aufklappen offen ist (sonst der erste)
+// Hat die Kachel Einstellungen (core/einstellungen.js), kommt ein letzter Reiter mit Zahnrad dazu; Kacheln ohne Reiter
+// bekommen dafür einen Reiter „Übersicht“ mit ihrem bisherigen Inhalt.
 const reiterWahl = {};
+const EINST = 'einstellungen';
+export function reiterVon(t) {
+  const einst = hatEinstellungen(t.id);
+  let tabs = t.tabs && t.tabs.length ? t.tabs : null;
+  if (!tabs && einst) tabs = [{ id: 'inhalt', name: 'Übersicht', html: (t.big || '') + rows(t.rows) }];
+  if (tabs && einst) tabs = [...tabs, { id: EINST, name: 'Einstellungen', icon: ZAHNRAD, html: formular(t.id) }];
+  return tabs;
+}
 function fillContent(t, el) {
+  const tabs = typeof t.render === 'function' ? null : reiterVon(t);
   if (typeof t.render === 'function') { el.innerHTML = ''; t.render(el); }
-  else if (t.tabs && t.tabs.length) {
-    const wahl = t.tabs.some(x => x.id === reiterWahl[t.id]) ? reiterWahl[t.id] : t.tabs[0].id;
-    el.innerHTML = `<div class="reiter" role="tablist">${t.tabs.map(x =>
-      `<button type="button" role="tab" data-tab="${esc(x.id)}" aria-selected="${x.id === wahl}">${esc(x.name)}</button>`).join('')}</div>` +
-      t.tabs.map(x => `<div class="reiterfeld" role="tabpanel" data-feld="${esc(x.id)}"${x.id === wahl ? '' : ' hidden'}>${x.html}</div>`).join('');
+  else if (tabs) {
+    const gibt = id => tabs.some(x => x.id === id);
+    const wahl = gibt(reiterWahl[t.id]) ? reiterWahl[t.id] : gibt(t.startReiter) ? t.startReiter : tabs[0].id;
+    el.innerHTML = `<div class="reiter" role="tablist">${tabs.map(x =>
+      `<button type="button" role="tab" data-tab="${esc(x.id)}" aria-selected="${x.id === wahl}"${x.icon ? ` class="reiter-icon" title="${esc(x.name)}" aria-label="${esc(x.name)}"` : ''}>${x.icon || esc(x.name)}</button>`).join('')}</div>` +
+      tabs.map(x => `<div class="reiterfeld" role="tabpanel" data-feld="${esc(x.id)}"${x.id === wahl ? '' : ' hidden'}>${x.html}</div>`).join('');
+    binden(t.id, el);
     el.querySelectorAll('[data-tab]').forEach(b => b.addEventListener('click', e => {
       e.stopPropagation();
       reiterWahl[t.id] = b.dataset.tab;
@@ -82,9 +97,10 @@ export function paint(id) {
   el.querySelector('.teaser').textContent = t.x;
   el.querySelector('.mini').innerHTML = t.chart || '';
   el.querySelector('.head').setAttribute('aria-label', [t.title, t.lglyphTip, t.m].filter(Boolean).join(': '));
-  // Aufgeklappten Inhalt nur neu zeichnen, wenn er sichtbar ist (schont Eingaben in Formularen)
-  if (active === id) fillContent(t, el.querySelector('.content'));
-  if (open === id) showSheet(id);
+  // Aufgeklappten Inhalt nur neu zeichnen, wenn er sichtbar ist – und nicht, während die Einstellungen offen sind (Eingaben bleiben)
+  const imFormular = reiterWahl[id] === EINST;
+  if (active === id && !imFormular) fillContent(t, el.querySelector('.content'));
+  if (open === id && !imFormular) showSheet(id);
 }
 
 // Anbieter melden neue Werte hierüber
@@ -137,6 +153,17 @@ function showSheet(id) {
 }
 function hideSheet() { open = null; sheet.classList.remove('open'); }
 function step(d) { const n = ORDER.length; showSheet(ORDER[(ORDER.indexOf(open) + d + n) % n]); }
+
+// Nach dem Speichern von Kachel-Einstellungen: Inhalt neu zeichnen (Reiter können sich ändern), Zahnrad-Reiter bleibt offen
+document.addEventListener('daily:einstellungen', e => {
+  const id = e.detail, t = byId[id]; if (!t) return;
+  const ziele = [active === id && document.querySelector(`#tile-${id} .content`), open === id && document.getElementById('s-content')].filter(Boolean);
+  ziele.forEach(el => {
+    fillContent(t, el);
+    const ok = el.querySelector('.ke-ok');
+    if (ok) { ok.textContent = 'Gespeichert ✓'; setTimeout(() => { ok.textContent = ''; }, 2500); }
+  });
+});
 
 export function initBoard() {
   ORDER = TILES.filter(Boolean).map(t => t.id);

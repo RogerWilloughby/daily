@@ -1,6 +1,7 @@
 // Tankpreise in der Nähe des gewählten Orts über /api/fuel (Tankerkönig, Daten der MTS-K).
 import { set } from '../core/board.js';
-import { settings } from '../core/store.js';
+import { settings, saveSettings } from '../core/store.js';
+import { kachelEinstellungen } from '../core/einstellungen.js';
 import { addAnswer } from '../core/ask.js';
 import { getJson, num } from '../core/util.js';
 
@@ -39,6 +40,12 @@ addAnswer(/tank|benzin|diesel|sprit|e10|e5/i, () => {
   if (!data || !data.configured) return 'Tankpreise sind noch nicht eingerichtet.';
   const s = data.stations[0];
   return s ? `Am günstigsten: ${s.name}, ${s.street} (${num(s.dist, 1)} km) mit ${price(s.price)} für ${NAME[data.type]}.` : 'Gerade keine geöffnete Tankstelle in der Nähe gefunden.';
+});
+
+// Einstellungen der Kachel (Zahnrad-Reiter)
+kachelEinstellungen('fuel', {
+  felder: () => [{ typ: 'select', key: 'fuel', label: 'Kraftstoff', wert: settings.fuel || 'e10', optionen: [['e10', 'Super E10'], ['e5', 'Super E5'], ['diesel', 'Diesel']] }],
+  speichern: w => saveSettings({ fuel: w.fuel })
 });
 
 export default { id: 'fuel', name: 'Tanken', every: 10 * 60e3, load };

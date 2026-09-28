@@ -1,6 +1,7 @@
 // Fußball über /api/sport (OpenLigaDB): Tabellenplatz, letztes und nächstes Spiel des eigenen Vereins.
 import { set } from '../core/board.js';
-import { settings } from '../core/store.js';
+import { settings, saveSettings } from '../core/store.js';
+import { kachelEinstellungen } from '../core/einstellungen.js';
 import { addAnswer } from '../core/ask.js';
 import { getJson } from '../core/util.js';
 
@@ -12,7 +13,7 @@ export async function load() {
   const j = await getJson('/api/sport?team=' + encodeURIComponent(settings.team || 'Dynamo Dresden'));
   if (!j.found) {
     data = null;
-    set('sport', { state: 'off', title: 'Sport', m: 'Verein wählen', ms: '–', x: `„${settings.team}“ wurde in der 1. bis 3. Liga nicht gefunden. Verein unten in den Einstellungen anpassen.`,
+    set('sport', { state: 'off', title: 'Sport', m: 'Verein wählen', ms: '–', x: `„${settings.team}“ wurde in der 1. bis 3. Liga nicht gefunden. Verein in den Einstellungen der Kachel (Zahnrad) anpassen.`,
       rows: [['Gesucht', settings.team], ['Ligen', '1., 2. und 3. Bundesliga (OpenLigaDB)']] });
     return;
   }
@@ -45,6 +46,12 @@ addAnswer(/sport|fußball|fussball|bundesliga|dynamo|spiel|tabelle|verein/i, () 
   return `${data.team.name}: Platz ${me.pos} in der ${data.league.name} mit ${me.points} Punkten.` +
     (data.last ? ` Zuletzt ${data.last.home} – ${data.last.away} ${data.last.score}.` : '') +
     (data.next ? ` Nächstes Spiel: ${when(data.next.date)}, ${data.next.home} – ${data.next.away}.` : '');
+});
+
+// Einstellungen der Kachel (Zahnrad-Reiter)
+kachelEinstellungen('sport', {
+  felder: () => [{ typ: 'text', key: 'team', label: 'Verein', wert: settings.team || '', platzhalter: 'z. B. Dynamo Dresden', hilfe: '1., 2. oder 3. Fußball-Bundesliga der Männer.' }],
+  speichern: w => saveSettings({ team: w.team.trim() || 'Dynamo Dresden' })
 });
 
 export default { id: 'sport', name: 'Fußball', every: 15 * 60e3, load };

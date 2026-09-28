@@ -1,8 +1,9 @@
-// Orte: Auswahlbox in der Leiste (alle gespeicherten Orte, Wechsel lädt alle Kacheln neu) und Dialog „Orte“
-// zum Hinzufügen (Gerätestandort oder Suche mit Vorschlägen) und Entfernen.
+// Orte: Auswahlbox in der Leiste (alle gespeicherten Orte, Wechsel lädt alle Kacheln neu) und Abschnitt „Orte“ in den
+// Einstellungen zum Wählen, Hinzufügen (Gerätestandort oder Suche mit Vorschlägen) und Entfernen.
 import { settings, ortWaehlen, ortHinzufuegen, ortEntfernen, aktiverOrt, MAX_ORTE } from '../core/store.js';
 import { esc } from '../core/util.js';
 import { dienst } from '../dienste/client.js';
+import { oeffneEinstellungen } from './dialogs.js';
 
 // Treffer des Dienstes „ort“ als Zeile: „Name, Landkreis (PLZ) · Bundesland“
 export function beschrift(p) {
@@ -31,7 +32,7 @@ export function auswahl(orte, aktiv) {
 
 export function initOrt(onChange) {
   const $ = id => document.getElementById(id);
-  const dlg = $('ort-dlg'), wahl = $('ort-select'), box = $('ort-results'), eingabe = $('ort-q'), meine = $('ort-meine');
+  const wahl = $('ort-select'), box = $('ort-results'), eingabe = $('ort-q'), meine = $('ort-meine');
   let tippTimer = null, tippNr = 0, treffer = [];
 
   // Auswahlbox in der Leiste
@@ -42,7 +43,7 @@ export function initOrt(onChange) {
   }
   wahl.addEventListener('change', () => {
     const v = wahl.value;
-    if (v === 'neu' || v === 'verwalten') { zeigeAuswahl(); oeffne(); return; }
+    if (v === 'neu' || v === 'verwalten') { zeigeAuswahl(); oeffne(v === 'neu'); return; }
     ortWaehlen(+v); zeigeAuswahl(); onChange();
   });
   zeigeAuswahl();
@@ -59,19 +60,16 @@ export function initOrt(onChange) {
   meine.addEventListener('click', e => {
     const w = e.target.closest('[data-weg]'), n = e.target.closest('[data-i]');
     if (w) { const vorher = settings.place; ortEntfernen(+w.dataset.weg); zeigeMeine(); zeigeAuswahl(); if (settings.place !== vorher) onChange(); }
-    else if (n) { ortWaehlen(+n.dataset.i); zeigeAuswahl(); dlg.close(); onChange(); }
+    else if (n) { ortWaehlen(+n.dataset.i); zeigeAuswahl(); zeigeMeine(); onChange(); }
   });
-  function oeffne() {
-    eingabe.value = ''; box.innerHTML = '';
-    zeigeMeine();
-    if (typeof dlg.showModal === 'function') dlg.showModal();
-    setTimeout(() => eingabe.focus(), 50);
-  }
+  // Beim Öffnen der Einstellungen: Liste frisch, Suche leer
+  document.addEventListener('daily:einstellungen-offen', () => { eingabe.value = ''; box.innerHTML = ''; treffer = []; zeigeMeine(); });
+  const oeffne = neu => oeffneEinstellungen(neu ? 'ort-q' : 'set-orte');
 
   function waehle(p) {
     ortHinzufuegen(alsEinstellung(p));
-    zeigeAuswahl();
-    dlg.close();
+    zeigeAuswahl(); zeigeMeine();
+    eingabe.value = ''; box.innerHTML = ''; treffer = [];     // Einstellungen bleiben offen, der neue Ort ist gewählt (✓)
     onChange();
   }
   function zeige(liste, leerText) {

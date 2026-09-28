@@ -4,10 +4,11 @@ import { initAsk, answerOpen, closeAnswer } from './core/ask.js';
 import { report, demo, zeit } from './core/status.js';
 import { aufMessung } from './dienste/client.js';
 import { ONLINE, getJson } from './core/util.js';
-import { chooseLayout } from './core/tiles.js';
-import { settings } from './core/store.js';
+import { chooseLayout, LAYOUTS } from './core/tiles.js';
+import { settings, saveSettings } from './core/store.js';
 import { initDialogs } from './ui/dialogs.js';
 import { initOrt } from './ui/ort.js';
+import { initKacheln } from './ui/kacheln.js';
 import { betrieb } from './core/betrieb.js';
 import weather from './providers/weather.js';
 import news from './providers/news.js';
@@ -25,7 +26,9 @@ import kalender from './providers/kalender.js';
 let isPrivate = false;
 if (ONLINE) { try { isPrivate = !!(await getJson('/api/config', { timeout: 2500 })).private; } catch (e) { /* öffentlich */ } }
 betrieb.privat = isPrivate;
-const sichtbar = new Set(chooseLayout(isPrivate, settings.layout, settings.alleKacheln).filter(Boolean).map(t => t.id));
+// Früher „Alle Kacheln zeigen (Vorschau)“ → einmalig in eine eigene Belegung mit allen Kacheln übernehmen
+if (settings.alleKacheln && !Array.isArray(settings.layout)) saveSettings({ layout: LAYOUTS[isPrivate ? 'private' : 'public'], alleKacheln: undefined });
+const sichtbar = new Set(chooseLayout(isPrivate, settings.layout).filter(Boolean).map(t => t.id));
 
 // Welche Kacheln ein Anbieter füllt – Anbieter ausgeblendeter Kacheln starten gar nicht erst (keine Abrufe)
 const KACHELN = { local: ['tasks', 'usage'], content: ['play', 'food', 'travel', 'film', 'health', 'tech', 'saving', 'relation'] };
@@ -61,8 +64,11 @@ function tick() {
 aufMessung(zeit);   // Ladezeiten der Dienste in die Statusanzeige (Mouseover)
 initBoard();
 initAsk();
-initDialogs(() => PROVIDERS.forEach(run), isPrivate);
-initOrt(() => PROVIDERS.forEach(run));        // Ort geändert → alle Kacheln neu laden
+initDialogs();
+initKacheln(isPrivate);
+initOrt(() => PROVIDERS.forEach(run));
+// Kachel-Einstellungen gespeichert → nur den Anbieter dieser Kachel neu laden
+document.addEventListener('daily:einstellungen', e => PROVIDERS.filter(p => (KACHELN[p.id] || [p.id]).includes(e.detail)).forEach(run));        // Ort geändert → alle Kacheln neu laden
 tick(); setInterval(tick, 15e3);
 
 document.addEventListener('keydown', e => {

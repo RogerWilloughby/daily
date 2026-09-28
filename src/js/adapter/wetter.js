@@ -193,3 +193,16 @@ export function antwort(env, regenEnv = null) {
     : `Nein, eher nicht. Das Regenrisiko bleibt heute bei höchstens ${p} %.`;
   return `${env.ort.name || 'Hier'}: jetzt ${r0(a.tempC)}°, ${zustandText(a.zustand, a.code)}. Heute ${r0(heute.minC)}° bis ${r0(heute.maxC)}°. ${schirm}${radar ? ' Radar: ' + radar : ''}`;
 }
+
+// Einstellungen der Kachel anwenden (rein, testbar): Reiter aus-/einblenden, Start-Reiter, Mini-Diagramm 7 oder 16 Tage.
+// „Heute“ bleibt immer; bei Unwetter (Reiter „Hinweise“ steht vorn) bleibt der Hinweis-Reiter sichtbar und zuerst offen.
+export const WETTER_STANDARD = { radar: true, tage: true, stunden: true, hinweise: true, mehr: true, start: 'heute', mini: 16 };
+export function mitOptionen(k, env, opt = {}) {
+  const o = { ...WETTER_STANDARD, ...opt };
+  const unwetter = k.tabs && k.tabs[0] && k.tabs[0].id === 'hinweise';
+  const tabs = (k.tabs || []).filter(t => t.id === 'heute' || (t.id === 'hinweise' && unwetter) || o[t.id] !== false);
+  const startReiter = unwetter ? 'hinweise' : tabs.some(t => t.id === o.start) ? o.start : 'heute';
+  const chart = +o.mini === 7 && env && env.daten ? miniDiagramm(env.daten.tage.slice(0, 7)) : k.chart;
+  return { ...k, tabs, startReiter, chart };
+}
+

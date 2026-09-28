@@ -118,14 +118,16 @@
   </div>
 </dialog>
 
-<dialog class="doc" id="ort-dlg" aria-labelledby="h-ort">
+<dialog class="doc" id="settings" aria-labelledby="h-set">
   <div class="doc-in">
-    <div class="doc-head"><h2 id="h-ort">Orte</h2><button class="x" type="button" data-doc-close>Schließen</button></div>
+    <div class="doc-head"><h2 id="h-set">Einstellungen</h2><button class="x" type="button" data-doc-close>Fertig</button></div>
     <div class="doc-body">
-      <p>Für Wetter, Regen, Wetterhinweise, Kalender (Feiertage, Ferien, Mond) und Tankpreise. Wechseln kannst du unten in der Leiste.</p>
-      <h3>Deine Orte <small id="ort-anzahl"></small></h3>
+      <p class="set-hinweis">Hier stehen nur allgemeine Einstellungen. Was eine Kachel zeigt, stellst du in der aufgeklappten Kachel über das Zahnrad ein.</p>
+
+      <h3 id="set-orte">Orte <small id="ort-anzahl"></small></h3>
+      <p class="set-hinweis">Für Wetter, Regen, Wetterhinweise, Kalender und Tankpreise. Schnell wechseln kannst du unten in der Leiste.</p>
       <ul class="ort-meine" id="ort-meine"></ul>
-      <h3>Ort hinzufügen</h3>
+      <h4>Ort hinzufügen</h4>
       <button type="button" class="btn primary wide" id="ort-hier"><span aria-hidden="true">&#x2316;</span> Meinen Standort ermitteln</button>
       <p class="set-oder">oder Ort eintippen:</p>
       <div class="set-row">
@@ -134,47 +136,19 @@
         <button type="button" class="btn" id="ort-suchen">Suchen</button>
       </div>
       <div id="ort-results" class="ort-liste" aria-live="polite"></div>
-    </div>
-  </div>
-</dialog>
-
-<dialog class="doc" id="settings" aria-labelledby="h-set">
-  <form class="doc-in" id="settings-form">
-    <div class="doc-head"><h2 id="h-set">Einstellungen</h2><button class="x" type="button" data-doc-close>Abbrechen</button></div>
-    <div class="doc-body">
-      <p class="set-hinweis">Den <b>Ort</b> änderst du unten in der Leiste über den Ort-Knopf.</p>
-
-      <div id="set-private" hidden>
-      <h3>Kalender (nur privat)</h3>
-      <p>iCal-Links deiner Kalender, einer pro Zeile. Bei Google: Kalender-Einstellungen → dein Kalender → „Privatadresse im iCal-Format“.</p>
-      <label for="set-ics" class="sr">Kalender-Links</label>
-      <textarea class="field" id="set-ics" rows="3" spellcheck="false" placeholder="https://calendar.google.com/calendar/ical/…/basic.ics"></textarea>
-      </div>
 
       <h3>Kacheln</h3>
-      <label class="set-check"><input type="checkbox" id="set-alle"> Alle Kacheln zeigen (Vorschau)</label>
-      <p class="set-hinweis">Gerade werden die Kacheln einzeln überarbeitet. Bis dahin zeigt DAILY nur die fertigen; die Vorschau blendet die übrigen ein.</p>
-
-      <div id="set-vorschau">
-      <h3>Mobilität: Haltestelle</h3>
-      <p>Abfahrten im Verkehrsverbund Oberelbe (Dresden und Umgebung).</p>
-      <label for="set-stop" class="sr">Haltestelle</label>
-      <input class="field" id="set-stop" type="text" placeholder="z. B. Postplatz" autocomplete="off">
-
-      <h3>Sport: Verein</h3>
-      <p>1., 2. oder 3. Fußball-Bundesliga der Männer.</p>
-      <label for="set-team" class="sr">Verein</label>
-      <input class="field" id="set-team" type="text" placeholder="z. B. Dynamo Dresden" autocomplete="off">
-
-      <h3>Tanken: Kraftstoff</h3>
-      <label for="set-fuel" class="sr">Kraftstoff</label>
-      <select class="field" id="set-fuel"><option value="e10">Super E10</option><option value="e5">Super E5</option><option value="diesel">Diesel</option></select>
+      <p class="set-hinweis">Doppelklick (oder Enter) verschiebt eine Kachel in die andere Liste. Die Reihenfolge unter „Aktiv“ ist die Reihenfolge im Raster – zum Ändern ziehen oder die Pfeile nutzen. „Vorschau“ = noch nicht überarbeitet.</p>
+      <div class="k-listen">
+        <div><h4>Aktiv <small id="k-anzahl"></small></h4><ul class="k-liste" id="k-aktiv" aria-label="Aktive Kacheln"></ul></div>
+        <div><h4>Verfügbar</h4><ul class="k-liste" id="k-frei" aria-label="Verfügbare Kacheln"></ul></div>
       </div>
+      <p class="k-meldung" id="k-meldung" aria-live="polite"></p>
 
       <p class="draft">Die Einstellungen bleiben nur auf diesem Gerät in diesem Browser. DAILY braucht kein Konto.</p>
-      <div class="set-actions"><span class="version" data-version="lang"></span><button type="submit" class="btn primary">Speichern</button></div>
+      <div class="set-actions"><span class="version" data-version="lang"></span><button type="button" class="btn primary" data-doc-close>Fertig</button></div>
     </div>
-  </form>
+  </div>
 </dialog>
 
 </body>

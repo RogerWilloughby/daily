@@ -15,7 +15,7 @@ export const DEFAULTS = {
   stop: 'Postplatz',
   team: 'Dynamo Dresden',
   fuel: 'e10',
-  alleKacheln: false, // Vorschau: auch noch nicht überarbeitete Kacheln zeigen
+  kacheln: {},        // Einstellungen je Kachel, z. B. { wetter: { mini: 7 }, kalender: { namen: false } }
   layout: null // eigene Kachelbelegung (Liste von IDs), kommt später über die Einstellungen
 };
 const SKEY = 'daily-settings';
@@ -25,6 +25,9 @@ if (!settings.place || typeof settings.place.lat !== 'number') settings.place = 
 else if (settings.place.gewaehlt == null && read(SKEY, {}).place && !(settings.place.name === 'Dresden' && settings.place.lat === 51.05))
   settings.place = { ...settings.place, gewaehlt: true };
 export function saveSettings(patch) { Object.assign(settings, patch); return write(SKEY, settings); }
+// Einstellungen einer Kachel lesen (mit Standardwerten) und speichern
+export const kachelOpt = (id, standard = {}) => ({ ...standard, ...((settings.kacheln || {})[id] || {}) });
+export const kachelOptSpeichern = (id, werte) => saveSettings({ kacheln: { ...(settings.kacheln || {}), [id]: { ...((settings.kacheln || {})[id] || {}), ...werte } } });
 
 // ---- Mehrere Orte: settings.orte (Liste), settings.place = aktiver Ort (alle Kacheln lesen nur place) ----
 export const MAX_ORTE = 10;

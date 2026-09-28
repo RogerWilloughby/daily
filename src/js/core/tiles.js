@@ -5,7 +5,7 @@
 // fertig: true = überarbeitet (Dienst daily/1 oder rein lokal). Nicht fertige Kacheln sind ausgeblendet,
 // bis sie umgezogen sind – sichtbar nur mit „Alle Kacheln zeigen (Vorschau)“ in den Einstellungen.
 
-const T = (id, title, short, icon, extra = {}) => ({ id, title, short, icon, scope: 'public', state: 'loading', m: '…', ms: '…', x: 'Wird geladen …', rows: [], ...extra });
+const T = (id, title, short, icon, extra = {}) => ({ id, title, name: title, short, icon, scope: 'public', state: 'loading', m: '…', ms: '…', x: 'Wird geladen …', rows: [], ...extra });
 
 export const CATALOG = [
   T('weather', 'Wetter', 'Wetter', null, { fertig: true }),   // kein festes Symbol: das Wettersymbol neben dem Wert zeigt das aktuelle Wetter
@@ -50,19 +50,21 @@ export const LAYOUTS = {
 
 export const byId = Object.fromEntries(CATALOG.map(t => [t.id, t]));
 
-// Aktive Belegung (wird beim Start einmal gesetzt). Ein eigenes Layout (später aus den Einstellungen)
-// wird geprüft: nur bekannte, erlaubte Kacheln, keine doppelten, auf 20 Plätze aufgefüllt (sonst freier Platz).
+// Aktive Belegung (wird beim Start einmal gesetzt).
+// custom (Liste von Kachel-IDs aus Einstellungen → Kacheln): genau diese Kacheln in dieser Reihenfolge – auch „Vorschau“-Kacheln
+// (noch nicht überarbeitet); unbekannte, doppelte oder im öffentlichen Betrieb private werden übergangen.
+// Ohne eigene Belegung: die Standardbelegung, davon nur überarbeitete Kacheln (fertig: true).
+// Übrige Plätze bleiben frei (null → „Freier Platz“).
 export const TILES = [];
-// alle = true: auch noch nicht überarbeitete Kacheln (Vorschau)
-export function chooseLayout(isPrivate, custom, alle = false) {
-  const allowed = id => byId[id] && (isPrivate || byId[id].scope === 'public') && (alle || byId[id].fertig);
-  const base = LAYOUTS[isPrivate ? 'private' : 'public'];
+export const erlaubt = (id, isPrivate) => !!byId[id] && (isPrivate || byId[id].scope === 'public');
+export function chooseLayout(isPrivate, custom) {
+  const eigene = Array.isArray(custom);
+  const quelle = eigene ? custom : LAYOUTS[isPrivate ? 'private' : 'public'].filter(id => byId[id] && byId[id].fertig);
   const ids = [];
-  for (const id of [...(Array.isArray(custom) ? custom : []), ...base]) {
+  for (const id of quelle) {
     if (ids.length >= SLOTS) break;
-    if (allowed(id) && !ids.includes(id)) ids.push(id);
+    if (erlaubt(id, isPrivate) && !ids.includes(id)) ids.push(id);
   }
-  // Fehlende Plätze bleiben frei (null → „Freier Platz“): ausgeblendete Kacheln, Warnungen stecken in der Wetterkachel
   TILES.splice(0, TILES.length, ...ids.map(id => byId[id]), ...Array(SLOTS - ids.length).fill(null));
   return TILES;
 }

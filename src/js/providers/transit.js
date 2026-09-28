@@ -1,6 +1,7 @@
 // Abfahrten über /api/transit (VVO, Dresden und Umgebung) an der Haltestelle aus den Einstellungen.
 import { set } from '../core/board.js';
-import { settings } from '../core/store.js';
+import { settings, saveSettings } from '../core/store.js';
+import { kachelEinstellungen } from '../core/einstellungen.js';
 import { addAnswer } from '../core/ask.js';
 import { hm, getJson } from '../core/util.js';
 
@@ -14,7 +15,7 @@ export async function load() {
   const j = await getJson('/api/transit?stop=' + encodeURIComponent(settings.stop || 'Postplatz'));
   if (!j.found) {
     data = null;
-    set('transit', { state: 'off', title: 'Abfahrten', m: 'Haltestelle wählen', ms: '–', x: `Haltestelle „${settings.stop}“ wurde nicht gefunden. In den Einstellungen anpassen.`,
+    set('transit', { state: 'off', title: 'Abfahrten', m: 'Haltestelle wählen', ms: '–', x: `Haltestelle „${settings.stop}“ wurde nicht gefunden. In den Einstellungen der Kachel (Zahnrad) anpassen.`,
       rows: [['Gesucht', settings.stop], ['Gebiet', 'Verkehrsverbund Oberelbe (Dresden und Umgebung)']] });
     return;
   }
@@ -37,6 +38,12 @@ addAnswer(/bus|bahn|tram|straßenbahn|strassenbahn|abfahrt|haltestelle|öpnv|oep
   if (!data) return 'Die Abfahrten sind gerade nicht verfügbar.';
   const deps = data.departures.filter(d => Date.parse(d.time) > Date.now() - 60000).slice(0, 4);
   return deps.length ? `${data.stop.name}: ` + deps.map(d => `${lineLabel(d)} nach ${d.direction} ${inTxt(d.time)}`).join(', ') + '.' : `${data.stop.name}: gerade keine Abfahrten.`;
+});
+
+// Einstellungen der Kachel (Zahnrad-Reiter)
+kachelEinstellungen('transit', {
+  felder: () => [{ typ: 'text', key: 'stop', label: 'Haltestelle', wert: settings.stop || '', platzhalter: 'z. B. Postplatz', hilfe: 'Verkehrsverbund Oberelbe (Dresden und Umgebung).' }],
+  speichern: w => saveSettings({ stop: w.stop.trim() || 'Postplatz' })
 });
 
 export default { id: 'transit', name: 'Abfahrten', every: 60e3, load };

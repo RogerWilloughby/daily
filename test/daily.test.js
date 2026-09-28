@@ -113,19 +113,19 @@ test('Layouts: öffentlich ohne private Kacheln, immer 20 Plätze (fehlende blei
   }
   assert.ok(LAYOUTS.public.every(id => byId[id].scope === 'public'));
   assert.ok(!CATALOG.some(t => t.id === 'mail' || t.id === 'parcels'));
-  const pub = chooseLayout(false, ['news', 'fuel', 'fuel', 'gibtsnicht'], true).map(t => t && t.id);
+  // eigene Belegung: genau diese Kacheln in dieser Reihenfolge (auch Vorschau), ohne Doppelte, Unbekannte und öffentlich private
+  const pub = chooseLayout(false, ['news', 'fuel', 'fuel', 'gibtsnicht', 'weather']).map(t => t && t.id);
   assert.equal(pub.length, SLOTS);
-  assert.equal(pub.filter(x => x === null).length, SLOTS - LAYOUTS.public.length);   // freie Plätze am Ende
-  assert.ok(!pub.includes('alerts'));                                                // Warnungen stecken jetzt in der Wetterkachel
-  assert.equal(pub[0], 'fuel');
-  assert.ok(!pub.includes('news'));
-  assert.equal(chooseLayout(true, null, true).filter(Boolean).map(t => t.id)[2], 'news');
-  // Standard: nur überarbeitete Kacheln, Rest freie Plätze; Vorschau zeigt alle
+  assert.deepEqual(pub.filter(Boolean), ['fuel', 'weather']);
+  assert.equal(pub.filter(x => x === null).length, SLOTS - 2);                       // freie Plätze am Ende
+  assert.deepEqual(chooseLayout(true, ['news', 'kalender']).filter(Boolean).map(t => t.id), ['news', 'kalender']);   // privat erlaubt
+  assert.equal(chooseLayout(false, []).filter(Boolean).length, 0);                    // leere eigene Belegung bleibt leer
+  // Standard (keine eigene Belegung): nur überarbeitete Kacheln
   const fertig = chooseLayout(false).map(t => t && t.id);
   assert.deepEqual(fertig.filter(Boolean), ['weather', 'kalender', 'links', 'tasks', 'usage']);
   assert.equal(fertig.length, SLOTS);
   assert.deepEqual(chooseLayout(true).filter(Boolean).map(t => t.id), ['weather', 'kalender', 'tasks', 'links', 'usage']);   // privat ebenso
-  assert.ok(chooseLayout(false, null, true).filter(Boolean).length > 4);
+  assert.ok(!fertig.includes('alerts'));
 });
 
 test('Meine Seiten: nur http(s)-Adressen', async () => {
