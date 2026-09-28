@@ -242,7 +242,7 @@ export function initBoard() {
     if (k) { k.classList.toggle('fest'); info(k, k.classList.contains('fest')); }
   });
   grid.addEventListener('click', e => {
-    if (e.target.closest('[data-info]')) return;
+    if (e.target.closest('[data-info], [data-mini-wahl]')) return;   // (i) und Diagramm-Umschalter öffnen die Kachel nicht
     if (e.target.closest('[data-close]')) { activate(null); return; }
     const head = e.target.closest('.head'); if (!head) return;
     const id = head.dataset.id;

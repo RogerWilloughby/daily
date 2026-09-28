@@ -39,6 +39,13 @@ addAnswer(/warnung|hinweis|unwetter|sturm|gewitter|glätte|glaette|glatteis|fros
 addAnswer(/schirm|regen|wetter|warm|kalt|grad|pollen|luft|jacke|radar/i, () =>
   env ? antwort(env, regen) : 'Die Wetterdaten sind gerade nicht erreichbar.');
 
+// Umschalter im Mini-Diagramm (24 Std. · 48 Std. · 7 Tage · 16 Tage): dieselbe Einstellung wie im Zahnrad-Reiter, sofort ohne Abruf
+document.addEventListener('click', e => {
+  const b = e.target.closest('#tile-weather [data-mini-wahl]'); if (!b) return;
+  kachelOptSpeichern('weather', { ...opt(), mini: +b.dataset.miniWahl });
+  if (env) set('weather', { ...zeige(env, regen, hinweise), tag: stand(env) });
+});
+
 // Einstellungen der Kachel (Zahnrad-Reiter)
 const REITER = [['radar', 'Radar'], ['tage', '16 Tage'], ['stunden', '48 Std.'], ['hinweise', 'Hinweise'], ['mehr', 'Mehr']];
 kachelEinstellungen('weather', {
@@ -49,7 +56,7 @@ kachelEinstellungen('weather', {
       { typ: 'hinweis', label: '„Heute“ ist immer da. Bei einer Unwetterwarnung erscheint „Hinweise“ trotzdem.' },
       ...REITER.map(([k, n]) => ({ typ: 'check', key: k, label: n, wert: o[k] !== false })),
       { typ: 'select', key: 'start', label: 'Beim Aufklappen zuerst', wert: o.start, optionen: [['heute', 'Heute'], ...REITER] },
-      { typ: 'select', key: 'mini', label: 'Diagramm in der kleinen Kachel', wert: o.mini, optionen: [['24', '24 Stunden'], ['7', '7 Tage'], ['16', '16 Tage']] }
+      { typ: 'select', key: 'mini', label: 'Diagramm in der kleinen Kachel', wert: o.mini, optionen: [['24', '24 Stunden'], ['48', '48 Stunden'], ['7', '7 Tage'], ['16', '16 Tage']] }
     ];
   },
   speichern: w => {

@@ -156,7 +156,14 @@ b.wd-t-max,b.wd-t-min,b.wd-t-regen,b.wd-t-sonne{font-weight:700}
 /* Mini-Diagramm: Striche alle 5°, jede zweite Stunde/jeder zweite Tag leicht getönt */
 .wd-mini .wd-gitter{stroke:currentColor;opacity:.2;stroke-width:1;vector-effect:non-scaling-stroke}
 .wd-mini .wd-streifen{fill:currentColor;opacity:.022}
-.wd-minilegende{font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wd-minilegende{font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap;display:flex;align-items:baseline;gap:8px;min-width:0}
+.wd-leg{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.wd-leg b[title]{cursor:help;text-decoration:underline dotted;text-underline-offset:2px}
+.wd-wahl{display:inline-flex;gap:2px;flex:none}
+.wd-wahl button{font:inherit;font-size:11px;line-height:1.2;color:var(--muted);background:none;border:1px solid transparent;border-radius:6px;padding:1px 5px;cursor:pointer}
+.wd-wahl button:hover{color:var(--ink);border-color:var(--line)}
+.wd-wahl button[aria-pressed="true"]{color:var(--ink);font-weight:700;background:var(--line)}
+.wd-tm[title]{cursor:help}
 .wd-minilegende b{font-weight:600}
 .wd .wd-temp{stroke:currentColor;opacity:.85}
 .wd-l-temp{background:currentColor}

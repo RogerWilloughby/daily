@@ -67,8 +67,14 @@ function mini(d) {
     `<div class="wd-miniskala wd-t-max"><div class="wd-sk">${links}</div></div>` +
     `<div class="wd-mini24">${svg}<div class="wd-marken">${marken}</div></div>` +
     `<div class="wd-miniskala wd-miniskala-r wd-t-regen"><div class="wd-sk">${rechts}</div></div></div>` +
-    `<div class="wd-minilegende" title="Balkenhöhe = Regenmenge in mm, Farbe kräftiger = Regen wahrscheinlicher">${d.legende} · <b class="wd-t-regen">Regen mm</b> (kräftiger = wahrscheinlicher)</div>`;
+    // „Regen mm“ zuerst: bleibt auch in schmalen Kacheln sichtbar (Mouseover mit Erklärung), der Rest wird notfalls gekürzt
+    `<div class="wd-minilegende">${umschalter(d.wahl)}<span class="wd-leg">` +
+    `<b class="wd-t-regen" title="Balkenhöhe = Regenmenge in mm · kräftigere Farbe = Regen wahrscheinlicher">Regen mm</b> · ${d.legende}</span></div>`;
 }
+// Umschalter der kleinen Kachel: 24 Std. · 48 Std. · 7 Tage · 16 Tage (Klick → providers/weather.js speichert und zeichnet neu)
+export const MINI_WAHL = [[24, '24 Std.'], [48, '48 Std.'], [7, '7 Tage'], [16, '16 Tage']];
+const umschalter = wahl => `<span class="wd-wahl" role="group" aria-label="Zeitraum des Diagramms">` +
+  MINI_WAHL.map(([w, t]) => `<button type="button" data-mini-wahl="${w}" aria-pressed="${w === wahl}">${t}</button>`).join('') + '</span>';
 const wtagKurz = datum => new Date(datum + 'T12:00:00Z').toLocaleDateString('de-DE', { weekday: 'short', timeZone: 'UTC' }).replace('.', '');
 
 // 7 oder 16 Tage: Höchst- und Tiefstlinie (Trend gestrichelt), Regen mm/Tag, Wochentage (16 Tage: jeder zweite)
@@ -81,23 +87,25 @@ export function miniDiagramm(tage) {
     linien: [{ werte: tage.map(t => t.maxC), klasse: 'wd-max', bisTrend: bis }, { werte: tage.map(t => t.minC), klasse: 'wd-min', bisTrend: bis }],
     regen: tage.map(t => ({ mm: t.niederschlagMm || 0, p: t.regenProzent })), mmMin: 10,
     marken: tage.map((t, i) => ({ i, text: wtagKurz(t.datum) })).filter(m => n <= 8 || m.i % 2 === 0),
-    legende: `${n} Tage: <b class="wd-t-max">Höchst</b> · <b class="wd-t-min">Tiefst</b>`,
+    wahl: n, legende: '<b class="wd-t-max">Höchst</b> · <b class="wd-t-min">Tiefst</b>',
     aria: `${n} Tage: Höchstwerte bis ${r0(tmax)}°, Tiefstwerte bis ${r0(tmin)}°`
   });
 }
 
-// 24 Std.: Temperaturlinie (Farbe Höchst), Regen mm/Std., Stunden alle 3 Std. stunde(iso) → Stunde als Zahl (Ortszeit).
-export function miniStunden(stunden, stunde) {
-  const l = (stunden || []).slice(0, 24);
+// 24 oder 48 Std.: Temperaturlinie (Farbe Höchst), Regen mm/Std.; Zeitachse alle 3 Std. (24) bzw. alle 6 Std. (48, um Mitternacht
+// der Wochentag). stunde(iso) → Stunde als Zahl (Ortszeit), wtag(iso) → „Di“.
+export function miniStunden(stunden, stunde, anzahl = 24, wtag = () => '') {
+  const l = (stunden || []).slice(0, anzahl);
   if (l.length < 2) return '';
-  const temps = l.map(s => s.tempC).filter(v => v != null);
+  const temps = l.map(s => s.tempC).filter(v => v != null), schritt = anzahl > 24 ? 6 : 3;
   return mini({
     n: l.length,
     linien: [{ werte: l.map(s => s.tempC), klasse: 'wd-max' }],
     regen: l.map(s => ({ mm: s.niederschlagMm || 0, p: s.regenProzent })), mmMin: 2,
-    marken: l.map((s, i) => ({ i, h: stunde(s.zeit) })).filter(m => m.h % 3 === 0).map(m => ({ i: m.i, text: String(m.h) })),
-    legende: '24 Std.: <b class="wd-t-max">Temperatur</b>',
-    aria: `24 Stunden: Temperatur ${r0(Math.min(...temps))}° bis ${r0(Math.max(...temps))}°`
+    marken: l.map((s, i) => ({ i, h: stunde(s.zeit), s })).filter(m => m.h % schritt === 0)
+      .map(m => ({ i: m.i, text: anzahl > 24 && m.h === 0 ? wtag(m.s.zeit) || '0' : String(m.h) })),
+    wahl: anzahl > 24 ? 48 : 24, legende: '<b class="wd-t-max">Temperatur</b>',
+    aria: `${anzahl} Stunden: Temperatur ${r0(Math.min(...temps))}° bis ${r0(Math.max(...temps))}°`
   });
 }
 

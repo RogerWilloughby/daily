@@ -119,7 +119,10 @@ const uhrVon = (iso, zone) => iso ? `${+new Date(iso).toLocaleTimeString('de-DE'
 export function kopfzeileHtml(env, klammern = false) {
   const a = env.daten.aktuell, h = env.daten.tage[0] || {}, zone = env.ort.zeitzone || 'Europe/Berlin';
   const um = iso => (uhrVon(iso, zone) ? ` <small class="wd-um">${klammern ? '(' : ''}${uhrVon(iso, zone)}${klammern ? ')' : ''}</small>` : '');
-  return `${esc(env.ort.name || 'Wetter')} ${r0(a.tempC)}° · ${tmin(h.minC)}${um(h.minZeit)} / ${tmax(h.maxC)}${um(h.maxZeit)}`;
+  // Mouseover: „Tiefstwert heute: 9° um 2 Uhr“
+  const tip = (art, v, iso) => `${art} heute: ${r0(v)}°${uhrVon(iso, zone) ? ' um ' + uhrVon(iso, zone) : ''}`;
+  const wert = (html, art, v, iso) => `<span class="wd-tm" title="${esc(tip(art, v, iso))}">${html}${um(iso)}</span>`;
+  return `${esc(env.ort.name || 'Wetter')} ${r0(a.tempC)}° · ${wert(tmin(h.minC), 'Tiefstwert', h.minC, h.minZeit)} / ${wert(tmax(h.maxC), 'Höchstwert', h.maxC, h.maxZeit)}`;
 }
 
 // „Dresden 15° · 9°/16°“
@@ -222,8 +225,9 @@ export function mitOptionen(k, env, opt = {}) {
   const startReiter = unwetter ? 'hinweise' : tabs.some(t => t.id === o.start) ? o.start : 'heute';
   const zone = (env && env.ort && env.ort.zeitzone) || 'Europe/Berlin';
   const stunde = iso => +new Date(iso).toLocaleTimeString('de-DE', { timeZone: zone, hour: '2-digit', hourCycle: 'h23' }).slice(0, 2);
+  const wtag = iso => new Date(iso).toLocaleDateString('de-DE', { timeZone: zone, weekday: 'short' }).replace('.', '');
   const chart = !env || !env.daten ? k.chart : +o.mini === 7 ? miniDiagramm(env.daten.tage.slice(0, 7))
-    : +o.mini === 16 ? k.chart : miniStunden(env.daten.stunden, stunde);
+    : +o.mini === 16 ? k.chart : miniStunden(env.daten.stunden, stunde, +o.mini === 48 ? 48 : 24, wtag);
   return { ...k, tabs, startReiter, chart };
 }
 

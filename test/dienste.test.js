@@ -228,13 +228,15 @@ test('Adapter Wetter: Kachel und Antwort aus dem Vertrag', async () => {
   assert.equal((k.chart.match(/°<\/span>/g) || []).length, 7);
   assert.equal((k.chart.match(/<line class="wd-gitter/g) || []).length, 7);
   assert.match(k.chart, /wd-miniskala-r wd-t-regen"><div class="wd-sk"><span class="wd-g5"[^>]*>0<\/span><span[^>]*>2<\/span>.*<span class="wd-g5"[^>]*>12 mm<\/span><\/div>/);   // Regen grün
-  assert.match(k.chart, /16 Tage: <b class="wd-t-max">Höchst<\/b> · <b class="wd-t-min">Tiefst<\/b> · <b class="wd-t-regen">Regen mm<\/b>/);
+  assert.match(k.chart, /<b class="wd-t-regen" title="Balkenhöhe = Regenmenge in mm · kräftigere Farbe = Regen wahrscheinlicher">Regen mm<\/b> · <b class="wd-t-max">Höchst<\/b> · <b class="wd-t-min">Tiefst<\/b>/);
+  assert.doesNotMatch(k.chart, /kräftiger = wahrscheinlicher/);                     // Erklärung nur noch als Mouseover
+  assert.match(k.chart, /data-mini-wahl="24" aria-pressed="false">24 Std\.<.*data-mini-wahl="48"[^>]*>48 Std\.<.*data-mini-wahl="7"[^>]*>7 Tage<.*data-mini-wahl="16" aria-pressed="true">16 Tage</);
   assert.match(k.chart, /wd-marken"><span[^>]*>Mo<\/span><span[^>]*>Mi<\/span>/);   // Wochentage, bei 16 Tagen jeder zweite
   assert.match(k.chart, /wd-max.*wd-min.*wd-trend/);
   // Kopfzeile mit farbigen Zahlen
-  assert.match(k.titleHtml, /^Berlin 15° · <b class="wd-t-min">9°<\/b> <small class="wd-um">\d{1,2} Uhr<\/small> \/ <b class="wd-t-max">16°<\/b> <small class="wd-um">\d{1,2} Uhr<\/small>$/);
+  assert.match(k.titleHtml, /^Berlin 15° · <span class="wd-tm" title="Tiefstwert heute: 9° um \d{1,2} Uhr"><b class="wd-t-min">9°<\/b> <small class="wd-um">\d{1,2} Uhr<\/small><\/span> \/ <span class="wd-tm" title="Höchstwert heute: 16° um \d{1,2} Uhr"><b class="wd-t-max">16°<\/b> <small class="wd-um">\d{1,2} Uhr<\/small><\/span>$/);
   assert.equal(k.zeileIcon, true);
-  assert.match(k.kopf, /9°<\/b> <small class="wd-um">\(\d{1,2} Uhr\)<\/small> \/ <b class="wd-t-max">16°<\/b> <small class="wd-um">\(\d{1,2} Uhr\)<\/small>/);   // kleine Kachel: Uhrzeit in Klammern
+  assert.match(k.kopf, /9°<\/b> <small class="wd-um">\(\d{1,2} Uhr\)<\/small><\/span> \/ <span class="wd-tm" title="Höchstwert[^"]*"><b class="wd-t-max">16°<\/b> <small class="wd-um">\(\d{1,2} Uhr\)<\/small>/);   // kleine Kachel: Uhrzeit in Klammern
   // Aufgeklappt: Reiter
   assert.deepEqual(k.tabs.map(t => t.name), ['Heute', '16 Tage', '48 Std.', 'Hinweise', 'Mehr']);
   const tab = id => k.tabs.find(t => t.id === id).html;
@@ -734,7 +736,12 @@ test('Einstellungen: Kachel-Formular, Wetter-Optionen, Kachel-Listen', async () 
   assert.equal(mitOptionen(kachel(w, r, null), w, { start: 'radar', radar: false }).startReiter, 'heute');   // ausgeblendeter Start → Heute
   // Standard: Mini-Diagramm 24 Stunden (Temperatur + Regenwahrscheinlichkeit, kräftig ab 1 mm)
   const k24 = mitOptionen(kachel(w, r, null), w, {});
-  assert.match(k24.chart, /24 Std\.: <b class="wd-t-max">Temperatur<\/b> · <b class="wd-t-regen">Regen mm<\/b>/);
+  assert.match(k24.chart, /data-mini-wahl="24" aria-pressed="true">.*<b class="wd-t-regen"[^>]*>Regen mm<\/b> · <b class="wd-t-max">Temperatur<\/b>/);
+  // 48 Stunden: Zeitachse alle 6 Std., um Mitternacht der Wochentag
+  const k48 = mitOptionen(kachel(w, r, null), w, { mini: 48 });
+  assert.match(k48.chart, /data-mini-wahl="48" aria-pressed="true"/);
+  assert.equal((k48.chart.match(/wd-streifen/g) || []).length, 24);
+  assert.match(k48.chart, /wd-marken">(<span[^>]*>(6|12|18|Mo|Di|Mi|Do|Fr|Sa|So)<\/span>)+<\/div>/);
   assert.doesNotMatch(k24.chart, />jetzt</);
   const { miniStunden } = await esm('src/js/adapter/diagramm.js');
   const probe = Array.from({ length: 30 }, (_, i) => ({ zeit: new Date(Date.UTC(2026, 8, 28, i)).toISOString(), tempC: 10 + i % 5, regenProzent: i === 3 ? 80 : i === 4 ? 40 : 0, niederschlagMm: i === 3 ? 2 : 0.2 }));
