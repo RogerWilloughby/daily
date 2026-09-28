@@ -101,7 +101,8 @@ export function paint(id) {
   el.querySelector('.m-short').textContent = t.ms ?? t.m;
   // Unterzeile: als Text (aufgeklappt) und – falls die Kachel eine Liste liefert – als Liste untereinander (kleine Kachel)
   const tz = el.querySelector('.teaser');
-  tz.innerHTML = `<span class="t-text">${esc(t.x)}</span>` + (t.liste && t.liste.length ? `<span class="t-liste">${listeHtml(t.liste)}</span>` : '');
+  // zeileIcon: das Symbol (z. B. Wetterlage) steht in der kleinen Kachel vor dem Text statt im Kopf
+  tz.innerHTML = `<span class="t-text">${t.zeileIcon && t.lglyph ? `<span class="t-icon" title="${esc(t.lglyphTip || '')}">${t.lglyph}</span>` : ''}${esc(t.x)}</span>` + (t.liste && t.liste.length ? `<span class="t-liste">${listeHtml(t.liste)}</span>` : '');
   tz.classList.toggle('mit-liste', !!(t.liste && t.liste.length));
   // Kopf der kleinen Kachel: nur Inhalt (z. B. Ort und Temperaturen, KW) – der Name erscheint beim Überfahren
   el.querySelector('.label .kopf').innerHTML = t.kopf || '';

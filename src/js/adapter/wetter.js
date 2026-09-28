@@ -102,15 +102,19 @@ function mehrZeilen(env, pollen) {
   return liste;
 }
 
+// Uhrzeit des Tiefst-/Höchstwerts: „6 Uhr“ (leer, wenn unbekannt)
+const uhrVon = (iso, zone) => iso ? `${+new Date(iso).toLocaleTimeString('de-DE', { timeZone: zone, hour: '2-digit' }).slice(0, 2)} Uhr` : '';
 export function kopfzeileHtml(env) {
-  const a = env.daten.aktuell, h = env.daten.tage[0] || {};
-  return `${esc(env.ort.name || 'Wetter')} ${r0(a.tempC)}° · ${tmin(h.minC)}/${tmax(h.maxC)}`;
+  const a = env.daten.aktuell, h = env.daten.tage[0] || {}, zone = env.ort.zeitzone || 'Europe/Berlin';
+  const um = iso => (uhrVon(iso, zone) ? ` <small class="wd-um">${uhrVon(iso, zone)}</small>` : '');
+  return `${esc(env.ort.name || 'Wetter')} ${r0(a.tempC)}° · ${tmin(h.minC)}${um(h.minZeit)} / ${tmax(h.maxC)}${um(h.maxZeit)}`;
 }
 
 // „Dresden 15° · 9°/16°“
 export function kopfzeile(env) {
-  const a = env.daten.aktuell, h = env.daten.tage[0] || {};
-  return `${env.ort.name || 'Wetter'} ${r0(a.tempC)}° · ${r0(h.minC)}°/${r0(h.maxC)}°`;
+  const a = env.daten.aktuell, h = env.daten.tage[0] || {}, zone = env.ort.zeitzone || 'Europe/Berlin';
+  const um = iso => (uhrVon(iso, zone) ? ` (${uhrVon(iso, zone)})` : '');
+  return `${env.ort.name || 'Wetter'} ${r0(a.tempC)}° · ${r0(h.minC)}°${um(h.minZeit)} / ${r0(h.maxC)}°${um(h.maxZeit)}`;
 }
 
 // Frost und Glätte heute oder morgen
@@ -173,7 +177,7 @@ export function kachel(env, regenEnv = null, hinweisEnv = null) {
   const wetterText = `${zustandText(a.zustand, a.code)}, gefühlt ${r0(a.gefuehltC)}°.`, regenZeile = regenHinweis(regenEnv) || regenText;
   // Kopfzeile: Ort, jetzt, Tiefst/Höchst von heute – alles in einer Zeile
   return {
-    state: 'live', title: kopfzeile(env) + (hTop ? ` · ${hKurz}` : ''), titleHtml: kopfzeileHtml(env) + abzeichen(hinweisEnv), kopf: kopfzeileHtml(env) + abzeichen(hinweisEnv), tabs,
+    state: 'live', title: kopfzeile(env) + (hTop ? ` · ${hKurz}` : ''), titleHtml: kopfzeileHtml(env) + abzeichen(hinweisEnv), kopf: kopfzeileHtml(env) + abzeichen(hinweisEnv), zeileIcon: true, tabs,
     lglyph: glyph(bild(a.zustand, a.tag)), lglyphTip: zustandText(a.zustand, a.code),   // Symbol in der Kopfzeile, Erklärung beim Überfahren
     glyph: '', m: '', ms: r0(a.tempC) + '°',                                               // keine große Zeile – Platz fürs Diagramm
     // Unwetter zuerst, sonst Wetter · Hinweis · Regen (Radar geht vor der Stundenvorhersage)

@@ -450,3 +450,19 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
   .tile:not([data-mode="active"]) .head:has(.teaser.mit-liste) .metric .m-long{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 }
 .teaser .t-liste{font-size:13px;line-height:1.35}
+/* Wetter klein: Symbol der Wetterlage vor dem Text (zweite Zeile) statt im Kopf; Uhrzeit von Tiefst/Höchst klein */
+.teaser .t-icon{display:none}
+@media (min-width:761px) and (min-height:521px){
+  .tile:not([data-mode="active"]) .teaser .t-icon{display:inline-flex;vertical-align:-3px;margin-right:5px;color:var(--ink)}
+  .tile:not([data-mode="active"]) .teaser .t-icon svg{width:17px;height:17px}
+  .tile:not([data-mode="active"]) .head:has(.t-icon) .label .lglyph{display:none}
+}
+.wd-um{font-size:.78em;font-weight:500;opacity:.8}
+@media (min-width:761px) and (min-height:521px){
+  .tile:not([data-mode="active"]) .label .kopf{white-space:normal;overflow:visible;line-height:1.3}
+  .tile:not([data-mode="active"]) .label:has(.kopf:not(:empty)){max-width:100%;flex-wrap:wrap}
+}
+@media (min-width:761px) and (min-height:521px){
+  /* mit Hinweis-Abzeichen wird der Kopf zweizeilig – dann die Unterzeile einzeilig, damit das Diagramm Platz hat */
+  .tile[data-mode="rest"] .head:has(.kopf .wh-badge):has(.mini:not(:empty)) .teaser{-webkit-line-clamp:1}
+}

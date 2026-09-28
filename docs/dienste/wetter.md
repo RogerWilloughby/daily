@@ -7,7 +7,7 @@ Aktuelles Wetter, 48-Stunden- und 16-Tage-Vorhersage (ab Tag 8 als Trend) mit Wi
 | | |
 |---|---|
 | Aufruf | `GET /api/v1/wetter` |
-| Programmversion | 1.2.0 |
+| Programmversion | 1.3.0 |
 | Vertrag (Datenformat) | daily/1, Version 1 |
 | Klasse | oeffentlich |
 | Länder | weltweit |
@@ -91,6 +91,8 @@ Quellen mit Lizenz:
 | `tage[].zustand` | Zustand als Aufzählung |
 | `tage[].minC` | Tiefstwert in °C |
 | `tage[].maxC` | Höchstwert in °C |
+| `tage[].minZeit` | Stunde, in der der Tiefstwert erreicht wird (UTC; aus den Stundenwerten, oder null) |
+| `tage[].maxZeit` | Stunde, in der der Höchstwert erreicht wird (UTC; aus den Stundenwerten, oder null) |
 | `tage[].regenProzent` | höchste Regenwahrscheinlichkeit des Tages in % |
 | `tage[].niederschlagMm` | Niederschlagssumme in mm |
 | `tage[].neuschneeCm` | Neuschnee-Summe in cm |
@@ -133,6 +135,7 @@ Rahmen und Stufen: `../architektur/skalierung.md`
 ## Änderungen
 | Version | Datum | Änderung |
 |---|---|---|
+| 1.3.0 | 2026-09-28 | Je Tag Uhrzeit des Tiefst- und Höchstwerts (minZeit, maxZeit) aus den Stundenwerten |
 | 1.2.0 | 2026-09-27 | 16 Tage (ab Tag 8 Trend), Wind/Sonne/Wolken/Luftdruck/Sicht/Schnee/Frost, Cache-Takt :00/:30 |
 | 1.1.0 | 2026-09-27 | Dienstblatt (Herkunft, Verarbeitung, Skalierung) |
 | 1.0.0 | 2026-09-27 | Erste Fassung im Format daily/1: jetzt, 48 Stunden, 7 Tage, Luft und Pollen (Open-Meteo) |

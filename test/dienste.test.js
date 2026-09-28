@@ -216,7 +216,8 @@ test('Adapter Wetter: Kachel und Antwort aus dem Vertrag', async () => {
   const { kachel, antwort: text } = await esm('src/js/adapter/wetter.js');
   const env = (await rufe('wetter', { ort: 'Berlin' })).body;
   const k = kachel(env);
-  assert.equal(k.title, 'Berlin 15° · 9°/16°');               // Ort, jetzt, Tiefst/Höchst in einer Zeile
+  assert.match(k.title, /^Berlin 15° · 9° \(\d{1,2} Uhr\) \/ 16° \(\d{1,2} Uhr\)$/);   // Ort, jetzt, Tiefst/Höchst mit Uhrzeit in einer Zeile
+  assert.ok(env.daten.tage[0].minZeit && env.daten.tage[0].maxZeit);
   assert.equal(k.m, '');                                        // keine große Zeile mehr
   assert.equal(k.ms, '15°');                                    // Handy: Kurzform
   assert.equal(k.lglyphTip, 'Teilweise bewölkt');               // Symbol in der Kopfzeile mit Erklärung
@@ -226,7 +227,8 @@ test('Adapter Wetter: Kachel und Antwort aus dem Vertrag', async () => {
   assert.match(k.chart, /16 Tage: <b class="wd-t-max">Höchst<\/b> · <b class="wd-t-min">Tiefst<\/b> · <b class="wd-t-regen">Regen<\/b>/);
   assert.match(k.chart, /wd-max.*wd-min.*wd-trend/);
   // Kopfzeile mit farbigen Zahlen
-  assert.equal(k.titleHtml, 'Berlin 15° · <b class="wd-t-min">9°</b>/<b class="wd-t-max">16°</b>');
+  assert.match(k.titleHtml, /^Berlin 15° · <b class="wd-t-min">9°<\/b> <small class="wd-um">\d{1,2} Uhr<\/small> \/ <b class="wd-t-max">16°<\/b> <small class="wd-um">\d{1,2} Uhr<\/small>$/);
+  assert.equal(k.zeileIcon, true);
   // Aufgeklappt: Reiter
   assert.deepEqual(k.tabs.map(t => t.name), ['Heute', '16 Tage', '48 Std.', 'Hinweise', 'Mehr']);
   const tab = id => k.tabs.find(t => t.id === id).html;

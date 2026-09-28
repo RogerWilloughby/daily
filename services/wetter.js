@@ -60,10 +60,13 @@ function umwandeln(w, q, jetzt = Date.now()) {
   const stunden = [], jeTag = {};
   let jetztK = -1;
   (h.time || []).forEach((t, k) => {
-    const tag = tagIn(t * 1000, zone), j = (jeTag[tag] ||= { null0: null, schnee: null });
+    const tag = tagIn(t * 1000, zone), j = (jeTag[tag] ||= { null0: null, schnee: null, tmin: null, tminT: null, tmax: null, tmaxT: null });
     const f = h.freezing_level_height?.[k], sd = h.snow_depth?.[k];
     if (f != null && (j.null0 == null || f < j.null0)) j.null0 = f;
     if (sd != null && (j.schnee == null || sd > j.schnee)) j.schnee = sd;
+    const tc = h.temperature_2m?.[k];   // Zeitpunkt des Tiefst-/Höchstwerts (erste Stunde mit dem Extremwert)
+    if (tc != null && (j.tmin == null || tc < j.tmin)) { j.tmin = tc; j.tminT = t; }
+    if (tc != null && (j.tmax == null || tc > j.tmax)) { j.tmax = tc; j.tmaxT = t; }
     if (t < abStunde) return;
     if (jetztK < 0) jetztK = k;
     if (stunden.length >= 48) return;
@@ -85,7 +88,7 @@ function umwandeln(w, q, jetzt = Date.now()) {
     const j = jeTag[datum] || {};
     return {
       datum, trend: k + 1 >= TREND_AB_TAG, code: d.weather_code?.[k] ?? null, zustand: zustand(d.weather_code?.[k]),
-      minC, maxC: runde(d.temperature_2m_max?.[k], 1),
+      minC, maxC: runde(d.temperature_2m_max?.[k], 1), minZeit: j.tminT == null ? null : zeitU(j.tminT), maxZeit: j.tmaxT == null ? null : zeitU(j.tmaxT),
       regenProzent: d.precipitation_probability_max?.[k] ?? null, niederschlagMm, neuschneeCm,
       schneehoeheCm: cmAusM(j.schnee), nullgradgrenzeM: runde(j.null0),
       frost: minC == null ? null : minC < 0,
@@ -131,7 +134,7 @@ const SCHEMA = S.obj({
   stunden: S.liste(S.obj({ zeit: S.zeit(), tempC: S.zahl(), gefuehltC: S.zahl(), code: S.ganz(), zustand: Z(),
     regenProzent: PROZENT(), niederschlagMm: S.zahl(), neuschneeCm: S.zahl(),
     windKmh: S.zahl(), boeenKmh: S.zahl(), windRichtungGrad: S.zahl(), wolkenProzent: PROZENT(), uvIndex: S.zahl(), sichtweiteM: S.zahl() })),
-  tage: S.liste(S.obj({ datum: S.datum(), trend: S.ja(), code: S.ganz(), zustand: Z(), minC: S.zahl(), maxC: S.zahl(),
+  tage: S.liste(S.obj({ datum: S.datum(), trend: S.ja(), code: S.ganz(), zustand: Z(), minC: S.zahl(), maxC: S.zahl(), minZeit: S.zeit(), maxZeit: S.zeit(),
     regenProzent: PROZENT(), niederschlagMm: S.zahl(), neuschneeCm: S.zahl(), schneehoeheCm: S.zahl(), nullgradgrenzeM: S.zahl(),
     frost: S.ja(), glaette: S.ja(), windMaxKmh: S.zahl(), boeenMaxKmh: S.zahl(), windRichtungGrad: S.zahl(), windRichtung: RICHTUNG(),
     sonnenstunden: S.zahl(), sonnenaufgang: S.zeit(), sonnenuntergang: S.zeit(), uvMax: S.zahl() })),
@@ -144,8 +147,9 @@ const SCHEMA = S.obj({
 module.exports = {
   id: 'wetter',
   version: 1,                 // Vertrag (Datenformat)
-  programmversion: '1.2.0',   // steigt bei jeder Änderung des Dienstes
+  programmversion: '1.3.0',   // steigt bei jeder Änderung des Dienstes
   aenderungen: [
+    { version: '1.3.0', datum: '2026-09-28', text: 'Je Tag Uhrzeit des Tiefst- und Höchstwerts (minZeit, maxZeit) aus den Stundenwerten' },
     { version: '1.2.0', datum: '2026-09-27', text: '16 Tage (ab Tag 8 Trend), Wind/Sonne/Wolken/Luftdruck/Sicht/Schnee/Frost, Cache-Takt :00/:30' },
     { version: '1.1.0', datum: '2026-09-27', text: 'Dienstblatt (Herkunft, Verarbeitung, Skalierung)' },
     { version: '1.0.0', datum: '2026-09-27', text: 'Erste Fassung im Format daily/1: jetzt, 48 Stunden, 7 Tage, Luft und Pollen (Open-Meteo)' }
@@ -220,6 +224,8 @@ module.exports = {
       'tage[].zustand': 'Zustand als Aufzählung',
       'tage[].minC': 'Tiefstwert in °C',
       'tage[].maxC': 'Höchstwert in °C',
+      'tage[].minZeit': 'Stunde, in der der Tiefstwert erreicht wird (UTC; aus den Stundenwerten, oder null)',
+      'tage[].maxZeit': 'Stunde, in der der Höchstwert erreicht wird (UTC; aus den Stundenwerten, oder null)',
       'tage[].regenProzent': 'höchste Regenwahrscheinlichkeit des Tages in %',
       'tage[].niederschlagMm': 'Niederschlagssumme in mm',
       'tage[].neuschneeCm': 'Neuschnee-Summe in cm',
