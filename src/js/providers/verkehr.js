@@ -1,22 +1,29 @@
-// Kachel „Verkehr“: Abfahrten (vorerst /api/transit, VVO – Umzug auf daily/1 folgt) und Tanken (Dienst „tanken“, daily/1).
-// Später kommt der Arbeitsweg dazu. Die kleine Kachel zeigt eine Ansicht, der Umschalter wechselt sofort ohne Abruf.
+// Kachel „Verkehr“: Abfahrten (vorerst /api/transit, VVO – Umzug auf daily/1 folgt), Arbeitsweg Auto (Dienst „autobahn“, daily/1)
+// und Tanken (Dienst „tanken“, daily/1). Die kleine Kachel zeigt eine Ansicht, der Umschalter wechselt sofort ohne Abruf.
+// Start und Ziel des Arbeitswegs liegen nur in den Einstellungen dieses Browsers; der Dienst „autobahn“ bekommt nur die Autobahnen.
 import { set } from '../core/board.js';
 import { settings, saveSettings, kachelOpt, kachelOptSpeichern } from '../core/store.js';
 import { kachelEinstellungen } from '../core/einstellungen.js';
 import { addAnswer } from '../core/ask.js';
 import { dienst, gespeichert, ortParams } from '../dienste/client.js';
 import { ansicht as tankAnsicht, antwort as tankAntwort, sorteVon, SORTE_NAME, UMKREISE } from '../adapter/tanken.js';
+import { ansicht as wegAnsicht, antwort as wegAntwort, strassenVon, FRAGE as WEG_FRAGE } from '../adapter/autobahn.js';
 import { umschalter } from '../adapter/diagramm.js';
 import { hm, getJson, esc } from '../core/util.js';
 
 const ID = 'verkehr';
-export const VERKEHR_STANDARD = { ansicht: 'abfahrten', umkreis: 5 };
-const WAHL = [['abfahrten', 'Abfahrten'], ['tanken', 'Tanken']];
+export const VERKEHR_STANDARD = { ansicht: 'abfahrten', umkreis: 5, strassen: '', start: null, ziel: null };
+const WAHL = [['abfahrten', 'Abfahrten'], ['arbeitsweg', 'Arbeitsweg'], ['tanken', 'Tanken']];
+const MAX_STRASSEN = 5;
 const opt = () => kachelOpt(ID, VERKEHR_STANDARD);
 const umkreis = () => (UMKREISE.includes(+opt().umkreis) ? +opt().umkreis : 5);
 const tankParams = () => ({ ...ortParams(settings.place), umkreis: umkreis() });
 
-let ab = null, tk = null, tkFehler = null;
+const strassen = () => (strassenVon(opt().strassen) || []).slice(0, MAX_STRASSEN);
+const wegParams = () => ({ strassen: strassen().join(',') });
+const wegOrte = () => ({ start: opt().start, ziel: opt().ziel });
+
+let ab = null, tk = null, tkFehler = null, aw = null;
 
 // ---- Abfahrten (VVO über /api/transit) ----
 const mins = iso => Math.max(0, Math.round((Date.parse(iso) - Date.now()) / 60000));
@@ -58,28 +65,53 @@ function tankenAnsicht() {
   return tankAnsicht(tk, sorteVon(settings.fuel));
 }
 
+// ---- Arbeitsweg Auto (Dienst „autobahn“) ----
+function arbeitswegAnsicht() {
+  if (!strassen().length) {
+    const t = 'Im Zahnrad unter „Arbeitsweg“ die Autobahnen (z. B. A4, A13) sowie Start und Ziel eintragen. Start und Ziel bleiben in diesem Browser.';
+    return { kopf: 'Arbeitsweg einrichten', m: '', ms: '–', x: t, liste: [], html: `<p>${esc(t)}</p>` };
+  }
+  return wegAnsicht(aw, wegOrte());
+}
+// Start/Ziel-Eingabe → Ort über den Dienst „ort“ (einmal beim Einrichten); nur das Ergebnis bleibt im Browser
+async function ortVon(eingabe, alt) {
+  const e = String(eingabe || '').trim();
+  if (!e) return null;
+  if (alt && alt.eingabe === e) return alt;
+  try {
+    const r = await dienst('ort', { q: e, land: 'DE' });
+    const o = r.daten && r.daten.orte && r.daten.orte[0];
+    return o ? { eingabe: e, name: o.name, region: o.region || null, lat: o.lat, lon: o.lon } : { eingabe: e, name: null };
+  } catch (err) { return { eingabe: e, name: null }; }
+}
+const ortHilfe = o => (!o ? '' : o.name ? `→ ${o.name}${o.region ? ` (${o.region})` : ''}` : 'nicht gefunden – Ortsname oder Postleitzahl');
+
 // ---- Kachel zusammensetzen ----
 function zeichne() {
   const wahl = WAHL.some(([w]) => w === opt().ansicht) ? opt().ansicht : 'abfahrten';
-  const teile = { abfahrten: abfahrtenAnsicht(), tanken: tankenAnsicht() }, a = teile[wahl];
+  const teile = { abfahrten: abfahrtenAnsicht(), arbeitsweg: arbeitswegAnsicht(), tanken: tankenAnsicht() }, a = teile[wahl];
   set(ID, {
     // keine große Zeile: Kopf + Liste (wie Finanzen); am Handy die Kurzform ms
-    state: ab || tk ? 'live' : 'error', title: 'Verkehr', kopf: a.kopf, m: '', ms: a.ms, x: a.x, liste: a.liste,
+    state: ab || tk || aw ? 'live' : 'error', title: 'Verkehr', kopf: a.kopf, m: '', ms: a.ms, x: a.x, liste: a.liste,
     chart: `<div class="vk-fuss">${umschalter(wahl, WAHL)}</div>`,
     tabs: WAHL.map(([id, name]) => ({ id, name, html: teile[id].html })), startReiter: wahl,
-    tag: tk && tk.veraltet && wahl === 'tanken' ? 'Stand ' + hm(tk.erstellt) : ''
+    tag: wahl === 'tanken' && tk && tk.veraltet ? 'Stand ' + hm(tk.erstellt) : wahl === 'arbeitsweg' && aw && aw.veraltet ? 'Stand ' + hm(aw.erstellt) : ''
   });
 }
 
 export async function load() {
-  if (!tk) { tk = gespeichert('tanken', tankParams()) || null; if (tk) zeichne(); }
-  const [a, t] = await Promise.all([
+  const mitWeg = strassen().length > 0;
+  if (!tk || (mitWeg && !aw)) { tk = tk || gespeichert('tanken', tankParams()) || null; aw = aw || (mitWeg && gespeichert('autobahn', wegParams())) || null; if (tk || aw) zeichne(); }
+  const [a, t, w] = await Promise.all([
     getJson('/api/transit?stop=' + encodeURIComponent(settings.stop || 'Postplatz')).catch(e => e),
-    dienst('tanken', tankParams()).catch(e => e)
+    dienst('tanken', tankParams()).catch(e => e),
+    mitWeg ? dienst('autobahn', wegParams()).catch(e => e) : null
   ]);
   if (!(a instanceof Error)) ab = a;
   if (t instanceof Error) tkFehler = t; else { tk = t; tkFehler = null; }
-  if (!ab && !tk) { zeichne(); throw (t instanceof Error ? t : a); }
+  if (w && !(w instanceof Error)) aw = w;
+  if (!mitWeg) aw = null;
+  if (!ab && !tk && !aw) { zeichne(); throw (t instanceof Error ? t : a); }
   zeichne();
 }
 
@@ -91,6 +123,8 @@ document.addEventListener('click', e => {
 });
 
 // Frag DAILY
+// Autobahn vor Bus/Bahn: „Autobahn“ enthält „bahn“
+addAnswer(WEG_FRAGE, q => wegAntwort(q, aw, { ...wegOrte(), strassen: strassen() }));
 addAnswer(/tank|benzin|diesel|sprit|super|\be10\b|\be5\b/i, q => tankAntwort(q, tk, settings.fuel));
 addAnswer(/bus|bahn|tram|straßenbahn|strassenbahn|abfahrt|haltestelle|öpnv|oepnv/i, () => {
   if (!ab || !ab.found) return 'Die Abfahrten sind gerade nicht verfügbar.';
@@ -104,17 +138,33 @@ kachelEinstellungen(ID, {
     { typ: 'select', key: 'ansicht', label: 'Kleine Kachel zeigt', wert: opt().ansicht, optionen: WAHL },
     { typ: 'titel', label: 'Abfahrten' },
     { typ: 'text', key: 'stop', label: 'Haltestelle', wert: settings.stop || '', platzhalter: 'z. B. Postplatz', hilfe: 'Vorerst Verkehrsverbund Oberelbe (Dresden und Umgebung); weitere Verbünde folgen.' },
+    { typ: 'titel', label: 'Arbeitsweg (Auto)' },
+    { typ: 'text', key: 'strassen', label: 'Autobahnen', wert: opt().strassen || '', platzhalter: 'z. B. A4, A13',
+      hilfe: opt().strassen && !strassenVon(opt().strassen) ? 'Bitte als A4, A13 angeben.' : `Bis zu ${MAX_STRASSEN}, durch Komma getrennt.` },
+    { typ: 'text', key: 'start', label: 'Start', wert: (opt().start || {}).eingabe || '', platzhalter: 'Ort oder PLZ', hilfe: ortHilfe(opt().start) },
+    { typ: 'text', key: 'ziel', label: 'Ziel', wert: (opt().ziel || {}).eingabe || '', platzhalter: 'Ort oder PLZ', hilfe: ortHilfe(opt().ziel) },
+    { typ: 'hinweis', label: 'Start und Ziel bleiben nur in diesem Browser. Gezeigt werden Staus, Sperrungen und Baustellen der Autobahnen nahe der Strecke. Bus und Bahn folgen.' },
     { typ: 'titel', label: 'Tanken' },
     { typ: 'select', key: 'fuel', label: 'Kraftstoff', wert: sorteVon(settings.fuel), optionen: Object.entries(SORTE_NAME).map(([k, v]) => [k, v]) },
     { typ: 'select', key: 'umkreis', label: 'Umkreis', wert: String(umkreis()), optionen: UMKREISE.map(k => [String(k), `${k} km`]) }
   ],
-  speichern: w => {
+  speichern: async w => {
     const stopNeu = (w.stop || '').trim() || 'Postplatz', umkreisNeu = +w.umkreis !== umkreis();
+    const sNeu = strassenVon(w.strassen), strassenText = sNeu ? sNeu.join(', ') : (w.strassen || '').trim();
+    const wegNeu = strassenText !== (opt().strassen || '');
     saveSettings({ stop: stopNeu, fuel: sorteVon(w.fuel) });
-    kachelOptSpeichern(ID, { ansicht: w.ansicht, umkreis: +w.umkreis });
+    kachelOptSpeichern(ID, { ansicht: w.ansicht, umkreis: +w.umkreis, strassen: strassenText });
     if (umkreisNeu) tk = gespeichert('tanken', tankParams()) || null;
+    if (wegNeu) aw = strassen().length ? gespeichert('autobahn', wegParams()) || null : null;
     zeichne();
-    load().catch(() => {});
+    // Start und Ziel auflösen (nur bei geänderter Eingabe), dann neu zeichnen
+    const [start, ziel] = await Promise.all([ortVon(w.start, opt().start), ortVon(w.ziel, opt().ziel)]);
+    const vorher = JSON.stringify([opt().start || null, opt().ziel || null]);
+    kachelOptSpeichern(ID, { start, ziel });
+    zeichne();
+    // Start/Ziel neu: Raster zeichnet die übrigen Reiter neu (sonst stünde dort noch der alte Weg) und lädt die Kachel neu
+    if (JSON.stringify([start, ziel]) !== vorher) document.dispatchEvent(new CustomEvent('daily:einstellungen', { detail: ID }));
+    else load().catch(() => {});
   }
 });
 

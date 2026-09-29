@@ -4,7 +4,7 @@ const SHELL = [
   '/', '/app.css', '/css/diagramm.css', '/css/wetter.css', '/css/finanzen.css', '/css/verkehr.css', '/manifest.webmanifest', '/content/daily.json',
   '/js/main.js', '/js/core/util.js', '/js/core/store.js', '/js/core/tiles.js', '/js/core/board.js',
   '/js/core/ask.js', '/js/core/status.js', '/js/core/version.js', '/js/ui/dialogs.js', '/js/ui/ort.js',
-  '/js/providers/weather.js', '/js/providers/news.js', '/js/providers/finanzen.js', '/js/providers/verkehr.js', '/js/adapter/tanken.js',
+  '/js/providers/weather.js', '/js/providers/news.js', '/js/providers/finanzen.js', '/js/providers/verkehr.js', '/js/adapter/tanken.js', '/js/adapter/autobahn.js',
   '/js/providers/sport.js', '/js/providers/content.js', '/js/providers/knowledge.js', '/js/providers/local.js',
   '/js/providers/links.js', '/js/providers/tools.js', '/js/tools/verzeichnis.js', '/tools/arbeitszeit.html', '/tools/setzkasten.html', '/js/providers/kalender.js',
   '/js/lib/url.js',

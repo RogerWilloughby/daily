@@ -39,7 +39,7 @@ Status: ✅ fertig in daily/1 · 🔁 läuft, noch alte Schnittstelle · 🆕 ne
 | `abfahrten` | ÖPNV-Abfahrten (Kachel „Verkehr“) | Live | Haltestelle | Verkehrsverbünde über OpenData ÖPNV/DELFI, Start VVO (Entscheidung A, 29.09.2026) | 🔁 |
 | `verbindung` | Arbeitsweg Bus/Bahn (Kachel „Verkehr“) | Live | Start und Ziel (nur im Browser gespeichert) | wie `abfahrten` | 🆕 |
 | `tanken` | Spritpreise E5/E10/Diesel (Kachel „Verkehr“) | Live | Ort, Umkreis | Tankerkönig (Schlüssel) | ✅ daily/1 (0.27.0) |
-| `autobahn` | Arbeitsweg Auto: Staus, Sperrungen, Baustellen je Autobahn (Kachel „Verkehr“) | Live | Autobahnen (z. B. A4, A13) | Autobahn-API des Bundes (autobahn.de) | 🆕 als Nächstes |
+| `autobahn` | Arbeitsweg Auto: Staus, Sperrungen, Baustellen je Autobahn (Kachel „Verkehr“) | Live | Autobahnen (z. B. A4, A13) | Autobahn-API des Bundes (autobahn.de) | ✅ daily/1 (0.28.0) |
 | `strompreis` | Strompreis (Börsenpreis heute/morgen, für E-Auto und Haushalt) | Live | – | Energy-Charts (Fraunhofer ISE) | 🆕 |
 | – | Pendelzeit Auto mit Live-Verkehr | Live | **Start und Ziel** | Routing-Dienste kostenpflichtig (Google, HERE, TomTom) | ⏸ keine freie Quelle |
 

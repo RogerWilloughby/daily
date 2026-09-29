@@ -1,6 +1,6 @@
 # DAILY – Übergabe: aktueller Arbeitsstand
 
-Stand 28.09.2026 (App 0.27.0). Für neue Chats: hier steht, woran gerade gearbeitet wird und wie es weitergeht. Verbindliche Entscheidungen stehen in `entscheidungen.md`, die Architektur in `../architektur/dienste.md`.
+Stand 29.09.2026 (App 0.28.0). Für neue Chats: hier steht, woran gerade gearbeitet wird und wie es weitergeht. Verbindliche Entscheidungen stehen in `entscheidungen.md`, die Architektur in `../architektur/dienste.md`.
 
 ## Vorgehen (Rogers Vorgaben)
 - **Erst Plan, dann Umsetzung (Rogers Vorgabe vom 27.09.2026):** Vor jeder Umsetzung und vor jedem Schreiben ins Repo einen kurzen Plan vorlegen – was und warum, welche Dateien (neu/geändert/gelöscht), was Roger danach tun muss, was offen/unsicher ist – und auf Rogers OK warten. Nicht einfach loslegen.
@@ -25,6 +25,7 @@ Stand 28.09.2026 (App 0.27.0). Für neue Chats: hier steht, woran gerade gearbei
 - **Privater Betrieb:** Vercel-Variable `DAILY_PRIVATE=1` (Production) – gesetzt am 28.09. Ohne sie läuft die Seite öffentlich: keine Termine, keine Schlagzeilen, kein Feld für Kalender-Links. Environment Variables liegen in der Vercel-Oberfläche in der **Seitenleiste des Projekts** (nicht unter Settings), direkt: https://vercel.com/rogerwilloughbys-projects/daily/settings/environment-variables. Nach dem Ändern einer Variable: Redeploy des obersten (aktuellen) Eintrags.
 - Roger arbeitet unter Windows meist in **PowerShell** (nicht cmd): Befehle immer mit vorherigem `cd` in den Projektordner – oder besser eine `.cmd`-Datei zum Doppelklicken.
 - Tests in der Desktop-VM: dort fehlt `node_modules`, `npm test` scheitert an `node-ical`; `node --test test/dienste.test.js` läuft. Vollständig läuft `npm test` im Cloud-Container.
+- **Arbeitskopie in der Desktop-VM (29.09.2026):** Claude arbeitet in `public/arbeit/` (per .gitignore ausgeschlossen), dort `npm ci` → `npm test` läuft vollständig. Der Cloud-Container erreicht verkehr.autobahn.de nicht. `npm run build` löscht `public/` – im verbundenen Ordner ist Löschen gesperrt, daher Build und Mock-Server in einer Kopie außerhalb (`$HOME/w`). Playwright in der VM: `playwright-core` + `@sparticuz/chromium` von npm (der Playwright-Download ist gesperrt), Start mit `--no-proxy-server`, ohne `--single-process`. Hintergrundprozesse enden mit jedem Aufruf – Mock-Server und Messung daher im selben Aufruf. `public/` kann Roger jederzeit löschen.
 
 ## Stand der Dienste
 Oberfläche: Standardbelegung = nur überarbeitete Kacheln (`fertig: true` in `src/js/core/tiles.js`) – **Wetter**, **Kalender**, **Verkehr**, **Finanzen**, **Tools**, Meine Seiten, Mein Daily, Deine Nutzung; übrige Felder „Freier Platz“. Seit 0.16.0 wählt man die Kacheln in Einstellungen → „Kacheln“ (Aktiv/Verfügbar, Doppelklick, Ziehen); alte Kacheln stehen dort als „Vorschau“. Einstellungen einer Kachel: Zahnrad-Reiter in der Kachel (Wetter, Kalender, Verkehr, Finanzen, Sport). Details `entscheidungen.md` → 3a.
@@ -41,6 +42,7 @@ Oberfläche: Standardbelegung = nur überarbeitete Kacheln (`fertig: true` in `s
 | `termine` | Kalender (nur privat) | ✅ getestet (0.15.0). Eigene Termine aus iCal, 14 Tage, Links per POST, nie zwischengespeichert. |
 | `finanzen` | Finanzen | 🆕 0.22.0, auf Vercel zu testen. EZB: Wechselkurse (90 Tage), Leitzinsen, Inflation; für alle gleich, Takt 1 Std. Adressen der EZB-Datenschnittstelle (Leitzinsen, Inflation) nur nach Dokumentation gebaut – bei Fehlern zuerst dort prüfen. |
 | `kurse` | Finanzen, Reiter „Märkte“ (nur privat) | 🆕 0.22.0. Yahoo (vorher `api/markets.js`), DAX, S&P 500, MSCI World, Bitcoin, Ethereum, Gold. |
+| `autobahn` | Verkehr, Ansicht „Arbeitsweg“ | 🆕 0.28.0, auf Vercel zu testen (kein Schlüssel nötig). Autobahn-API: Staus, Sperrungen, Baustellen der gewählten Autobahnen (bis 5), Takt 5 min; Start/Ziel nur im Browser, Filter auf den Weg im Browser (Korridor ≥ 10 km bzw. ¼ der Luftlinie). |
 | `tanken` | Verkehr, Ansicht „Tanken“ | 🆕 0.27.0, auf Vercel zu testen (braucht `TANKERKOENIG_API_KEY`). Alle Sorten mit einem Abruf, Umkreis 2/5/10 km, Takt 5 min. |
 | übrige | – | noch alte Schnittstelle (`api/*.js`): Abfahrten (in der Kachel „Verkehr“, `api/transit.js`), ausgeblendet: Sport (Fußball), Wissen (Wort, „An diesem Tag“), Tagesinhalte (Rätsel, Essen, Land, Film, Gesundheit, Tech, Sparen, Beziehung), Schlagzeilen (privat). Nach dem Umzug in `tiles.js` `fertig: true` setzen. |
 
@@ -62,9 +64,11 @@ App-Seite „Woher kommen die Daten?“ (Fußzeile → Datenquellen) zeigt die D
 - Vercel hat zweimal einen Push verpasst (28.09. und 29.09.) – Git-Verbindung in Vercel prüfen (Settings → Git, Deployments).
 - Wetter klein bei 1100 px: Sonnenzahl ragt aus der Kachel, Text der Wetterlage wird verdrängt (gemessen mit App 0.26.3; bei 1400 und 1920 px passt alles). Ansätze: „Wind“ weglassen, Wetterlage kürzen.
 - Später zu besprechen: „Immer meinen aktuellen Standort verwenden“, Ort je Kachel, Kachelauswahl in den Einstellungen.
+- Arbeitsweg Auto: Autobahnen aus Start und Ziel vorschlagen (heute von Hand); aufgelöster Start/Ziel („→ Dresden (Sachsen)“) erscheint im Zahnrad erst beim nächsten Öffnen; Richtung nicht gefiltert (beide Richtungen, für Hin- und Rückweg gewollt).
+- Autobahn öffentlich: API ohne Lizenzangabe, Staumeldungen teils INRIX – vor dem öffentlichen Start klären (`../recht/checkliste.md`).
 
 ## Nächste Schritte (in dieser Reihenfolge)
-1. **Kachel „Verkehr“ weiter ausbauen** (Entscheidungen in `entscheidungen.md` → „Kachel Verkehr“): Schritt 2 Dienst `autobahn` (Arbeitsweg Auto), Schritt 3 Bus/Bahn über Verkehrsverbünde (`abfahrten`, `verbindung`, Start VVO). **Vorher je Schritt Plan vorlegen.**
+1. **Kachel „Verkehr“ weiter ausbauen** (Entscheidungen in `entscheidungen.md` → „Kachel Verkehr“): Schritt 2 Dienst `autobahn` ✅ 0.28.0 (Roger testet auf Vercel: Zahnrad → Autobahnen, Start, Ziel). Als Nächstes Schritt 3 Bus/Bahn über Verkehrsverbünde (`abfahrten`, `verbindung`, Start VVO). **Vorher Plan vorlegen.**
 2. **Nächste Kachel auf daily/1 umziehen** – Roger wählt aus: Sport, Geld (privat), Wissen, Tagesinhalte, Schlagzeilen (privat). Vorschlag laut `dienste-katalog.md`: `tanken`, `abfahrten`, `fussball`, `an-diesem-tag`, `tagesinhalt`, `kurse`. **Vorher Plan vorlegen.** Je Dienst: Dienstblatt, Version, Tests, Frag DAILY, Kachel mit `fertig: true`, Einstellungen im Zahnrad-Reiter der Kachel.
 3. Neue Dienst-Ideen von Roger aufnehmen (`dienste-katalog.md`).
 4. **Vor dem öffentlichen Start:** eigene Daten Wetter/Radar (zentral, Stufe 4), Lasttest, Vercel Pro, Recht (`../recht/checkliste.md`).

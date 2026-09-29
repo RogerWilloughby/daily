@@ -1,6 +1,6 @@
 // App-Version der Oberfläche. Die Nummer pflegt Claude bei jeder Änderung (package.json und hier gleich halten, ein Test prüft das):
 // kleine Korrektur → 0.6.1, neue Funktion → 0.7.0. Stand (Zeitpunkt) und Commit setzt der Build (build.js) automatisch ein.
-export const APP = { version: '0.27.0', stand: null, commit: null };
+export const APP = { version: '0.28.0', stand: null, commit: null };
 
 // „DAILY 0.6.0 · 27.09.2026 14:32 · b518008“ (lokal ohne Stand und Commit)
 export function versionText(app = APP) {

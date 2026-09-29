@@ -184,4 +184,64 @@ const ezbInflation = () => 'KEY,FREQ,REF_AREA,ADJUSTMENT,ICP_ITEM,STS_INSTITUTIO
   [['DE', '2026-07', 2.0], ['DE', '2026-08', 2.1], ['U2', '2026-07', 2.0], ['U2', '2026-08', 2.2]]
     .map(([g, m, v]) => `ICP.M.${g}.N.000000.4.ANR,M,${g},N,000000,4,ANR,${m},${v}`).join('\n');
 
-module.exports = { ezbKurse, ezbZinsen, ezbInflation, rss, atom, yahoo, table1, table2, matches2, pointfinder, departures, onthisday, ics, alerts, school, tanken, forecast, airQuality, geocoding, radar };
+// Autobahn-API (verkehr.autobahn.de): Aufbau wie die echten Antworten vom 29.09.2026, Strecke A4 Dresden – Chemnitz.
+// Zeiten relativ zu jetzt (Ortszeit im Text), damit „läuft gerade“ / „ab heute Abend“ im Testserver stimmt.
+const bt = d => new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: '2-digit' }).format(d);
+const bz = d => new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(d);
+const abendHeute = (() => { const d = new Date(now); d.setUTCHours(19, 0, 0, 0); if (d <= now) d.setUTCDate(d.getUTCDate() + 1); return d; })();
+const ab = (id, typ, titel, unter, [lat, lon], [lat2, lon2], mehr = {}) => ({
+  identifier: id, icon: '101', isBlocked: 'false', future: false, extent: `${lat},${lon},${lat2},${lon2}`, point: `${lat},${lon}`,
+  startLcPosition: '5', display_type: typ, subtitle: unter, title: titel, coordinate: { lat, long: lon },
+  routeRecommendation: [], footer: [], lorryParkingFeatureIcons: [], geometry: { type: 'LineString', coordinates: [[lon, lat], [lon2, lat2]] }, ...mehr
+});
+function autobahn(url) {
+  const m = String(url).match(/autobahn\/(A\d+)\/services\/(\w+)/);
+  if (!m) return null;
+  const [, strasse, art] = m;
+  if (strasse === 'A4') {
+    if (art === 'warning') return { warning: [
+      ab('INRIX--vi-avl.test-1', 'WARNING', 'A4 | Wilsdruff - Nossen', ' Dresden -> Chemnitz', [51.0551, 13.5201], [51.0602, 13.3301], {
+        startTimestamp: ago(25).toISOString().replace(/\.\d{3}Z$/, 'Z'), delayTimeValue: '14', abnormalTrafficType: 'QUEUING_TRAFFIC', averageSpeed: '25', source: 'inrix',
+        description: [`Beginn: ${bt(ago(25))} um ${bz(ago(25))} Uhr`, '', 'Angespannte Verkehrslage, stockender Verkehr zwischen Wilsdruff und Nossen', '', 'Verzögerung: 14 Minuten'] }),
+      ab('INRIX--vi-avl.test-2', 'WARNING', 'A4 | Frechen-Nord - Köln-Eifeltor', ' Heerlen/Aachen -> Köln', [50.9285, 6.8317], [50.8943, 6.9184], {
+        startTimestamp: ago(90).toISOString().replace(/\.\d{3}Z$/, 'Z'), delayTimeValue: '27', abnormalTrafficType: 'QUEUING_TRAFFIC', source: 'inrix',
+        description: [`Beginn: ${bt(ago(90))} um ${bz(ago(90))} Uhr`, '', 'Angespannte Verkehrslage...'] }),
+      ab('vi-mel.test-3', 'WARNING', 'A4 | Hainichen - Chemnitz-Ost', ' Chemnitz -> Dresden', [50.9701, 13.1203], [50.9001, 13.0002], {
+        startTimestamp: ago(10).toISOString().replace(/\.\d{3}Z$/, 'Z'),
+        description: [`Beginn: ${bt(ago(10))} um ${bz(ago(10))} Uhr`, '', 'Gegenstände auf der Fahrbahn'] })
+    ] };
+    if (art === 'closure') return { closure: [
+      ab('vi-fbm.test-4', 'CLOSURE_ENTRY_EXIT', 'A4 | Dresden-Altstadt', ' Chemnitz -> Dresden', [51.0701, 13.6801], [51.0701, 13.6801], {
+        icon: '262', isBlocked: 'true', startTimestamp: ago(24 * 60).toISOString().replace(/\.\d{3}Z$/, 'Z'),
+        impact: { lower: 'Dresden-Altstadt', upper: 'Dresden-Altstadt', symbols: ['CLOSED'] },
+        description: [`Beginn: ${bt(ago(24 * 60))} um ${bz(ago(24 * 60))} Uhr`, `Ende: ${bt(inMin(3 * 24 * 60))} um ${bz(inMin(3 * 24 * 60))} Uhr`, '', 'A4: Chemnitz -> Dresden, Auffahrt Dresden-Altstadt gesperrt', '', 'Fahrbahnerneuerung'] }),
+      ab('vi-fbm.test-5', 'CLOSURE', 'A4 | Siebenlehn - Nossen', ' Chemnitz -> Dresden', [51.0301, 13.3001], [51.0501, 13.2901], {
+        icon: '250', future: true, impact: { lower: 'Nossen', upper: 'Siebenlehn', symbols: ['SEPARATE', 'CLOSED', 'CLOSED'] },
+        description: ['Die Baustelle ist zu folgenden Zeiträumen gültig:', `${bt(abendHeute)} ${bz(abendHeute)} bis zum ${bt(new Date(+abendHeute + 8 * 3600e3))} ${bz(new Date(+abendHeute + 8 * 3600e3))} Uhr.`,
+          `${bt(new Date(+abendHeute + 7 * 864e5))} ${bz(abendHeute)} bis zum ${bt(new Date(+abendHeute + 7 * 864e5 + 8 * 3600e3))} ${bz(new Date(+abendHeute + 8 * 3600e3))} Uhr.`,
+          '(Ende der Gesamtmaßnahme: 30.10.26)', '', 'A4: Chemnitz -> Dresden, zwischen AS Siebenlehn und AS Nossen', '', 'Länge: konnte nicht ermittelt werden', '', 'Vollsperrung für Brückenprüfung'] })
+    ] };
+    if (art === 'roadworks') return { roadworks: [
+      ab('vi-bs.test-6', 'SHORT_TERM_ROADWORKS', 'A4 | Wilsdruff - Dresden-Altstadt', ' Chemnitz -> Dresden', [51.0551, 13.5401], [51.0651, 13.6601], {
+        icon: '123', startTimestamp: ago(120).toISOString().replace(/\.\d{3}Z$/, 'Z'),
+        description: ['Zeitraum dieser Bauphase:', `Beginn: ${bt(ago(120))} um ${bz(ago(120))} Uhr`, `Ende: ${bt(inMin(360))} um ${bz(inMin(360))} Uhr`, '', 'Länge: 1.2 km | Max. 60 km/h', '', 'Tagesbaustelle, rechter Fahrstreifen gesperrt'] }),
+      ab('vi-bs.test-7', 'ROADWORKS', 'A4 | Hainichen - Siebenlehn', ' Dresden -> Chemnitz', [50.9801, 13.1501], [51.0201, 13.2801], {
+        icon: '123', startTimestamp: ago(30 * 24 * 60).toISOString().replace(/\.\d{3}Z$/, 'Z'),
+        description: ['Zeitraum dieser Bauphase:', `Beginn: ${bt(ago(30 * 24 * 60))} um 09:00 Uhr`, `Ende: ${bt(inMin(60 * 24 * 60))} um 15:00 Uhr`, '', 'Länge: 3.85 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 6.25 m', '', 'Fahrbahnerneuerung'] }),
+      ab('2023-001281--vi-bs.test-8', 'ROADWORKS', 'A4 | Aachen-Laurensberg - Aachen', ' Heerlen/Aachen -> Köln', [50.803642258915616, 6.085980568128126], [50.80367511958786, 6.140189036523035], {
+        icon: '123', startTimestamp: '2026-08-25T09:00:00+02:00',
+        description: ['Zeitraum dieser Bauphase:', 'Beginn: 25.08.26 um 09:00 Uhr', 'Ende: 01.12.26 um 15:00 Uhr', '(Ende der Gesamtmaßnahme: 01.12.26)', '',
+          'A4: Heerlen/Aachen -> Köln, zwischen 0.7 km hinter AS Aachen-Laurensberg und 2.2 km vor AK Aachen', '', 'Länge: 3.85 km | Max. 80 km/h | Maximale Durchfahrtsbreite: 6.25 m', '', 'Instandsetzung Grenze NL_D - AK Aachen'] })
+    ] };
+  }
+  if (strasse === 'A13') {
+    if (art === 'roadworks') return { roadworks: [
+      ab('vi-bs.test-9', 'ROADWORKS', 'A13 | Ruhland - Ortrand', ' Berlin -> Dresden', [51.4501, 13.8501], [51.3901, 13.7801], {
+        startTimestamp: ago(10 * 24 * 60).toISOString().replace(/\.\d{3}Z$/, 'Z'), description: ['Länge: 2 km | Max. 80 km/h', 'Fahrbahnerneuerung'] })
+    ] };
+    return { [art]: [] };
+  }
+  return null;   // unbekannte Autobahn: 404
+}
+
+module.exports = { ezbKurse, ezbZinsen, ezbInflation, rss, atom, yahoo, table1, table2, matches2, pointfinder, departures, onthisday, ics, alerts, school, tanken, forecast, airQuality, geocoding, radar, autobahn };

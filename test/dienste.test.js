@@ -945,3 +945,77 @@ test('Tanken: Vertrag, alle Sorten mit einem Abruf, Günstigste/Durchschnitt, Sc
   assert.equal(a.antwort('Wie wird das Wetter?', env), null);
   assert.equal(a.antwort('Was kostet Sprit?', null), 'Die Spritpreise sind gerade nicht erreichbar.');
 });
+
+test('Autobahn: Vertrag, Arten, Zeiten aus dem Text, Eingaben, fehlende Autobahn; Arbeitsweg-Ansicht und Frag DAILY', async () => {
+  const w = dienste.byId.autobahn;
+  // Eingabe: Schreibweise egal, sortiert, ohne Doppelte; Bundesstraßen ungültig
+  assert.deepEqual(w.strassenAus('a13, A 4;a4'), ['A4', 'A13']);
+  assert.deepEqual(w.strassenAus('A04 A7'), ['A4', 'A7']);
+  assert.equal(w.strassenAus('B96'), null);
+  // Ortszeit → UTC, Sommer- und Winterzeit
+  assert.equal(w.berlin('25', '08', '26', '09', '00'), '2026-08-25T07:00:00Z');
+  assert.equal(w.berlin('01', '12', '26', '15', '00'), '2026-12-01T14:00:00Z');
+  const t = w.ausText(['Die Baustelle ist zu folgenden Zeiträumen gültig:', '12.10.26 21:00 bis zum 13.10.26 05:00 Uhr.', '26.10.26 21:00 bis zum 27.10.26 05:00 Uhr.', 'Länge: 3.85 km | Max. 80 km/h']);
+  assert.deepEqual(t.zeitraeume, [{ beginn: '2026-10-12T19:00:00Z', ende: '2026-10-13T03:00:00Z' }, { beginn: '2026-10-26T20:00:00Z', ende: '2026-10-27T04:00:00Z' }]);
+  assert.deepEqual([t.laengeKm, t.tempoKmh, t.beginn, t.ende], [3.9, 80, null, null]);
+  // Umwandlung einer Autobahn
+  const q = { warning: fx.autobahn('x/autobahn/A4/services/warning'), closure: fx.autobahn('x/autobahn/A4/services/closure'), roadworks: fx.autobahn('x/autobahn/A4/services/roadworks') };
+  const ms = w.umwandeln(q, 'A4');
+  assert.deepEqual(pruefe({ strassen: ['A4'], fehlend: [], meldungen: ms }, w.schema), []);
+  assert.deepEqual(ms.map(m => m.typ), ['stau', 'stau', 'meldung', 'anschlusssperrung', 'sperrung', 'tagesbaustelle', 'baustelle', 'baustelle']);
+  const stau = ms[0];
+  assert.deepEqual([stau.von, stau.bis, stau.richtung.nach, stau.lage, stau.verzoegerungMin, stau.tempoKmh, stau.anbieter], ['Wilsdruff', 'Nossen', 'Chemnitz', 'stockend', 14, 25, 'inrix']);
+  const aachen = ms.find(m => m.von === 'Aachen-Laurensberg');
+  assert.deepEqual([aachen.beginn, aachen.ende, aachen.laengeKm, aachen.tempoKmh, aachen.lat2], ['2026-08-25T07:00:00Z', '2026-12-01T14:00:00Z', 3.9, 80, 50.8037]);
+  const nacht = ms.find(m => m.typ === 'sperrung');
+  assert.deepEqual([nacht.kuenftig, nacht.zeitraeume.length, nacht.beginn === nacht.zeitraeume[0].beginn, nacht.ende === nacht.zeitraeume[1].ende], [true, 2, true, true]);
+  const as = ms.find(m => m.typ === 'anschlusssperrung');
+  assert.deepEqual([as.von, as.bis, as.gesperrt], ['Dresden-Altstadt', null, true]);
+  assert.ok(ms.every(m => !m.text.includes('')));                                                       // ohne Leerzeilen
+  // Router: sortiert, Takt 5 Minuten, Fehler
+  w.JE_STRASSE.clear();
+  const r = await rufe('autobahn', { strassen: 'A13,a4' });
+  assert.equal(r.code, 200);
+  gueltig(r.body, w.schema);
+  assert.deepEqual([r.body.daten.strassen, r.body.ort, r.body.daten.meldungen.at(-1).strasse], [['A4', 'A13'], null, 'A13']);
+  assert.equal(Date.parse(r.body.gueltigBis) % 300e3, 0);
+  assert.deepEqual((await rufe('autobahn', { strassen: 'A4,A999' })).body.daten.fehlend, ['A999']);
+  assert.deepEqual([(await rufe('autobahn', {})).body.fehler.code, (await rufe('autobahn', { strassen: 'B96' })).body.fehler.code,
+    (await rufe('autobahn', { strassen: 'A1,A2,A3,A4,A5,A6' })).body.fehler.code, (await rufe('autobahn', { strassen: 'A999' })).code],
+    ['eingabe_fehlt', 'eingabe_ungueltig', 'eingabe_ungueltig', 502]);
+  // Ansicht „Arbeitsweg“: nur Meldungen nahe der Strecke Dresden → Chemnitz (Köln und Aachen fallen weg)
+  const a = await esm('src/js/adapter/autobahn.js');
+  const start = { name: 'Dresden', lat: 51.05, lon: 13.74 }, ziel = { name: 'Chemnitz', lat: 50.83, lon: 12.92 };
+  assert.ok(Math.abs(a.luftlinieKm(start, ziel) - 62.6) < 1);
+  assert.equal(Math.round(a.korridorKm(start, ziel)), 16);                                             // ¼ der Luftlinie > 10 km
+  assert.equal(a.korridorKm(start, { lat: 51.0, lon: 13.7 }), 10);
+  const env = r.body, v = a.ansicht(env, { start, ziel });
+  assert.equal(v.kopf, '<b>Dresden → Chemnitz</b> <small>A4 · A13</small>');
+  assert.deepEqual(v.liste.map(z => z.d + ' ' + z.t), ['+14 min A4 Wilsdruff – Nossen · stockender Verkehr',
+    'Achtung A4 Hainichen – Chemnitz-Ost · Gegenstände auf der Fahrbahn', 'ab 21 Uhr A4 Siebenlehn – Nossen · Sperrung']);
+  assert.match(v.liste[0].tip, /Richtung Chemnitz\nstockender Verkehr · 25 km\/h · seit /);
+  assert.equal(v.x, '1 Stau (bis +14 min), 1 Sperrung, 1 Baustelle.');
+  assert.doesNotMatch(v.html, /Köln|Aachen|Ruhland/);
+  assert.match(v.html, /Staus und Meldungen.*Sperrungen.*Baustellen heute.*Baustellen/);
+  assert.match(v.html, /Meldungen bis 16 km neben der Luftlinie/);
+  // Ohne Start/Ziel alle Meldungen; ohne Meldungen „frei“; ohne Daten
+  const alle = a.ansicht(env, {});
+  assert.equal(alle.liste[0].t, 'A4 Frechen-Nord – Köln-Eifeltor · stockender Verkehr');
+  const ruhig = a.ansicht({ ...env, daten: { ...env.daten, meldungen: env.daten.meldungen.filter(m => m.typ === 'baustelle') } }, { start, ziel });
+  assert.deepEqual([ruhig.ms, ruhig.x, ruhig.liste.map(z => z.d + ' ' + z.t)], ['frei', 'Keine Staus oder Sperrungen · 1 Baustelle.', ['✓ Keine Staus oder Sperrungen', '1 Baustelle']]);
+  assert.match(a.ansicht(null).x, /nicht erreichbar/);
+  // Zeiten: nächtliche Sperrung läuft nur in ihrem Zeitraum
+  const z = { typ: 'sperrung', kuenftig: true, beginn: '2026-10-12T19:00:00Z', ende: '2026-10-27T04:00:00Z', zeitraeume: t.zeitraeume };
+  assert.deepEqual([a.aktiv(z, Date.parse('2026-10-12T20:00:00Z')), a.aktiv(z, Date.parse('2026-10-13T12:00:00Z'))], [true, false]);
+  assert.equal(a.status(z, Date.parse('2026-10-13T12:00:00Z')), 'ab 26.10.');
+  assert.equal(a.status(z, Date.parse('2026-10-12T20:00:00Z')), 'bis morgen 5 Uhr');
+  assert.equal(a.wann(Date.parse('2026-10-15T19:00:00Z'), Date.parse('2026-10-13T12:00:00Z')), 'Do 21 Uhr');
+  // Frag DAILY
+  const o = { start, ziel, strassen: ['A4', 'A13'] };
+  assert.match(a.antwort('Wie ist mein Arbeitsweg?', env, o), /^A4, A13 \(Dresden → Chemnitz\): stockender Verkehr A4 Wilsdruff – Nossen Richtung Chemnitz \(\+14 min\)/);
+  assert.match(a.antwort('Stau auf der A4?', env, o), /Frechen-Nord/);                                  // gezielte Frage: ganze Autobahn
+  assert.match(a.antwort('Was ist auf der A7 los?', env, o), /^A7 ist nicht in deinem Arbeitsweg/);
+  assert.match(a.antwort('Stau?', env, { start, ziel, strassen: [] }), /Autobahnen eintragen/);
+  assert.equal(a.antwort('Wann fährt die Bahn?', env, o), null);
+  assert.deepEqual([a.strassenVon('a4, A 13'), a.strassenVon('B96')], [['A4', 'A13'], null]);
+});

@@ -175,8 +175,9 @@ Neue Kachel mit eigener Darstellung: Datei unter `src/js/ansichten/`, vom Provid
 | `termine` | ✅ daily/1, **nur privat** – eigene Termine aus iCal (14 Tage), Links nur per POST, nie zwischengespeichert; in der Kachel „Kalender“ (Kennzahl „14:00 Zahnarzt“, Reiter „Termine“) |
 | `finanzen` | ✅ daily/1 – EZB: Wechselkurse (90 Tage), Leitzinsen, Inflation; Kachel „Finanzen“ |
 | `tanken` | ✅ daily/1 – Tankerkönig (MTS-K): E5, E10, Diesel im Umkreis 2/5/10 km; Kachel „Verkehr“, Ansicht „Tanken“ |
+| `autobahn` | ✅ daily/1 – Autobahn-API: Staus, Sperrungen, Baustellen je Autobahn (bis 5); Kachel „Verkehr“, Ansicht „Arbeitsweg“ – Start/Ziel nur im Browser, Filter auf den Weg im Adapter |
 | `kurse` | ✅ daily/1, **nur privat** – Yahoo (DAX, S&P 500, MSCI World, Bitcoin, Ethereum, Gold); Kachel „Finanzen“, Reiter „Märkte“ |
-| Tanken, Abfahrten, Sport, Geld, Wissen, Tagesinhalte | ⏳ noch alte Einzelfunktionen bzw. im Browser berechnet |
+| Abfahrten, Sport, Wissen, Tagesinhalte | ⏳ noch alte Einzelfunktionen bzw. im Browser berechnet |
 | Kalender, Schlagzeilen (privat) | ⏳ |
 
 Nach der Umstellung aller Dienste entfallen die alten `api/*.js`-Funktionen.
