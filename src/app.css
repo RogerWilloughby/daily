@@ -176,7 +176,6 @@ b.wd-t-max,b.wd-t-min,b.wd-t-regen,b.wd-t-sonne{font-weight:700}
 .tile[data-mode="lane"] .wd-mini{height:22px}
 .wd path{fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
 .wd .wd-max{stroke:var(--wd-max)}.wd .wd-min{stroke:var(--wd-min)}
-.wd .wd-trend{stroke-dasharray:3 3;opacity:.75}
 .wd .wd-regen{fill:var(--wd-regen)}.wd .wd-sonne{fill:var(--wd-sonne)}
 .wd .wd-blass{opacity:.55}
 .wd-figur{margin:0 0 14px;position:relative}
@@ -184,13 +183,11 @@ b.wd-t-max,b.wd-t-min,b.wd-t-regen,b.wd-t-sonne{font-weight:700}
 .wd-gross .wd-achse{font-size:9.5px;fill:currentColor;opacity:.7}
 .wd-gross .wd-wert{font-size:11px;font-weight:600;fill:currentColor}
 .wd-gross .wd-gitter{stroke:currentColor;opacity:.15;stroke-width:1}
-.wd-gross .wd-trendfeld{fill:currentColor;opacity:.06}
 .wd-gross .wd-spalte{fill:transparent;cursor:crosshair}
 .wd-gross .wd-spalte.an{fill:currentColor;opacity:.08}
 .wd-legende{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;opacity:.85;margin-top:4px}
 .wd-legende i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:5px;vertical-align:middle}
 .wd-l-max{background:var(--wd-max)}.wd-l-min{background:var(--wd-min)}.wd-l-regen{background:var(--wd-regen);height:8px!important}.wd-l-sonne{background:var(--wd-sonne);height:8px!important}
-.wd-l-trend{background:repeating-linear-gradient(90deg,currentColor 0 3px,transparent 3px 6px);opacity:.7}
 .wd-tip{position:absolute;right:0;top:0;font-size:12px;padding:4px 8px;border-radius:8px;background:var(--surface);color:var(--ink);border:1px solid var(--line);pointer-events:none;max-width:90%}
 .lglyph{flex:none;width:18px;height:18px;color:var(--accent);display:inline-flex}
 .lglyph[hidden]{display:none}

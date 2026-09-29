@@ -241,7 +241,9 @@ test('Adapter Wetter: Kachel und Antwort aus dem Vertrag', async () => {
   assert.match(k.chart, /data-tip="(Mo|Di|Mi|Do|Fr|Sa|So)\s\d{1,2}\.\d{1,2}\. · -?\d+–-?\d+° · [^"]+ · \d+(,\d)?\smm\s\(\d+\s%\) · ☀\s\d+(,\d)?\sh/);   // kurz gefasst
   assert.match(k.chart, /class="wd-max" d="M[\d.]+,[\d.]+C/);
   assert.match(k.chart, /<b class="wd-t-sonne"[^>]*>Sonne<\/b>/);
-  assert.match(k.chart, /wd-max.*wd-min.*wd-trend/);
+  assert.match(k.chart, /wd-max.*wd-min/);
+  assert.doesNotMatch(k.chart + k.tabs.map(t => t.html).join(''), /wd-trend|Trend|unsicher/);   // keine Trend-Kennzeichnung mehr in der Oberfläche
+  assert.ok(!k.rows.some(([l, v]) => /Trend|unsicher/.test(l + v)));
   // Kopfzeile mit farbigen Zahlen
   assert.match(k.titleHtml, /^Berlin 15° · <span class="wd-tm" title="Tiefstwert heute: 9° um \d{1,2} Uhr"><b class="wd-t-min">9°<\/b> <small class="wd-um">\d{1,2} Uhr<\/small><\/span> \/ <span class="wd-tm" title="Höchstwert heute: 16° um \d{1,2} Uhr"><b class="wd-t-max">16°<\/b> <small class="wd-um">\d{1,2} Uhr<\/small><\/span>$/);
   assert.equal(k.zeileIcon, true);
@@ -276,7 +278,7 @@ test('Adapter Wetter: Kachel und Antwort aus dem Vertrag', async () => {
   assert.equal(zeile('Wind'), '11 km/h aus W, Böen 25 km/h');
   assert.match(zeile('Sonne'), /4 Std\. Sonne · UV bis 3$/);
   assert.equal(zeile('Luftdruck'), '1016 hPa, fallend');
-  assert.match(zeile('Trend bis'), /° bis .*° · .* \(unsicher\)$/);
+  assert.match(zeile('Bis '), /° bis .*° · (eher wechselhaft|eher trocken|teils Regen)$/);
   assert.ok(!k.rows.some(([l]) => l === 'Achtung'));        // heute/morgen kein Frost
   assert.match(text(env), /^Berlin: jetzt 15°/);
 });

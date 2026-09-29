@@ -140,12 +140,12 @@ function warnung(tage, z) {
   return t.glaette ? `Glätte möglich ${wann} (bis ${r0(t.minC)}°)` : `Frost ${wann} (bis ${r0(t.minC)}°)`;
 }
 
-// Trend-Tage zusammengefasst: Temperaturspanne und Tendenz
-function trendText(tage) {
+// Spätere Tage zusammengefasst: Temperaturspanne und Tendenz (ohne „Trend“/„unsicher“ – das steht im Dienstblatt)
+function spaeterText(tage) {
   const min = Math.min(...tage.map(t => t.minC ?? Infinity)), max = Math.max(...tage.map(t => t.maxC ?? -Infinity));
   const nass = tage.filter(t => (t.regenProzent ?? 0) >= 50).length;
   const art = nass >= tage.length / 2 ? 'eher wechselhaft' : nass === 0 ? 'eher trocken' : 'teils Regen';
-  return `${r0(min)}° bis ${r0(max)}° · ${art} (unsicher)`;
+  return `${r0(min)}° bis ${r0(max)}° · ${art}`;
 }
 
 // Darstellung als Kachel (Felder wie in core/board.js erwartet)
@@ -169,10 +169,10 @@ export function kachel(env, regenEnv = null, hinweisEnv = null) {
   if (warn) rows.push(['Achtung', warn]);
   if (d.luft) rows.push(['Luftqualität', `${LUFT[d.luft.stufe] || '–'} (EAQI ${r0(d.luft.aqi)})`]);
   if (pollen) rows.push(['Pollen', pollen]);
-  d.tage.slice(1, 7).filter(t => !t.trend).forEach((t, i) => rows.push([i === 0 ? 'Morgen' : z.wtag(t.datum),
+  d.tage.slice(1, 7).forEach((t, i) => rows.push([i === 0 ? 'Morgen' : z.wtag(t.datum),
     `${r0(t.minC)}° bis ${r0(t.maxC)}° · ${zustandText(t.zustand, t.code)} · Regen bis ${t.regenProzent ?? 0} %`]));
-  const trend = d.tage.filter(t => t.trend);
-  if (trend.length) rows.push([`Trend bis ${z.wtag(trend[trend.length - 1].datum)}`, trendText(trend)]);
+  const spaeter = d.tage.slice(7);
+  if (spaeter.length) rows.push([`Bis ${z.wtag(spaeter[spaeter.length - 1].datum)}`, spaeterText(spaeter)]);
   rows.push(['Stand', `${z.hm(a.zeit)} Uhr · ${env.quellen.map(q => q.name).join(', ')}`]);
   // Aufgeklappt: Reiter statt langer Liste – alles ohne Scrollen sichtbar
   const zone = env.ort.zeitzone || 'Europe/Berlin', hTop = (hinweisEnv && hinweisEnv.daten && hinweisEnv.daten.hinweise[0]) || null;
@@ -214,7 +214,7 @@ export function tagTip(t) {
   const tag = `${d.toLocaleDateString('de-DE', { weekday: 'short', timeZone: 'UTC' }).replace('.', '')} ${d.getUTCDate()}.${d.getUTCMonth() + 1}.`;
   return [tag, `${r0(t.minC)}–${r0(t.maxC)}°`, zustandText(t.zustand, t.code),
     `${mmText(t.niederschlagMm)}${t.regenProzent != null ? ` (${t.regenProzent} %)` : ''}`,
-    t.sonnenstunden != null ? `☀ ${komma1(t.sonnenstunden)} h` : null, t.trend ? 'Trend' : null].filter(Boolean).map(fest).join(' · ');
+    t.sonnenstunden != null ? `☀ ${komma1(t.sonnenstunden)} h` : null].filter(Boolean).map(fest).join(' · ');
 }
 export function stundeTip(s, zone = 'Europe/Berlin') {
   const d = new Date(s.zeit), h = +d.toLocaleTimeString('de-DE', { timeZone: zone, hour: '2-digit', hourCycle: 'h23' }).slice(0, 2);

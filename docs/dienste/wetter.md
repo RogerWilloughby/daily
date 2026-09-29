@@ -7,16 +7,17 @@ Aktuelles Wetter, 48-Stunden- und 16-Tage-Vorhersage (ab Tag 8 als Trend) mit Wi
 | | |
 |---|---|
 | Aufruf | `GET /api/v1/wetter` |
-| Programmversion | 1.4.0 |
+| Programmversion | 1.4.1 |
 | Vertrag (Datenformat) | daily/1, Version 1 |
 | Klasse | oeffentlich |
 | Länder | weltweit |
 | Gültigkeit | bis zum nächsten Takt von 30 min (z. B. :00/:30) |
 
 ## Zweck
-Wetter für einen Ort: jetzt, die nächsten 48 Stunden und 15 Tage (ab Tag 8 als Trend gekennzeichnet), mit Wind, Sonne, Wolken, Luftdruck, Sicht, Schnee und Frost, dazu Luftqualität und Pollen.
+Wetter für einen Ort: jetzt, die nächsten 48 Stunden und 15 Tage, mit Wind, Sonne, Wolken, Luftdruck, Sicht, Schnee und Frost, dazu Luftqualität und Pollen.
 
 ## Herkunft der Daten
+- Vorhersagen sind ohne Gewähr: Schon bei 48 Stunden kann das tatsächliche Wetter deutlich abweichen (z. B. Schauer, Gewitter, Nebel), und ab etwa dem 8. Tag nimmt die Genauigkeit spürbar ab. Das Feld „trend“ kennzeichnet diese Tage; die DAILY-Oberfläche zeigt sie wie alle anderen.
 - Open-Meteo Forecast API („best match“): für Deutschland zuerst DWD ICON-D2 (≈ 2 km, ≈ 2 Tage), dann ICON-EU (≈ 7 km, bis 5 Tage) und ICON global (bis 7,5 Tage), danach ECMWF (bis 15 Tage) und GFS (bis 16 Tage).
 - Open-Meteo Air Quality API: Luftqualität und Pollen aus Copernicus CAMS (Europa ≈ 11 km).
 - Frei nutzbar nur nicht kommerziell (keine Werbung, kein Abo): höchstens 600 Aufrufe/Minute, 5.000/Stunde, 10.000/Tag. Entscheidung 27.09.2026: Open-Meteo, solange DAILY nicht kommerziell ist.
@@ -42,7 +43,7 @@ Quellen mit Lizenz:
 - Takt: Antworten gelten bis zur nächsten vollen oder halben Stunde – alle Nutzer einer 1-km-Zelle teilen sich einen Abruf und sehen denselben Stand.
 - WMO-Wettercode → Zustand als Aufzählung (klar, regen, gewitter …); Windrichtung → 8 Himmelsrichtungen; Zeiten als UTC, Tage in der Zeitzone des Orts.
 - Abgeleitet: Luftdruck-Tendenz (Änderung jetzt → +3 h, ab 1 hPa steigend/fallend), Frost (Tiefstwert unter 0 °C), Glätte (Tiefstwert ≤ 0,5 °C und Niederschlag oder Neuschnee), Nullgradgrenze (tiefste des Tages), Schneehöhe (höchste des Tages).
-- Tage ab dem 8. sind als Trend gekennzeichnet (trend: true) – Oberflächen zeigen sie zurückhaltend.
+- Tage ab dem 8. sind mit trend: true gekennzeichnet (geringere Genauigkeit); DAILY zeigt sie ohne besondere Kennzeichnung.
 - Luftqualität optional: fällt sie aus, kommt luft = null und der Hinweis luft_nicht_verfuegbar.
 
 ## Ausgabe (`daten`)
@@ -135,6 +136,7 @@ Rahmen und Stufen: `../architektur/skalierung.md`
 ## Änderungen
 | Version | Datum | Änderung |
 |---|---|---|
+| 1.4.1 | 2026-09-29 | Dienstblatt: Hinweis „ohne Gewähr“ und zur abnehmenden Genauigkeit; das Feld „trend“ bleibt als Angabe, DAILY stellt es nicht mehr gesondert dar |
 | 1.4.0 | 2026-09-29 | 15 statt 16 Tage (der 16. Tag kam oft ohne Werte); Tage am Ende ohne Tiefst- und Höchstwert werden weggelassen |
 | 1.3.0 | 2026-09-28 | Je Tag Uhrzeit des Tiefst- und Höchstwerts (minZeit, maxZeit) aus den Stundenwerten |
 | 1.2.0 | 2026-09-27 | 16 Tage (ab Tag 8 Trend), Wind/Sonne/Wolken/Luftdruck/Sicht/Schnee/Frost, Cache-Takt :00/:30 |
