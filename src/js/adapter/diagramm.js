@@ -79,7 +79,8 @@ function mini(d) {
   const xs = Array.from({ length: n }, (_, i) => x(i));
   for (const l of d.linien) out.push(linie(xs, l.werte.map(v => (v == null ? null : y(v))), l.klasse, true));
   // Spalten für das Mouseover (core/board.js zeigt data-tip über dem Diagramm)
-  if (d.tips) d.tips.forEach((t, i) => { if (t) out.push(`<rect class="wd-spalte" x="${(i * sp).toFixed(1)}" y="0" width="${sp.toFixed(1)}" height="${H}" data-tip="${esc(t)}"/>`); });
+  // Werte je Spalte: Objekt → data-zp (Zeitpunkt-Block der Kachel, core/board.js), Text → data-tip
+  if (d.tips) d.tips.forEach((t, i) => { if (t) out.push(`<rect class="wd-spalte" x="${(i * sp).toFixed(1)}" y="0" width="${sp.toFixed(1)}" height="${H}" ${typeof t === 'object' ? `data-zp="${esc(JSON.stringify(t))}"` : `data-tip="${esc(t)}"`}/>`); });
   const svg = `<svg class="wd wd-mini" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">${out.join('')}</svg>`;
   const marken = d.marken.filter(m => x(m.i) / W > 0.03 && x(m.i) / W < 0.97)
     .map(m => `<span style="left:${(x(m.i) / W * 100).toFixed(1)}%">${esc(m.text)}</span>`).join('');

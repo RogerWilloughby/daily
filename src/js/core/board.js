@@ -1,6 +1,6 @@
 // Das Kachelraster: Aufbau, „Raster wächst mit“, Handy-Vollbild und Aktualisieren einzelner Kacheln.
 import { TILES, byId, raster } from './tiles.js';
-import { esc, icon, rows } from './util.js';
+import { esc, icon, rows, glyph } from './util.js';
 import { countClick } from './store.js';
 import { hatEinstellungen, formular, binden, offeneSpeichern, ZAHNRAD } from './einstellungen.js';
 
@@ -112,6 +112,9 @@ export function paint(id) {
   // zeileIcon: das Symbol (z. B. Wetterlage) steht in der kleinen Kachel vor dem Text statt im Kopf
   tz.innerHTML = `<span class="t-text">${t.zeileIcon && t.lglyph ? `<span class="t-icon" title="${esc(t.lglyphTip || '')}">${t.lglyph}</span>` : ''}${esc(t.x)}</span>` +
     (t.zeile2 && t.zeile2.text ? `<span class="t-zeile2">${t.zeile2.glyph ? `<span class="t-icon">${t.zeile2.glyph}</span>` : ''}${esc(t.zeile2.text)}</span>` : '') + (t.liste && t.liste.length ? `<span class="t-liste">${listeHtml(t.liste)}</span>` : '');
+  // Zeitpunkt-Block (Wetter): feste Felder, beim Überfahren des Diagramms wechseln nur die Werte (miniTip)
+  if (t.zp) tz.insertAdjacentHTML('beforeend', `<span class="t-zp" data-jetzt="${esc(JSON.stringify(t.zp))}">${zpHtml(t.zp)}</span>`);
+  tz.classList.toggle('mit-zp', !!t.zp);
   tz.classList.toggle('mit-liste', !!(t.liste && t.liste.length));
   tz.classList.toggle('mit-zeile2', !!(t.zeile2 && t.zeile2.text));   // zweite Zeile (Wetter: Regen) – klein eigene Zeile, sonst im Text
   // Kopf der kleinen Kachel: nur Inhalt (z. B. Ort und Temperaturen, KW) – der Name erscheint beim Überfahren
@@ -231,31 +234,26 @@ function miniDichte(wurzel) {
   });
 }
 
-// Mouseover im Mini-Diagramm: Spalte (data-tip) hervorheben, Werte oben rechts in der Kachel (ohne Hintergrund-Kasten)
+// Zeitpunkt-Block: immer dieselben Felder an festen Plätzen (Zeitpunkt, Temperatur, gefühlt, Wetterlage / Regen, %, Wind, Sonne)
+function zpHtml(z) {
+  const f = (k, v) => `<span class="zp-${k}">${esc(v || '')}</span>`;
+  return f('z', z.z) + f('t', z.t) + f('g', z.g) + `<span class="zp-l">${glyph(z.i)}<span>${esc(z.l)}</span></span>` +
+    `<span class="zp-r"><span class="zp-mm">☂ ${esc(z.mm)}</span>${f('p', z.p)}${f('w', z.w)}${f('s', z.s)}</span>`;
+}
+// Überfahren des Mini-Diagramms: Spalte hervorheben, Werte der Stunde/des Tags in den Zeitpunkt-Block; beim Verlassen zurück auf „Jetzt“
 function miniTip(e) {
   const sp = e.target.closest && e.target.closest('.wd-mini .wd-spalte');
   const tile = sp && sp.closest('.tile');
   grid.querySelectorAll('.wd-spalte.an').forEach(x => { if (x !== sp) x.classList.remove('an'); });
-  grid.querySelectorAll('.mini-hover:not([hidden])').forEach(t => { if (!tile || t.parentNode !== tile) { t.hidden = true; t.parentNode.classList.remove('hover-an'); } });
-  if (!sp || !tile) return;
-  let tip = tile.querySelector(':scope > .mini-hover');
-  if (!tip) { tip = document.createElement('div'); tip.className = 'mini-hover'; tip.setAttribute('aria-hidden', 'true'); tile.appendChild(tip); }
+  grid.querySelectorAll('.t-zp.zp-an').forEach(b => {
+    if (tile && b.closest('.tile') === tile) return;
+    b.classList.remove('zp-an'); delete b.dataset.zeigt; try { b.innerHTML = zpHtml(JSON.parse(b.dataset.jetzt)); } catch (err) { /* bleibt */ }
+  });
+  if (!sp || !tile || !sp.dataset.zp) return;
+  const block = tile.querySelector('.t-zp'); if (!block) return;
   sp.classList.add('an');
-  tip.textContent = sp.dataset.tip; tip.hidden = false;
-  // Immer oben rechts neben dem Kopf (nie springen). Das Warn-Abzeichen tritt solange zurück (der Hinweis steht auch in der Textzeile);
-  // Breite = Platz rechts vom Kopftext (Ort, Temperaturen), mindestens 130 px
-  tile.classList.add('hover-an');
-  const tr = tile.getBoundingClientRect(), lab = tile.querySelector('.head .label'), kopf = lab && lab.querySelector('.kopf');
-  let rechts = tr.left + 20;
-  if (kopf && kopf.getClientRects().length) {
-    const r = document.createRange(), badge = kopf.querySelector('.wh-badge');
-    r.selectNodeContents(kopf); if (badge) r.setEndBefore(badge);
-    const rr = r.getBoundingClientRect(); rechts = rr.right;
-    // Kopftext füllt die Zeile (schmale Kachel): dann in der Zeile darunter (dort steht sonst das Abzeichen), volle Breite
-    if (tr.right - 12 - rechts - 14 < 130) { tip.style.maxWidth = (tr.width - 24) + 'px'; tip.style.top = (rr.bottom - tr.top + 2) + 'px'; return; }
-  } else if (lab) rechts = [...lab.children].filter(c => c.getClientRects().length).reduce((m, c) => Math.max(m, c.getBoundingClientRect().right), rechts);
-  tip.style.maxWidth = Math.max(130, tr.right - 12 - rechts - 14) + 'px';
-  tip.style.top = (lab ? lab.getBoundingClientRect().top - tr.top : 10) + 'px';
+  if (block.dataset.zeigt !== sp.dataset.zp) { block.innerHTML = zpHtml(JSON.parse(sp.dataset.zp)); block.dataset.zeigt = sp.dataset.zp; }
+  block.classList.add('zp-an');
 }
 export function initBoard() {
   grid.addEventListener('pointermove', miniTip);

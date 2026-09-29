@@ -238,7 +238,14 @@ test('Adapter Wetter: Kachel und Antwort aus dem Vertrag', async () => {
   assert.doesNotMatch(k.chart, /class="wd-sonne"/);                                   // keine Sonnenbalken mehr
   assert.match(k.chart, /<div class="wd-sonnen wd-t-sonne">(<span class="(wd-s2)?" style="left:[\d.]+%">\d+<\/span>){15}<\/div>/);   // volle Stunden je Tag
   assert.equal((k.chart.match(/class="wd-spalte"/g) || []).length, 15);
-  assert.match(k.chart, /data-tip="(Mo|Di|Mi|Do|Fr|Sa|So)\s\d{1,2}\.\d{1,2}\. · -?\d+–-?\d+° · [^"]+ · \d+(,\d)?\smm\s\(\d+\s%\) · ☀\s\d+(,\d)?\sh/);   // kurz gefasst
+  const zp = c => JSON.parse(c.match(/data-zp="([^"]*)"/)[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
+  const z1 = zp(k.chart);                                                              // Werte je Tag für den Zeitpunkt-Block
+  assert.deepEqual(Object.keys(z1), ['z', 't', 'g', 'i', 'l', 'mm', 'p', 'w', 's']);
+  assert.match(z1.z, /^(Mo|Di|Mi|Do|Fr|Sa|So) \d{1,2}\.\d{1,2}\.$/);
+  assert.match(z1.t, /^-?\d+–-?\d+°$/);
+  assert.equal(z1.g, '');                                                             // Tag: kein „gefühlt“, Platz bleibt frei
+  assert.match(z1.s, /^☀ \d+ h$/);
+  assert.doesNotMatch(k.chart, /data-tip=/);
   assert.match(k.chart, /class="wd-max" d="M[\d.]+,[\d.]+C/);
   assert.match(k.chart, /<b class="wd-t-sonne"[^>]*>Sonne<\/b>/);
   assert.match(k.chart, /wd-max.*wd-min/);
@@ -748,7 +755,16 @@ test('Einstellungen: Kachel-Formular, Wetter-Optionen, Kachel-Listen', async () 
   // Standard: Mini-Diagramm 24 Stunden (Temperatur + Regenwahrscheinlichkeit, kräftig ab 1 mm)
   const k24 = mitOptionen(kachel(w, r, null), w, {});
   assert.match(k24.chart, /data-mini-wahl="24" aria-pressed="true">.*<b class="wd-t-regen"[^>]*>Regen mm<\/b> · <b class="wd-t-max" title="Temperatur je Stunde">Temperatur<\/b>/);
-  assert.match(k24.chart, /data-tip="(Mo|Di|Mi|Do|Fr|Sa|So)\s\d{1,2}\sUhr · -?\d+°[^"]* · \d+(,\d)?\smm[^"]* · Wind\s\d+/);
+  const z24 = JSON.parse(k24.chart.match(/data-zp="([^"]*)"/)[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
+  assert.deepEqual(Object.keys(z24), ['z', 't', 'g', 'i', 'l', 'mm', 'p', 'w', 's']);   // gleiche Felder wie beim Tag
+  assert.match(z24.z, /^(Mo|Di|Mi|Do|Fr|Sa|So) \d{1,2} Uhr$/);
+  assert.match(z24.w, /^Wind \d+ km\/h$/);
+  // Kopfzeile klein: ohne aktuelle Temperatur, „heute“ vor Tiefst/Höchst; Zeitpunkt-Block „Jetzt“ mit denselben Feldern
+  const kk = mitOptionen(kachel(w, r, null), w, {});
+  assert.match(kk.kopf, /^Berlin · heute <span class="wd-tm"/);
+  assert.deepEqual(Object.keys(kk.zp), ['z', 't', 'g', 'i', 'l', 'mm', 'p', 'w', 's']);
+  assert.equal(kk.zp.z, 'Jetzt');
+  assert.match(kk.kopf, /class="wh-badge wd-radar" title="Regenradar: Regen in 20 Min\. \(leicht\)\.">☂ in 20 Min\. \(leicht\)<\/span>/);
   assert.doesNotMatch(k24.chart, /wd-sonnen/);                                        // Sonne nur bei Tagen
   // 48 Stunden: Zeitachse alle 6 Std., um Mitternacht der Wochentag
   const k48 = mitOptionen(kachel(w, r, null), w, { mini: 48 });

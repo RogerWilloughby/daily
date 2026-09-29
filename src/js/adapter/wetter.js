@@ -116,13 +116,13 @@ function mehrZeilen(env, pollen) {
 // Uhrzeit des Tiefst-/Höchstwerts: „6 Uhr“ (leer, wenn unbekannt)
 const uhrVon = (iso, zone) => iso ? `${+new Date(iso).toLocaleTimeString('de-DE', { timeZone: zone, hour: '2-digit' }).slice(0, 2)} Uhr` : '';
 // klammern: kleine Kachel „9° (2 Uhr)“, aufgeklappt „9° 2 Uhr“
-export function kopfzeileHtml(env, klammern = false) {
+export function kopfzeileHtml(env, klammern = false, mitJetzt = true) {
   const a = env.daten.aktuell, h = env.daten.tage[0] || {}, zone = env.ort.zeitzone || 'Europe/Berlin';
   const um = iso => (uhrVon(iso, zone) ? ` <small class="wd-um">${klammern ? '(' : ''}${uhrVon(iso, zone)}${klammern ? ')' : ''}</small>` : '');
   // Mouseover: „Tiefstwert heute: 9° um 2 Uhr“
   const tip = (art, v, iso) => `${art} heute: ${r0(v)}°${uhrVon(iso, zone) ? ' um ' + uhrVon(iso, zone) : ''}`;
   const wert = (html, art, v, iso) => `<span class="wd-tm" title="${esc(tip(art, v, iso))}">${html}${um(iso)}</span>`;
-  return `${esc(env.ort.name || 'Wetter')} ${r0(a.tempC)}° · ${wert(tmin(h.minC), 'Tiefstwert', h.minC, h.minZeit)} / ${wert(tmax(h.maxC), 'Höchstwert', h.maxC, h.maxZeit)}`;
+  return `${esc(env.ort.name || 'Wetter')}${mitJetzt ? ` ${r0(a.tempC)}°` : ''} · ${mitJetzt ? '' : 'heute '}${wert(tmin(h.minC), 'Tiefstwert', h.minC, h.minZeit)} / ${wert(tmax(h.maxC), 'Höchstwert', h.maxC, h.maxZeit)}`;
 }
 
 // „Dresden 15° · 9°/16°“
@@ -193,13 +193,14 @@ export function kachel(env, regenEnv = null, hinweisEnv = null) {
   const regenZeile = regenHinweis(regenEnv) || regen24(env).text;
   // Kopfzeile: Ort, jetzt, Tiefst/Höchst von heute – alles in einer Zeile
   return {
-    state: 'live', title: kopfzeile(env) + (hTop ? ` · ${hKurz}` : ''), titleHtml: kopfzeileHtml(env) + abzeichen(hinweisEnv), kopf: kopfzeileHtml(env, true) + abzeichen(hinweisEnv), zeileIcon: true, tabs,
+    state: 'live', title: kopfzeile(env) + (hTop ? ` · ${hKurz}` : ''), titleHtml: kopfzeileHtml(env) + abzeichen(hinweisEnv), kopf: kopfzeileHtml(env, true, false) + abzeichen(hinweisEnv) + radarAbzeichen(regenEnv), zeileIcon: true, tabs,
+    zp: zpJetzt(env),   // Zeitpunkt-Block der kleinen Kachel (Jetzt; beim Überfahren des Diagramms Stunde/Tag)
     lglyph: glyph(bild(a.zustand, a.tag)), lglyphTip: zustandText(a.zustand, a.code),   // Symbol in der Kopfzeile, Erklärung beim Überfahren
     glyph: '', m: '', ms: r0(a.tempC) + '°',                                               // keine große Zeile – Platz fürs Diagramm
     // Unwetter zuerst, sonst Wetter · Hinweis; der Regen steht darunter in einer eigenen Zeile (Schirm-Symbol)
     x: (hTop && hTop.stufe >= 3 ? [hKurz, wetterText] : [wetterText, hKurz]).filter(Boolean).join(' '),
     zeile2: { glyph: glyph('schirm'), text: regenZeile },
-    chart: miniDiagramm(d.tage, tagTip),
+    chart: miniDiagramm(d.tage, zpTag),
     rows
   };
 }
@@ -207,21 +208,41 @@ export function kachel(env, regenEnv = null, hinweisEnv = null) {
 // Mouseover-Texte der Mini-Diagramme (rein, testbar)
 const fest = t => t.replace(/ /g, '\u00a0');   // Teile nicht mitten drin umbrechen
 const mmText = v => `${String(Math.round((v || 0) * 10) / 10).replace('.', ',')} mm`;
-// kurz gefasst, damit es oben rechts in der Kachel Platz hat: „Mo 5.10. · 12–21° · Gewitter · 12 mm (70 %) · ☀ 1,4 h“
+// Zeitpunkt-Block der kleinen Kachel (rein, testbar): immer dieselben Felder in derselben Reihenfolge – für „Jetzt“, eine Stunde
+// oder einen Tag. Beim Überfahren des Diagramms wechseln nur die Werte (core/board.js), nicht Anordnung oder Zeilenzahl.
+// { z: Zeitpunkt, t: Temperatur, g: gefühlt, i: Symbol, l: Wetterlage, mm: Regenmenge, p: Regenwahrscheinlichkeit, w: Wind, s: Sonnenstunden des Tages }
 const komma1 = v => String(Math.round(v * 10) / 10).replace('.', ',');
-export function tagTip(t) {
-  const d = new Date(t.datum + 'T12:00:00Z');
-  const tag = `${d.toLocaleDateString('de-DE', { weekday: 'short', timeZone: 'UTC' }).replace('.', '')} ${d.getUTCDate()}.${d.getUTCMonth() + 1}.`;
-  return [tag, `${r0(t.minC)}–${r0(t.maxC)}°`, zustandText(t.zustand, t.code),
-    `${mmText(t.niederschlagMm)}${t.regenProzent != null ? ` (${t.regenProzent} %)` : ''}`,
-    t.sonnenstunden != null ? `☀ ${komma1(t.sonnenstunden)} h` : null].filter(Boolean).map(fest).join(' · ');
+const sonneText = t => (t && t.sonnenstunden != null ? `☀ ${Math.round(t.sonnenstunden)} h` : '☀ –');
+const gef = (g, t) => (g != null && r0(g) !== r0(t) ? `gef. ${r0(g)}°` : '');
+export function zpJetzt(env) {
+  const a = env.daten.aktuell, s0 = env.daten.stunden[0] || {}, heute = env.daten.tage[0];
+  return { z: 'Jetzt', t: `${r0(a.tempC)}°`, g: gef(a.gefuehltC, a.tempC), i: bild(a.zustand, a.tag), l: zustandText(a.zustand, a.code),
+    mm: mmText(s0.niederschlagMm), p: s0.regenProzent != null ? `${s0.regenProzent} %` : '', w: a.windKmh != null ? `Wind ${r0(a.windKmh)} km/h` : '', s: sonneText(heute) };
 }
-export function stundeTip(s, zone = 'Europe/Berlin') {
+export function zpStunde(s, tage, zone = 'Europe/Berlin') {
   const d = new Date(s.zeit), h = +d.toLocaleTimeString('de-DE', { timeZone: zone, hour: '2-digit', hourCycle: 'h23' }).slice(0, 2);
   const wt = d.toLocaleDateString('de-DE', { timeZone: zone, weekday: 'short' }).replace('.', '');
-  return [`${wt} ${h} Uhr`, `${r0(s.tempC)}°${s.gefuehltC != null && r0(s.gefuehltC) !== r0(s.tempC) ? ` (gef. ${r0(s.gefuehltC)}°)` : ''}`,
-    zustandText(s.zustand, s.code), `${mmText(s.niederschlagMm)}${s.regenProzent != null ? ` (${s.regenProzent} %)` : ''}`,
-    s.windKmh != null ? `Wind ${r0(s.windKmh)}${s.boeenKmh >= 40 ? `/${r0(s.boeenKmh)}` : ''} km/h` : null].filter(Boolean).map(fest).join(' · ');
+  const datum = new Intl.DateTimeFormat('en-CA', { timeZone: zone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
+  const tag = (tage || []).find(t => t.datum === datum);
+  const hell = tag && tag.sonnenaufgang && tag.sonnenuntergang ? d >= new Date(tag.sonnenaufgang) && d < new Date(tag.sonnenuntergang) : h >= 7 && h < 19;
+  return { z: `${wt} ${h} Uhr`, t: `${r0(s.tempC)}°`, g: gef(s.gefuehltC, s.tempC), i: bild(s.zustand, hell), l: zustandText(s.zustand, s.code),
+    mm: mmText(s.niederschlagMm), p: s.regenProzent != null ? `${s.regenProzent} %` : '', w: s.windKmh != null ? `Wind ${r0(s.windKmh)} km/h` : '', s: sonneText(tag) };
+}
+export function zpTag(t) {
+  const d = new Date(t.datum + 'T12:00:00Z');
+  return { z: `${d.toLocaleDateString('de-DE', { weekday: 'short', timeZone: 'UTC' }).replace('.', '')} ${d.getUTCDate()}.${d.getUTCMonth() + 1}.`,
+    t: `${r0(t.minC)}–${r0(t.maxC)}°`, g: '', i: bild(t.zustand, true), l: zustandText(t.zustand, t.code),
+    mm: mmText(t.niederschlagMm), p: t.regenProzent != null ? `${t.regenProzent} %` : '', w: t.windMaxKmh != null ? `Wind ${r0(t.windMaxKmh)} km/h` : '', s: sonneText(t) };
+}
+// Text-Fassung (Frag DAILY, Tests): „So 11.10. · 5–17° · Klar · 0 mm (0 %) · ☀ 10 h“
+export const zpText = z => [z.z, z.t, z.g, z.l, `${z.mm}${z.p ? ` (${z.p})` : ''}`, z.w, z.s].filter(Boolean).join(' · ');
+export const tagTip = t => zpText(zpTag(t));
+export const stundeTip = (s, zone) => zpText(zpStunde(s, [], zone));
+// Radar-Meldung als Abzeichen in der Kopfzeile („☂ in 20 Min. (leicht)“) – bleibt beim Überfahren stehen
+export function radarAbzeichen(regenEnv) {
+  const t = regenHinweis(regenEnv); if (!t) return '';
+  const kurz = t.replace(/\.$/, '').replace(/^Regen (in|hört)/, '$1');
+  return ` <span class="wh-badge wd-radar" title="${esc('Regenradar: ' + t)}">☂ ${esc(kurz)}</span>`;
 }
 
 // Antwort für „Frag DAILY“
@@ -246,8 +267,8 @@ export function mitOptionen(k, env, opt = {}) {
   const zone = (env && env.ort && env.ort.zeitzone) || 'Europe/Berlin';
   const stunde = iso => +new Date(iso).toLocaleTimeString('de-DE', { timeZone: zone, hour: '2-digit', hourCycle: 'h23' }).slice(0, 2);
   const wtag = iso => new Date(iso).toLocaleDateString('de-DE', { timeZone: zone, weekday: 'short' }).replace('.', '');
-  const chart = !env || !env.daten ? k.chart : +o.mini === 7 ? miniDiagramm(env.daten.tage.slice(0, 7), tagTip)
-    : [15, 16].includes(+o.mini) ? k.chart : miniStunden(env.daten.stunden, stunde, +o.mini === 48 ? 48 : 24, wtag, s => stundeTip(s, zone));
+  const chart = !env || !env.daten ? k.chart : +o.mini === 7 ? miniDiagramm(env.daten.tage.slice(0, 7), zpTag)
+    : [15, 16].includes(+o.mini) ? k.chart : miniStunden(env.daten.stunden, stunde, +o.mini === 48 ? 48 : 24, wtag, s => zpStunde(s, env.daten.tage, zone));
   return { ...k, tabs, startReiter, chart };
 }
 
