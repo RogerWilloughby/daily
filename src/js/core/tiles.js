@@ -12,13 +12,12 @@ export const CATALOG = [
   T('kalender', 'Kalender', 'Kalender', 'cal', { fertig: true, hover: 'Kalender / Termine' }),   // Feiertage, Ferien, Aktionstage, Mond, Finsternisse (ersetzt „Feiertage & Ferien“ und „Himmel“)
   T('links', 'Meine Seiten', 'Seiten', 'link', { state: 'local', fertig: true }),
   T('tasks', 'Mein Daily', 'Aufgaben', 'list', { state: 'local', fertig: true }),
-  T('transit', 'Abfahrten', 'ÖPNV', 'tram'),
+  T('verkehr', 'Verkehr', 'Verkehr', 'tram', { fertig: true, hover: 'Verkehr' }),   // Abfahrten, Tanken (später Arbeitsweg); ersetzt „Abfahrten“ und „Tanken“
   T('sport', 'Sport', 'Sport', 'ball'),
   T('money', 'Finanzen', 'Finanzen', 'money', { fertig: true, hover: 'Finanzen' }),   // Wechselkurse, Leitzinsen, Inflation (EZB); privat zusätzlich Märkte
   T('play', 'Rätsel & Witz', 'Rätsel', 'dice', { state: 'content' }),
   T('food', 'Essen', 'Essen', 'food', { state: 'content' }),
   T('knowledge', 'Wissen', 'Wissen', 'book'),
-  T('fuel', 'Tanken', 'Tanken', 'fuel'),
   T('travel', 'Land des Tages', 'Reisen', 'globe', { state: 'content' }),
   T('film', 'Filmtipp', 'Film', 'film', { state: 'content' }),
   T('health', 'Gesundheit', 'Fitness', 'heart', { state: 'content' }),
@@ -37,15 +36,15 @@ export const SLOTS = 20, STANDARD_ANZAHL = 12;
 // Standard-Belegung, Zeile für Zeile (Priorität nach Nutzung)
 export const LAYOUTS = {
   public: [
-    'weather', 'kalender', 'links', 'tasks', 'transit',
+    'weather', 'kalender', 'links', 'tasks', 'verkehr',
     'sport', 'money', 'play', 'food', 'knowledge',
-    'fuel', 'travel', 'film',
+    'travel', 'film',
     'health', 'tech', 'saving', 'relation', 'tools', 'usage'
   ],
   private: [
-    'weather', 'kalender', 'news', 'tasks', 'transit',
+    'weather', 'kalender', 'news', 'tasks', 'verkehr',
     'sport', 'money', 'play', 'food', 'knowledge',
-    'fuel', 'film', 'relation', 'links', 'tech',
+    'film', 'relation', 'links', 'tech',
     'saving', 'travel', 'tools', 'usage'
   ]
 };
@@ -58,10 +57,12 @@ export const byId = Object.fromEntries(CATALOG.map(t => [t.id, t]));
 // Ohne eigene Belegung: 12 Kacheln der Standardbelegung – überarbeitete (fertig: true) zuerst, dann Vorschau-Kacheln.
 export const TILES = [];
 export const erlaubt = (id, isPrivate) => !!byId[id] && (isPrivate || byId[id].scope === 'public');
+// Frühere Kacheln, die in einer anderen aufgegangen sind: gespeicherte eigene Belegungen zeigen die neue Kachel
+export const ERSETZT = { transit: 'verkehr', fuel: 'verkehr' };
 export function chooseLayout(isPrivate, custom) {
   const eigene = Array.isArray(custom);
   const std = LAYOUTS[isPrivate ? 'private' : 'public'];
-  const quelle = eigene ? custom : [...std.filter(id => byId[id] && byId[id].fertig), ...std.filter(id => byId[id] && !byId[id].fertig)];
+  const quelle = eigene ? custom.map(id => ERSETZT[id] || id) : [...std.filter(id => byId[id] && byId[id].fertig), ...std.filter(id => byId[id] && !byId[id].fertig)];
   const max = eigene ? SLOTS : STANDARD_ANZAHL, ids = [];
   for (const id of quelle) {
     if (ids.length >= max) break;

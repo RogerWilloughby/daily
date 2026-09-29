@@ -2,7 +2,7 @@
 // Doppelklick (oder Enter) verschiebt eine Kachel in die andere Liste. In „Aktiv“ ist die Reihenfolge = Platz im Raster:
 // ziehen (Maus) oder ▲/▼ (Handy, Tastatur). Gespeichert wird sofort (settings.layout); beim Schließen baut sich das Raster neu auf.
 import { settings, saveSettings } from '../core/store.js';
-import { CATALOG, TILES, SLOTS, erlaubt } from '../core/tiles.js';
+import { CATALOG, TILES, SLOTS, erlaubt, ERSETZT } from '../core/tiles.js';
 import { esc, icon } from '../core/util.js';
 
 // Rein, testbar: Kachel verschieben bzw. umsortieren. Liefert { aktiv, meldung }.
@@ -47,7 +47,7 @@ export function initKacheln(isPrivate) {
 
   // Beim Öffnen der Einstellungen: aktueller Stand des Rasters
   document.addEventListener('daily:einstellungen-offen', () => {
-    aktiv = Array.isArray(settings.layout) ? settings.layout.filter(id => erlaubt(id, isPrivate)) : TILES.filter(Boolean).map(t => t.id);
+    aktiv = Array.isArray(settings.layout) ? [...new Set(settings.layout.map(id => ERSETZT[id] || id))].filter(id => erlaubt(id, isPrivate)) : TILES.filter(Boolean).map(t => t.id);
     meldung.textContent = ''; zeige();
   });
   // Schließen: Raster neu aufbauen, wenn sich etwas geändert hat

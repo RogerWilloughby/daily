@@ -76,14 +76,6 @@ test('Tagesinhalte: 31 Tage ab 26.09.2026, alle Felder gefüllt', () => {
 const { pathToFileURL } = require('node:url');
 const esm = p => import(pathToFileURL(path.join(__dirname, '..', p)).href); // auch unter Windows
 
-test('Tanken: nur offene mit Preis, günstigste zuerst', () => {
-  const { mapStations } = require('../api/fuel');
-  const r = mapStations(fx.fuel().stations);
-  assert.deepEqual(r.map(s => s.price), [1.689, 1.749]);
-  assert.equal(r[1].name, 'ARAL');
-  assert.equal(r[1].street, 'Königsbrücker Straße 96');
-});
-
 test('Datenschutz: Koordinaten werden auf ~1 km gerundet', () => {
   const { coord } = require('../api/_lib/http');
   assert.equal(coord('51.050912', 90), 51.05);
@@ -114,18 +106,21 @@ test('Layouts: öffentlich ohne private Kacheln, Standard 12 (fertige zuerst), R
   assert.ok(LAYOUTS.public.every(id => byId[id].scope === 'public'));
   assert.ok(!CATALOG.some(t => t.id === 'mail' || t.id === 'parcels'));
   // eigene Belegung: genau diese Kacheln in dieser Reihenfolge (auch Vorschau), ohne Doppelte, Unbekannte und öffentlich private
-  assert.deepEqual(chooseLayout(false, ['news', 'fuel', 'fuel', 'gibtsnicht', 'weather']).map(t => t.id), ['fuel', 'weather']);
+  assert.deepEqual(chooseLayout(false, ['news', 'sport', 'sport', 'gibtsnicht', 'weather']).map(t => t.id), ['sport', 'weather']);
+  // frühere Kacheln „Abfahrten“ (transit) und „Tanken“ (fuel) → „Verkehr“, nur einmal
+  assert.deepEqual(chooseLayout(false, ['transit', 'weather', 'fuel']).map(t => t.id), ['verkehr', 'weather']);
   assert.deepEqual(chooseLayout(true, ['news', 'kalender']).map(t => t.id), ['news', 'kalender']);   // privat erlaubt
   assert.equal(chooseLayout(false, []).length, 0);                                    // leere eigene Belegung bleibt leer
   assert.equal(chooseLayout(true, LAYOUTS.private.concat(CATALOG.map(t => t.id))).length, Math.min(SLOTS, CATALOG.length));   // höchstens 20
   // Standard (keine eigene Belegung): 12 Kacheln, überarbeitete zuerst, dann Vorschau-Kacheln in Standardreihenfolge
   const pub = chooseLayout(false).map(t => t.id);
   assert.equal(pub.length, STANDARD_ANZAHL);
-  assert.deepEqual(pub.slice(0, 7), ['weather', 'kalender', 'links', 'tasks', 'money', 'tools', 'usage']);
-  assert.deepEqual(pub.slice(7, 9), ['transit', 'sport']);
+  assert.deepEqual(pub.slice(0, 8), ['weather', 'kalender', 'links', 'tasks', 'verkehr', 'money', 'tools', 'usage']);
+  assert.deepEqual(pub.slice(8, 10), ['sport', 'play']);
+  assert.ok(!CATALOG.some(t => t.id === 'transit' || t.id === 'fuel'));
   assert.ok(!pub.includes('news') && !pub.includes('alerts'));
   const priv = chooseLayout(true).map(t => t.id);
-  assert.deepEqual(priv.slice(0, 8), ['weather', 'kalender', 'tasks', 'money', 'links', 'tools', 'usage', 'news']);
+  assert.deepEqual(priv.slice(0, 9), ['weather', 'kalender', 'tasks', 'verkehr', 'money', 'links', 'tools', 'usage', 'news']);
   // Raster: Rechner (quer, Wunschform 1,4) und Handy (hochkant, quadratisch)
   const r = (n, w, h, a, v) => { const x = raster(n, w, h, a, v); return `${x.cols}x${x.rows}`; };
   assert.deepEqual([1, 2, 4, 6, 9, 12, 20].map(n => r(n, 1344, 700)), ['1x1', '2x1', '2x2', '3x2', '3x3', '4x3', '5x4']);

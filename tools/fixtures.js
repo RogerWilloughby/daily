@@ -93,12 +93,13 @@ const school = () => [
   { id: 'b', startDate: day(inMin(60 * 24 * 88)), endDate: day(inMin(60 * 24 * 100)), type: 'School', name: [{ language: 'EN', text: 'Christmas holidays' }, { language: 'DE', text: 'Weihnachtsferien' }] }
 ];
 
-// Tankerkönig list.php
-const fuel = () => ({ ok: true, status: 'ok', stations: [
-  { id: 's1', name: 'Tankstelle Nord', brand: 'ARAL', street: 'Königsbrücker Straße', houseNumber: '96', place: 'Dresden', dist: 2.4, price: 1.749, isOpen: true },
-  { id: 's2', name: 'Freie Tankstelle', brand: '', street: 'Budapester Str.', houseNumber: '1', place: 'Dresden', dist: 0.9, price: 1.689, isOpen: true },
-  { id: 's3', name: 'Zu', brand: 'JET', street: 'Leipziger Str.', houseNumber: '', place: 'Dresden', dist: 1.5, price: 1.599, isOpen: false },
-  { id: 's4', name: 'Ohne Preis', brand: 'Shell', street: 'x', place: 'Dresden', dist: 1.1, price: null, isOpen: true }
+// Tankerkönig list.php (type=all: alle Sorten je Tankstelle, sortiert nach Entfernung)
+const tanken = () => ({ ok: true, license: 'CC BY 4.0 -  https://creativecommons.tankerkoenig.de', data: 'MTS-K', status: 'ok', stations: [
+  { id: 's2', name: 'Freie Tankstelle', brand: '', street: 'Budapester Str.', houseNumber: '1', postCode: 1069, place: 'Dresden', lat: 51.0441, lng: 13.7301, dist: 0.9, diesel: 1.599, e5: 1.749, e10: 1.689, isOpen: true },
+  { id: 's4', name: 'Shell Dresden', brand: 'Shell', street: 'Bautzner Str.', houseNumber: '', postCode: 1099, place: 'Dresden', lat: 51.061, lng: 13.76, dist: 1.1, diesel: null, e5: false, e10: 1.729, isOpen: true },
+  { id: 's3', name: 'JET Dresden', brand: 'JET', street: 'Leipziger Str.', houseNumber: '10', postCode: 1097, place: 'Dresden', lat: 51.07, lng: 13.73, dist: 1.5, diesel: 1.499, e5: 1.599, e10: 1.539, isOpen: false },
+  { id: 's1', name: 'Tankstelle Nord', brand: 'ARAL', street: 'Königsbrücker Straße', houseNumber: '96', postCode: 1099, place: 'Dresden', lat: 51.08, lng: 13.76, dist: 2.4, diesel: 1.629, e5: 1.809, e10: 1.749, isOpen: true },
+  { id: 's5', name: 'Star Coschütz', brand: 'STAR', street: 'Karlsruher Str.', houseNumber: '85', postCode: 1189, place: 'Dresden', lat: 51.02, lng: 13.72, dist: 3.8, diesel: 1.589, e5: 1.739, e10: 1.689, isOpen: true }
 ] });
 
 // ---- Open-Meteo (Format mit timezone=auto & timeformat=unixtime) ----
@@ -183,4 +184,4 @@ const ezbInflation = () => 'KEY,FREQ,REF_AREA,ADJUSTMENT,ICP_ITEM,STS_INSTITUTIO
   [['DE', '2026-07', 2.0], ['DE', '2026-08', 2.1], ['U2', '2026-07', 2.0], ['U2', '2026-08', 2.2]]
     .map(([g, m, v]) => `ICP.M.${g}.N.000000.4.ANR,M,${g},N,000000,4,ANR,${m},${v}`).join('\n');
 
-module.exports = { ezbKurse, ezbZinsen, ezbInflation, rss, atom, yahoo, table1, table2, matches2, pointfinder, departures, onthisday, ics, alerts, school, fuel, forecast, airQuality, geocoding, radar };
+module.exports = { ezbKurse, ezbZinsen, ezbInflation, rss, atom, yahoo, table1, table2, matches2, pointfinder, departures, onthisday, ics, alerts, school, tanken, forecast, airQuality, geocoding, radar };

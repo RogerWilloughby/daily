@@ -903,3 +903,45 @@ test('Finanzen: EZB-Kurse, Leitzinsen, Inflation; Kurse (Yahoo) nur privat; Kach
   assert.deepEqual(kursSkala(1.117, 1.163), { lo: 1.1, hi: 1.18, stufe: 0.02, stellen: 2 });
   assert.deepEqual(kursSkala(170, 181), { lo: 170, hi: 185, stufe: 5, stellen: 0 });
 });
+
+test('Tanken: Vertrag, alle Sorten mit einem Abruf, Günstigste/Durchschnitt, Schlüssel und Land; Ansicht und Frag DAILY', async () => {
+  const w = dienste.byId.tanken;
+  const d = w.umwandeln(fx.tanken(), 5);
+  assert.deepEqual(pruefe(d, w.schema), []);
+  assert.deepEqual([d.anzahl, d.anzahlOffen], [5, 4]);
+  assert.deepEqual(d.stationen.map(s => s.id), ['s2', 's4', 's3', 's1', 's5']);                  // nach Entfernung
+  assert.deepEqual(d.guenstigste.e10, { id: 's2', preis: 1.689, entfernungKm: 0.9 });            // Gleichstand mit s5 → die nähere
+  assert.equal(d.guenstigste.diesel.id, 's5');                                                   // JET (1,49⁹) ist geschlossen
+  assert.deepEqual([d.stationen[1].preise.e5, d.stationen[1].preise.diesel, d.stationen[0].marke, d.stationen[0].plz], [null, null, null, '01069']);   // false/null → null, ohne Marke → null
+  assert.equal(d.durchschnitt.e10, 1.714);
+  // Router: ohne Schlüssel schluessel_fehlt; mit Schlüssel gültiger Rahmen, Takt 5 Minuten; Ausland nicht unterstützt
+  const alt = process.env.TANKERKOENIG_API_KEY;
+  delete process.env.TANKERKOENIG_API_KEY;
+  const ohne = await rufe('tanken', { lat: '51.05', lon: '13.74' });
+  assert.deepEqual([ohne.code, ohne.body.fehler.code], [503, 'schluessel_fehlt']);
+  process.env.TANKERKOENIG_API_KEY = 'test';
+  const r = await rufe('tanken', { lat: '51.05', lon: '13.74', umkreis: '10' });
+  assert.equal(r.code, 200);
+  gueltig(r.body, w.schema);
+  assert.equal(r.body.daten.umkreisKm, 10);
+  assert.equal(Date.parse(r.body.gueltigBis) % 300e3, 0);
+  assert.equal((await rufe('tanken', { lat: '51.05', lon: '13.74', umkreis: '7' })).body.daten.umkreisKm, 5);
+  assert.equal((await rufe('tanken', { lat: '48.2', lon: '16.37', land: 'AT' })).body.fehler.code, 'nicht_unterstuetzt');
+  if (alt === undefined) delete process.env.TANKERKOENIG_API_KEY; else process.env.TANKERKOENIG_API_KEY = alt;
+  // Ansicht „Tanken“ der Kachel „Verkehr“ und Frag DAILY
+  const a = await esm('src/js/adapter/tanken.js');
+  assert.deepEqual([a.preis(1.749), a.preis(1.7), a.preis(null)], ['1,74⁹ €', '1,70⁰ €', '–']);
+  const env = { ...r.body, daten: d };
+  const v = a.ansicht(env, 'e10');
+  assert.equal(v.kopf, 'E10 ab <b>1,68⁹ €</b>');
+  assert.deepEqual(v.liste.map(z => z.d + ' ' + z.t), ['1,68⁹ Freie Tankstelle · 0,9 km', '1,68⁹ STAR · 3,8 km', '1,72⁹ Shell · 1,1 km']);
+  assert.match(v.liste[0].tip, /Budapester Str\. 1, Dresden · E10 1,68⁹ · E5 1,74⁹ · Diesel 1,59⁹$/);
+  assert.equal((v.html.match(/<div class="row/g) || []).length, 5);
+  assert.match(v.html, /<div class="row vk-zu">.*JET.*geschlossen/);                              // geschlossene am Ende
+  assert.equal(a.ansicht(env, 'unsinn').kopf, v.kopf);                                            // unbekannte Sorte → E10
+  const leer = a.ansicht({ ...env, daten: { ...d, guenstigste: { e5: null, e10: null, diesel: null } } }, 'diesel');
+  assert.match(leer.x, /keine Tankstelle mit Diesel geöffnet/);
+  assert.match(a.antwort('Wo ist Diesel gerade günstig?', env), /^Am günstigsten für Diesel: STAR, Karlsruher Str\. 85, Dresden \(3,8 km\) mit 1,58⁹ €/);
+  assert.equal(a.antwort('Wie wird das Wetter?', env), null);
+  assert.equal(a.antwort('Was kostet Sprit?', null), 'Die Spritpreise sind gerade nicht erreichbar.');
+});

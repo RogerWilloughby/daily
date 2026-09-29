@@ -15,5 +15,6 @@
 | [`termine`](termine.md) | Termine | 1.0.0 | Deine Kalender (iCal) | weltweit | D |
 | [`finanzen`](finanzen.md) | Finanzen | 1.0.0 | Europäische Zentralbank (EZB) – Referenzkurse, Leitzinsen, HVPI | weltweit | B |
 | [`kurse`](kurse.md) | Kurse (privat) | 1.0.0 | Yahoo Finance (nur private Nutzung) | weltweit | B |
+| [`tanken`](tanken.md) | Tanken | 1.0.0 | Tankerkönig (Daten der Markttransparenzstelle für Kraftstoffe) | DE | C |
 
 Skalierungsklassen: **A** berechnet – ohne Quelle, beliebig oft · **B** für alle gleich – ein Abruf je Zeitraum reicht für alle Nutzer · **C** je Ort, rasterbar – Anfragen je gerundetem Ort bündelbar · **D** je Eingabe – jede Eingabe ist eigen (Suche, Liste)

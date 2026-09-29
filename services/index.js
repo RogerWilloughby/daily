@@ -14,7 +14,8 @@ const DIENSTE = [
   require('./namenstage'),
   require('./termine'),
   require('./finanzen'),
-  require('./kurse')
+  require('./kurse'),
+  require('./tanken')
 ];
 const byId = Object.fromEntries(DIENSTE.map(d => [d.id, d]));
 

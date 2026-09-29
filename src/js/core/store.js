@@ -56,7 +56,7 @@ export const aktiverOrt = () => settings.orte.findIndex(o => gleicherOrt(o, sett
 const CKEY = 'daily-clicks';
 const LEGACY = { 'Heute & Wetter': 'weather', 'Kalender': 'calendar', 'Mail': 'mail', 'Nachrichten': 'news', 'Schlagzeilen': 'news',
   'Mein Daily': 'tasks', 'Sport': 'sport', 'Geld': 'money', 'Spielen': 'play', 'Essen': 'food', 'Wissen': 'knowledge',
-  'Mobilität': 'transit', 'Gesundheit': 'health', 'Reisen & Länder': 'travel', 'Entertainment': 'film', 'Tech': 'tech',
+  'Mobilität': 'verkehr', 'Gesundheit': 'health', 'Reisen & Länder': 'travel', 'Entertainment': 'film', 'Tech': 'tech',
   'Shopping': 'saving', 'Beziehung': 'relation', 'Pakete': 'parcels' };
 export const stats = (() => {
   const s = read(CKEY, null) || { start: new Date().toISOString(), counts: {} };
@@ -65,6 +65,10 @@ export const stats = (() => {
     const c = {};
     for (const [k, n] of Object.entries(s.counts)) { const id = LEGACY[k] || k; c[id] = (c[id] || 0) + n; }
     s.counts = c; s.v = 2; write(CKEY, s);
+  }
+  if (s.v < 3) { // „Abfahrten“ und „Tanken“ sind in „Verkehr“ aufgegangen (App 0.27.0)
+    for (const alt of ['transit', 'fuel']) if (s.counts[alt]) { s.counts.verkehr = (s.counts.verkehr || 0) + s.counts[alt]; delete s.counts[alt]; }
+    s.v = 3; write(CKEY, s);
   }
   return s;
 })();

@@ -159,6 +159,7 @@ Das allgemeine Kachelraster weiß nichts über einzelne Kacheln. Kachelbesondere
 | `src/css/diagramm.css` | gemeinsame Diagramm-Styles `.wd-*` und Farben `--wd-*` (Wetter, Finanzen, Kalender) |
 | `src/css/wetter.css` | nur Wetter: Zeitpunkt-Block, Regenzeile, Radar, Sonnenzahlen |
 | `src/css/finanzen.css` | nur Finanzen: `fi-*`, Kurslinie |
+| `src/css/verkehr.css` | nur Verkehr: `vk-*` (Umschalter unten, Listen aufgeklappt) |
 
 Neue Kachel mit eigener Darstellung: Datei unter `src/js/ansichten/`, vom Provider importiert; eigene Styles unter `src/css/`, in `index.html` und `sw.js` eingetragen.
 
@@ -173,6 +174,7 @@ Neue Kachel mit eigener Darstellung: Datei unter `src/js/ansichten/`, vom Provid
 | `namenstage` | ✅ daily/1 – feste, gepflegte Liste nach dem kirchlichen Kalender (`services/daten/namenstage.json`); in der Kachel „Kalender“ (Zeile, Reiter „Namenstage“, Frag DAILY „Wann hat Josef Namenstag?“) |
 | `termine` | ✅ daily/1, **nur privat** – eigene Termine aus iCal (14 Tage), Links nur per POST, nie zwischengespeichert; in der Kachel „Kalender“ (Kennzahl „14:00 Zahnarzt“, Reiter „Termine“) |
 | `finanzen` | ✅ daily/1 – EZB: Wechselkurse (90 Tage), Leitzinsen, Inflation; Kachel „Finanzen“ |
+| `tanken` | ✅ daily/1 – Tankerkönig (MTS-K): E5, E10, Diesel im Umkreis 2/5/10 km; Kachel „Verkehr“, Ansicht „Tanken“ |
 | `kurse` | ✅ daily/1, **nur privat** – Yahoo (DAX, S&P 500, MSCI World, Bitcoin, Ethereum, Gold); Kachel „Finanzen“, Reiter „Märkte“ |
 | Tanken, Abfahrten, Sport, Geld, Wissen, Tagesinhalte | ⏳ noch alte Einzelfunktionen bzw. im Browser berechnet |
 | Kalender, Schlagzeilen (privat) | ⏳ |

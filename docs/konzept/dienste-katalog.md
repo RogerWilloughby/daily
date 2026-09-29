@@ -36,11 +36,12 @@ Status: ✅ fertig in daily/1 · 🔁 läuft, noch alte Schnittstelle · 🆕 ne
 ## 3. Mobilität
 | Dienst | Ideen | Art | Eingabe | Quelle | Status |
 |---|---|---|---|---|---|
-| `abfahrten` | ÖPNV-Abfahrten | Live | Haltestelle | VVO (nur Raum Dresden) | 🔁 |
-| `tanken` | Benzinpreise | Live | Ort, Kraftstoff | Tankerkönig (Schlüssel) | 🔁 |
-| `verkehr` | Verkehrsinfos, Staus, Baustellen | Live | Ort (Umkreis) | Autobahn-API des Bundes (autobahn.de) | 🆕 |
+| `abfahrten` | ÖPNV-Abfahrten (Kachel „Verkehr“) | Live | Haltestelle | Verkehrsverbünde über OpenData ÖPNV/DELFI, Start VVO (Entscheidung A, 29.09.2026) | 🔁 |
+| `verbindung` | Arbeitsweg Bus/Bahn (Kachel „Verkehr“) | Live | Start und Ziel (nur im Browser gespeichert) | wie `abfahrten` | 🆕 |
+| `tanken` | Spritpreise E5/E10/Diesel (Kachel „Verkehr“) | Live | Ort, Umkreis | Tankerkönig (Schlüssel) | ✅ daily/1 (0.27.0) |
+| `autobahn` | Arbeitsweg Auto: Staus, Sperrungen, Baustellen je Autobahn (Kachel „Verkehr“) | Live | Autobahnen (z. B. A4, A13) | Autobahn-API des Bundes (autobahn.de) | 🆕 als Nächstes |
 | `strompreis` | Strompreis (Börsenpreis heute/morgen, für E-Auto und Haushalt) | Live | – | Energy-Charts (Fraunhofer ISE) | 🆕 |
-| – | Pendelzeit | Live | **Start und Ziel** | Routing-Dienste meist kostenpflichtig | ⏸ braucht persönliche Adressen |
+| – | Pendelzeit Auto mit Live-Verkehr | Live | **Start und Ziel** | Routing-Dienste kostenpflichtig (Google, HERE, TomTom) | ⏸ keine freie Quelle |
 
 ## 4. Geld
 

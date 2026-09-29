@@ -1,0 +1,7 @@
+/* DAILY – Kachel „Verkehr“ (Abfahrten, Tanken): Umschalter unten in der kleinen Kachel, Listen aufgeklappt. */
+.mini:has(.vk-fuss){flex:0 0 auto;min-height:0;padding-top:4px}
+.vk-fuss{display:flex;justify-content:flex-start}
+.vk-hinweis{margin:0 0 6px;color:var(--muted);font-size:13px}
+.vk-quelle{margin:8px 0 0;color:var(--muted);font-size:11px}
+.vk-zu{opacity:.55}
+.vk-spaet{color:var(--warn,#B4531A);font-weight:600}

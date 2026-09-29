@@ -1,6 +1,6 @@
 # DAILY – Übergabe: aktueller Arbeitsstand
 
-Stand 28.09.2026 (App 0.26.3). Für neue Chats: hier steht, woran gerade gearbeitet wird und wie es weitergeht. Verbindliche Entscheidungen stehen in `entscheidungen.md`, die Architektur in `../architektur/dienste.md`.
+Stand 28.09.2026 (App 0.27.0). Für neue Chats: hier steht, woran gerade gearbeitet wird und wie es weitergeht. Verbindliche Entscheidungen stehen in `entscheidungen.md`, die Architektur in `../architektur/dienste.md`.
 
 ## Vorgehen (Rogers Vorgaben)
 - **Erst Plan, dann Umsetzung (Rogers Vorgabe vom 27.09.2026):** Vor jeder Umsetzung und vor jedem Schreiben ins Repo einen kurzen Plan vorlegen – was und warum, welche Dateien (neu/geändert/gelöscht), was Roger danach tun muss, was offen/unsicher ist – und auf Rogers OK warten. Nicht einfach loslegen.
@@ -27,7 +27,7 @@ Stand 28.09.2026 (App 0.26.3). Für neue Chats: hier steht, woran gerade gearbei
 - Tests in der Desktop-VM: dort fehlt `node_modules`, `npm test` scheitert an `node-ical`; `node --test test/dienste.test.js` läuft. Vollständig läuft `npm test` im Cloud-Container.
 
 ## Stand der Dienste
-Oberfläche: Standardbelegung = nur überarbeitete Kacheln (`fertig: true` in `src/js/core/tiles.js`) – **Wetter**, **Kalender**, **Finanzen**, **Tools**, Meine Seiten, Mein Daily, Deine Nutzung; übrige Felder „Freier Platz“. Seit 0.16.0 wählt man die Kacheln in Einstellungen → „Kacheln“ (Aktiv/Verfügbar, Doppelklick, Ziehen); alte Kacheln stehen dort als „Vorschau“. Einstellungen einer Kachel: Zahnrad-Reiter in der Kachel (Wetter, Kalender, Tanken, Abfahrten, Sport). Details `entscheidungen.md` → 3a.
+Oberfläche: Standardbelegung = nur überarbeitete Kacheln (`fertig: true` in `src/js/core/tiles.js`) – **Wetter**, **Kalender**, **Verkehr**, **Finanzen**, **Tools**, Meine Seiten, Mein Daily, Deine Nutzung; übrige Felder „Freier Platz“. Seit 0.16.0 wählt man die Kacheln in Einstellungen → „Kacheln“ (Aktiv/Verfügbar, Doppelklick, Ziehen); alte Kacheln stehen dort als „Vorschau“. Einstellungen einer Kachel: Zahnrad-Reiter in der Kachel (Wetter, Kalender, Verkehr, Finanzen, Sport). Details `entscheidungen.md` → 3a.
 
 | Dienst | Kachel | Stand |
 |---|---|---|
@@ -41,7 +41,8 @@ Oberfläche: Standardbelegung = nur überarbeitete Kacheln (`fertig: true` in `s
 | `termine` | Kalender (nur privat) | ✅ getestet (0.15.0). Eigene Termine aus iCal, 14 Tage, Links per POST, nie zwischengespeichert. |
 | `finanzen` | Finanzen | 🆕 0.22.0, auf Vercel zu testen. EZB: Wechselkurse (90 Tage), Leitzinsen, Inflation; für alle gleich, Takt 1 Std. Adressen der EZB-Datenschnittstelle (Leitzinsen, Inflation) nur nach Dokumentation gebaut – bei Fehlern zuerst dort prüfen. |
 | `kurse` | Finanzen, Reiter „Märkte“ (nur privat) | 🆕 0.22.0. Yahoo (vorher `api/markets.js`), DAX, S&P 500, MSCI World, Bitcoin, Ethereum, Gold. |
-| übrige | – | noch alte Schnittstelle (`api/*.js`), ausgeblendet: Tanken, Abfahrten, Sport (Fußball), Wissen (Wort, „An diesem Tag“), Tagesinhalte (Rätsel, Essen, Land, Film, Gesundheit, Tech, Sparen, Beziehung), Schlagzeilen (privat). Nach dem Umzug in `tiles.js` `fertig: true` setzen. |
+| `tanken` | Verkehr, Ansicht „Tanken“ | 🆕 0.27.0, auf Vercel zu testen (braucht `TANKERKOENIG_API_KEY`). Alle Sorten mit einem Abruf, Umkreis 2/5/10 km, Takt 5 min. |
+| übrige | – | noch alte Schnittstelle (`api/*.js`): Abfahrten (in der Kachel „Verkehr“, `api/transit.js`), ausgeblendet: Sport (Fußball), Wissen (Wort, „An diesem Tag“), Tagesinhalte (Rätsel, Essen, Land, Film, Gesundheit, Tech, Sparen, Beziehung), Schlagzeilen (privat). Nach dem Umzug in `tiles.js` `fertig: true` setzen. |
 
 App-Seite „Woher kommen die Daten?“ (Fußzeile → Datenquellen) zeigt die Dienstblätter aus dem Katalog `/api/v1/dienste`.
 
@@ -63,6 +64,7 @@ App-Seite „Woher kommen die Daten?“ (Fußzeile → Datenquellen) zeigt die D
 - Später zu besprechen: „Immer meinen aktuellen Standort verwenden“, Ort je Kachel, Kachelauswahl in den Einstellungen.
 
 ## Nächste Schritte (in dieser Reihenfolge)
-1. **Nächste Kachel auf daily/1 umziehen** – Roger wählt aus: Tanken, Abfahrten, Sport, Geld (privat), Wissen, Tagesinhalte, Schlagzeilen (privat). Vorschlag laut `dienste-katalog.md`: `tanken`, `abfahrten`, `fussball`, `an-diesem-tag`, `tagesinhalt`, `kurse`. **Vorher Plan vorlegen.** Je Dienst: Dienstblatt, Version, Tests, Frag DAILY, Kachel mit `fertig: true`, Einstellungen im Zahnrad-Reiter der Kachel.
-2. Neue Dienst-Ideen von Roger aufnehmen (`dienste-katalog.md`).
-3. **Vor dem öffentlichen Start:** eigene Daten Wetter/Radar (zentral, Stufe 4), Lasttest, Vercel Pro, Recht (`../recht/checkliste.md`).
+1. **Kachel „Verkehr“ weiter ausbauen** (Entscheidungen in `entscheidungen.md` → „Kachel Verkehr“): Schritt 2 Dienst `autobahn` (Arbeitsweg Auto), Schritt 3 Bus/Bahn über Verkehrsverbünde (`abfahrten`, `verbindung`, Start VVO). **Vorher je Schritt Plan vorlegen.**
+2. **Nächste Kachel auf daily/1 umziehen** – Roger wählt aus: Sport, Geld (privat), Wissen, Tagesinhalte, Schlagzeilen (privat). Vorschlag laut `dienste-katalog.md`: `tanken`, `abfahrten`, `fussball`, `an-diesem-tag`, `tagesinhalt`, `kurse`. **Vorher Plan vorlegen.** Je Dienst: Dienstblatt, Version, Tests, Frag DAILY, Kachel mit `fertig: true`, Einstellungen im Zahnrad-Reiter der Kachel.
+3. Neue Dienst-Ideen von Roger aufnehmen (`dienste-katalog.md`).
+4. **Vor dem öffentlichen Start:** eigene Daten Wetter/Radar (zentral, Stufe 4), Lasttest, Vercel Pro, Recht (`../recht/checkliste.md`).

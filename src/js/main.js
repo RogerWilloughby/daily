@@ -15,12 +15,11 @@ import weather from './providers/weather.js';
 import news from './providers/news.js';
 import finanzen from './providers/finanzen.js';
 import sport from './providers/sport.js';
-import transit from './providers/transit.js';
+import verkehr from './providers/verkehr.js';
 import content from './providers/content.js';
 import knowledge from './providers/knowledge.js';
 import local from './providers/local.js';
 import links from './providers/links.js';
-import fuel from './providers/fuel.js';
 import kalender from './providers/kalender.js';
 import tools from './providers/tools.js';
 
@@ -35,7 +34,7 @@ const sichtbar = new Set(chooseLayout(isPrivate, settings.layout).filter(Boolean
 // Welche Kacheln ein Anbieter füllt – Anbieter ausgeblendeter Kacheln starten gar nicht erst (keine Abrufe)
 const KACHELN = { local: ['tasks', 'usage'], content: ['play', 'food', 'travel', 'film', 'health', 'tech', 'saving', 'relation'] };
 // Reihenfolge = Priorität: was am häufigsten gebraucht wird, lädt zuerst
-const PROVIDERS = [local, links, weather, kalender, news, content, transit, finanzen, sport, knowledge, fuel, tools]
+const PROVIDERS = [local, links, weather, kalender, news, content, verkehr, finanzen, sport, knowledge, tools]
   .filter(p => (isPrivate || !p.private) && (KACHELN[p.id] || [p.id]).some(id => sichtbar.has(id)));
 const lastRun = new Map();
 
