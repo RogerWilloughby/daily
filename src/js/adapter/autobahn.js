@@ -85,8 +85,6 @@ export function status(m, jetzt = Date.now()) {
   const e = laufendBis(m, jetzt);
   return Number.isFinite(e) ? 'bis ' + wann(e, jetzt) : 'Baustelle';
 }
-// Zeilen des amtlichen Texts, die aufgeklappt nichts Neues sagen (stehen schon in Status und Zeile)
-const WEG_TEXT = /^(Beginn:|Ende:|Zeitraum dieser Bauphase|Die Baustelle ist zu folgenden|Länge:|Verzögerung:)/;
 // Beschreibung in einer Zeile: „A4 Wilsdruff – Nossen · Richtung Chemnitz“ (+ Art, wo nötig)
 function zeile(m) {
   const art = m.typ === 'stau' ? (LAGE_NAME[m.lage] || 'Stau') : m.typ === 'meldung' ? kurztext(m) || 'Meldung' : TYP_NAME[m.typ];
@@ -130,30 +128,20 @@ const wegName = (start, ziel) => (start && ziel && start.name && ziel.name ? `${
 // Ansicht „Arbeitsweg“ (Felder wie core/board.js erwartet; die Kachel „Verkehr“ setzt Umschalter und Reiter zusammen)
 export function ansicht(env, { start, ziel, jetzt = Date.now() } = {}) {
   const d = env && env.daten;
-  if (!d) return { kopf: 'Arbeitsweg', m: '', ms: '–', x: 'Die Autobahn-Meldungen sind gerade nicht erreichbar.', liste: [], html: '<p>Die Autobahn-Meldungen sind gerade nicht erreichbar.</p>' };
+  if (!d) return { kopf: 'Arbeitsweg', ms: '–', x: 'Die Autobahn-Meldungen sind gerade nicht erreichbar.', liste: [], bereich: '' };
   const a = auswahl(env, { start, ziel, jetzt }), weg = wegName(start, ziel), bahnen = d.strassen.join(' · ');
-  const x = zusammenfassung(a, jetzt);
-  const liste = a.wichtig.slice(0, 3).map(m => { const z = zeile(m); return { d: status(m, jetzt), t: `${z.ort} · ${z.art}`, tip: tipp(m, jetzt), gruppe: 1 }; });
+  // Mini-Reiter: alle Staus, Meldungen und Sperrungen am Weg (laufend oder in 24 Std.), so viele wie in die Kachel passen;
+  // danach die Baustellen nur als eine Zeile „3 Baustellen“ (Rogers Entscheidung), Einzelheiten beim Überfahren
+  const liste = a.wichtig.map(m => { const z = zeile(m); return { d: status(m, jetzt), t: `${z.ort} · ${z.art}`, tip: tipp(m, jetzt), gruppe: 1 }; });
   if (!liste.length) liste.push({ d: '✓', t: 'Keine Staus oder Sperrungen', tip: `${bahnen}${weg ? ' · ' + weg : ''}`, gruppe: 1 });
-  if (a.baustellen.length && liste.length < 3) liste.push({ d: String(a.baustellen.length), t: a.baustellen.length === 1 ? 'Baustelle' : 'Baustellen', tip: a.baustellen.map(m => zeile(m).ort).join('\n'), gruppe: 2 });
-  // Aufgeklappt: Gruppen mit amtlichem Text
-  const reihe = m => { const z = zeile(m), txt = (m.text || []).filter(t => !WEG_TEXT.test(t) && t !== z.art).slice(0, 6);
-    return `<div class="row${aktiv(m, jetzt) ? '' : ' vk-spaeter'}"><dt><b>${esc(status(m, jetzt))}</b></dt>` +
-      `<dd><b>${esc(z.ort)}</b>${z.richtung ? ' · ' + esc(z.richtung) : ''} · ${esc(z.art)}` +
-      `${m.tempoKmh ? ` · ${m.tempoKmh} km/h` : ''}${m.laengeKm ? ` · ${esc(String(m.laengeKm).replace('.', ','))} km` : ''}` +
-      `${txt.length ? `<br><small>${txt.map(esc).join(' · ')}</small>` : ''}</dd></div>`; };
-  const gruppe = (titel, l, max = 30) => (l.length ? `<h4 class="vk-gruppe">${esc(titel)}</h4><dl class="kompakt">${l.slice(0, max).map(reihe).join('')}</dl>` +
-    (l.length > max ? `<p class="vk-hinweis">… und ${l.length - max} weitere</p>` : '') : '');
-  const bereich = weg ? `${weg} · ${bahnen} · Meldungen bis ${Math.round(korridorKm(start, ziel))} km neben der Luftlinie, beide Richtungen` : `${bahnen} · alle Meldungen (Start und Ziel im Zahnrad eintragen, um auf den Weg zu beschränken)`;
-  const html = `<p class="vk-hinweis">${esc(bereich)}</p>` +
-    (a.staus.length || a.sperrungen.length || a.tagesbaustellen.length ? '' : '<p><b>✓ Keine Staus oder Sperrungen.</b></p>') +
-    gruppe('Staus und Meldungen', a.staus) + gruppe('Sperrungen', a.sperrungen) + gruppe('Baustellen heute', a.tagesbaustellen) + gruppe('Baustellen', a.baustellen) +
-    (d.fehlend.length ? `<p class="vk-hinweis">Keine Daten für ${esc(d.fehlend.join(', '))}.</p>` : '') +
-    '<p class="vk-quelle">Quelle: Die Autobahn GmbH des Bundes (verkehr.autobahn.de), Verkehrsmeldungen teils INRIX · Angaben ohne Gewähr</p>';
+  if (a.baustellen.length) liste.push({ d: String(a.baustellen.length), t: a.baustellen.length === 1 ? 'Baustelle' : 'Baustellen',
+    tip: a.baustellen.map(m => `${zeile(m).ort} · ${status(m, jetzt)}${m.tempoKmh ? ` · ${m.tempoKmh} km/h` : ''}`).join('\n'), gruppe: 2 });
+  const bereich = (weg ? `Meldungen bis ${Math.round(korridorKm(start, ziel))} km neben der Luftlinie ${weg}, beide Richtungen` : 'Alle Meldungen der Autobahnen (Start und Ziel im Zahnrad eintragen, um auf den Weg zu beschränken)') +
+    (d.fehlend.length ? ` · keine Daten für ${d.fehlend.join(', ')}` : '');
+  const aktivNr = a.wichtig.filter(m => aktiv(m, jetzt) && m.typ !== 'tagesbaustelle').length;
   return {
     kopf: `<b>${esc(weg || bahnen)}</b>${weg ? ` <small>${esc(bahnen)}</small>` : ''}`,
-    m: '', ms: a.wichtig.some(m => aktiv(m, jetzt) && m.typ !== 'tagesbaustelle') ? `${a.wichtig.filter(m => aktiv(m, jetzt) && m.typ !== 'tagesbaustelle').length} ⚠` : 'frei',
-    x, liste, html
+    ms: aktivNr ? `${aktivNr} ⚠` : 'frei', x: zusammenfassung(a, jetzt), liste, bereich
   };
 }
 

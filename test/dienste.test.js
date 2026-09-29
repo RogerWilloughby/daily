@@ -951,11 +951,11 @@ test('Tanken: Vertrag, alle Sorten mit einem Abruf, Günstigste/Durchschnitt, Sc
   assert.deepEqual([a.preis(1.749), a.preis(1.7), a.preis(null)], ['1,74⁹ €', '1,70⁰ €', '–']);
   const env = { ...r.body, daten: d };
   const v = a.ansicht(env, 'e10');
-  assert.equal(v.kopf, 'E10 ab <b>1,68⁹ €</b>');
-  assert.deepEqual(v.liste.map(z => z.d + ' ' + z.t), ['1,68⁹ Freie Tankstelle · 0,9 km', '1,68⁹ STAR · 3,8 km', '1,72⁹ Shell · 1,1 km']);
+  assert.equal(v.kopf, 'E10 ab <b>1,68⁹ €</b><small class="vk-schnitt">Ø 1,71⁴</small>');         // Mini-Reiter: Kopf mit Durchschnitt
+  assert.deepEqual(v.liste.map(z => z.d + ' ' + z.t), ['1,68⁹ Freie Tankstelle · 0,9 km', '1,68⁹ STAR · 3,8 km', '1,72⁹ Shell · 1,1 km', '1,74⁹ ARAL · 2,4 km']);   // alle geöffneten, günstigste zuerst
   assert.match(v.liste[0].tip, /Budapester Str\. 1, Dresden · E10 1,68⁹ · E5 1,74⁹ · Diesel 1,59⁹$/);
-  assert.equal((v.html.match(/<div class="row/g) || []).length, 5);
-  assert.match(v.html, /<div class="row vk-zu">.*JET.*geschlossen/);                              // geschlossene am Ende
+  assert.equal(v.html, undefined);                                                                 // kein Aufklappen mehr
+  assert.doesNotMatch(v.liste.map(z => z.t).join(), /JET/);                                         // geschlossene fehlen
   assert.equal(a.ansicht(env, 'unsinn').kopf, v.kopf);                                            // unbekannte Sorte → E10
   const leer = a.ansicht({ ...env, daten: { ...d, guenstigste: { e5: null, e10: null, diesel: null } } }, 'diesel');
   assert.match(leer.x, /keine Tankstelle mit Diesel geöffnet/);
@@ -1010,12 +1010,14 @@ test('Autobahn: Vertrag, Arten, Zeiten aus dem Text, Eingaben, fehlende Autobahn
   const env = r.body, v = a.ansicht(env, { start, ziel });
   assert.equal(v.kopf, '<b>Dresden → Chemnitz</b> <small>A4 · A13</small>');
   assert.deepEqual(v.liste.map(z => z.d + ' ' + z.t), ['+14 min A4 Wilsdruff – Nossen · stockender Verkehr',
-    'Achtung A4 Hainichen – Chemnitz-Ost · Gegenstände auf der Fahrbahn', 'ab 21 Uhr A4 Siebenlehn – Nossen · Sperrung']);
+    'Achtung A4 Hainichen – Chemnitz-Ost · Gegenstände auf der Fahrbahn', 'ab 21 Uhr A4 Siebenlehn – Nossen · Sperrung',
+    'gesperrt A4 Dresden-Altstadt · Anschlussstelle gesperrt', 'bis ' + v.liste[4].d.slice(4) + ' A4 Wilsdruff – Dresden-Altstadt · Tagesbaustelle', '1 Baustelle']);   // alle am Weg, Baustellen als eine Zeile
+  assert.match(v.liste[5].tip, /^A4 Hainichen – Siebenlehn · bis [\d.]+ · 80 km\/h$/);
   assert.match(v.liste[0].tip, /Richtung Chemnitz\nstockender Verkehr · 25 km\/h · seit /);
   assert.equal(v.x, '1 Stau (bis +14 min), 1 Sperrung, 1 Baustelle.');
-  assert.doesNotMatch(v.html, /Köln|Aachen|Ruhland/);
-  assert.match(v.html, /Staus und Meldungen.*Sperrungen.*Baustellen heute.*Baustellen/);
-  assert.match(v.html, /Meldungen bis 16 km neben der Luftlinie/);
+  assert.doesNotMatch(JSON.stringify(v.liste), /Köln|Aachen|Ruhland/);
+  assert.equal(v.html, undefined);                                                                 // kein Aufklappen mehr
+  assert.equal(v.bereich, 'Meldungen bis 16 km neben der Luftlinie Dresden → Chemnitz, beide Richtungen');
   // Ohne Start/Ziel alle Meldungen; ohne Meldungen „frei“; ohne Daten
   const alle = a.ansicht(env, {});
   assert.equal(alle.liste[0].t, 'A4 Frechen-Nord – Köln-Eifeltor · stockender Verkehr');

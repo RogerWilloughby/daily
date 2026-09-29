@@ -2,7 +2,7 @@
 import { TILES, byId, raster } from './tiles.js';
 import { esc, icon, rows } from './util.js';
 import { ansichtVon, erweiterungen } from './ansichten.js';
-import { countClick } from './store.js';
+import { countClick, kachelOpt, kachelOptSpeichern } from './store.js';
 import { hatEinstellungen, formular, binden, offeneSpeichern, ZAHNRAD } from './einstellungen.js';
 
 const WEIGHT = 4;
@@ -21,6 +21,7 @@ function tileHTML(t) {
       <span class="teaser"></span>
       <span class="mini" aria-hidden="true"></span>
     </button>
+    <div class="kr" hidden></div>
     <button class="info-knopf" type="button" data-info aria-label="Info zu ${esc(t.name || t.title)}" aria-expanded="false">i</button>
     <div class="info-feld" role="tooltip" hidden></div>
     <div class="body">
@@ -65,6 +66,54 @@ function fillContent(t, el) {
   }
   else el.innerHTML = (t.big || '') + rows(t.rows);
   erweiterungen().forEach(x => x.nachInhalt && x.nachInhalt(el));
+}
+
+// ---- Mini-Reiter (Entscheidung 29.09.2026, entscheidungen.md Abschnitt 13: Reiter in der kleinen Kachel statt Aufklappen) ----
+// t.kleinReiter: [{ id, name, icon (SVG aus eigenem Code), kopf? (HTML), liste? ([{ d, t, tip?, gruppe? }]), html? (wenn die Liste leer ist) }]
+// Links unter der Kopfzeile eine schmale Spalte mit Symbolen (Name beim Überfahren), rechts der Inhalt des gewählten Reiters.
+// Die Wahl bleibt je Kachel gespeichert (Kachel-Einstellung „reiter“); t.startReiter gilt, solange nichts gewählt ist.
+// Hat die Kachel Einstellungen, steht unten ein Zahnrad – es öffnet das Einstellungsfenster (kein Reiter).
+// Zeilen, die nicht mehr ganz in die Kachel passen, werden ausgeblendet (kein Scrollen, keine halben Zeilen).
+function krWahl(t) {
+  const gibt = id => t.kleinReiter.some(x => x.id === id), gespeichert = kachelOpt(t.id).reiter;
+  return gibt(gespeichert) ? gespeichert : gibt(t.startReiter) ? t.startReiter : t.kleinReiter[0].id;
+}
+function krHtml(t) {
+  const wahl = krWahl(t), r = t.kleinReiter.find(x => x.id === wahl);
+  const knopf = x => `<button type="button" role="tab" data-kr="${esc(x.id)}" aria-selected="${x.id === wahl}" title="${esc(x.name)}" aria-label="${esc(x.name)}">${x.icon || esc(x.name.slice(0, 2))}</button>`;
+  const einst = hatEinstellungen(t.id) ? `<button type="button" class="kr-einst" data-kr-einst title="Einstellungen" aria-label="Einstellungen">${ZAHNRAD}</button>` : '';
+  const inhalt = r.liste && r.liste.length ? `<div class="kr-liste">${listeHtml(r.liste)}</div>` : (r.html || '');   // leere Liste → html (Hinweistext)
+  return `<div class="kr-leiste" role="tablist" aria-label="Ansichten">${t.kleinReiter.map(knopf).join('')}${einst}</div>` +
+    `<div class="kr-feld" role="tabpanel">${inhalt}</div>`;
+}
+// Zeilen ausblenden, die unten über den Rand ragen würden
+function krZeilen(el) {
+  const feld = el.querySelector('.kr-feld'); if (!feld) return;
+  const zeilen = [...feld.querySelectorAll('.tl-z')];
+  zeilen.forEach(z => { z.hidden = false; });
+  const unten = feld.getBoundingClientRect().bottom;
+  zeilen.forEach(z => { if (z.getBoundingClientRect().bottom > unten + 0.5) z.hidden = true; });
+}
+const krAlle = () => grid.querySelectorAll('.tile.mit-kr').forEach(krZeilen);
+
+// Einstellungen einer Kachel im eigenen Fenster (statt Reiter in der aufgeklappten Kachel)
+let einstFenster = null, einstId = null;
+function einstellungenOeffnen(id) {
+  const t = byId[id]; if (!t) return;
+  if (!einstFenster) {
+    einstFenster = document.createElement('dialog');
+    einstFenster.className = 'doc kachel-einst';
+    einstFenster.innerHTML = '<div class="doc-in"><div class="doc-head"><h2></h2><button class="x" type="button" data-ke-zu>Fertig</button></div><div class="doc-body"></div></div>';
+    document.body.append(einstFenster);
+    einstFenster.addEventListener('click', e => { if (e.target === einstFenster || e.target.closest('[data-ke-zu]')) einstFenster.close(); });
+    einstFenster.addEventListener('close', () => { offeneSpeichern(); einstId = null; });
+  }
+  einstId = id;
+  einstFenster.querySelector('h2').textContent = `Einstellungen · ${t.name || t.title}`;
+  const body = einstFenster.querySelector('.doc-body');
+  body.innerHTML = formular(id);
+  binden(id, body);
+  if (typeof einstFenster.showModal === 'function' && !einstFenster.open) einstFenster.showModal();
 }
 
 // Liste für die kleine Kachel: [{ d, t, gruppe, tip? }] – zwischen Gruppen ein kleiner Abstand; tip = Text beim Überfahren
@@ -112,6 +161,15 @@ export function paint(id) {
   el.querySelector('.head').removeAttribute('title');
   el.querySelector('.info-feld').innerHTML = [t.hover || t.name || t.title, ...(t.info || [])].map(z => `<span>${esc(z)}</span>`).join('');
   el.querySelector('.mini').innerHTML = t.chart || '';
+  // Mini-Reiter: Kopf des gewählten Reiters, Spalte mit Symbolen, Inhalt
+  const kr = el.querySelector('.kr'), mitKr = !!(t.kleinReiter && t.kleinReiter.length);
+  el.classList.toggle('mit-kr', mitKr); kr.hidden = !mitKr;
+  if (mitKr) {
+    kr.innerHTML = krHtml(t);
+    const r = t.kleinReiter.find(x => x.id === krWahl(t));
+    if (r.kopf != null) el.querySelector('.label .kopf').innerHTML = r.kopf;
+    requestAnimationFrame(() => krZeilen(el));
+  } else kr.innerHTML = '';
   erweiterungen().forEach(x => x.nachZeichnen && x.nachZeichnen(el));
   el.querySelector('.head').setAttribute('aria-label', [t.title, t.lglyphTip, t.m].filter(Boolean).join(': '));
   // Aufgeklappten Inhalt nur neu zeichnen, wenn er sichtbar ist – und nicht, während die Einstellungen offen sind (Eingaben bleiben)
@@ -194,6 +252,10 @@ function step(d) { const n = ORDER.length; showSheet(ORDER[(ORDER.indexOf(open) 
 // Der Zahnrad-Reiter selbst bleibt stehen – sonst spränge beim Tippen der Cursor aus dem Feld.
 document.addEventListener('daily:einstellungen', e => {
   const id = e.detail, t = byId[id]; if (!t) return;
+  if (einstId === id && einstFenster) {                // Einstellungsfenster: nur kurz bestätigen, das Formular bleibt stehen
+    const ok = einstFenster.querySelector('.ke-ok');
+    if (ok) { ok.textContent = 'Gespeichert ✓'; clearTimeout(ok._t); ok._t = setTimeout(() => { ok.textContent = ''; }, 2000); }
+  }
   const ziele = [active === id && document.querySelector(`#tile-${id} .content`), open === id && document.getElementById('s-content')].filter(Boolean);
   ziele.forEach(el => {
     const alt = el.querySelector(`:scope > [data-feld="${EINST}"]`);
@@ -213,7 +275,7 @@ export function initBoard() {
   const zeiger = e => erweiterungen().forEach(x => x.zeiger && x.zeiger(e, grid));
   grid.addEventListener('pointermove', zeiger);
   grid.addEventListener('pointerleave', zeiger);
-  addEventListener('resize', () => requestAnimationFrame(() => { rasterNeu(); erweiterungen().forEach(x => x.groesse && x.groesse(grid)); }));
+  addEventListener('resize', () => requestAnimationFrame(() => { rasterNeu(); erweiterungen().forEach(x => x.groesse && x.groesse(grid)); krAlle(); }));
   ORDER = TILES.map(t => t.id);
   grid.innerHTML = TILES.map(tileHTML).join('');
   TILES.forEach(t => paint(t.id));
@@ -230,6 +292,17 @@ export function initBoard() {
     if (k) { k.classList.toggle('fest'); info(k, k.classList.contains('fest')); }
   });
   grid.addEventListener('click', e => {
+    // Mini-Reiter: Wechsel sofort und gespeichert; Zahnrad öffnet das Einstellungsfenster; die Kachel klappt nicht auf
+    const kr = e.target.closest('[data-kr]'), ke = e.target.closest('[data-kr-einst]');
+    if (kr || ke) {
+      const id = e.target.closest('.tile').id.replace(/^tile-/, '');
+      if (ke) { einstellungenOeffnen(id); return; }
+      countClick(id); document.dispatchEvent(new CustomEvent('daily:click', { detail: id }));
+      kachelOptSpeichern(id, { reiter: kr.dataset.kr });
+      paint(id);
+      return;
+    }
+    if (e.target.closest('.tile.mit-kr')) return;          // Kacheln mit Mini-Reitern werden nicht mehr aufgeklappt
     if (e.target.closest('[data-info], [data-mini-wahl], a[href]')) return;   // (i), Diagramm-Umschalter und Links öffnen die Kachel nicht
     if (e.target.closest('[data-close]')) { activate(null); return; }
     const head = e.target.closest('.head'); if (!head) return;

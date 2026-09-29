@@ -1,10 +1,3 @@
-/* DAILY – Kachel „Verkehr“ (Abfahrten, Arbeitsweg, Tanken): Umschalter unten in der kleinen Kachel, Listen aufgeklappt. */
-.mini:has(.vk-fuss){flex:0 0 auto;min-height:0;padding-top:4px}
-.vk-fuss{display:flex;justify-content:flex-start}
-.vk-hinweis{margin:0 0 6px;color:var(--muted);font-size:13px}
-.vk-quelle{margin:8px 0 0;color:var(--muted);font-size:11px}
-.vk-zu{opacity:.55}
-.vk-spaet{color:var(--warn,#B4531A);font-weight:600}
-.vk-gruppe{margin:10px 0 4px;font-size:13px;font-weight:600}
-.vk-gruppe:first-of-type{margin-top:4px}
-.vk-spaeter{opacity:.75}
+/* DAILY – Kachel „Verkehr“ (Abfahrten, Arbeitsweg, Tanken): Inhalte der Mini-Reiter (Reiterspalte allgemein in app.css, .kr-*). */
+.vk-text{margin:0;color:var(--muted);font-size:13px;line-height:1.4}
+.vk-schnitt{font-weight:500;color:var(--muted);margin-left:6px;font-size:.9em}

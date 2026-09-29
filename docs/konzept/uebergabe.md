@@ -1,6 +1,6 @@
 # DAILY – Übergabe: aktueller Arbeitsstand
 
-Stand 29.09.2026 (App 0.29.0). Für neue Chats: hier steht, woran gerade gearbeitet wird und wie es weitergeht. Verbindliche Entscheidungen stehen in `entscheidungen.md`, die Architektur in `../architektur/dienste.md`.
+Stand 29.09.2026 (App 0.30.0). Für neue Chats: hier steht, woran gerade gearbeitet wird und wie es weitergeht. Verbindliche Entscheidungen stehen in `entscheidungen.md`, die Architektur in `../architektur/dienste.md`.
 
 ## Vorgehen (Rogers Vorgaben)
 - **Erst Plan, dann Umsetzung (Rogers Vorgabe vom 27.09.2026):** Vor jeder Umsetzung und vor jedem Schreiben ins Repo einen kurzen Plan vorlegen – was und warum, welche Dateien (neu/geändert/gelöscht), was Roger danach tun muss, was offen/unsicher ist – und auf Rogers OK warten. Nicht einfach loslegen.
@@ -71,7 +71,7 @@ App-Seite „Woher kommen die Daten?“ (Fußzeile → Datenquellen) zeigt die D
 - Autobahn öffentlich: API ohne Lizenzangabe, Staumeldungen teils INRIX – vor dem öffentlichen Start klären (`../recht/checkliste.md`).
 
 ## Nächste Schritte (in dieser Reihenfolge)
-0. **Mini-Reiter umsetzen** (Konzept-Entscheidung 29.09.2026, `entscheidungen.md` Abschnitt 13): Baustein im Kachelraster + Kachel „Verkehr“ (Abfahrten · Arbeitsweg · Tanken) nach `vorlage-mini-reiter.md`, auf den aktuellen Stand übertragen; danach Wetter, übrige Kacheln, Aufklappen entfernen. **Vorher Plan vorlegen.**
+0. **Mini-Reiter umsetzen** (Konzept-Entscheidung 29.09.2026, `entscheidungen.md` Abschnitt 13): (1) Baustein im Kachelraster + Kachel „Verkehr“ ✅ 0.30.0 (Roger prüft im Browser). Als Nächstes (2) Wetter (Variante 1a: Jetzt · Radar · Hinweise · Mehr), dann (3) Kalender, Finanzen, Tools, lokale Kacheln, (4) Aufklappen entfernen. Handy pausiert (Roger 29.09.: nur am PC darstellen, auf neue Dienste konzentrieren). **Je Schritt Plan vorlegen.**
 1. **Kachel „Verkehr“ weiter ausbauen** (Entscheidungen in `entscheidungen.md` → „Kachel Verkehr“): Schritt 2 Dienst `autobahn` ✅ 0.28.0 (Roger testet auf Vercel: Zahnrad → Autobahnen, Start, Ziel). Als Nächstes Schritt 3 Bus/Bahn über Verkehrsverbünde (`abfahrten`, `verbindung`, Start VVO). **Vorher Plan vorlegen.**
 2. **Nächste Kachel auf daily/1 umziehen** – Roger wählt aus: Sport, Geld (privat), Wissen, Tagesinhalte, Schlagzeilen (privat). Vorschlag laut `dienste-katalog.md`: `tanken`, `abfahrten`, `fussball`, `an-diesem-tag`, `tagesinhalt`, `kurse`. **Vorher Plan vorlegen.** Je Dienst: Dienstblatt, Version, Tests, Frag DAILY, Kachel mit `fertig: true`, Einstellungen im Zahnrad-Reiter der Kachel.
 3. Neue Dienst-Ideen von Roger aufnehmen (`dienste-katalog.md`).

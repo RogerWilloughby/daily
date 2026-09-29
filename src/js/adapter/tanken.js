@@ -25,30 +25,23 @@ export const allePreise = s => SORTEN.filter(x => s.preise[x] != null).map(x => 
 // Ansicht „Tanken“ (Felder wie core/board.js erwartet; die Kachel „Verkehr“ setzt Umschalter und Reiter zusammen)
 export function ansicht(env, sorte = 'e10') {
   const s = sorteVon(sorte), d = env && env.daten;
-  if (!d) return { kopf: 'Tanken', m: '', ms: '–', x: 'Die Spritpreise sind gerade nicht erreichbar.', liste: [], html: '<p>Die Spritpreise sind gerade nicht erreichbar.</p>' };
+  if (!d) return { kopf: 'Tanken', ms: '–', x: 'Die Spritpreise sind gerade nicht erreichbar.', liste: [] };
   const best = d.guenstigste[s];
   const mit = d.stationen.filter(x => x.offen && x.preise[s] != null).sort((a, b) => a.preise[s] - b.preise[s] || (a.entfernungKm ?? 99) - (b.entfernungKm ?? 99));
   const ort = env.ort && env.ort.name ? ` um ${env.ort.name}` : '';
   if (!best) {
     const leer = `Im Umkreis von ${d.umkreisKm} km${ort} ist gerade keine Tankstelle mit ${SORTE_NAME[s]} geöffnet.`;
-    return { kopf: `${esc(SORTE_KURZ[s])} · ${d.umkreisKm} km`, m: '', ms: '–', x: leer, liste: [], html: `<p>${esc(leer)}</p>` };
+    return { kopf: `${esc(SORTE_KURZ[s])} · ${d.umkreisKm} km`, ms: '–', x: leer, liste: [] };
   }
-  const b = d.stationen.find(x => x.id === best.id);
-  const liste = mit.slice(0, 3).map(x => ({ d: preis(x.preise[s], false), t: `${titel(x)} · ${km(x.entfernungKm)}`,
+  const b = d.stationen.find(x => x.id === best.id), schnitt = d.durchschnitt[s];
+  // Mini-Reiter: alle geöffneten Tankstellen mit Preis, günstigste zuerst – so viele, wie in die Kachel passen
+  const liste = mit.map(x => ({ d: preis(x.preise[s], false), t: `${titel(x)} · ${km(x.entfernungKm)}`,
     tip: `${titel(x)}, ${adresse(x)} · ${allePreise(x)}`, gruppe: 1 }));
-  const schnitt = d.durchschnitt[s];
-  // Aufgeklappt: alle Tankstellen im Umkreis, günstigste zuerst, geschlossene am Ende
-  const zeile = x => `<div class="row${x.offen ? '' : ' vk-zu'}"><dt>${x.preise[s] != null ? `<b>${esc(preis(x.preise[s]))}</b>` : '–'}</dt>` +
-    `<dd>${esc(titel(x))} · ${esc(adresse(x))} · ${esc(km(x.entfernungKm))}${x.offen ? '' : ' · <small>geschlossen</small>'}<br><small>${esc(allePreise(x))}</small></dd></div>`;
-  const reihe = [...mit, ...d.stationen.filter(x => !mit.includes(x))];
-  const html = `<p class="vk-hinweis">${esc(SORTE_NAME[s])} · Umkreis ${d.umkreisKm} km${esc(ort)} · ${d.anzahlOffen} von ${d.anzahl} geöffnet` +
-    `${schnitt != null ? ` · Durchschnitt ${esc(preis(schnitt))}` : ''}</p><dl class="kompakt">${reihe.map(zeile).join('')}</dl>` +
-    '<p class="vk-quelle">Quelle: Tankerkönig (CC BY 4.0), Markttransparenzstelle für Kraftstoffe · Angaben ohne Gewähr</p>';
   return {
-    kopf: `${esc(SORTE_KURZ[s])} ab <b>${esc(preis(best.preis))}</b>`,
-    m: `${SORTE_KURZ[s]} ${preis(best.preis)}`, ms: preis(best.preis),
+    kopf: `${esc(SORTE_KURZ[s])} ab <b>${esc(preis(best.preis))}</b>${schnitt != null ? `<small class="vk-schnitt">Ø ${esc(preis(schnitt, false))}</small>` : ''}`,
+    ms: preis(best.preis),
     x: `${titel(b)}, ${adresse(b)} · ${km(b.entfernungKm)}${schnitt != null ? ` · Durchschnitt ${preis(schnitt)}` : ''}`,
-    liste, html
+    liste, bereich: `${SORTE_NAME[s]} · Umkreis ${d.umkreisKm} km${ort} · ${d.anzahlOffen} von ${d.anzahl} geöffnet`
   };
 }
 

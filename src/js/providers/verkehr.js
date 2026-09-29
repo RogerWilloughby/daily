@@ -1,5 +1,5 @@
 // Kachel „Verkehr“: Abfahrten (vorerst /api/transit, VVO – Umzug auf daily/1 folgt), Arbeitsweg Auto (Dienst „autobahn“, daily/1)
-// und Tanken (Dienst „tanken“, daily/1). Die kleine Kachel zeigt eine Ansicht, der Umschalter wechselt sofort ohne Abruf.
+// und Tanken (Dienst „tanken“, daily/1). Mini-Reiter in der kleinen Kachel (Abfahrten · Arbeitsweg · Tanken, Zahnrad → Einstellungsfenster), kein Aufklappen.
 // Start und Ziel des Arbeitswegs liegen nur in den Einstellungen dieses Browsers; der Dienst „autobahn“ bekommt nur die Autobahnen.
 import { set } from '../core/board.js';
 import { settings, saveSettings, kachelOpt, kachelOptSpeichern } from '../core/store.js';
@@ -8,12 +8,10 @@ import { addAnswer } from '../core/ask.js';
 import { dienst, gespeichert, ortParams } from '../dienste/client.js';
 import { ansicht as tankAnsicht, antwort as tankAntwort, sorteVon, SORTE_NAME, UMKREISE } from '../adapter/tanken.js';
 import { ansicht as wegAnsicht, antwort as wegAntwort, strassenVon, FRAGE as WEG_FRAGE } from '../adapter/autobahn.js';
-import { umschalter } from '../adapter/diagramm.js';
-import { hm, getJson, esc } from '../core/util.js';
+import { hm, getJson, esc, icon } from '../core/util.js';
 
 const ID = 'verkehr';
-export const VERKEHR_STANDARD = { ansicht: 'abfahrten', umkreis: 5, strassen: '', start: null, ziel: null };
-const WAHL = [['abfahrten', 'Abfahrten'], ['arbeitsweg', 'Arbeitsweg'], ['tanken', 'Tanken']];
+export const VERKEHR_STANDARD = { umkreis: 5, strassen: '', start: null, ziel: null };
 const MAX_STRASSEN = 5;
 const opt = () => kachelOpt(ID, VERKEHR_STANDARD);
 const umkreis = () => (UMKREISE.includes(+opt().umkreis) ? +opt().umkreis : 5);
@@ -30,25 +28,24 @@ const mins = iso => Math.max(0, Math.round((Date.parse(iso) - Date.now()) / 6000
 const inTxt = iso => { const m = mins(iso); return m === 0 ? 'jetzt' : `in ${m} min`; };
 // „Tram 1“, „Bus 62“, „S1“ – Verkehrsmittel vor die Liniennummer
 const lineLabel = d => /^[A-Z]/.test(d.line) ? d.line : /bus/i.test(d.mot) ? `Bus ${d.line}` : /tram/i.test(d.mot) ? `Tram ${d.line}` : d.line;
+const text = t => `<p class="vk-text">${esc(t)}</p>`;
 const kommende = () => (ab && ab.found ? ab.departures.filter(d => Date.parse(d.time) > Date.now() - 60000) : []);
 
 function abfahrtenAnsicht() {
-  if (!ab) return { kopf: 'Abfahrten', m: '', ms: '–', x: 'Die Abfahrten sind gerade nicht verfügbar.', liste: [], html: '<p>Die Abfahrten sind gerade nicht verfügbar.</p>' };
+  if (!ab) return { kopf: 'Abfahrten', ms: '–', x: 'Die Abfahrten sind gerade nicht verfügbar.', html: text('Die Abfahrten sind gerade nicht verfügbar.') };
   if (!ab.found) {
-    const t = `Haltestelle „${settings.stop}“ wurde nicht gefunden. In den Einstellungen der Kachel (Zahnrad) anpassen – vorerst nur Verkehrsverbund Oberelbe (Dresden und Umgebung).`;
-    return { kopf: 'Haltestelle wählen', m: '', ms: '–', x: t, liste: [], html: `<p>${esc(t)}</p>` };
+    const t = `Haltestelle „${settings.stop}“ wurde nicht gefunden. Im Zahnrad anpassen – vorerst nur Verkehrsverbund Oberelbe (Dresden und Umgebung).`;
+    return { kopf: 'Haltestelle wählen', ms: '–', x: t, html: text(t) };
   }
   const deps = kommende(), first = deps[0];
-  const rows = deps.slice(0, 12).map(d => `<div class="row"><dt>${esc(hm(d.time))}${d.delay > 0 ? ` <small class="vk-spaet">+${d.delay}</small>` : ''}</dt>` +
-    `<dd>${esc(lineLabel(d))} → ${esc(d.direction)}${d.platform ? ` · <small>${esc(d.platform)}</small>` : ''}</dd></div>`).join('');
+  if (!first) return { kopf: `<b>${esc(ab.stop.name)}</b>`, ms: '–', x: 'Gerade keine Abfahrten.', html: text('In der nächsten Zeit keine Abfahrten.') };
   return {
     kopf: `<b>${esc(ab.stop.name)}</b>`,
-    m: first ? `${lineLabel(first)} ${inTxt(first.time)}` : 'Keine Abfahrt', ms: first ? (mins(first.time) ? `${mins(first.time)} min` : 'jetzt') : '–',
-    x: deps.slice(0, 3).map(d => `${lineLabel(d)} → ${d.direction} ${inTxt(d.time)}`).join(' · ') || 'Gerade keine Abfahrten.',
-    liste: deps.slice(0, 3).map(d => ({ d: inTxt(d.time).replace('in ', ''), t: `${lineLabel(d)} → ${d.direction}`,
-      tip: `${hm(d.time)}${d.delay > 0 ? ` (+${d.delay} min)` : ''} · ${lineLabel(d)} → ${d.direction}${d.platform ? ' · ' + d.platform : ''}`, gruppe: 1 })),
-    html: `<p class="vk-hinweis">${esc(ab.stop.name)} · Echtzeit, soweit verfügbar</p><dl class="kompakt">${rows || '<div class="row"><dd>In der nächsten Zeit keine Abfahrten.</dd></div>'}</dl>` +
-      '<p class="vk-quelle">Quelle: VVO (Verkehrsverbund Oberelbe)</p>'
+    ms: mins(first.time) ? `${mins(first.time)} min` : 'jetzt',
+    x: deps.slice(0, 3).map(d => `${lineLabel(d)} → ${d.direction} ${inTxt(d.time)}`).join(' · '),
+    // so viele, wie in die Kachel passen (das Raster blendet den Rest aus); Überfahren: Uhrzeit, Verspätung, Steig
+    liste: deps.slice(0, 12).map(d => ({ d: inTxt(d.time).replace('in ', ''), t: `${lineLabel(d)} → ${d.direction}${d.delay > 0 ? ` (+${d.delay})` : ''}`,
+      tip: `${hm(d.time)}${d.delay > 0 ? ` (+${d.delay} min)` : ''} · ${lineLabel(d)} → ${d.direction}${d.platform ? ' · ' + d.platform : ''}`, gruppe: 1 }))
   };
 }
 
@@ -56,22 +53,24 @@ function abfahrtenAnsicht() {
 function tankenAnsicht() {
   if (tkFehler && tkFehler.code === 'schluessel_fehlt' && !tk) {
     const t = 'Für Spritpreise braucht DAILY einen kostenlosen Tankerkönig-Schlüssel (Betreiber, einmalig): onboarding.tankerkoenig.de, dann Vercel-Variable TANKERKOENIG_API_KEY.';
-    return { kopf: 'Tanken einrichten', m: '', ms: '–', x: t, liste: [], html: `<p>${esc(t)}</p>` };
+    return { kopf: 'Tanken einrichten', ms: '–', x: t, html: text(t) };
   }
   if (tkFehler && tkFehler.code === 'nicht_unterstuetzt' && !tk) {
     const t = 'Spritpreise gibt es nur für Orte in Deutschland.';
-    return { kopf: 'Tanken', m: '', ms: '–', x: t, liste: [], html: `<p>${esc(t)}</p>` };
+    return { kopf: 'Tanken', ms: '–', x: t, html: text(t) };
   }
-  return tankAnsicht(tk, sorteVon(settings.fuel));
+  const a = tankAnsicht(tk, sorteVon(settings.fuel));
+  return a.liste.length ? a : { ...a, html: text(a.x) };
 }
 
 // ---- Arbeitsweg Auto (Dienst „autobahn“) ----
 function arbeitswegAnsicht() {
   if (!strassen().length) {
     const t = 'Im Zahnrad unter „Arbeitsweg“ die Autobahnen (z. B. A4, A13) sowie Start und Ziel eintragen. Start und Ziel bleiben in diesem Browser.';
-    return { kopf: 'Arbeitsweg einrichten', m: '', ms: '–', x: t, liste: [], html: `<p>${esc(t)}</p>` };
+    return { kopf: 'Arbeitsweg einrichten', ms: '–', x: t, html: text(t) };
   }
-  return wegAnsicht(aw, wegOrte());
+  const a = wegAnsicht(aw, wegOrte());
+  return a.liste.length ? a : { ...a, html: text(a.x) };
 }
 // Start/Ziel-Eingabe → Ort über den Dienst „ort“ (einmal beim Einrichten); nur das Ergebnis bleibt im Browser
 async function ortVon(eingabe, alt) {
@@ -86,16 +85,18 @@ async function ortVon(eingabe, alt) {
 }
 const ortHilfe = o => (!o ? '' : o.name ? `→ ${o.name}${o.region ? ` (${o.region})` : ''}` : 'nicht gefunden – Ortsname oder Postleitzahl');
 
-// ---- Kachel zusammensetzen ----
+// ---- Kachel zusammensetzen: Mini-Reiter (core/board.js), der gewählte Reiter wird dort je Kachel gespeichert ----
 function zeichne() {
-  const wahl = WAHL.some(([w]) => w === opt().ansicht) ? opt().ansicht : 'abfahrten';
-  const teile = { abfahrten: abfahrtenAnsicht(), arbeitsweg: arbeitswegAnsicht(), tanken: tankenAnsicht() }, a = teile[wahl];
+  const ab1 = abfahrtenAnsicht(), aw1 = arbeitswegAnsicht(), tk1 = tankenAnsicht();
+  const reiter = (id, name, sym, a) => ({ id, name, icon: icon(sym), kopf: a.kopf, liste: a.liste || [], html: a.html || '' });
   set(ID, {
-    // keine große Zeile: Kopf + Liste (wie Finanzen); am Handy die Kurzform ms
-    state: ab || tk || aw ? 'live' : 'error', title: 'Verkehr', kopf: a.kopf, m: '', ms: a.ms, x: a.x, liste: a.liste,
-    chart: `<div class="vk-fuss">${umschalter(wahl, WAHL)}</div>`,
-    tabs: WAHL.map(([id, name]) => ({ id, name, html: teile[id].html })), startReiter: wahl,
-    tag: wahl === 'tanken' && tk && tk.veraltet ? 'Stand ' + hm(tk.erstellt) : wahl === 'arbeitsweg' && aw && aw.veraltet ? 'Stand ' + hm(aw.erstellt) : ''
+    // am Handy (pausiert) die Kurzform der Abfahrten
+    state: ab || tk || aw ? 'live' : 'error', title: 'Verkehr', m: '', ms: ab1.ms, x: ab1.x, liste: [],
+    kleinReiter: [reiter('abfahrten', 'Abfahrten', 'tram', ab1), reiter('arbeitsweg', 'Arbeitsweg', 'auto', aw1), reiter('tanken', 'Tanken', 'fuel', tk1)],
+    startReiter: opt().ansicht,   // früher gespeicherte Ansicht (bis 0.29.0), bis ein Reiter gewählt wird
+    info: ['Abfahrten: VVO (Verkehrsverbund Oberelbe)', ...(aw1.bereich ? ['Arbeitsweg: ' + aw1.bereich] : []),
+      'Autobahn: Die Autobahn GmbH des Bundes, teils INRIX', 'Tanken: Tankerkönig (CC BY 4.0), MTS-K' + (tk1.bereich ? ' · ' + tk1.bereich : ''),
+      ...(tk && tk.veraltet ? ['Tankpreise Stand ' + hm(tk.erstellt)] : []), ...(aw && aw.veraltet ? ['Autobahn Stand ' + hm(aw.erstellt)] : []), 'Angaben ohne Gewähr']
   });
 }
 
@@ -115,13 +116,6 @@ export async function load() {
   zeichne();
 }
 
-// Umschalter in der kleinen Kachel: dieselbe Einstellung wie „Beim Öffnen zeigen“ im Zahnrad-Reiter, sofort ohne Abruf
-document.addEventListener('click', e => {
-  const b = e.target.closest(`#tile-${ID} [data-mini-wahl]`); if (!b) return;
-  kachelOptSpeichern(ID, { ansicht: b.dataset.miniWahl });
-  zeichne();
-});
-
 // Frag DAILY
 // Autobahn vor Bus/Bahn: „Autobahn“ enthält „bahn“
 addAnswer(WEG_FRAGE, q => wegAntwort(q, aw, { ...wegOrte(), strassen: strassen() }));
@@ -132,10 +126,9 @@ addAnswer(/bus|bahn|tram|straßenbahn|strassenbahn|abfahrt|haltestelle|öpnv|oep
   return deps.length ? `${ab.stop.name}: ` + deps.map(d => `${lineLabel(d)} nach ${d.direction} ${inTxt(d.time)}`).join(', ') + '.' : `${ab.stop.name}: gerade keine Abfahrten.`;
 });
 
-// Einstellungen der Kachel (Zahnrad-Reiter)
+// Einstellungen der Kachel (Zahnrad in der Reiterspalte → Einstellungsfenster)
 kachelEinstellungen(ID, {
   felder: () => [
-    { typ: 'select', key: 'ansicht', label: 'Kleine Kachel zeigt', wert: opt().ansicht, optionen: WAHL },
     { typ: 'titel', label: 'Abfahrten' },
     { typ: 'text', key: 'stop', label: 'Haltestelle', wert: settings.stop || '', platzhalter: 'z. B. Postplatz', hilfe: 'Vorerst Verkehrsverbund Oberelbe (Dresden und Umgebung); weitere Verbünde folgen.' },
     { typ: 'titel', label: 'Arbeitsweg (Auto)' },
@@ -153,7 +146,7 @@ kachelEinstellungen(ID, {
     const sNeu = strassenVon(w.strassen), strassenText = sNeu ? sNeu.join(', ') : (w.strassen || '').trim();
     const wegNeu = strassenText !== (opt().strassen || '');
     saveSettings({ stop: stopNeu, fuel: sorteVon(w.fuel) });
-    kachelOptSpeichern(ID, { ansicht: w.ansicht, umkreis: +w.umkreis, strassen: strassenText });
+    kachelOptSpeichern(ID, { umkreis: +w.umkreis, strassen: strassenText });
     if (umkreisNeu) tk = gespeichert('tanken', tankParams()) || null;
     if (wegNeu) aw = strassen().length ? gespeichert('autobahn', wegParams()) || null : null;
     zeichne();
@@ -162,7 +155,7 @@ kachelEinstellungen(ID, {
     const vorher = JSON.stringify([opt().start || null, opt().ziel || null]);
     kachelOptSpeichern(ID, { start, ziel });
     zeichne();
-    // Start/Ziel neu: Raster zeichnet die übrigen Reiter neu (sonst stünde dort noch der alte Weg) und lädt die Kachel neu
+    // Start/Ziel neu: Kachel neu laden (das Einstellungsfenster zeigt „Gespeichert ✓“)
     if (JSON.stringify([start, ziel]) !== vorher) document.dispatchEvent(new CustomEvent('daily:einstellungen', { detail: ID }));
     else load().catch(() => {});
   }

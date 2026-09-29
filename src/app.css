@@ -408,3 +408,19 @@ a.tl-z.tl-link:hover .tl-d{text-decoration:underline}
 .tool-name{font-weight:600;font-size:15px}
 .tool-text{grid-column:2;font-size:13px;opacity:.8}
 .tool-auf{grid-row:1/span 2;grid-column:3;align-self:center;font-size:13px;font-weight:600;white-space:nowrap}
+/* Mini-Reiter (entscheidungen.md Abschnitt 13): Reiter in der kleinen Kachel statt Aufklappen – links eine Spalte mit Symbolen, rechts der Inhalt */
+.tile.mit-kr{grid-template-rows:auto minmax(0,1fr)}
+.tile.mit-kr .head{padding-bottom:6px;cursor:default}
+.tile.mit-kr .head :is(.teaser,.mini,.metric){display:none}
+.kr[hidden]{display:none}
+.kr{display:grid;grid-template-columns:26px minmax(0,1fr);column-gap:10px;min-height:0;overflow:hidden;padding:0 20px 14px 14px}
+.kr-leiste{display:flex;flex-direction:column;gap:4px;min-height:0}
+.kr-leiste button{width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;border:1px solid transparent;border-radius:7px;
+  background:transparent;color:var(--muted);cursor:pointer;padding:0}
+.kr-leiste button .ico{width:16px;height:16px}
+.kr-leiste button:hover{color:var(--ink);border-color:var(--line)}
+.kr-leiste button[aria-selected="true"]{color:var(--accent);background:var(--line)}
+.kr-leiste .kr-einst{margin-top:auto}
+.kr-feld{min-width:0;min-height:0;overflow:hidden;font-size:13px;line-height:1.35}
+.kr-liste{display:flex;flex-direction:column;gap:2px}
+.kr-liste .tl-z[hidden]{display:none}
