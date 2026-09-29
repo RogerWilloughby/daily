@@ -792,6 +792,13 @@ test('Einstellungen: Kachel-Formular, Wetter-Optionen, Kachel-Listen', async () 
   const z3 = JSON.parse(k48.chart.match(/data-zp="([^"]*)"/)[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
   assert.deepEqual(Object.keys(z3), ['z', 't', 'g', 'i', 'l', 'mm', 'p', 'w', 's']);
   assert.match(z3.z, /^(Mo|Di|Mi|Do|Fr|Sa|So) Morgen$/);
+  // Zeitpunkt-Block: Schirm vor Regenmenge und -wahrscheinlichkeit, bei 0 mm / 0 % durchgestrichen (zp-kein)
+  globalThis.document ||= { addEventListener() {} };
+  const { zpHtml } = await esm('src/js/ansichten/wetter.js');
+  const zr = (mm, p) => zpHtml({ z: 'Jetzt', t: '1°', g: '', i: 'rain', l: 'Regen', mm, p, w: '', s: '' }).match(/<span class="zp-r">.*<\/span>/)[0];
+  assert.match(zr('0 mm', '8 %'), /<span class="zp-mm"><i class="zp-schirm zp-kein"[^>]*>☂<\/i> 0 mm<\/span><span class="zp-p"><i class="zp-schirm"[^>]*>☂<\/i> 8 %<\/span>/);
+  assert.match(zr('1,2 mm', '0 %'), /<span class="zp-mm"><i class="zp-schirm"[^>]*>☂<\/i> 1,2 mm<\/span><span class="zp-p"><i class="zp-schirm zp-kein"[^>]*>☂<\/i> 0 %<\/span>/);
+  assert.match(zr('0,4 mm', ''), /<span class="zp-p"><\/span>/);                    // ohne Wahrscheinlichkeit kein Schirm
   // Ältere Antwort ohne heute/tageszeiten → 15 Tage wie bisher
   const alt = { ...w, daten: { ...w.daten, heute: undefined, tageszeiten: undefined } };
   assert.equal(mitOptionen(kachel(alt, r, null), alt, { mini: 3 }).chart, kachel(alt, r, null).chart);
