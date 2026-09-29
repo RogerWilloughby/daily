@@ -10,6 +10,7 @@ import { initDialogs } from './ui/dialogs.js';
 import { initOrt } from './ui/ort.js';
 import { initKacheln } from './ui/kacheln.js';
 import { betrieb } from './core/betrieb.js';
+import './ansichten/mini-diagramm.js'; // Mini-Diagramme: Dichte, Hinweise, Zeiger (allgemein)
 import weather from './providers/weather.js';
 import news from './providers/news.js';
 import finanzen from './providers/finanzen.js';

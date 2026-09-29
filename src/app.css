@@ -7,7 +7,6 @@
 @font-face{font-family:"Figtree";src:url(/fonts/figtree-400.woff2) format("woff2");font-weight:400;font-display:swap}
 @font-face{font-family:"Figtree";src:url(/fonts/figtree-500.woff2) format("woff2");font-weight:500;font-display:swap}
 @font-face{font-family:"Figtree";src:url(/fonts/figtree-600.woff2) format("woff2");font-weight:600;font-display:swap}
-
 /* 2 Farben – hell als Basis, dunkel über Systemeinstellung oder data-theme */
 :root{
   --ground:#E8ECEA; --surface:#F7F9F7; --line:#D3DAD6; --ink:#16201C; --muted:#526059;
@@ -17,8 +16,7 @@
   --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
   --body:"Figtree","Segoe UI",system-ui,sans-serif;
   --ease:cubic-bezier(.2,.8,.2,1);
-  --radius:12px;
-}
+  --radius:12px}
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     color-scheme:dark;
@@ -33,9 +31,7 @@
   --ground:#101513; --surface:#1A201D; --line:#2B3430; --ink:#E6ECE8; --muted:#9AA8A1;
   --accent:#8DB5E6; --active-bg:#1F3552; --active-ink:#EEF3F9; --active-muted:#A9BCD3; --active-line:#34507A;
   --up:#7CCB98; --down:#F08C77; --ok:#7CCB98; --warn:#E7B45A;
-  --active-up:#9FD8B2; --active-down:#F2A99A;
-}
-
+  --active-up:#9FD8B2; --active-down:#F2A99A}
 /* 3 Grundlayout: Raster oben, Antwort darüber-liegend, Leiste unten; die Seite scrollt nie */
 html,body{height:100%}
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box}
@@ -45,8 +41,9 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 [hidden]{display:none !important}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .app{height:100%;box-sizing:border-box;padding-block:16px 14px;padding-inline:clamp(16px,2vw,28px);display:flex;flex-direction:column;gap:14px}
-.grid{order:1}.answer{order:2}.bar{order:3}
-
+.grid{order:1}
+.answer{order:2}
+.bar{order:3}
 /* 4 Leiste */
 .bar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;min-height:48px}
 .brand{font-family:var(--display);font-weight:700;font-size:28px;letter-spacing:.08em}
@@ -89,7 +86,6 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .answer{display:flex;align-items:flex-start;gap:14px;padding:14px 18px;border-radius:var(--radius);background:var(--active-bg);color:var(--active-ink);font-size:15px;line-height:1.45}
 .answer p{margin:0;flex:1}
 .answer .q{color:var(--active-muted);display:block;font-size:13px;margin-bottom:2px}
-
 /* 5 Raster & Kacheln */
 .grid{flex:1;min-height:0;display:grid;gap:10px;
   grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:repeat(4,minmax(0,1fr));
@@ -108,32 +104,6 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .metric[data-len="long"]{font-size:23px;line-height:1.12}
 .metric[data-len="long"] .m-long{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .tile[data-mode="lane"] .metric[data-len="long"] .m-long,.tile[data-mode="small"] .metric[data-len="long"] .m-long{white-space:nowrap;display:block}
-/* Wetter-Diagramme (Farben geprüft: Höchst/Tiefst/Regen/Sonne je Hell und Dunkel) */
-:root{--wd-max:#C0621C;--wd-min:#17457F;--wd-regen:#5AAEE8;--wd-sonne:#C99A06;--wd-max-text:#A8520F;--wd-min-text:#143C70;--wd-regen-text:#2878B5;--wd-sonne-text:#9A6D00}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--wd-max:#D9773A;--wd-min:#4777C8;--wd-regen:#7CC4F2;--wd-sonne:#A6841E;--wd-max-text:#F0A06A;--wd-min-text:#7FA6E6;--wd-regen-text:#9AD2F5;--wd-sonne-text:#F2C94C}}
-:root[data-theme="dark"]{--wd-max:#D9773A;--wd-min:#4777C8;--wd-regen:#7CC4F2;--wd-sonne:#A6841E;--wd-max-text:#F0A06A;--wd-min-text:#7FA6E6;--wd-regen-text:#9AD2F5;--wd-sonne-text:#F2C94C}
-.tile[data-mode="active"],.sheet{--wd-max:#D9773A;--wd-min:#4777C8;--wd-regen:#7CC4F2;--wd-sonne:#A6841E;--wd-max-text:#F0A06A;--wd-min-text:#7FA6E6;--wd-regen-text:#9AD2F5;--wd-sonne-text:#F2C94C}
-/* Regenradar: Stufen einer Farbe (hell → kräftig), Karte animiert ohne Skript */
-:root{--rs1:#9ED9CF;--rs2:#4FB3A5;--rs3:#0F8A7A;--rs4:#07564C}
-.tile[data-mode="active"],.sheet{--rs1:#2E6F66;--rs2:#1FA08C;--rs3:#4CC7B4;--rs4:#B5F0E6}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--rs1:#2E6F66;--rs2:#1FA08C;--rs3:#4CC7B4;--rs4:#B5F0E6}}
-.rs1{fill:var(--rs1);background:var(--rs1)}.rs2{fill:var(--rs2);background:var(--rs2)}.rs3{fill:var(--rs3);background:var(--rs3)}.rs4{fill:var(--rs4);background:var(--rs4)}
-.rk-feld{display:grid;grid-template-columns:116px minmax(0,1fr);gap:6px 12px;align-items:start}
-.rk-rechts{min-width:0}
-.rk-werte{grid-column:1/-1;margin:0;display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;font-size:13px;line-height:1.3}
-.rk-werte div{border-top:1px solid var(--active-line);padding-top:4px}
-.rk-werte dt{color:var(--active-muted);font-size:11px}
-.rk-werte dd{margin:0}
-.rk{display:block;width:116px;height:116px;border-radius:8px}
-.rk .rk-grund{fill:currentColor;opacity:.06}
-.rk .rk-ring{fill:none;stroke:currentColor;stroke-width:.12;stroke-dasharray:.4 .4;opacity:.55}
-.rk .rk-ort{fill:currentColor;stroke:var(--active-bg);stroke-width:.25}
-.rk .rk-n,.rk .rk-zeit{font-size:1.25px;fill:currentColor;opacity:.75;font-family:var(--body)}
-.rk .rk-zeit{font-weight:700;opacity:.9}
-.wd-legende.rk-legende{font-size:11px;gap:4px 10px}
-.rk-legende i{height:8px!important;width:10px!important}
-.rk-verlauf{margin-bottom:6px}
-@media (max-width:760px){.rk-feld{grid-template-columns:1fr}.rk{width:100%;height:auto;aspect-ratio:1}}
 /* Reiter in aufgeklappten Kacheln */
 .reiter{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--active-line);padding-bottom:6px}
 .reiter button{padding:5px 11px;border-radius:999px;font-size:13px;font-weight:600;color:var(--active-muted);border:1px solid transparent}
@@ -142,53 +112,10 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .reiterfeld[hidden]{display:none}
 dl.kompakt .row{padding:4px 0;font-size:14px}
 dl.kompakt dd{margin:0}
-/* farbige Zahlen passend zu den Diagrammlinien */
-.wd-t-max{color:var(--wd-max-text)}.wd-t-min{color:var(--wd-min-text)}.wd-t-regen{color:var(--wd-regen-text)}.wd-t-sonne{color:var(--wd-sonne-text)}
-b.wd-t-max,b.wd-t-min,b.wd-t-regen,b.wd-t-sonne{font-weight:700}
-.wd text.wd-t-max{fill:var(--wd-max-text)}.wd text.wd-t-min{fill:var(--wd-min-text)}
-.wd-minibox{display:flex;gap:4px;align-items:stretch;height:calc(100% - 18px);min-height:28px}
-.wd-miniskala{font-size:10px;line-height:1;padding:0 0 11px;white-space:nowrap;min-width:2.3em}
-.wd-miniskala-r{min-width:3.2em}
-.wd-sk{position:relative;height:100%}
-.wd-sk span{position:absolute;right:0;transform:translateY(-50%);font-weight:600}
-.wd-miniskala-r .wd-sk span{right:auto;left:0}
-.wd-eng .wd-g5,.wd-eng2 .wd-gi{display:none}
-/* Mini-Diagramm: Striche alle 5°, jede zweite Stunde/jeder zweite Tag leicht getönt */
-.wd-mini .wd-gitter{stroke:currentColor;opacity:.2;stroke-width:1;vector-effect:non-scaling-stroke}
-.wd-mini .wd-streifen{fill:currentColor;opacity:.022}
-.wd-minilegende{font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap;display:flex;align-items:baseline;gap:8px;min-width:0}
-.wd-leg{min-width:0;overflow:hidden;text-overflow:ellipsis}
-.wd-leg b[title]{cursor:help;text-decoration:underline dotted;text-underline-offset:2px}
-.wd-wahl{display:inline-flex;gap:2px;flex:none}
-.wd-wahl button{font:inherit;font-size:11px;line-height:1.2;color:var(--muted);background:none;border:1px solid transparent;border-radius:6px;padding:1px 5px;cursor:pointer}
-.wd-wahl button:hover{color:var(--ink);border-color:var(--line)}
-.wd-wahl button[aria-pressed="true"]{color:var(--ink);font-weight:700;background:var(--line)}
-.wd-tm[title]{cursor:help}
-.wd-minilegende b{font-weight:600}
-.wd .wd-temp{stroke:currentColor;opacity:.85}
-.wd-l-temp{background:currentColor}
-.wd-gross .wd-fett{font-weight:700;opacity:.9}
 .mini{display:block;align-self:stretch;flex:1 1 auto;min-height:32px;padding-top:6px}
 .mini:empty{display:none}
-.wd-mini{display:block;flex:1;min-width:0;height:100%;min-height:24px;overflow:visible}
 .tile[data-mode="small"] .mini,.tile[data-mode="active"] .mini{display:none}
 .tile[data-mode="rest"] .head:has(.mini:not(:empty)) .teaser{-webkit-line-clamp:2}
-.tile[data-mode="lane"] .wd-mini{height:22px}
-.wd path{fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
-.wd .wd-max{stroke:var(--wd-max)}.wd .wd-min{stroke:var(--wd-min)}
-.wd .wd-regen{fill:var(--wd-regen)}.wd .wd-sonne{fill:var(--wd-sonne)}
-.wd .wd-blass{opacity:.55}
-.wd-figur{margin:0 0 14px;position:relative}
-.wd-gross{display:block;width:100%;height:auto;font-family:var(--body)}
-.wd-gross .wd-achse{font-size:9.5px;fill:currentColor;opacity:.7}
-.wd-gross .wd-wert{font-size:11px;font-weight:600;fill:currentColor}
-.wd-gross .wd-gitter{stroke:currentColor;opacity:.15;stroke-width:1}
-.wd-gross .wd-spalte{fill:transparent;cursor:crosshair}
-.wd-gross .wd-spalte.an{fill:currentColor;opacity:.08}
-.wd-legende{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;opacity:.85;margin-top:4px}
-.wd-legende i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:5px;vertical-align:middle}
-.wd-l-max{background:var(--wd-max)}.wd-l-min{background:var(--wd-min)}.wd-l-regen{background:var(--wd-regen);height:8px!important}.wd-l-sonne{background:var(--wd-sonne);height:8px!important}
-.wd-tip{position:absolute;right:0;top:0;font-size:12px;padding:4px 8px;border-radius:8px;background:var(--surface);color:var(--ink);border:1px solid var(--line);pointer-events:none;max-width:90%}
 .lglyph{flex:none;width:18px;height:18px;color:var(--accent);display:inline-flex}
 .lglyph[hidden]{display:none}
 .lglyph svg{width:100%;height:100%}
@@ -198,10 +125,10 @@ b.wd-t-max,b.wd-t-min,b.wd-t-regen,b.wd-t-sonne{font-weight:700}
 .glyph:empty{display:none}
 .glyph svg{width:100%;height:100%;display:block}
 .teaser{color:var(--muted);font-size:14px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.trend-up{color:var(--up)}.trend-down{color:var(--down)}
+.trend-up{color:var(--up)}
+.trend-down{color:var(--down)}
 .body{display:none}
 .tag{flex:none;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
-
 /* Zustände: lädt · nicht verbunden · frei */
 .tile[data-state="loading"] .metric,.tile[data-state="loading"] .teaser{opacity:.45}
 .tile[data-state="off"]{background:transparent;border-style:dashed}
@@ -209,7 +136,6 @@ b.wd-t-max,b.wd-t-min,b.wd-t-regen,b.wd-t-sonne{font-weight:700}
 .tile.free{background:transparent;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px}
 .tile.free:hover{border-color:var(--line)}
 .tile.free[data-mode="small"] span{display:none}
-
 /* Kleine und mitwachsende Kacheln */
 .tile[data-mode="small"] .head,.tile[data-mode="lane"] .head{padding:10px 12px;gap:3px}
 .tile[data-mode="small"] .label,.tile[data-mode="lane"] .label{font-size:13px}
@@ -218,7 +144,6 @@ b.wd-t-max,b.wd-t-min,b.wd-t-regen,b.wd-t-sonne{font-weight:700}
 .tile[data-mode="small"] .teaser{display:none}
 .tile[data-mode="small"] .tag{display:none}
 .tile[data-mode="lane"] .teaser{font-size:13px;-webkit-line-clamp:2}
-
 /* 6 Aktive Kachel: oben eine Kopfzeile (Überschrift, Wert, Unterzeile), darunter die ganze Breite für Reiter und Inhalt */
 .tile[data-mode="active"]{background:var(--active-bg);border-color:var(--active-bg);border-style:solid;color:var(--active-ink);
   grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}
@@ -233,21 +158,14 @@ b.wd-t-max,b.wd-t-min,b.wd-t-regen,b.wd-t-sonne{font-weight:700}
 .tile[data-mode="active"] .metric[data-len="long"]{font-size:clamp(18px,1.6vw,24px);line-height:1.1}
 .tile[data-mode="active"] .metric[data-len="long"] .m-long{display:block;-webkit-line-clamp:unset}
 .tile[data-mode="active"] .teaser{color:var(--active-muted);font-size:17px;-webkit-line-clamp:6}
-.tile[data-mode="active"] .trend-up{color:var(--active-up)}.tile[data-mode="active"] .trend-down{color:var(--active-down)}
+.tile[data-mode="active"] .trend-up{color:var(--active-up)}
+.tile[data-mode="active"] .trend-down{color:var(--active-down)}
 .tile[data-mode="active"] .body{display:flex;flex-direction:column;min-height:0;padding:0 26px 14px;gap:10px;animation:fadein .4s var(--ease)}
 .tile[data-mode="active"] .body .close{position:absolute;top:14px;right:18px}
-.tile[data-mode="active"] .wd-figur{display:flex;align-items:flex-start;gap:18px;margin-bottom:4px}
-.tile[data-mode="active"] .wd-gross{height:226px;width:auto;max-width:calc(100% - 150px);flex:none}
-.tile[data-mode="active"] .wd-figur .wd-legende{flex-direction:column;gap:6px;margin-top:18px}
-.tile[data-mode="active"] .rk-verlauf .wd-gross{height:92px;max-width:100%}
-.tile[data-mode="active"] .rk-feld{grid-template-columns:150px minmax(0,1fr) minmax(0,1fr);gap:8px 20px}
-.tile[data-mode="active"] .rk{width:150px;height:150px}
-.tile[data-mode="active"] .rk-werte{grid-column:auto;grid-template-columns:1fr;align-self:start}
 .close{align-self:flex-end;min-height:40px;padding:0 14px;border-radius:10px;border:1px solid var(--active-line);color:var(--active-ink);font-size:14px}
 .content{min-height:0;overflow:auto;display:flex;flex-direction:column;gap:10px;padding-bottom:18px;scrollbar-width:thin;scrollbar-color:var(--active-line) transparent;
   -webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 22px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 22px),transparent)}
 @keyframes fadein{from{opacity:.4}to{opacity:1}}
-
 /* Inhalte im aufgeklappten Zustand (Kachel und Handy-Vollbild) */
 dl{margin:0}
 .row{display:grid;grid-template-columns:minmax(110px,34%) minmax(0,1fr);gap:14px;padding:8px 0;border-bottom:1px solid var(--active-line);font-size:15px;line-height:1.35}
@@ -280,7 +198,6 @@ dl{margin:0}
 .links-form{flex-wrap:wrap}
 .links-form input{flex:1 1 140px}
 .task-del{min-height:32px;padding:0 10px;font-size:13px}
-
 /* 7 Dialoge (Impressum, Datenschutz, Einstellungen) */
 dialog.doc{width:min(640px,calc(100vw - 32px));max-height:calc(100vh - 48px);box-sizing:border-box;padding:0;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);overflow:hidden}
 dialog.doc::backdrop{background:rgba(10,20,16,.45)}
@@ -316,17 +233,18 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
 .set-results label{display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:8px;cursor:pointer}
 .set-results label:hover{background:var(--ground)}
 .set-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
-
 /* 8 Mobil: Kompaktraster (Spalten × Zeilen nach Kachelzahl, siehe tiles.js → raster), Vollbild pro Kachel */
 .sheet{display:none}
 @media (max-width:760px),(max-height:520px){
   .bar{gap:10px 12px;min-height:0}
   .brand{font-size:24px}
   .clock{font-size:19px;margin-left:auto}
-  .gear{order:2}.gear span{display:none}
+  .gear{order:2}
+  .gear span{display:none}
   .mini{display:none}
   .metric[data-leer]{display:flex}
-  .ort-wahl{order:2}.ort-wahl select{max-width:15ch}
+  .ort-wahl{order:2}
+  .ort-wahl select{max-width:15ch}
   .date{order:3;flex:1 1 auto;min-width:0;font-size:14px}
   .status{order:4;padding:3px 8px}
   .legal{order:5;flex-basis:100%;gap:12px;font-size:12px}
@@ -362,36 +280,23 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
 .s-nav{display:flex;gap:10px}
 .s-nav .s-btn{flex:1;min-height:48px}
 .s-hint{text-align:center;font-size:12px;color:var(--active-muted)}
-
 /* 9 Bewegung reduzieren */
-@media (prefers-reduced-motion:reduce){.grid,.tile,.head{transition:none}.tile[data-mode="active"] .body{animation:none}}
-
-/* Wetterhinweise (DWD-Farben: 1 gelb, 2 orange, 3 rot, 4 violett) – in beiden Farbschemen gleich, Text kontraststark */
-.wh-s1{--wh:#F2D02E;--wh-text:#3A2E00}.wh-s2{--wh:#F08A24;--wh-text:#2A1400}.wh-s3{--wh:#D12A2A;--wh-text:#fff}.wh-s4{--wh:#8E1F8E;--wh-text:#fff}
-.wh-badge{display:inline-block;margin-left:6px;padding:0 6px;border-radius:9px;background:var(--wh);color:var(--wh-text);font-size:11px;font-weight:700;line-height:17px;vertical-align:1px;white-space:nowrap}
-.wh-feld{display:grid;gap:6px;font-size:13px;line-height:1.3}
-.wh-karte{border-left:5px solid var(--wh);padding:2px 0 2px 10px}
-.wh-karte header{margin-bottom:2px}
-.wh-stufe{display:inline-block;padding:0 6px;border-radius:9px;background:var(--wh);color:var(--wh-text);font-size:11px;font-weight:700}
-.wh-karte p{margin:2px 0}
-.wh-titel{font-weight:700}
-.wh-tipp{color:var(--active-muted)}
-.wh-s3 .wh-titel,.wh-s4 .wh-titel{font-size:14px}
-.wh-quelle,.wh-mehr{margin:0;font-size:11px;color:var(--active-muted)}
-
+@media (prefers-reduced-motion:reduce){
+  .grid,.tile,.head{transition:none}
+  .tile[data-mode="active"] .body{animation:none}
+}
 .set-check{display:flex;align-items:center;gap:8px;font-size:15px;cursor:pointer}
 .set-check input{width:18px;height:18px;accent-color:var(--accent)}
-.wh-ruhig{align-content:start}
-.wh-keine{font-size:15px;margin:4px 0}
-
 /* Kalender: Liste „Datum | Ereignis“ mit farbigem Punkt je Art */
 .kl-liste{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:auto 1fr;column-gap:12px;font-size:13px;line-height:1.3}
 .kl-z{display:contents}
 .kl-z>span{border-top:1px solid var(--active-line);padding:3px 0}
 .kl-z:first-child>span{border-top:0;padding-top:0}
-.kl-d{white-space:nowrap}.kl-d small{margin-left:6px;color:var(--active-muted);font-size:11px}
+.kl-d{white-space:nowrap}
+.kl-d small{margin-left:6px;color:var(--active-muted);font-size:11px}
 .kl-t small{color:var(--active-muted);font-size:11px}
-.kl-wichtig .kl-t{font-weight:600}.kl-wichtig .kl-t small{font-weight:400}
+.kl-wichtig .kl-t{font-weight:600}
+.kl-wichtig .kl-t small{font-weight:400}
 .kl-punkt{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;vertical-align:1px;background:var(--active-muted)}
 .kl-feiertag .kl-punkt,.kl-brueckentag .kl-punkt{background:var(--wd-max)}
 .kl-ferien .kl-punkt{background:var(--wd-regen)}
@@ -402,7 +307,6 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
 .kl-kopf,.kl-jetzt{margin:0 0 6px;font-size:13px}
 .kl-leer{margin:4px 0;color:var(--active-muted)}
 .kl-quelle,.content .kl-quelle{margin:6px 0 0;font-size:11px;line-height:1.35;color:var(--active-muted)}
-
 /* Einstellungen je Kachel (Zahnrad-Reiter) – kompakt, ohne Scrollen */
 .reiter .reiter-icon{padding-left:8px;padding-right:8px;display:inline-flex;align-items:center}
 .reiter .reiter-icon .ico{width:16px;height:16px}
@@ -418,7 +322,6 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
 .ke textarea.field{min-height:44px}
 .ke-aktionen{display:flex;align-items:center;justify-content:flex-end;gap:10px;min-height:16px}
 .ke-ok{font-size:12px;color:var(--active-muted)}
-
 /* Einstellungen → Kacheln: zwei Listen */
 .k-listen{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .k-listen h4{margin:4px 0 6px}
@@ -438,8 +341,9 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
 .k-liste li.k-ueber{box-shadow:inset 0 2px 0 var(--accent)}
 .k-leer{color:var(--muted);cursor:default!important}
 .k-meldung{margin:6px 0 0;font-size:13px;color:var(--muted);min-height:1em}
-@media (max-width:560px){.k-listen{grid-template-columns:1fr}}
-
+@media (max-width:560px){
+  .k-listen{grid-template-columns:1fr}
+}
 /* Kleine Kacheln: Name nur beim Überfahren (Hinweistext), im Kopf nur Inhalt (Wetter: Ort/Temperaturen, Kalender: KW).
    Am Handy (siehe unten) bleibt der Kurzname. Aufgeklappt bleibt die Überschrift mit Namen. */
 .label .kopf:empty{display:none}
@@ -455,7 +359,9 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
 .tl-z{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tl-z.tl-neu{margin-top:6px}
 .tl-d{font-weight:600;color:var(--ink)}
-@media (max-width:760px),(max-height:520px){.label .kopf{display:none}}
+@media (max-width:760px),(max-height:520px){
+  .label .kopf{display:none}
+}
 @media (min-width:761px) and (min-height:521px){
   .tile:not([data-mode="active"]) .head:has(.teaser.mit-liste) .metric{font-size:13px;font-family:inherit;font-weight:700;line-height:1.35;letter-spacing:0}
   .tile:not([data-mode="active"]) .head:has(.teaser.mit-liste) .metric .m-long{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
@@ -468,23 +374,16 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
   .tile:not([data-mode="active"]) .teaser .t-icon svg{width:17px;height:17px}
   .tile:not([data-mode="active"]) .head:has(.t-icon) .label .lglyph{display:none}
 }
-.wd-um{font-size:.78em;font-weight:500;opacity:.8}
 @media (min-width:761px) and (min-height:521px){
   .tile:not([data-mode="active"]) .label .kopf{white-space:normal;overflow:visible;line-height:1.3}
   .tile:not([data-mode="active"]) .label:has(.kopf:not(:empty)){max-width:100%;flex-wrap:wrap}
 }
-@media (min-width:761px) and (min-height:521px){
-  /* mit Hinweis-Abzeichen wird der Kopf zweizeilig – dann die Unterzeile einzeilig, damit das Diagramm Platz hat */
-  .tile[data-mode="rest"] .head:has(.kopf .wh-badge):has(.mini:not(:empty)) .teaser{-webkit-line-clamp:1}
-}
-
 /* Kalender klein: KW unten */
 .kl-fuss{font-size:11px;color:var(--muted);letter-spacing:.04em}
 .mini:has(.kl-fuss){flex:0 0 auto;min-height:0;padding-top:4px}
 @media (min-width:761px) and (min-height:521px){
   .tile:not([data-mode="active"]) .teaser.mit-liste{flex:1 1 auto;min-height:0}
 }
-
 /* (i) unten rechts in der kleinen Kachel: Info-Feld mit Name (später mehr) – nicht aufgeklappt, nicht am Handy */
 .info-knopf{position:absolute;right:8px;bottom:8px;width:16px;height:16px;border-radius:50%;border:1px solid var(--line);background:var(--surface);
   color:var(--muted);font:600 10px/14px Georgia,serif;font-style:italic;text-align:center;padding:0;cursor:pointer;z-index:2;opacity:.7}
@@ -494,31 +393,9 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
 .info-feld[hidden]{display:none}
 .info-feld span:first-child{font-weight:600}
 .tile[data-mode="active"] .info-knopf,.tile[data-mode="active"] .info-feld,.tile[data-mode="small"] .info-knopf{display:none}
-@media (max-width:760px),(max-height:520px){.info-knopf,.info-feld{display:none!important}}
-/* Mini-Diagramm 24 Std.: Zeitmarken unter der Kurve */
-.wd-mini24{position:relative;flex:1;min-width:0;display:flex;flex-direction:column}
-.wd-mini24 .wd-mini{flex:1;min-height:0}
-.wd-marken{position:relative;height:11px;font-size:9px;line-height:11px;color:var(--muted)}
-.wd-marken span{position:absolute;transform:translateX(-50%);white-space:nowrap}
-
-/* Wetter klein: Regen in einer eigenen Zeile (Schirm-Symbol). Aufgeklappt und am Handy läuft er im Text weiter. */
-.teaser .t-zeile2::before{content:' '}
-@media (min-width:761px) and (min-height:521px){
-  .tile:is([data-mode="rest"],[data-mode="lane"]) .teaser.mit-zeile2,.tile[data-mode="rest"] .head:has(.kopf .wh-badge):has(.mini:not(:empty)) .teaser.mit-zeile2{display:block;-webkit-line-clamp:unset;overflow:hidden;flex:0 0 auto}
-  .tile:is([data-mode="rest"],[data-mode="lane"]) .teaser.mit-zeile2 .t-text{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
-  .tile:is([data-mode="rest"],[data-mode="lane"]) .head:has(.mini:not(:empty)) .teaser.mit-zeile2 .t-text{-webkit-line-clamp:1}
-  .tile:is([data-mode="rest"],[data-mode="lane"]) .teaser .t-zeile2{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
-  .tile:is([data-mode="rest"],[data-mode="lane"]) .teaser .t-zeile2::before{content:none}
+@media (max-width:760px),(max-height:520px){
+  .info-knopf,.info-feld{display:none!important}
 }
-
-/* Finanzen: Kopf „1 € = 1,1423 $ ▲ 0,21 %“, Kurslinie im Mini-Diagramm, Zahlen der Skala neutral */
-.fi-kopf b{font-weight:700}
-.fi-aend{font-size:.8em;font-weight:600;white-space:nowrap}
-.fi-plus{color:var(--up)}.fi-minus{color:var(--down)}
-.tile[data-mode="active"] .fi-plus{color:var(--active-up)}.tile[data-mode="active"] .fi-minus{color:var(--active-down)}
-.wd .wd-kurs{stroke:var(--accent);fill:none}
-.fi-skala{color:var(--muted);min-width:3.4em}
-
 /* Tools: Zeilen der kleinen Kachel als Links, aufgeklappt eine Liste mit Beschreibung */
 a.tl-z.tl-link{color:inherit;text-decoration:none;border-radius:6px;padding:2px 4px;margin:0 -4px}
 a.tl-z.tl-link:hover{background:var(--line)}
@@ -531,29 +408,3 @@ a.tl-z.tl-link:hover .tl-d{text-decoration:underline}
 .tool-name{font-weight:600;font-size:15px}
 .tool-text{grid-column:2;font-size:13px;opacity:.8}
 .tool-auf{grid-row:1/span 2;grid-column:3;align-self:center;font-size:13px;font-weight:600;white-space:nowrap}
-
-/* Wetter-Mini: Sonnenstunden als Zahl oben, Mouseover-Spalten */
-.wd-sonnen{position:absolute;top:0;left:0;right:0;height:11px;font-size:9px;line-height:11px;font-weight:700;pointer-events:none}
-.wd-sonnen span{position:absolute;transform:translateX(-50%)}
-.wd-seng .wd-sonnen .wd-s2{display:none}
-.wd-mini .wd-spalte{fill:transparent;cursor:crosshair}
-.wd-mini .wd-spalte.an{fill:currentColor;opacity:.1}
-.tile[data-mode="active"] 
-/* Wetter klein: Zeitpunkt-Block mit festen Spalten – beim Überfahren wechseln nur die Werte (Jetzt / Stunde / Tag) */
-.teaser .t-zp{display:none}
-@media (min-width:761px) and (min-height:521px){
-  .tile:is([data-mode="rest"],[data-mode="lane"]) .teaser.mit-zp{display:block;-webkit-line-clamp:unset;overflow:hidden;flex:0 0 auto}
-  .tile:is([data-mode="rest"],[data-mode="lane"]) .teaser.mit-zp :is(.t-text,.t-zeile2){display:none}
-  .tile:is([data-mode="rest"],[data-mode="lane"]) .teaser.mit-zp .t-zp{display:grid;grid-template-columns:9.5ch 5.5ch 7.5ch minmax(0,1fr);column-gap:.5em;
-    align-items:center;row-gap:1px;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--ink)}
-}
-.zp-z{font-weight:600}
-.t-zp.zp-an .zp-z{color:var(--accent)}
-.zp-g{color:var(--muted);font-size:.92em}
-.zp-l{display:flex;align-items:center;gap:5px;min-width:0}
-.zp-l svg{width:16px;height:16px;flex:none}
-.zp-l span{overflow:hidden;text-overflow:ellipsis}
-.zp-r{grid-column:2/-1;display:grid;grid-template-columns:8ch 4.5ch 11.5ch 6ch;column-gap:.6em;color:var(--muted);font-size:.92em}
-.zp-mm{color:var(--wd-regen-text)}
-.zp-s{color:var(--wd-sonne-text)}
-.wh-badge.wd-radar{background:var(--wd-regen);color:#fff}

@@ -1,0 +1,89 @@
+/* DAILY – Wetterkachel: Zeitpunkt-Block, Sonnenzahlen, Radar, Wetterhinweise, Textzeilen der kleinen Kachel. */
+/* Regenradar: Stufen einer Farbe (hell → kräftig), Karte animiert ohne Skript */
+:root{--rs1:#9ED9CF;--rs2:#4FB3A5;--rs3:#0F8A7A;--rs4:#07564C}
+.tile[data-mode="active"],.sheet{--rs1:#2E6F66;--rs2:#1FA08C;--rs3:#4CC7B4;--rs4:#B5F0E6}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){--rs1:#2E6F66;--rs2:#1FA08C;--rs3:#4CC7B4;--rs4:#B5F0E6}
+}
+.rs1{fill:var(--rs1);background:var(--rs1)}
+.rs2{fill:var(--rs2);background:var(--rs2)}
+.rs3{fill:var(--rs3);background:var(--rs3)}
+.rs4{fill:var(--rs4);background:var(--rs4)}
+.rk-feld{display:grid;grid-template-columns:116px minmax(0,1fr);gap:6px 12px;align-items:start}
+.rk-rechts{min-width:0}
+.rk-werte{grid-column:1/-1;margin:0;display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;font-size:13px;line-height:1.3}
+.rk-werte div{border-top:1px solid var(--active-line);padding-top:4px}
+.rk-werte dt{color:var(--active-muted);font-size:11px}
+.rk-werte dd{margin:0}
+.rk{display:block;width:116px;height:116px;border-radius:8px}
+.rk .rk-grund{fill:currentColor;opacity:.06}
+.rk .rk-ring{fill:none;stroke:currentColor;stroke-width:.12;stroke-dasharray:.4 .4;opacity:.55}
+.rk .rk-ort{fill:currentColor;stroke:var(--active-bg);stroke-width:.25}
+.rk .rk-n,.rk .rk-zeit{font-size:1.25px;fill:currentColor;opacity:.75;font-family:var(--body)}
+.rk .rk-zeit{font-weight:700;opacity:.9}
+.wd-legende.rk-legende{font-size:11px;gap:4px 10px}
+.rk-legende i{height:8px!important;width:10px!important}
+.rk-verlauf{margin-bottom:6px}
+@media (max-width:760px){
+  .rk-feld{grid-template-columns:1fr}
+  .rk{width:100%;height:auto;aspect-ratio:1}
+}
+.wd-tm[title]{cursor:help}
+.tile[data-mode="active"] .rk-verlauf .wd-gross{height:92px;max-width:100%}
+.tile[data-mode="active"] .rk-feld{grid-template-columns:150px minmax(0,1fr) minmax(0,1fr);gap:8px 20px}
+.tile[data-mode="active"] .rk{width:150px;height:150px}
+.tile[data-mode="active"] .rk-werte{grid-column:auto;grid-template-columns:1fr;align-self:start}
+/* Wetterhinweise (DWD-Farben: 1 gelb, 2 orange, 3 rot, 4 violett) – in beiden Farbschemen gleich, Text kontraststark */
+.wh-s1{--wh:#F2D02E;--wh-text:#3A2E00}
+.wh-s2{--wh:#F08A24;--wh-text:#2A1400}
+.wh-s3{--wh:#D12A2A;--wh-text:#fff}
+.wh-s4{--wh:#8E1F8E;--wh-text:#fff}
+.wh-badge{display:inline-block;margin-left:6px;padding:0 6px;border-radius:9px;background:var(--wh);color:var(--wh-text);font-size:11px;font-weight:700;line-height:17px;vertical-align:1px;white-space:nowrap}
+.wh-feld{display:grid;gap:6px;font-size:13px;line-height:1.3}
+.wh-karte{border-left:5px solid var(--wh);padding:2px 0 2px 10px}
+.wh-karte header{margin-bottom:2px}
+.wh-stufe{display:inline-block;padding:0 6px;border-radius:9px;background:var(--wh);color:var(--wh-text);font-size:11px;font-weight:700}
+.wh-karte p{margin:2px 0}
+.wh-titel{font-weight:700}
+.wh-tipp{color:var(--active-muted)}
+.wh-s3 .wh-titel,.wh-s4 .wh-titel{font-size:14px}
+.wh-quelle,.wh-mehr{margin:0;font-size:11px;color:var(--active-muted)}
+.wh-ruhig{align-content:start}
+.wh-keine{font-size:15px;margin:4px 0}
+.wd-um{font-size:.78em;font-weight:500;opacity:.8}
+@media (min-width:761px) and (min-height:521px){
+/* mit Hinweis-Abzeichen wird der Kopf zweizeilig – dann die Unterzeile einzeilig, damit das Diagramm Platz hat */
+    .tile[data-mode="rest"] .head:has(.kopf .wh-badge):has(.mini:not(:empty)) .teaser{-webkit-line-clamp:1}
+}
+/* Wetter klein: Regen in einer eigenen Zeile (Schirm-Symbol). Aufgeklappt und am Handy läuft er im Text weiter. */
+.teaser .t-zeile2::before{content:' '}
+@media (min-width:761px) and (min-height:521px){
+  .tile:is([data-mode="rest"],[data-mode="lane"]) .teaser.mit-zeile2,.tile[data-mode="rest"] .head:has(.kopf .wh-badge):has(.mini:not(:empty)) .teaser.mit-zeile2{display:block;-webkit-line-clamp:unset;overflow:hidden;flex:0 0 auto}
+  .tile:is([data-mode="rest"],[data-mode="lane"]) .teaser.mit-zeile2 .t-text{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+  .tile:is([data-mode="rest"],[data-mode="lane"]) .head:has(.mini:not(:empty)) .teaser.mit-zeile2 .t-text{-webkit-line-clamp:1}
+  .tile:is([data-mode="rest"],[data-mode="lane"]) .teaser .t-zeile2{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+  .tile:is([data-mode="rest"],[data-mode="lane"]) .teaser .t-zeile2::before{content:none}
+}
+/* Wetter-Mini: Sonnenstunden als Zahl oben, Mouseover-Spalten */
+.wd-sonnen{position:absolute;top:0;left:0;right:0;height:11px;font-size:9px;line-height:11px;font-weight:700;pointer-events:none}
+.wd-sonnen span{position:absolute;transform:translateX(-50%)}
+.wd-seng .wd-sonnen .wd-s2{display:none}
+.tile[data-mode="active"] 
+/* Wetter klein: Zeitpunkt-Block mit festen Spalten – beim Überfahren wechseln nur die Werte (Jetzt / Stunde / Tag) */
+.teaser .t-zp{display:none}
+@media (min-width:761px) and (min-height:521px){
+  .tile:is([data-mode="rest"],[data-mode="lane"]) .teaser.mit-zp{display:block;-webkit-line-clamp:unset;overflow:hidden;flex:0 0 auto}
+  .tile:is([data-mode="rest"],[data-mode="lane"]) .teaser.mit-zp :is(.t-text,.t-zeile2){display:none}
+  .tile:is([data-mode="rest"],[data-mode="lane"]) .teaser.mit-zp .t-zp{display:grid;grid-template-columns:9.5ch 5.5ch 7.5ch minmax(0,1fr);column-gap:.5em;
+    align-items:center;row-gap:1px;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--ink)}
+}
+.zp-z{font-weight:600}
+.t-zp.zp-an .zp-z{color:var(--accent)}
+.zp-g{color:var(--muted);font-size:.92em}
+.zp-l{display:flex;align-items:center;gap:5px;min-width:0}
+.zp-l svg{width:16px;height:16px;flex:none}
+.zp-l span{overflow:hidden;text-overflow:ellipsis}
+.zp-r{grid-column:2/-1;display:grid;grid-template-columns:8ch 4.5ch 11.5ch 6ch;column-gap:.6em;color:var(--muted);font-size:.92em}
+.zp-mm{color:var(--wd-regen-text)}
+.zp-s{color:var(--wd-sonne-text)}
+.wh-badge.wd-radar{background:var(--wd-regen);color:#fff}

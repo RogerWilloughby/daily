@@ -1,6 +1,7 @@
 // Das Kachelraster: Aufbau, „Raster wächst mit“, Handy-Vollbild und Aktualisieren einzelner Kacheln.
 import { TILES, byId, raster } from './tiles.js';
-import { esc, icon, rows, glyph } from './util.js';
+import { esc, icon, rows } from './util.js';
+import { ansichtVon, erweiterungen } from './ansichten.js';
 import { countClick } from './store.js';
 import { hatEinstellungen, formular, binden, offeneSpeichern, ZAHNRAD } from './einstellungen.js';
 
@@ -63,20 +64,7 @@ function fillContent(t, el) {
     }));
   }
   else el.innerHTML = (t.big || '') + rows(t.rows);
-  hinweise(el);
-}
-function hinweise(el) {
-  el.querySelectorAll('figure').forEach(fig => {
-    const tip = fig.querySelector('.wd-tip'); if (!tip) return;
-    const zeige = e => {
-      const z = e.target.closest('[data-tip]');
-      if (!z) { tip.hidden = true; return; }
-      fig.querySelectorAll('.an').forEach(x => x.classList.remove('an')); z.classList.add('an');
-      tip.textContent = z.dataset.tip; tip.hidden = false;
-    };
-    fig.addEventListener('pointermove', zeige);
-    fig.addEventListener('pointerleave', () => { tip.hidden = true; fig.querySelectorAll('.an').forEach(x => x.classList.remove('an')); });
-  });
+  erweiterungen().forEach(x => x.nachInhalt && x.nachInhalt(el));
 }
 
 // Liste für die kleine Kachel: [{ d, t, gruppe }] – zwischen Gruppen ein kleiner Abstand
@@ -111,19 +99,20 @@ export function paint(id) {
   const tz = el.querySelector('.teaser');
   // zeileIcon: das Symbol (z. B. Wetterlage) steht in der kleinen Kachel vor dem Text statt im Kopf
   tz.innerHTML = `<span class="t-text">${t.zeileIcon && t.lglyph ? `<span class="t-icon" title="${esc(t.lglyphTip || '')}">${t.lglyph}</span>` : ''}${esc(t.x)}</span>` +
-    (t.zeile2 && t.zeile2.text ? `<span class="t-zeile2">${t.zeile2.glyph ? `<span class="t-icon">${t.zeile2.glyph}</span>` : ''}${esc(t.zeile2.text)}</span>` : '') + (t.liste && t.liste.length ? `<span class="t-liste">${listeHtml(t.liste)}</span>` : '');
-  // Zeitpunkt-Block (Wetter): feste Felder, beim Überfahren des Diagramms wechseln nur die Werte (miniTip)
-  if (t.zp) tz.insertAdjacentHTML('beforeend', `<span class="t-zp" data-jetzt="${esc(JSON.stringify(t.zp))}">${zpHtml(t.zp)}</span>`);
-  tz.classList.toggle('mit-zp', !!t.zp);
+    (t.liste && t.liste.length ? `<span class="t-liste">${listeHtml(t.liste)}</span>` : '');
   tz.classList.toggle('mit-liste', !!(t.liste && t.liste.length));
-  tz.classList.toggle('mit-zeile2', !!(t.zeile2 && t.zeile2.text));   // zweite Zeile (Wetter: Regen) – klein eigene Zeile, sonst im Text
+  // Eigene Ansicht der Kachel (core/ansichten.js, z. B. ansichten/wetter.js): zusätzlicher Inhalt und Klassen der Unterzeile
+  const av = ansichtVon(id), extra = av && av.teaser ? av.teaser(t) : null;
+  (tz.dataset.klassen || '').split(' ').filter(Boolean).forEach(k => tz.classList.remove(k));
+  if (extra) { tz.insertAdjacentHTML('beforeend', extra.html || ''); (extra.klassen || []).forEach(k => tz.classList.add(k)); }
+  tz.dataset.klassen = extra ? (extra.klassen || []).join(' ') : '';
   // Kopf der kleinen Kachel: nur Inhalt (z. B. Ort und Temperaturen, KW) – der Name erscheint beim Überfahren
   el.querySelector('.label .kopf').innerHTML = t.kopf || '';
   // Info-Feld hinter dem (i) unten rechts: Name (später auch Quelle, Stand …)
   el.querySelector('.head').removeAttribute('title');
   el.querySelector('.info-feld').innerHTML = [t.hover || t.name || t.title, ...(t.info || [])].map(z => `<span>${esc(z)}</span>`).join('');
   el.querySelector('.mini').innerHTML = t.chart || '';
-  requestAnimationFrame(() => miniDichte(el));        // wenig Höhe → Striche alle 10°
+  erweiterungen().forEach(x => x.nachZeichnen && x.nachZeichnen(el));
   el.querySelector('.head').setAttribute('aria-label', [t.title, t.lglyphTip, t.m].filter(Boolean).join(': '));
   // Aufgeklappten Inhalt nur neu zeichnen, wenn er sichtbar ist – und nicht, während die Einstellungen offen sind (Eingaben bleiben)
   const imFormular = reiterWahl[id] === EINST;
@@ -173,7 +162,7 @@ export function activate(id) {
   if (active === id) return;
   offeneSpeichern();
   active = id; layout();
-  requestAnimationFrame(() => miniDichte(grid));
+  erweiterungen().forEach(x => x.groesse && x.groesse(grid));
   if (id) { const t = byId[id]; fillContent(t, document.querySelector(`#tile-${id} .content`)); }
 }
 export const isAnyOpen = () => active !== null || open !== null;
@@ -220,50 +209,16 @@ document.addEventListener('daily:einstellungen', e => {
   });
 });
 
-// Wenig Höhe: Striche und Zahlen nur alle 10° (jede Zahl behält ihren Strich). Aufruf nach dem Zeichnen und bei Größenänderung.
-function miniDichte(wurzel) {
-  wurzel.querySelectorAll('.wd-minibox').forEach(b => {
-    const svg = b.querySelector('.wd-mini'), n = b.querySelectorAll('.wd-miniskala:not(.wd-miniskala-r) .wd-sk span').length;
-    if (!svg || n < 2) return;
-    const h = svg.getBoundingClientRect().height, n10 = b.querySelectorAll('.wd-miniskala:not(.wd-miniskala-r) .wd-sk span:not(.wd-g5)').length;
-    const stufe = h / (n - 1) >= 13 ? 0 : n10 > 1 && h / (n10 - 1) >= 13 ? 1 : 2;
-    b.classList.toggle('wd-eng', stufe === 1);   // Striche und Zahlen alle 10°
-    b.classList.toggle('wd-eng2', stufe === 2);  // nur oberste und unterste Zahl mit Strich
-    const sn = b.querySelectorAll('.wd-sonnen span').length;                     // Sonnenzahlen: zu eng → jede zweite
-    if (sn) b.classList.toggle('wd-seng', svg.getBoundingClientRect().width / sn < 16);
-  });
-}
-
-// Zeitpunkt-Block: immer dieselben Felder an festen Plätzen (Zeitpunkt, Temperatur, gefühlt, Wetterlage / Regen, %, Wind, Sonne)
-function zpHtml(z) {
-  const f = (k, v) => `<span class="zp-${k}">${esc(v || '')}</span>`;
-  return f('z', z.z) + f('t', z.t) + f('g', z.g) + `<span class="zp-l">${glyph(z.i)}<span>${esc(z.l)}</span></span>` +
-    `<span class="zp-r"><span class="zp-mm">☂ ${esc(z.mm)}</span>${f('p', z.p)}${f('w', z.w)}${f('s', z.s)}</span>`;
-}
-// Überfahren des Mini-Diagramms: Spalte hervorheben, Werte der Stunde/des Tags in den Zeitpunkt-Block; beim Verlassen zurück auf „Jetzt“
-function miniTip(e) {
-  const sp = e.target.closest && e.target.closest('.wd-mini .wd-spalte');
-  const tile = sp && sp.closest('.tile');
-  grid.querySelectorAll('.wd-spalte.an').forEach(x => { if (x !== sp) x.classList.remove('an'); });
-  grid.querySelectorAll('.t-zp.zp-an').forEach(b => {
-    if (tile && b.closest('.tile') === tile) return;
-    b.classList.remove('zp-an'); delete b.dataset.zeigt; try { b.innerHTML = zpHtml(JSON.parse(b.dataset.jetzt)); } catch (err) { /* bleibt */ }
-  });
-  if (!sp || !tile || !sp.dataset.zp) return;
-  const block = tile.querySelector('.t-zp'); if (!block) return;
-  sp.classList.add('an');
-  if (block.dataset.zeigt !== sp.dataset.zp) { block.innerHTML = zpHtml(JSON.parse(sp.dataset.zp)); block.dataset.zeigt = sp.dataset.zp; }
-  block.classList.add('zp-an');
-}
 export function initBoard() {
-  grid.addEventListener('pointermove', miniTip);
-  grid.addEventListener('pointerleave', miniTip);
-  addEventListener('resize', () => requestAnimationFrame(() => { rasterNeu(); miniDichte(grid); }));
+  const zeiger = e => erweiterungen().forEach(x => x.zeiger && x.zeiger(e, grid));
+  grid.addEventListener('pointermove', zeiger);
+  grid.addEventListener('pointerleave', zeiger);
+  addEventListener('resize', () => requestAnimationFrame(() => { rasterNeu(); erweiterungen().forEach(x => x.groesse && x.groesse(grid)); }));
   ORDER = TILES.map(t => t.id);
   grid.innerHTML = TILES.map(tileHTML).join('');
   TILES.forEach(t => paint(t.id));
   rasterNeu();
-  requestAnimationFrame(() => miniDichte(grid));
+  erweiterungen().forEach(x => x.groesse && x.groesse(grid));
 
   // (i): Überfahren zeigt das Info-Feld, Klick schaltet es fest ein/aus – ohne die Kachel zu öffnen
   const info = (knopf, an) => { const f = knopf.nextElementSibling; f.hidden = !an; knopf.setAttribute('aria-expanded', String(an)); };

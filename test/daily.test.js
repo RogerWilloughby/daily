@@ -182,3 +182,21 @@ test('Syntax: alle Browser-Module lassen sich parsen', () => {
     assert.equal(r.status, 0, path.relative(process.cwd(), f) + ': ' + (r.stderr || '').split('\n').slice(0, 5).join(' '));
   }
 });
+
+// Trennung: Das allgemeine Kachelraster (core/board.js) und die allgemeinen Styles (app.css) enthalten nichts Wetter- oder
+// Finanz-Spezifisches. Diagramme → ansichten/*.js, adapter/*diagramm.js, css/diagramm.css, css/wetter.css, css/finanzen.css.
+test('Aufbau: board.js und app.css ohne Wetter-/Finanz-Teile, Ansichts-CSS eingebunden', () => {
+  const lies = p => fs.readFileSync(path.join(__dirname, '..', p), 'utf8');
+  const board = lies('src/js/core/board.js').replace(/\/\/.*$/gm, '');
+  for (const muster of [/\bwd-/, /\bzp-|\bt-zp\b|data-zp|zpHtml/, /\bfi-/, /\bwh-/, /\brk-|\brs[1-4]\b/, /miniDichte|miniKurs|zeile2/])
+    assert.doesNotMatch(board, muster, 'board.js enthält ' + muster);
+  const css = lies('src/app.css').replace(/\/\*[\s\S]*?\*\//g, '').replace(/var\(--wd-[\w-]+\)/g, '');
+  for (const muster of [/\.wd-|--wd-/, /\.zp-|\.t-zp|\.mit-zp/, /\.fi-/, /\.wh-/, /\.rk-|--rs\d/])
+    assert.doesNotMatch(css, muster, 'app.css enthält ' + muster);
+  const html = lies('src/index.html'), sw = lies('src/sw.js');
+  for (const f of ['/css/diagramm.css', '/css/wetter.css', '/css/finanzen.css']) {
+    assert.ok(fs.existsSync(path.join(__dirname, '../src', f)), 'fehlt: ' + f);
+    assert.ok(html.includes(`href="${f}"`), 'nicht in index.html: ' + f);
+    assert.ok(sw.includes(`'${f}'`), 'nicht im Service Worker: ' + f);
+  }
+});

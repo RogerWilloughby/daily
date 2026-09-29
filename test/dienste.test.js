@@ -863,7 +863,8 @@ test('Finanzen: EZB-Kurse, Leitzinsen, Inflation; Kurse (Yahoo) nur privat; Kach
   assert.match(a.antwort('Wie steht der DAX?', r.body, k.body), /^DAX: 24\.312 Pkt \(▲ 0,42 % zum Vortag\)/);
   assert.match(a.antwort('Wie steht der DAX?', r.body, null), /nur im privaten Betrieb/);
   assert.equal(a.antwort('Wie wird das Wetter?', r.body), null);
-  const { kursSkala, pfadRund } = await esm('src/js/adapter/diagramm.js');
+  const { pfadRund } = await esm('src/js/adapter/diagramm.js');
+  const { kursSkala } = await esm('src/js/adapter/kursdiagramm.js');
   // runde Linie: Kurvensegmente, Endpunkte exakt, kein Überschwingen über den Höchstwert
   const rund = pfadRund([[0, 10], [10, 0], [20, 10], [30, 5]]);
   assert.match(rund, /^M0\.0,10\.0C.*20\.0,10\.0C.*30\.0,5\.0$/);

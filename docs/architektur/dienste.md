@@ -143,6 +143,24 @@ Daraus entstehen der Katalog `/api/v1/dienste`, die Dateien `docs/dienste/<id>.m
 | `src/js/dienste/client.js` | Abruf im Browser, Zwischenspeicher bis `gueltigBis`, Fehler mit Code |
 | `src/js/adapter/*.js` | Darstellung je Dienst (ohne DOM, testbar) |
 
+## Aufbau der Oberfläche: wo liegt was
+Das allgemeine Kachelraster weiß nichts über einzelne Kacheln. Kachelbesondere Darstellung hängt sich über Ansichten ein (seit App 0.25.1; Test „Aufbau“ in `test/daily.test.js` wacht darüber).
+
+| Datei | Zweck |
+|---|---|
+| `src/js/core/board.js` | allgemeines Kachelraster: Raster, Aktivieren, Reiter, Listen, Einstellungen – ohne Wetter/Finanzen |
+| `src/js/core/ansichten.js` | Anmeldung: `ansicht(id, { teaser, spalte, zurueck })` für eine Kachel, `erweiterung({ nachInhalt, nachZeichnen, groesse, zeiger })` für alle |
+| `src/js/ansichten/mini-diagramm.js` | allgemeine Diagramm-Bedienung: Dichte je Platz (`miniDichte`), Hinweise der großen Diagramme, Überfahren der Spalten |
+| `src/js/ansichten/wetter.js` | Wetter-Kachel klein: Regenzeile und Zeitpunkt-Block („Jetzt“ / überfahrene Stunde oder Tag) |
+| `src/js/adapter/diagramm.js` | Wetter-Diagramme als HTML/SVG-Text und gemeinsame Bausteine (`skala`, `pfad`, `pfadRund`, `umschalter`) |
+| `src/js/adapter/kursdiagramm.js` | Mini-Kursdiagramm der Finanzen-Kachel (`miniKurs`, `kursSkala`) |
+| `src/app.css` | allgemeine Styles, Design-Tokens, Hell/Dunkel |
+| `src/css/diagramm.css` | gemeinsame Diagramm-Styles `.wd-*` und Farben `--wd-*` (Wetter, Finanzen, Kalender) |
+| `src/css/wetter.css` | nur Wetter: Zeitpunkt-Block, Regenzeile, Radar, Sonnenzahlen |
+| `src/css/finanzen.css` | nur Finanzen: `fi-*`, Kurslinie |
+
+Neue Kachel mit eigener Darstellung: Datei unter `src/js/ansichten/`, vom Provider importiert; eigene Styles unter `src/css/`, in `index.html` und `sw.js` eingetragen.
+
 ## Stand der Umstellung
 | Dienst | Status |
 |---|---|

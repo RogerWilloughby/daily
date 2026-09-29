@@ -8,6 +8,7 @@ import { kachel, antwort, mitOptionen, WETTER_STANDARD } from '../adapter/wetter
 import { kachelEinstellungen } from '../core/einstellungen.js';
 import { antwort as hinweisAntwort } from '../adapter/hinweise.js';
 import { hm } from '../core/util.js';
+import '../ansichten/wetter.js'; // Darstellung der Wetter-Kachel (Zeitpunkt-Block)
 
 let env = null, regen = null, hinweise = null;
 

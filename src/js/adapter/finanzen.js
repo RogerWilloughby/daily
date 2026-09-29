@@ -1,7 +1,7 @@
 // Adapter „Finanzen“: macht aus den Diensten „finanzen“ (EZB, öffentlich) und „kurse“ (Yahoo, nur privat) die Kachel und Antworten.
 // Reine Kursangaben, keine Anlageempfehlung. Rein, ohne DOM – testbar.
 import { esc } from '../core/util.js';
-import { miniKurs } from './diagramm.js';
+import { miniKurs } from './kursdiagramm.js';
 
 export const FINANZ_STANDARD = { haupt: 'USD', weitere: ['GBP', 'CHF', 'PLN', 'CZK'], tage: 30, zinsen: true, inflation: true, maerkte: true };
 // Zur Wahl in den Einstellungen (Reihenfolge)
