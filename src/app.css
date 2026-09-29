@@ -541,8 +541,8 @@ a.tl-z.tl-link:hover .tl-d{text-decoration:underline}
 .wd-seng .wd-sonnen .wd-s2{display:none}
 .wd-mini .wd-spalte{fill:transparent;cursor:crosshair}
 .wd-mini .wd-spalte.an{fill:currentColor;opacity:.1}
-.mini-hover{position:absolute;top:10px;right:12px;max-width:52%;z-index:3;text-align:right;font-size:11px;line-height:1.35;font-weight:500;
+.mini-hover{position:absolute;top:10px;right:12px;max-width:52%;z-index:3;text-align:right;font-size:10.5px;line-height:1.3;font-weight:500;
   color:var(--ink);background:var(--surface);padding:0 0 2px 8px;pointer-events:none}
 .mini-hover[hidden]{display:none}
-.mini-hover.unten{text-align:left;font-size:12.5px;padding:0;right:auto}
 .tile[data-mode="active"] .mini-hover{display:none}
+.tile.hover-an .kopf .wh-badge{visibility:hidden}

@@ -171,3 +171,14 @@ test('Tools: Verzeichnis, Kachel mit Links, Seiten ohne Google Fonts', async () 
     assert.equal(kachel([]).liste.length, 0);
   }
 });
+
+test('Syntax: alle Browser-Module lassen sich parsen', () => {
+  const fs = require('fs'), { spawnSync } = require('child_process');
+  const dateien = [];
+  const lauf = d => fs.readdirSync(d, { withFileTypes: true }).forEach(e => { const p = path.join(d, e.name); if (e.isDirectory()) lauf(p); else if (p.endsWith('.js')) dateien.push(p); });
+  lauf(path.join(__dirname, '..', 'src', 'js'));
+  for (const f of dateien) {
+    const r = spawnSync(process.execPath, ['--experimental-default-type=module', '--check', f], { encoding: 'utf8' });
+    assert.equal(r.status, 0, path.relative(process.cwd(), f) + ': ' + (r.stderr || '').split('\n').slice(0, 5).join(' '));
+  }
+});

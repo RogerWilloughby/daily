@@ -236,26 +236,26 @@ function miniTip(e) {
   const sp = e.target.closest && e.target.closest('.wd-mini .wd-spalte');
   const tile = sp && sp.closest('.tile');
   grid.querySelectorAll('.wd-spalte.an').forEach(x => { if (x !== sp) x.classList.remove('an'); });
-  grid.querySelectorAll('.mini-hover:not([hidden])').forEach(t => { if (!tile || t.parentNode !== tile) t.hidden = true; });
+  grid.querySelectorAll('.mini-hover:not([hidden])').forEach(t => { if (!tile || t.parentNode !== tile) { t.hidden = true; t.parentNode.classList.remove('hover-an'); } });
   if (!sp || !tile) return;
   let tip = tile.querySelector(':scope > .mini-hover');
   if (!tip) { tip = document.createElement('div'); tip.className = 'mini-hover'; tip.setAttribute('aria-hidden', 'true'); tile.appendChild(tip); }
   sp.classList.add('an');
   tip.textContent = sp.dataset.tip; tip.hidden = false;
-  // Platz: rechts neben dem Kopf, wenn dort frei genug ist – sonst über den Textzeilen (Wetterlage/Regen) darunter
-  const tr = tile.getBoundingClientRect(), lab = tile.querySelector('.head .label'), tz = tile.querySelector('.head .teaser');
-  const inhalt = lab ? [...lab.children].filter(c => c.offsetParent && c.getClientRects().length).reduce((m, c) => Math.max(m, c.getBoundingClientRect().right), tr.left) : tr.left;
-  const frei = tr.right - 12 - inhalt - 16;
-  tip.classList.remove('unten'); tip.style.cssText = '';
-  if (frei >= 170 && lab) {
-    tip.style.maxWidth = frei + 'px'; tip.style.top = (lab.getBoundingClientRect().top - tr.top) + 'px';
-    if (tip.getBoundingClientRect().height <= lab.getBoundingClientRect().height * 1.9 + 4) return;
-  }
-  if (tz) {
-    const r = tz.getBoundingClientRect();
-    tip.classList.add('unten');
-    tip.style.cssText = `top:${r.top - tr.top}px;left:${r.left - tr.left}px;width:${r.width}px;min-height:${r.height}px;max-width:none`;
-  }
+  // Immer oben rechts neben dem Kopf (nie springen). Das Warn-Abzeichen tritt solange zurück (der Hinweis steht auch in der Textzeile);
+  // Breite = Platz rechts vom Kopftext (Ort, Temperaturen), mindestens 130 px
+  tile.classList.add('hover-an');
+  const tr = tile.getBoundingClientRect(), lab = tile.querySelector('.head .label'), kopf = lab && lab.querySelector('.kopf');
+  let rechts = tr.left + 20;
+  if (kopf && kopf.getClientRects().length) {
+    const r = document.createRange(), badge = kopf.querySelector('.wh-badge');
+    r.selectNodeContents(kopf); if (badge) r.setEndBefore(badge);
+    const rr = r.getBoundingClientRect(); rechts = rr.right;
+    // Kopftext füllt die Zeile (schmale Kachel): dann in der Zeile darunter (dort steht sonst das Abzeichen), volle Breite
+    if (tr.right - 12 - rechts - 14 < 130) { tip.style.maxWidth = (tr.width - 24) + 'px'; tip.style.top = (rr.bottom - tr.top + 2) + 'px'; return; }
+  } else if (lab) rechts = [...lab.children].filter(c => c.getClientRects().length).reduce((m, c) => Math.max(m, c.getBoundingClientRect().right), rechts);
+  tip.style.maxWidth = Math.max(130, tr.right - 12 - rechts - 14) + 'px';
+  tip.style.top = (lab ? lab.getBoundingClientRect().top - tr.top : 10) + 'px';
 }
 export function initBoard() {
   grid.addEventListener('pointermove', miniTip);
