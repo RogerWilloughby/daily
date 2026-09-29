@@ -6,8 +6,8 @@ import { esc, glyph } from '../core/util.js';
 
 export function zpHtml(z) {
   const f = (k, v) => `<span class="zp-${k}">${esc(v || '')}</span>`;
-  // Regenmenge und -wahrscheinlichkeit mit Schirm (blau); bei 0 mm bzw. 0 % ist der Schirm durchgestrichen
-  const schirm = (k, v) => `<span class="zp-${k}">${v ? `<i class="zp-schirm${/^0(,0)? /.test(v) ? ' zp-kein' : ''}" aria-hidden="true">☂</i> ${esc(v)}` : ''}</span>`;
+  // Regenmenge und -wahrscheinlichkeit mit Schirm (blau)
+  const schirm = (k, v) => `<span class="zp-${k}">${v ? `<i class="zp-schirm" aria-hidden="true">☂</i> ${esc(v)}` : ''}</span>`;
   return f('z', z.z) + f('t', z.t) + f('g', z.g) + `<span class="zp-l">${glyph(z.i)}<span>${esc(z.l)}</span></span>` +
     `<span class="zp-r">${schirm('mm', z.mm)}${schirm('p', z.p)}${f('w', z.w)}${f('s', z.s)}</span>`;
 }
