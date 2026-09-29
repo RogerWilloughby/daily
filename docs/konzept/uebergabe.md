@@ -10,6 +10,8 @@ Stand 29.09.2026 (App 0.29.0). Für neue Chats: hier steht, woran gerade gearbei
 - **Skalierung:** Für jeden Dienst die Frage „10 Mio. Aufrufe/Tag?“ – Rahmen in `../architektur/skalierung.md`.
 - **Qualität:** „Die Ortseingabe muss 100 % perfekt sein“ – Maßstab ist Google. Jeder gemeldete Fehlfall wird ein Testfall in `test/dienste.test.js`.
 - **Strategie öffentlich:** keine Nutzerdaten außer dem Ort, keine Nachrichten. Kalender und Schlagzeilen nur privat. Mail und Pakete gestrichen.
+- **Handy pausiert (29.09.2026):** Darstellung auf dem Handy ruht, bis Roger das Thema wieder aufnimmt – Dienste und Darstellung erst exemplarisch am PC.
+- **Bedienung (29.09.2026):** Mini-Reiter in der kleinen Kachel statt Aufklappen (`entscheidungen.md`, Abschnitt 13; Vorlage `vorlage-mini-reiter.md`).
 - **Datenhaltung (29.09.2026):** keine Datenbank – feste Daten als Dateien im Repo, Regeln rechnen, Wechselndes live + CDN. Vor jedem neuen Dienst prüfen, dass er damit auskommt (`entscheidungen.md`, Abschnitt 12).
 - Roger liefert später weitere Dienst-Ideen.
 
@@ -69,6 +71,7 @@ App-Seite „Woher kommen die Daten?“ (Fußzeile → Datenquellen) zeigt die D
 - Autobahn öffentlich: API ohne Lizenzangabe, Staumeldungen teils INRIX – vor dem öffentlichen Start klären (`../recht/checkliste.md`).
 
 ## Nächste Schritte (in dieser Reihenfolge)
+0. **Mini-Reiter umsetzen** (Konzept-Entscheidung 29.09.2026, `entscheidungen.md` Abschnitt 13): Baustein im Kachelraster + Kachel „Verkehr“ (Abfahrten · Arbeitsweg · Tanken) nach `vorlage-mini-reiter.md`, auf den aktuellen Stand übertragen; danach Wetter, übrige Kacheln, Aufklappen entfernen. **Vorher Plan vorlegen.**
 1. **Kachel „Verkehr“ weiter ausbauen** (Entscheidungen in `entscheidungen.md` → „Kachel Verkehr“): Schritt 2 Dienst `autobahn` ✅ 0.28.0 (Roger testet auf Vercel: Zahnrad → Autobahnen, Start, Ziel). Als Nächstes Schritt 3 Bus/Bahn über Verkehrsverbünde (`abfahrten`, `verbindung`, Start VVO). **Vorher Plan vorlegen.**
 2. **Nächste Kachel auf daily/1 umziehen** – Roger wählt aus: Sport, Geld (privat), Wissen, Tagesinhalte, Schlagzeilen (privat). Vorschlag laut `dienste-katalog.md`: `tanken`, `abfahrten`, `fussball`, `an-diesem-tag`, `tagesinhalt`, `kurse`. **Vorher Plan vorlegen.** Je Dienst: Dienstblatt, Version, Tests, Frag DAILY, Kachel mit `fertig: true`, Einstellungen im Zahnrad-Reiter der Kachel.
 3. Neue Dienst-Ideen von Roger aufnehmen (`dienste-katalog.md`).

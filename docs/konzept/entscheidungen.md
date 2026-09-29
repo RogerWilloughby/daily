@@ -156,6 +156,14 @@ Der Prototyp zählt lokal, welche Kacheln geöffnet werden (Kachel „Deine Nutz
 - Eine Datenbank kommt erst infrage bei wachsenden Daten (z. B. eigener Preisverlauf, wenn die Quelle keinen liefert) oder Nutzerdaten über Geräte hinweg (Konto, Einstellungen). Dann vorher mit Roger klären.
 - Prüfschritt vor jedem neuen Dienst: siehe `../architektur/dienste.md` → „Einen Dienst bauen“, Schritt 0.
 
+## 13. Bedienung: Mini-Reiter statt Aufklappen (29.09.2026)
+- **Roger:** Statt eine Kachel zum Aufklappen zu vergrößern, arbeiten wir mit Reitern in der kleinen Kachel. Entscheidungen: Reiter **nur als Symbole** (Name beim Überfahren) in einer schmalen Spalte **links unter der Kopfzeile** (Kopfzeile bleibt volle Breite; die Breite der Kacheln hat dafür Spielraum). Die Mini-Reiter **ersetzen** das Aufklappen; die Einstellungen einer Kachel öffnen über ein Zahnrad unten in der Reiterspalte ein eigenes Fenster.
+- **Wetter (Variante 1a):** kleine Reiter Jetzt (Zeitpunkt-Block + Diagramm mit Zeitraum-Umschalter Heute · 3 Tage · 7 · 15) · Radar · Hinweise (nur bei Warnung) · Mehr. „15 Tage“ und „48 Std.“ gibt es klein nicht als eigene Reiter – das deckt der Zeitraum-Umschalter ab.
+- **Handy pausiert:** Die Darstellung auf dem Handy ruht, bis Roger das Thema wieder aufnimmt. Dienste und Darstellung werden zuerst exemplarisch am PC gebaut.
+- **Umsetzung als allgemeiner Baustein** im Kachelraster (`core/board.js`, Styles `.kr-*` in `app.css`): Eine Kachel liefert `kleinReiter` ([{ id, name, icon, kopf?, liste? | html? }]); das Raster zeichnet die Spalte, wechselt, speichert die Wahl je Kachel (Kachel-Einstellung `reiter`), zeigt so viele Listenzeilen, wie ganz hineinpassen, und öffnet das Einstellungsfenster. Kacheln mit Mini-Reitern klappen nicht mehr auf; die übrigen klappen bis zu ihrer Umstellung weiter auf.
+- **Vorlage:** Eine im Konzept-Chat gebaute und gemessene Umsetzung (auf Stand 0.27.0, nicht eingespielt) liegt in `vorlage-mini-reiter.md` – als Grundlage für den Umsetzungs-Chat.
+- **Reihenfolge:** (1) Baustein + Kachel „Verkehr“ (Abfahrten · Arbeitsweg · Tanken), (2) Wetter, (3) Kalender, Finanzen, Tools und lokale Kacheln, (4) Code fürs Aufklappen entfernen. Je Schritt ein Plan.
+
 ## Design
 Grau-grüner Grund, dunkelblaue aktive Kachel, Schriften Bricolage Grotesque + Figtree, Hell- und Dunkelmodus. App-Icon: Raster mit großer „D“-Kachel. Beispieltermin: „Geburtstag von Claude“.
 Prototyp: `../prototyp/daily-prototyp.html`.
