@@ -1,5 +1,5 @@
 // Wetter-Diagramme als HTML/SVG-Text (ohne DOM, testbar). Farben über CSS-Klassen (app.css, .wd-*), damit Hell/Dunkel/aktive Kachel passen.
-// Einheitliche Farben: Höchstwert orange, Tiefstwert blau, Niederschlag grün, Sonne gelb – für Linien, Balken UND die zugehörigen Zahlen.
+// Einheitliche Farben: Höchstwert orange, Tiefstwert dunkelblau, Niederschlag hellblau, Sonne gelb – für Linien, Balken UND die zugehörigen Zahlen.
 // Keine zweite Y-Achse: Temperatur, Niederschlag und Sonne stehen in getrennten Feldern übereinander, mit gemeinsamer Zeitachse.
 const r0 = v => (v == null ? '–' : Math.round(v));
 const komma = v => String(v).replace('.', ',');
@@ -12,11 +12,33 @@ function skala(min, max, oben, unten) {
 }
 const pfad = pts => pts.filter(p => p[1] != null && Number.isFinite(p[1])).map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join('');
 
-// Linie in zwei Teilen: belastbare Punkte durchgezogen (bis Index „bis“), danach gestrichelt
-function linie(xs, ys, bis, klasse) {
-  const a = xs.map((x, i) => [x, ys[i]]);
+// Runde Linie (monotone kubische Interpolation nach Fritsch-Carlson): weich, schießt aber nie über die echten Werte hinaus (rein, testbar)
+export function pfadRund(pts) {
+  const p = pts.filter(q => q[1] != null && Number.isFinite(q[1]));
+  if (p.length < 3) return pfad(p);
+  const n = p.length, d = [], m = [];
+  for (let i = 0; i < n - 1; i++) d.push((p[i + 1][1] - p[i][1]) / (p[i + 1][0] - p[i][0]));
+  m[0] = d[0]; m[n - 1] = d[n - 2];
+  for (let i = 1; i < n - 1; i++) m[i] = d[i - 1] * d[i] <= 0 ? 0 : (d[i - 1] + d[i]) / 2;
+  for (let i = 0; i < n - 1; i++) {
+    if (d[i] === 0) { m[i] = 0; m[i + 1] = 0; continue; }
+    const a = m[i] / d[i], b = m[i + 1] / d[i], t = a * a + b * b;
+    if (t > 9) { const k = 3 / Math.sqrt(t); m[i] = k * a * d[i]; m[i + 1] = k * b * d[i]; }
+  }
+  const f = v => v.toFixed(1);
+  let out = `M${f(p[0][0])},${f(p[0][1])}`;
+  for (let i = 0; i < n - 1; i++) {
+    const h = (p[i + 1][0] - p[i][0]) / 3;
+    out += `C${f(p[i][0] + h)},${f(p[i][1] + m[i] * h)} ${f(p[i + 1][0] - h)},${f(p[i + 1][1] - m[i + 1] * h)} ${f(p[i + 1][0])},${f(p[i + 1][1])}`;
+  }
+  return out;
+}
+
+// Linie in zwei Teilen: belastbare Punkte durchgezogen (bis Index „bis“), danach gestrichelt; rund = weich gezeichnet
+function linie(xs, ys, bis, klasse, rund = false) {
+  const a = xs.map((x, i) => [x, ys[i]]), zeichne = rund ? pfadRund : pfad;
   const fest = a.slice(0, bis + 1), trend = a.slice(bis);
-  return `<path class="${klasse}" d="${pfad(fest)}"/>` + (trend.length > 1 ? `<path class="${klasse} wd-trend" d="${pfad(trend)}"/>` : '');
+  return `<path class="${klasse}" d="${zeichne(fest)}"/>` + (trend.length > 1 ? `<path class="${klasse} wd-trend" d="${zeichne(trend)}"/>` : '');
 }
 const bisVorTrend = tage => { const ab = tage.findIndex(t => t.trend); return ab < 0 ? tage.length : ab - 1; };
 
@@ -56,8 +78,15 @@ function mini(d) {
     const h = Math.max(1, Math.round((T1 - yR(Math.min(r.mm, mmTop))) * 10) / 10);
     out.push(`<rect class="wd-regen" x="${(x(i) - bw / 2).toFixed(1)}" y="${(T1 - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h}" rx="1" fill-opacity="${deckkraft(r.p)}"/>`);
   });
+  // Sonnenstunden (nur Tage): gelbe Balken hängen von der Oberkante, höchstens ein Drittel der Höhe (Skala mind. 12 Std.)
+  if (d.sonne) {
+    const sMax = Math.max(12, ...d.sonne.map(v => v || 0)), sw = Math.max(1, sp * 0.35);
+    d.sonne.forEach((v, i) => { if (v > 0) out.push(`<rect class="wd-sonne" x="${(x(i) - sw / 2).toFixed(1)}" y="0" width="${sw.toFixed(1)}" height="${Math.max(0.8, Math.round(v / sMax * H / 3 * 10) / 10)}" rx="0.5"/>`); });
+  }
   const xs = Array.from({ length: n }, (_, i) => x(i));
-  for (const l of d.linien) out.push(linie(xs, l.werte.map(v => (v == null ? null : y(v))), l.bisTrend ?? n, l.klasse));
+  for (const l of d.linien) out.push(linie(xs, l.werte.map(v => (v == null ? null : y(v))), l.bisTrend ?? n, l.klasse, true));
+  // Spalten für das Mouseover (core/board.js zeigt data-tip über dem Diagramm)
+  if (d.tips) d.tips.forEach((t, i) => { if (t) out.push(`<rect class="wd-spalte" x="${(i * sp).toFixed(1)}" y="0" width="${sp.toFixed(1)}" height="${H}" data-tip="${esc(t)}"/>`); });
   const svg = `<svg class="wd wd-mini" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">${out.join('')}</svg>`;
   const marken = d.marken.filter(m => x(m.i) / W > 0.03 && x(m.i) / W < 0.97)
     .map(m => `<span style="left:${(x(m.i) / W * 100).toFixed(1)}%">${esc(m.text)}</span>`).join('');
@@ -65,11 +94,11 @@ function mini(d) {
   const rechts = werte.map((v, k) => `<span class="${g5(v).trim()}" style="top:${pz(y(v))}%">${mm(k * stufe)}${v === hi ? ' mm' : ''}</span>`).join('');
   return `<div class="wd-minibox" role="img" aria-label="${esc(d.aria)}, Temperaturskala ${lo}° bis ${hi}°, Regen bis ${mm(mmMax)} mm">` +
     `<div class="wd-miniskala wd-t-max"><div class="wd-sk">${links}</div></div>` +
-    `<div class="wd-mini24">${svg}<div class="wd-marken">${marken}</div></div>` +
+    `<div class="wd-mini24">${svg}<div class="wd-marken">${marken}</div><div class="wd-minitip" hidden></div></div>` +
     `<div class="wd-miniskala wd-miniskala-r wd-t-regen"><div class="wd-sk">${rechts}</div></div></div>` +
     // „Regen mm“ zuerst: bleibt auch in schmalen Kacheln sichtbar (Mouseover mit Erklärung), der Rest wird notfalls gekürzt
     `<div class="wd-minilegende">${umschalter(d.wahl)}<span class="wd-leg">` +
-    `<b class="wd-t-regen" title="Balkenhöhe = Regenmenge in mm · kräftigere Farbe = Regen wahrscheinlicher">Regen mm</b> · ${d.legende}</span></div>`;
+    `<b class="wd-t-regen" title="Balkenhöhe = Regenmenge in mm · kräftigere Farbe = Regen wahrscheinlicher">Regen mm</b> · ${d.legende}${d.sonne ? ' · <b class="wd-t-sonne" title="Gelbe Balken von oben = Sonnenstunden des Tages">Sonne</b>' : ''}</span></div>`;
 }
 // Umschalter der kleinen Kachel: 24 Std. · 48 Std. · 7 Tage · 16 Tage (Klick → providers/weather.js speichert und zeichnet neu)
 export const MINI_WAHL = [[24, '24 Std.'], [48, '48 Std.'], [7, '7 Tage'], [16, '16 Tage']];
@@ -78,7 +107,7 @@ const umschalter = (wahl, optionen = MINI_WAHL) => `<span class="wd-wahl" role="
 const wtagKurz = datum => new Date(datum + 'T12:00:00Z').toLocaleDateString('de-DE', { weekday: 'short', timeZone: 'UTC' }).replace('.', '');
 
 // 7 oder 16 Tage: Höchst- und Tiefstlinie (Trend gestrichelt), Regen mm/Tag, Wochentage (16 Tage: jeder zweite)
-export function miniDiagramm(tage) {
+export function miniDiagramm(tage, tip = null) {
   if (!tage || tage.length < 2) return '';
   const n = tage.length, bis = bisVorTrend(tage);
   const tmin = Math.min(...tage.map(t => t.minC ?? Infinity)), tmax = Math.max(...tage.map(t => t.maxC ?? -Infinity));
@@ -86,6 +115,7 @@ export function miniDiagramm(tage) {
     n,
     linien: [{ werte: tage.map(t => t.maxC), klasse: 'wd-max', bisTrend: bis }, { werte: tage.map(t => t.minC), klasse: 'wd-min', bisTrend: bis }],
     regen: tage.map(t => ({ mm: t.niederschlagMm || 0, p: t.regenProzent })), mmMin: 10,
+    sonne: tage.map(t => t.sonnenstunden), tips: tip ? tage.map(tip) : null,
     marken: tage.map((t, i) => ({ i, text: wtagKurz(t.datum) })).filter(m => n <= 8 || m.i % 2 === 0),
     wahl: n, legende: '<b class="wd-t-max">Höchst</b> · <b class="wd-t-min">Tiefst</b>',
     aria: `${n} Tage: Höchstwerte bis ${r0(tmax)}°, Tiefstwerte bis ${r0(tmin)}°`
@@ -94,14 +124,14 @@ export function miniDiagramm(tage) {
 
 // 24 oder 48 Std.: Temperaturlinie (Farbe Höchst), Regen mm/Std.; Zeitachse alle 3 Std. (24) bzw. alle 6 Std. (48, um Mitternacht
 // der Wochentag). stunde(iso) → Stunde als Zahl (Ortszeit), wtag(iso) → „Di“.
-export function miniStunden(stunden, stunde, anzahl = 24, wtag = () => '') {
+export function miniStunden(stunden, stunde, anzahl = 24, wtag = () => '', tip = null) {
   const l = (stunden || []).slice(0, anzahl);
   if (l.length < 2) return '';
   const temps = l.map(s => s.tempC).filter(v => v != null), schritt = anzahl > 24 ? 6 : 3;
   return mini({
     n: l.length,
     linien: [{ werte: l.map(s => s.tempC), klasse: 'wd-max' }],
-    regen: l.map(s => ({ mm: s.niederschlagMm || 0, p: s.regenProzent })), mmMin: 2,
+    regen: l.map(s => ({ mm: s.niederschlagMm || 0, p: s.regenProzent })), mmMin: 2, tips: tip ? l.map(tip) : null,
     marken: l.map((s, i) => ({ i, h: stunde(s.zeit), s })).filter(m => m.h % schritt === 0)
       .map(m => ({ i: m.i, text: anzahl > 24 && m.h === 0 ? wtag(m.s.zeit) || '0' : String(m.h) })),
     wahl: anzahl > 24 ? 48 : 24, legende: '<b class="wd-t-max">Temperatur</b>',

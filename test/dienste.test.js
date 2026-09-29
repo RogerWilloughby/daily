@@ -231,7 +231,13 @@ test('Adapter Wetter: Kachel und Antwort aus dem Vertrag', async () => {
   assert.match(k.chart, /<b class="wd-t-regen" title="Balkenhöhe = Regenmenge in mm · kräftigere Farbe = Regen wahrscheinlicher">Regen mm<\/b> · <b class="wd-t-max">Höchst<\/b> · <b class="wd-t-min">Tiefst<\/b>/);
   assert.doesNotMatch(k.chart, /kräftiger = wahrscheinlicher/);                     // Erklärung nur noch als Mouseover
   assert.match(k.chart, /data-mini-wahl="24" aria-pressed="false">24 Std\.<.*data-mini-wahl="48"[^>]*>48 Std\.<.*data-mini-wahl="7"[^>]*>7 Tage<.*data-mini-wahl="16" aria-pressed="true">16 Tage</);
-  assert.match(k.chart, /wd-marken"><span[^>]*>Mo<\/span><span[^>]*>Mi<\/span>/);   // Wochentage, bei 16 Tagen jeder zweite
+  assert.match(k.chart, /wd-marken">(<span[^>]*>(Mo|Di|Mi|Do|Fr|Sa|So)<\/span>){8}<\/div>/);   // Wochentage, bei 16 Tagen jeder zweite
+  // Sonne (Tage) als gelbe Balken von oben, Mouseover je Tag, runde Linien
+  assert.ok((k.chart.match(/class="wd-sonne"/g) || []).length > 0);
+  assert.equal((k.chart.match(/class="wd-spalte"/g) || []).length, 16);
+  assert.match(k.chart, /data-tip="[A-Z][a-z]\., \d{1,2}\.\d{1,2}\. · -?\d+° bis -?\d+° · [^"]+ · Regen \d+(,\d)? mm \(\d+ %\)/);
+  assert.match(k.chart, /class="wd-max" d="M[\d.]+,[\d.]+C/);
+  assert.match(k.chart, /<b class="wd-t-sonne"[^>]*>Sonne<\/b>/);
   assert.match(k.chart, /wd-max.*wd-min.*wd-trend/);
   // Kopfzeile mit farbigen Zahlen
   assert.match(k.titleHtml, /^Berlin 15° · <span class="wd-tm" title="Tiefstwert heute: 9° um \d{1,2} Uhr"><b class="wd-t-min">9°<\/b> <small class="wd-um">\d{1,2} Uhr<\/small><\/span> \/ <span class="wd-tm" title="Höchstwert heute: 16° um \d{1,2} Uhr"><b class="wd-t-max">16°<\/b> <small class="wd-um">\d{1,2} Uhr<\/small><\/span>$/);
@@ -737,6 +743,8 @@ test('Einstellungen: Kachel-Formular, Wetter-Optionen, Kachel-Listen', async () 
   // Standard: Mini-Diagramm 24 Stunden (Temperatur + Regenwahrscheinlichkeit, kräftig ab 1 mm)
   const k24 = mitOptionen(kachel(w, r, null), w, {});
   assert.match(k24.chart, /data-mini-wahl="24" aria-pressed="true">.*<b class="wd-t-regen"[^>]*>Regen mm<\/b> · <b class="wd-t-max">Temperatur<\/b>/);
+  assert.match(k24.chart, /data-tip="(Mo|Di|Mi|Do|Fr|Sa|So) \d{1,2} Uhr · -?\d+°[^"]* · Regen \d+(,\d)? mm/);
+  assert.doesNotMatch(k24.chart, /class="wd-sonne"/);                                  // Sonne nur bei Tagen
   // 48 Stunden: Zeitachse alle 6 Std., um Mitternacht der Wochentag
   const k48 = mitOptionen(kachel(w, r, null), w, { mini: 48 });
   assert.match(k48.chart, /data-mini-wahl="48" aria-pressed="true"/);
@@ -834,7 +842,11 @@ test('Finanzen: EZB-Kurse, Leitzinsen, Inflation; Kurse (Yahoo) nur privat; Kach
   assert.match(a.antwort('Wie steht der DAX?', r.body, k.body), /^DAX: 24\.312 Pkt \(▲ 0,42 % zum Vortag\)/);
   assert.match(a.antwort('Wie steht der DAX?', r.body, null), /nur im privaten Betrieb/);
   assert.equal(a.antwort('Wie wird das Wetter?', r.body), null);
-  const { kursSkala } = await esm('src/js/adapter/diagramm.js');
+  const { kursSkala, pfadRund } = await esm('src/js/adapter/diagramm.js');
+  // runde Linie: Kurvensegmente, Endpunkte exakt, kein Überschwingen über den Höchstwert
+  const rund = pfadRund([[0, 10], [10, 0], [20, 10], [30, 5]]);
+  assert.match(rund, /^M0\.0,10\.0C.*20\.0,10\.0C.*30\.0,5\.0$/);
+  assert.ok(rund.match(/-?[\d.]+/g).map(Number).filter((v, i) => i % 2 === 1).every(v => v >= 0 && v <= 10));
   assert.deepEqual(kursSkala(1.117, 1.163), { lo: 1.1, hi: 1.18, stufe: 0.02, stellen: 2 });
   assert.deepEqual(kursSkala(170, 181), { lo: 170, hi: 185, stufe: 5, stellen: 0 });
 });

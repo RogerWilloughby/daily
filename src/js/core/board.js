@@ -229,7 +229,22 @@ function miniDichte(wurzel) {
   });
 }
 
+// Mouseover im Mini-Diagramm: Spalte (data-tip) hervorheben, Werte in einem Feld über dem Diagramm
+function miniTip(e) {
+  const sp = e.target.closest && e.target.closest('.wd-mini .wd-spalte');
+  const box = e.target.closest && e.target.closest('.wd-mini24');
+  grid.querySelectorAll('.wd-spalte.an').forEach(x => { if (x !== sp) x.classList.remove('an'); });
+  grid.querySelectorAll('.wd-minitip:not([hidden])').forEach(t => { if (!box || t.parentNode !== box || !sp) t.hidden = true; });
+  if (!sp || !box) return;
+  const tip = box.querySelector('.wd-minitip'); if (!tip) return;
+  sp.classList.add('an');
+  tip.textContent = sp.dataset.tip; tip.hidden = false;
+  const r = box.getBoundingClientRect(), s = sp.getBoundingClientRect(), w = tip.offsetWidth;
+  tip.style.left = Math.max(0, Math.min(r.width - w, s.left + s.width / 2 - r.left - w / 2)) + 'px';
+}
 export function initBoard() {
+  grid.addEventListener('pointermove', miniTip);
+  grid.addEventListener('pointerleave', miniTip);
   addEventListener('resize', () => requestAnimationFrame(() => { rasterNeu(); miniDichte(grid); }));
   ORDER = TILES.map(t => t.id);
   grid.innerHTML = TILES.map(tileHTML).join('');

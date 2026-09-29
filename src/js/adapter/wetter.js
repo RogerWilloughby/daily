@@ -199,9 +199,25 @@ export function kachel(env, regenEnv = null, hinweisEnv = null) {
     // Unwetter zuerst, sonst Wetter · Hinweis; der Regen steht darunter in einer eigenen Zeile (Schirm-Symbol)
     x: (hTop && hTop.stufe >= 3 ? [hKurz, wetterText] : [wetterText, hKurz]).filter(Boolean).join(' '),
     zeile2: { glyph: glyph('schirm'), text: regenZeile },
-    chart: miniDiagramm(d.tage),
+    chart: miniDiagramm(d.tage, tagTip),
     rows
   };
+}
+
+// Mouseover-Texte der Mini-Diagramme (rein, testbar)
+const mmText = v => `${String(Math.round((v || 0) * 10) / 10).replace('.', ',')} mm`;
+export function tagTip(t) {
+  const tag = new Date(t.datum + 'T12:00:00Z').toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'numeric', timeZone: 'UTC' });
+  return [`${tag}`, `${r0(t.minC)}° bis ${r0(t.maxC)}°`, zustandText(t.zustand, t.code),
+    `Regen ${mmText(t.niederschlagMm)}${t.regenProzent != null ? ` (${t.regenProzent} %)` : ''}`,
+    t.sonnenstunden != null ? `${String(t.sonnenstunden).replace('.', ',')} Std. Sonne` : null, t.trend ? 'Trend (unsicher)' : null].filter(Boolean).join(' · ');
+}
+export function stundeTip(s, zone = 'Europe/Berlin') {
+  const d = new Date(s.zeit), h = +d.toLocaleTimeString('de-DE', { timeZone: zone, hour: '2-digit', hourCycle: 'h23' }).slice(0, 2);
+  const wt = d.toLocaleDateString('de-DE', { timeZone: zone, weekday: 'short' }).replace('.', '');
+  return [`${wt} ${h} Uhr`, `${r0(s.tempC)}°${s.gefuehltC != null && r0(s.gefuehltC) !== r0(s.tempC) ? ` (gefühlt ${r0(s.gefuehltC)}°)` : ''}`,
+    zustandText(s.zustand, s.code), `Regen ${mmText(s.niederschlagMm)}${s.regenProzent != null ? ` (${s.regenProzent} %)` : ''}`,
+    s.windKmh != null ? `Wind ${r0(s.windKmh)} km/h${s.boeenKmh >= 40 ? `, Böen ${r0(s.boeenKmh)}` : ''}` : null].filter(Boolean).join(' · ');
 }
 
 // Antwort für „Frag DAILY“
@@ -226,8 +242,8 @@ export function mitOptionen(k, env, opt = {}) {
   const zone = (env && env.ort && env.ort.zeitzone) || 'Europe/Berlin';
   const stunde = iso => +new Date(iso).toLocaleTimeString('de-DE', { timeZone: zone, hour: '2-digit', hourCycle: 'h23' }).slice(0, 2);
   const wtag = iso => new Date(iso).toLocaleDateString('de-DE', { timeZone: zone, weekday: 'short' }).replace('.', '');
-  const chart = !env || !env.daten ? k.chart : +o.mini === 7 ? miniDiagramm(env.daten.tage.slice(0, 7))
-    : +o.mini === 16 ? k.chart : miniStunden(env.daten.stunden, stunde, +o.mini === 48 ? 48 : 24, wtag);
+  const chart = !env || !env.daten ? k.chart : +o.mini === 7 ? miniDiagramm(env.daten.tage.slice(0, 7), tagTip)
+    : +o.mini === 16 ? k.chart : miniStunden(env.daten.stunden, stunde, +o.mini === 48 ? 48 : 24, wtag, s => stundeTip(s, zone));
   return { ...k, tabs, startReiter, chart };
 }
 
