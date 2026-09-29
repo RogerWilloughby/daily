@@ -2,7 +2,7 @@
 // Heute: kachel() für das Kachelraster und antwort() für „Frag DAILY“. Später z. B. liste(), dashboard().
 // Ohne DOM – daher auch in Node testbar.
 import { glyph, esc } from '../core/util.js';
-import { miniDiagramm, miniStunden, tageDiagramm, stundenDiagramm } from './diagramm.js';
+import { miniDiagramm, miniHeute, miniTageszeiten, miniWahl, tageDiagramm, stundenDiagramm } from './diagramm.js';
 import { hinweis as regenHinweis, radarReiter } from './regen.js';
 import { abzeichen, kurz as hinweisKurz, reiter as hinweisReiter } from './hinweise.js';
 
@@ -122,7 +122,14 @@ export function kopfzeileHtml(env, klammern = false, mitJetzt = true) {
   // Mouseover: „Tiefstwert heute: 9° um 2 Uhr“
   const tip = (art, v, iso) => `${art} heute: ${r0(v)}°${uhrVon(iso, zone) ? ' um ' + uhrVon(iso, zone) : ''}`;
   const wert = (html, art, v, iso) => `<span class="wd-tm" title="${esc(tip(art, v, iso))}">${html}${um(iso)}</span>`;
-  return `${esc(env.ort.name || 'Wetter')}${mitJetzt ? ` ${r0(a.tempC)}°` : ''} · ${mitJetzt ? '' : 'heute '}${wert(tmin(h.minC), 'Tiefstwert', h.minC, h.minZeit)} / ${wert(tmax(h.maxC), 'Höchstwert', h.maxC, h.maxZeit)}`;
+  return `${esc(env.ort.name || 'Wetter')}${mitJetzt ? ` ${r0(a.tempC)}°` : ''} · ${mitJetzt ? '' : 'heute '}${wert(tmin(h.minC), 'Tiefstwert', h.minC, h.minZeit)} / ${wert(tmax(h.maxC), 'Höchstwert', h.maxC, h.maxZeit)}` +
+    (mitJetzt ? '' : windHeute(h));
+}
+// Wind heute in der Kopfzeile der kleinen Kachel: „ · Wind 25/50 km/h“ (Höchstwert/stärkste Böe des Tages, kurz, damit die Zeile passt; ausführlich im Mouseover)
+export function windHeute(h) {
+  if (!h || h.windMaxKmh == null) return '';
+  const tip = `Wind heute: bis ${r0(h.windMaxKmh)} km/h${h.windRichtung ? ' aus ' + h.windRichtung : ''}${h.boeenMaxKmh != null ? `, Böen bis ${r0(h.boeenMaxKmh)} km/h` : ''}`;
+  return ` <span class="wd-wind" title="${esc(tip)}">· Wind ${r0(h.windMaxKmh)}${h.boeenMaxKmh != null ? `/${r0(h.boeenMaxKmh)}` : ''} km/h</span>`;
 }
 
 // „Dresden 15° · 9°/16°“
@@ -234,6 +241,14 @@ export function zpTag(t) {
     t: `${r0(t.minC)}–${r0(t.maxC)}°`, g: '', i: bild(t.zustand, true), l: zustandText(t.zustand, t.code),
     mm: mmText(t.niederschlagMm), p: t.regenProzent != null ? `${t.regenProzent} %` : '', w: t.windMaxKmh != null ? `Wind ${r0(t.windMaxKmh)} km/h` : '', s: sonneText(t) };
 }
+// Tageszeit (3-Tage-Diagramm): „Di Mittag“, mittlere Temperatur, Wind und Sonne der Tageszeit
+const TAGESZEIT = { morgen: 'Morgen', mittag: 'Mittag', abend: 'Abend', nacht: 'Nacht' };
+export function zpTageszeit(t) {
+  const d = new Date(t.datum + 'T12:00:00Z');
+  return { z: `${d.toLocaleDateString('de-DE', { weekday: 'short', timeZone: 'UTC' }).replace('.', '')} ${TAGESZEIT[t.abschnitt] || ''}`,
+    t: `${r0(t.tempC)}°`, g: gef(t.gefuehltC, t.tempC), i: bild(t.zustand, t.abschnitt === 'morgen' || t.abschnitt === 'mittag'), l: zustandText(t.zustand, t.code),
+    mm: mmText(t.niederschlagMm), p: t.regenProzent != null ? `${t.regenProzent} %` : '', w: t.windMaxKmh != null ? `Wind ${r0(t.windMaxKmh)} km/h` : '', s: sonneText(t) };
+}
 // Text-Fassung (Frag DAILY, Tests): „So 11.10. · 5–17° · Klar · 0 mm (0 %) · ☀ 10 h“
 export const zpText = z => [z.z, z.t, z.g, z.l, `${z.mm}${z.p ? ` (${z.p})` : ''}`, z.w, z.s].filter(Boolean).join(' · ');
 export const tagTip = t => zpText(zpTag(t));
@@ -256,9 +271,10 @@ export function antwort(env, regenEnv = null) {
   return `${env.ort.name || 'Hier'}: jetzt ${r0(a.tempC)}°, ${zustandText(a.zustand, a.code)}. Heute ${r0(heute.minC)}° bis ${r0(heute.maxC)}°. ${schirm}${radar ? ' Radar: ' + radar : ''}`;
 }
 
-// Einstellungen der Kachel anwenden (rein, testbar): Reiter aus-/einblenden, Start-Reiter, Mini-Diagramm 24 Std. (Standard), 48 Std., 7 oder 15 Tage (gespeichert „16“ von früher gilt als 15).
+// Einstellungen der Kachel anwenden (rein, testbar): Reiter aus-/einblenden, Start-Reiter, Mini-Diagramm Heute (1, Standard), 3, 7 oder 15 Tage
+// (gespeichert von früher: 24 Std. → Heute, 48 Std. → 3 Tage, 16 → 15 Tage; siehe miniWahl).
 // „Heute“ bleibt immer; bei Unwetter (Reiter „Hinweise“ steht vorn) bleibt der Hinweis-Reiter sichtbar und zuerst offen.
-export const WETTER_STANDARD = { radar: true, tage: true, stunden: true, hinweise: true, mehr: true, start: 'heute', mini: 24 };
+export const WETTER_STANDARD = { radar: true, tage: true, stunden: true, hinweise: true, mehr: true, start: 'heute', mini: 1 };
 export function mitOptionen(k, env, opt = {}) {
   const o = { ...WETTER_STANDARD, ...opt };
   const unwetter = k.tabs && k.tabs[0] && k.tabs[0].id === 'hinweise';
@@ -266,9 +282,11 @@ export function mitOptionen(k, env, opt = {}) {
   const startReiter = unwetter ? 'hinweise' : tabs.some(t => t.id === o.start) ? o.start : 'heute';
   const zone = (env && env.ort && env.ort.zeitzone) || 'Europe/Berlin';
   const stunde = iso => +new Date(iso).toLocaleTimeString('de-DE', { timeZone: zone, hour: '2-digit', hourCycle: 'h23' }).slice(0, 2);
-  const wtag = iso => new Date(iso).toLocaleDateString('de-DE', { timeZone: zone, weekday: 'short' }).replace('.', '');
-  const chart = !env || !env.daten ? k.chart : +o.mini === 7 ? miniDiagramm(env.daten.tage.slice(0, 7), zpTag)
-    : [15, 16].includes(+o.mini) ? k.chart : miniStunden(env.daten.stunden, stunde, +o.mini === 48 ? 48 : 24, wtag, s => zpStunde(s, env.daten.tage, zone));
+  const w = miniWahl(o.mini), d = env && env.daten;
+  // Ältere Antworten (vor wetter 1.5.0) ohne „heute“/„tageszeiten“: 15 Tage wie bisher
+  const chart = !d ? k.chart : w === 7 ? miniDiagramm(d.tage.slice(0, 7), zpTag)
+    : w === 3 && d.tageszeiten && d.tageszeiten.length ? miniTageszeiten(d.tageszeiten, zpTageszeit)
+    : w === 1 && d.heute && d.heute.length ? miniHeute(d.heute, stunde, s => zpStunde(s, d.tage, zone)) : k.chart;
   return { ...k, tabs, startReiter, chart };
 }
 

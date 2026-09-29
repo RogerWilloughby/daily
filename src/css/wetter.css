@@ -1,9 +1,9 @@
 /* DAILY – Wetterkachel: Zeitpunkt-Block, Sonnenzahlen, Radar, Wetterhinweise, Textzeilen der kleinen Kachel. */
-/* Regenradar: Stufen einer Farbe (hell → kräftig), Karte animiert ohne Skript */
-:root{--rs1:#9ED9CF;--rs2:#4FB3A5;--rs3:#0F8A7A;--rs4:#07564C}
-.tile[data-mode="active"],.sheet{--rs1:#2E6F66;--rs2:#1FA08C;--rs3:#4CC7B4;--rs4:#B5F0E6}
+/* Regenradar: Stufen des Regen-Hellblaus (hell → kräftig, wie --wd-regen), Karte animiert ohne Skript */
+:root{--rs1:#CFE8FA;--rs2:#8CC8F0;--rs3:#5AAEE8;--rs4:#2878B5}
+.tile[data-mode="active"],.sheet{--rs1:#1F4E73;--rs2:#2F7FBF;--rs3:#5AAEE8;--rs4:#BFE3FA}
 @media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){--rs1:#2E6F66;--rs2:#1FA08C;--rs3:#4CC7B4;--rs4:#B5F0E6}
+  :root:not([data-theme="light"]){--rs1:#1F4E73;--rs2:#2F7FBF;--rs3:#5AAEE8;--rs4:#BFE3FA}
 }
 .rs1{fill:var(--rs1);background:var(--rs1)}
 .rs2{fill:var(--rs2);background:var(--rs2)}
@@ -51,6 +51,8 @@
 .wh-ruhig{align-content:start}
 .wh-keine{font-size:15px;margin:4px 0}
 .wd-um{font-size:.78em;font-weight:500;opacity:.8}
+/* Wind heute in der Kopfzeile der kleinen Kachel */
+.wd-wind{font-weight:500;opacity:.85;white-space:nowrap}
 @media (min-width:761px) and (min-height:521px){
 /* mit Hinweis-Abzeichen wird der Kopf zweizeilig – dann die Unterzeile einzeilig, damit das Diagramm Platz hat */
     .tile[data-mode="rest"] .head:has(.kopf .wh-badge):has(.mini:not(:empty)) .teaser{-webkit-line-clamp:1}

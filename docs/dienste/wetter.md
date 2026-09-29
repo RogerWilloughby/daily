@@ -2,19 +2,19 @@
 
 > Erzeugt aus `services/wetter.js` mit `npm run doku` – nicht von Hand bearbeiten.
 
-Aktuelles Wetter, 48-Stunden- und 16-Tage-Vorhersage (ab Tag 8 als Trend) mit Wind, Sonne, Wolken, Luftdruck, Sicht, Schnee und Frost, dazu Luftqualität und Pollen für einen Ort.
+Aktuelles Wetter, heutiger Tag Stunde für Stunde, 48 Stunden, Tageszeiten für 3 Tage und 15-Tage-Vorhersage mit Wind, Sonne, Wolken, Luftdruck, Sicht, Schnee und Frost, dazu Luftqualität und Pollen für einen Ort.
 
 | | |
 |---|---|
 | Aufruf | `GET /api/v1/wetter` |
-| Programmversion | 1.4.1 |
+| Programmversion | 1.5.0 |
 | Vertrag (Datenformat) | daily/1, Version 1 |
 | Klasse | oeffentlich |
 | Länder | weltweit |
 | Gültigkeit | bis zum nächsten Takt von 30 min (z. B. :00/:30) |
 
 ## Zweck
-Wetter für einen Ort: jetzt, die nächsten 48 Stunden und 15 Tage, mit Wind, Sonne, Wolken, Luftdruck, Sicht, Schnee und Frost, dazu Luftqualität und Pollen.
+Wetter für einen Ort: jetzt, der heutige Tag Stunde für Stunde, die nächsten 48 Stunden, Tageszeiten für 3 Tage und 15 Tage, mit Wind, Sonne, Wolken, Luftdruck, Sicht, Schnee und Frost, dazu Luftqualität und Pollen.
 
 ## Herkunft der Daten
 - Vorhersagen sind ohne Gewähr: Schon bei 48 Stunden kann das tatsächliche Wetter deutlich abweichen (z. B. Schauer, Gewitter, Nebel), und ab etwa dem 8. Tag nimmt die Genauigkeit spürbar ab. Das Feld „trend“ kennzeichnet diese Tage; die DAILY-Oberfläche zeigt sie wie alle anderen.
@@ -43,6 +43,7 @@ Quellen mit Lizenz:
 - Takt: Antworten gelten bis zur nächsten vollen oder halben Stunde – alle Nutzer einer 1-km-Zelle teilen sich einen Abruf und sehen denselben Stand.
 - WMO-Wettercode → Zustand als Aufzählung (klar, regen, gewitter …); Windrichtung → 8 Himmelsrichtungen; Zeiten als UTC, Tage in der Zeitzone des Orts.
 - Abgeleitet: Luftdruck-Tendenz (Änderung jetzt → +3 h, ab 1 hPa steigend/fallend), Frost (Tiefstwert unter 0 °C), Glätte (Tiefstwert ≤ 0,5 °C und Niederschlag oder Neuschnee), Nullgradgrenze (tiefste des Tages), Schneehöhe (höchste des Tages).
+- Tageszeiten (heute und die zwei Folgetage): Morgen 6–12, Mittag 12–18, Abend 18–24 Uhr, Nacht 0–6 Uhr des Folgetags (Ortszeit); Temperatur als Mittel, Tiefst- und Höchstwert der Stunden, Wetter = bedeutendster WMO-Code, Niederschlag und Sonne als Summe, Regenwahrscheinlichkeit, Wind und Böen als Höchstwert.
 - Tage ab dem 8. sind mit trend: true gekennzeichnet (geringere Genauigkeit); DAILY zeigt sie ohne besondere Kennzeichnung.
 - Luftqualität optional: fällt sie aus, kommt luft = null und der Hinweis luft_nicht_verfuegbar.
 
@@ -85,6 +86,39 @@ Quellen mit Lizenz:
 | `stunden[].wolkenProzent` | Bewölkung in % |
 | `stunden[].uvIndex` | UV-Index |
 | `stunden[].sichtweiteM` | Sichtweite in m |
+| `stunden[].sonnenMin` | Sonnenschein in dieser Stunde in Minuten |
+| `heute` | alle Stunden des heutigen Kalendertags (0–23 Uhr Ortszeit, auch die schon vergangenen), Felder wie bei stunden |
+| `heute[].zeit` | Stundenbeginn (UTC) |
+| `heute[].tempC` | Temperatur in °C |
+| `heute[].gefuehltC` | gefühlte Temperatur in °C |
+| `heute[].code` | WMO-Wettercode |
+| `heute[].zustand` | Zustand als Aufzählung |
+| `heute[].regenProzent` | Regenwahrscheinlichkeit in % |
+| `heute[].niederschlagMm` | Niederschlag in mm |
+| `heute[].neuschneeCm` | Neuschnee in cm |
+| `heute[].windKmh` | Wind in km/h |
+| `heute[].boeenKmh` | Böen in km/h |
+| `heute[].windRichtungGrad` | Windrichtung in Grad |
+| `heute[].wolkenProzent` | Bewölkung in % |
+| `heute[].uvIndex` | UV-Index |
+| `heute[].sichtweiteM` | Sichtweite in m |
+| `heute[].sonnenMin` | Sonnenschein in dieser Stunde in Minuten |
+| `tageszeiten` | heute und die zwei Folgetage, je Morgen, Mittag, Abend, Nacht (zeitlich aufsteigend; schon vergangene Tageszeiten von heute sind enthalten) |
+| `tageszeiten[].datum` | Kalendertag JJJJ-MM-TT, zu dem die Tageszeit gehört (die Nacht gehört zum Vortag) |
+| `tageszeiten[].abschnitt` | morgen (6–12 Uhr), mittag (12–18 Uhr), abend (18–24 Uhr), nacht (0–6 Uhr des Folgetags) |
+| `tageszeiten[].beginn` | Beginn der Tageszeit (UTC) |
+| `tageszeiten[].stunden` | Anzahl der Stunden mit Werten (normal 6) |
+| `tageszeiten[].tempC` | mittlere Temperatur in °C |
+| `tageszeiten[].minC` | Tiefstwert in °C |
+| `tageszeiten[].maxC` | Höchstwert in °C |
+| `tageszeiten[].gefuehltC` | mittlere gefühlte Temperatur in °C |
+| `tageszeiten[].code` | bedeutendster WMO-Wettercode (höchster Code der Stunden) |
+| `tageszeiten[].zustand` | Zustand als Aufzählung |
+| `tageszeiten[].regenProzent` | höchste Regenwahrscheinlichkeit in % |
+| `tageszeiten[].niederschlagMm` | Niederschlagssumme in mm |
+| `tageszeiten[].windMaxKmh` | höchste Windgeschwindigkeit in km/h |
+| `tageszeiten[].boeenMaxKmh` | stärkste Böe in km/h |
+| `tageszeiten[].sonnenstunden` | Sonnenscheindauer in Stunden |
 | `tage` | 15 Tage ab heute, zeitlich aufsteigend (am Ende weniger, falls ein Tag ohne Tiefst- und Höchstwert käme) |
 | `tage[].datum` | Kalendertag JJJJ-MM-TT in der Zeitzone des Orts |
 | `tage[].trend` | true ab dem 8. Tag: nur Tendenz, Werte unsicher |
@@ -127,7 +161,7 @@ Hinweise (`hinweise`):
 |---|---|
 | Klasse | C – je Ort, rasterbar – Anfragen je gerundetem Ort bündelbar |
 | Quelle | Open-Meteo frei: 10.000 Aufrufe/Tag, nur nicht kommerziell. Bezahlt: 29 $/Monat für 1 Mio., 99 $/Monat für 5 Mio. Aufrufe; darüber Enterprise. |
-| Kosten | Je Aktualisierung 2 Anfragen an Open-Meteo (Wetter + Luft). Funktion: kurze Laufzeit, fast nur Warten auf die Quelle. |
+| Kosten | Je Aktualisierung 2 Anfragen an Open-Meteo (Wetter + Luft). Funktion: kurze Laufzeit, fast nur Warten auf die Quelle. Seit 1.5.0 (heute, tageszeiten) ist die Antwort etwa 20–30 % größer, Abrufzahl unverändert. |
 | Cache | Nur auf Anfrage; CDN und Browser halten die Antwort bis zur nächsten vollen oder halben Stunde. Je belegter 1-km-Zelle höchstens 48 Aktualisierungen/Tag = 96 Abrufe – das freie Kontingent reicht für rund 100 gleichzeitig genutzte Orte. |
 | Bei 10 Mio. Aufrufen/Tag | Nicht mit dem freien Open-Meteo: bei z. B. 50.000 belegten Zellen × 48 Aktualisierungen wären es ~4,8 Mio. Abrufe/Tag. Wege: gröberes Raster (z. B. 0,05° ≈ 5 km), bezahlter Tarif (ab 29 $/Monat) oder DWD-Open-Data (MOSMIX: Abrufe unabhängig von der Nutzerzahl). |
 
@@ -136,6 +170,7 @@ Rahmen und Stufen: `../architektur/skalierung.md`
 ## Änderungen
 | Version | Datum | Änderung |
 |---|---|---|
+| 1.5.0 | 2026-09-29 | Neu: „heute“ (alle Stunden des heutigen Tages, 0–23 Uhr Ortszeit), „tageszeiten“ (heute und die zwei Folgetage je Morgen, Mittag, Abend, Nacht) und Sonnenminuten je Stunde (sonnenMin) |
 | 1.4.1 | 2026-09-29 | Dienstblatt: Hinweis „ohne Gewähr“ und zur abnehmenden Genauigkeit; das Feld „trend“ bleibt als Angabe, DAILY stellt es nicht mehr gesondert dar |
 | 1.4.0 | 2026-09-29 | 15 statt 16 Tage (der 16. Tag kam oft ohne Werte); Tage am Ende ohne Tiefst- und Höchstwert werden weggelassen |
 | 1.3.0 | 2026-09-28 | Je Tag Uhrzeit des Tiefst- und Höchstwerts (minZeit, maxZeit) aus den Stundenwerten |
