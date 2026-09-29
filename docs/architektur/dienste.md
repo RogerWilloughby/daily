@@ -122,6 +122,7 @@ Jeder Dienst beschreibt sich selbst im Feld `blatt`: Zweck, Herkunft der Daten, 
 Daraus entstehen der Katalog `/api/v1/dienste`, die Dateien `docs/dienste/<id>.md` (`npm run doku`) und die App-Seite „Woher kommen die Daten?“ (Fußzeile → Datenquellen). Ein Test bricht ab, wenn ein Blatt unvollständig ist, ein Ausgabefeld fehlt oder `docs/dienste` veraltet ist.
 
 ## Einen Dienst bauen
+0. **Datenhaltung prüfen (vor dem Plan):** Kommt der Dienst mit festen Dateien im Repo (`services/daten/`), Rechnen oder Live-Abruf + CDN-Zwischenspeicher aus? Wenn nicht (wachsende Daten, Nutzerdaten über Geräte), erst mit Roger klären – keine Datenbank ohne Entscheidung (`../konzept/entscheidungen.md`, Abschnitt 12).
 1. `services/<id>.js` mit `id, version, titel, beschreibung, eingaben, laender, klasse, ttl, quellen, schema, blatt` und `run(eingabe) → { daten, ort?, hinweise?, quellen? }`.
    Die Umwandlung der Quelle als eigene, reine Funktion `umwandeln()` exportieren (testbar ohne Netz).
 2. In `services/index.js` eintragen.

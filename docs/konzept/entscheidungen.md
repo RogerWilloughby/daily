@@ -145,6 +145,14 @@ Der Prototyp zählt lokal, welche Kacheln geöffnet werden (Kachel „Deine Nutz
 - Betriebsart: `api/config.js` meldet `private` (aus `DAILY_PRIVATE`). `main.js` wählt damit das Layout (`chooseLayout` in `core/tiles.js`) und startet nur die passenden Anbieter. Ein eigenes Layout aus `settings.layout` (Liste von Kachel-IDs) wird geprüft und mit der Standardbelegung auf 20 Plätze aufgefüllt (reicht sie nicht, bleiben Plätze frei) – Grundlage für die Kachelauswahl in den Einstellungen.
 - Reine Rechenmodule ohne DOM liegen in `src/js/lib/` (Feiertage, Astronomie, Adressprüfung) und sind so mit `npm test` prüfbar.
 
+## 12. Datenhaltung: Dateien statt Datenbank (29.09.2026)
+- **Roger: „Dann bleiben wir bei den Dateien und prüfen vor jedem neuen Dienst, dass er damit zurecht kommt.“**
+- Feste oder selten geänderte Daten sind Dateien im Repo (`services/daten/`: Orte, Namenstage). Regeln werden gerechnet (Feiertage aus der Osterformel, Aktionstage, Zeitumstellung, Astronomie). Was sich ändert, kommt live von der Quelle (z. B. Schulferien, Wetter) und wird über CDN und Browser bis `gueltigBis` zwischengespeichert.
+- Begründung (gemessen 29.09.2026): Ortsbestand (1,4 MB) laden ≈ 27 ms einmal je Serverstart, danach im Speicher; nächsten Ort suchen ≈ 0,4 ms. Eine Datenbank bräuchte je Abfrage 5–30 ms Netzweg, dazu Kosten, Verbindungsgrenzen, Ausfallrisiko und Datenschutz. Bei 10 Mio. Aufrufen/Tag ist das CDN der Hebel, nicht die Datenhaltung.
+- Nachteil: Datenänderung = Commit + Deployment – für selten geänderte Daten gewollt.
+- Eine Datenbank kommt erst infrage bei wachsenden Daten (z. B. eigener Preisverlauf, wenn die Quelle keinen liefert) oder Nutzerdaten über Geräte hinweg (Konto, Einstellungen). Dann vorher mit Roger klären.
+- Prüfschritt vor jedem neuen Dienst: siehe `../architektur/dienste.md` → „Einen Dienst bauen“, Schritt 0.
+
 ## Design
 Grau-grüner Grund, dunkelblaue aktive Kachel, Schriften Bricolage Grotesque + Figtree, Hell- und Dunkelmodus. App-Icon: Raster mit großer „D“-Kachel. Beispieltermin: „Geburtstag von Claude“.
 Prototyp: `../prototyp/daily-prototyp.html`.

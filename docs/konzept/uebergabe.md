@@ -10,6 +10,7 @@ Stand 28.09.2026 (App 0.26.3). Für neue Chats: hier steht, woran gerade gearbei
 - **Skalierung:** Für jeden Dienst die Frage „10 Mio. Aufrufe/Tag?“ – Rahmen in `../architektur/skalierung.md`.
 - **Qualität:** „Die Ortseingabe muss 100 % perfekt sein“ – Maßstab ist Google. Jeder gemeldete Fehlfall wird ein Testfall in `test/dienste.test.js`.
 - **Strategie öffentlich:** keine Nutzerdaten außer dem Ort, keine Nachrichten. Kalender und Schlagzeilen nur privat. Mail und Pakete gestrichen.
+- **Datenhaltung (29.09.2026):** keine Datenbank – feste Daten als Dateien im Repo, Regeln rechnen, Wechselndes live + CDN. Vor jedem neuen Dienst prüfen, dass er damit auskommt (`entscheidungen.md`, Abschnitt 12).
 - Roger liefert später weitere Dienst-Ideen.
 
 ## Arbeitsablauf und Stolpersteine
