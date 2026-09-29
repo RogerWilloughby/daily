@@ -226,21 +226,36 @@ function miniDichte(wurzel) {
     const stufe = h / (n - 1) >= 13 ? 0 : n10 > 1 && h / (n10 - 1) >= 13 ? 1 : 2;
     b.classList.toggle('wd-eng', stufe === 1);   // Striche und Zahlen alle 10°
     b.classList.toggle('wd-eng2', stufe === 2);  // nur oberste und unterste Zahl mit Strich
+    const sn = b.querySelectorAll('.wd-sonnen span').length;                     // Sonnenzahlen: zu eng → jede zweite
+    if (sn) b.classList.toggle('wd-seng', svg.getBoundingClientRect().width / sn < 16);
   });
 }
 
-// Mouseover im Mini-Diagramm: Spalte (data-tip) hervorheben, Werte in einem Feld über dem Diagramm
+// Mouseover im Mini-Diagramm: Spalte (data-tip) hervorheben, Werte oben rechts in der Kachel (ohne Hintergrund-Kasten)
 function miniTip(e) {
   const sp = e.target.closest && e.target.closest('.wd-mini .wd-spalte');
-  const box = e.target.closest && e.target.closest('.wd-mini24');
+  const tile = sp && sp.closest('.tile');
   grid.querySelectorAll('.wd-spalte.an').forEach(x => { if (x !== sp) x.classList.remove('an'); });
-  grid.querySelectorAll('.wd-minitip:not([hidden])').forEach(t => { if (!box || t.parentNode !== box || !sp) t.hidden = true; });
-  if (!sp || !box) return;
-  const tip = box.querySelector('.wd-minitip'); if (!tip) return;
+  grid.querySelectorAll('.mini-hover:not([hidden])').forEach(t => { if (!tile || t.parentNode !== tile) t.hidden = true; });
+  if (!sp || !tile) return;
+  let tip = tile.querySelector(':scope > .mini-hover');
+  if (!tip) { tip = document.createElement('div'); tip.className = 'mini-hover'; tip.setAttribute('aria-hidden', 'true'); tile.appendChild(tip); }
   sp.classList.add('an');
   tip.textContent = sp.dataset.tip; tip.hidden = false;
-  const r = box.getBoundingClientRect(), s = sp.getBoundingClientRect(), w = tip.offsetWidth;
-  tip.style.left = Math.max(0, Math.min(r.width - w, s.left + s.width / 2 - r.left - w / 2)) + 'px';
+  // Platz: rechts neben dem Kopf, wenn dort frei genug ist – sonst über den Textzeilen (Wetterlage/Regen) darunter
+  const tr = tile.getBoundingClientRect(), lab = tile.querySelector('.head .label'), tz = tile.querySelector('.head .teaser');
+  const inhalt = lab ? [...lab.children].filter(c => c.offsetParent && c.getClientRects().length).reduce((m, c) => Math.max(m, c.getBoundingClientRect().right), tr.left) : tr.left;
+  const frei = tr.right - 12 - inhalt - 16;
+  tip.classList.remove('unten'); tip.style.cssText = '';
+  if (frei >= 170 && lab) {
+    tip.style.maxWidth = frei + 'px'; tip.style.top = (lab.getBoundingClientRect().top - tr.top) + 'px';
+    if (tip.getBoundingClientRect().height <= lab.getBoundingClientRect().height * 1.9 + 4) return;
+  }
+  if (tz) {
+    const r = tz.getBoundingClientRect();
+    tip.classList.add('unten');
+    tip.style.cssText = `top:${r.top - tr.top}px;left:${r.left - tr.left}px;width:${r.width}px;min-height:${r.height}px;max-width:none`;
+  }
 }
 export function initBoard() {
   grid.addEventListener('pointermove', miniTip);

@@ -205,19 +205,20 @@ export function kachel(env, regenEnv = null, hinweisEnv = null) {
 }
 
 // Mouseover-Texte der Mini-Diagramme (rein, testbar)
+const fest = t => t.replace(/ /g, '\u00a0');   // Teile nicht mitten drin umbrechen
 const mmText = v => `${String(Math.round((v || 0) * 10) / 10).replace('.', ',')} mm`;
 export function tagTip(t) {
   const tag = new Date(t.datum + 'T12:00:00Z').toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'numeric', timeZone: 'UTC' });
   return [`${tag}`, `${r0(t.minC)}° bis ${r0(t.maxC)}°`, zustandText(t.zustand, t.code),
     `Regen ${mmText(t.niederschlagMm)}${t.regenProzent != null ? ` (${t.regenProzent} %)` : ''}`,
-    t.sonnenstunden != null ? `${String(t.sonnenstunden).replace('.', ',')} Std. Sonne` : null, t.trend ? 'Trend (unsicher)' : null].filter(Boolean).join(' · ');
+    t.sonnenstunden != null ? `${String(t.sonnenstunden).replace('.', ',')} Std. Sonne` : null, t.trend ? 'Trend (unsicher)' : null].filter(Boolean).map(fest).join(' · ');
 }
 export function stundeTip(s, zone = 'Europe/Berlin') {
   const d = new Date(s.zeit), h = +d.toLocaleTimeString('de-DE', { timeZone: zone, hour: '2-digit', hourCycle: 'h23' }).slice(0, 2);
   const wt = d.toLocaleDateString('de-DE', { timeZone: zone, weekday: 'short' }).replace('.', '');
   return [`${wt} ${h} Uhr`, `${r0(s.tempC)}°${s.gefuehltC != null && r0(s.gefuehltC) !== r0(s.tempC) ? ` (gefühlt ${r0(s.gefuehltC)}°)` : ''}`,
     zustandText(s.zustand, s.code), `Regen ${mmText(s.niederschlagMm)}${s.regenProzent != null ? ` (${s.regenProzent} %)` : ''}`,
-    s.windKmh != null ? `Wind ${r0(s.windKmh)} km/h${s.boeenKmh >= 40 ? `, Böen ${r0(s.boeenKmh)}` : ''}` : null].filter(Boolean).join(' · ');
+    s.windKmh != null ? `Wind ${r0(s.windKmh)} km/h${s.boeenKmh >= 40 ? `, Böen ${r0(s.boeenKmh)}` : ''}` : null].filter(Boolean).map(fest).join(' · ');
 }
 
 // Antwort für „Frag DAILY“
