@@ -7,14 +7,14 @@ Aktuelles Wetter, 48-Stunden- und 16-Tage-Vorhersage (ab Tag 8 als Trend) mit Wi
 | | |
 |---|---|
 | Aufruf | `GET /api/v1/wetter` |
-| Programmversion | 1.3.0 |
+| Programmversion | 1.4.0 |
 | Vertrag (Datenformat) | daily/1, Version 1 |
 | Klasse | oeffentlich |
 | Länder | weltweit |
 | Gültigkeit | bis zum nächsten Takt von 30 min (z. B. :00/:30) |
 
 ## Zweck
-Wetter für einen Ort: jetzt, die nächsten 48 Stunden und 16 Tage (ab Tag 8 als Trend gekennzeichnet), mit Wind, Sonne, Wolken, Luftdruck, Sicht, Schnee und Frost, dazu Luftqualität und Pollen.
+Wetter für einen Ort: jetzt, die nächsten 48 Stunden und 15 Tage (ab Tag 8 als Trend gekennzeichnet), mit Wind, Sonne, Wolken, Luftdruck, Sicht, Schnee und Frost, dazu Luftqualität und Pollen.
 
 ## Herkunft der Daten
 - Open-Meteo Forecast API („best match“): für Deutschland zuerst DWD ICON-D2 (≈ 2 km, ≈ 2 Tage), dann ICON-EU (≈ 7 km, bis 5 Tage) und ICON global (bis 7,5 Tage), danach ECMWF (bis 15 Tage) und GFS (bis 16 Tage).
@@ -84,7 +84,7 @@ Quellen mit Lizenz:
 | `stunden[].wolkenProzent` | Bewölkung in % |
 | `stunden[].uvIndex` | UV-Index |
 | `stunden[].sichtweiteM` | Sichtweite in m |
-| `tage` | 16 Tage ab heute, zeitlich aufsteigend |
+| `tage` | 15 Tage ab heute, zeitlich aufsteigend (am Ende weniger, falls ein Tag ohne Tiefst- und Höchstwert käme) |
 | `tage[].datum` | Kalendertag JJJJ-MM-TT in der Zeitzone des Orts |
 | `tage[].trend` | true ab dem 8. Tag: nur Tendenz, Werte unsicher |
 | `tage[].code` | WMO-Wettercode (bedeutendstes Wetter des Tages) |
@@ -135,6 +135,7 @@ Rahmen und Stufen: `../architektur/skalierung.md`
 ## Änderungen
 | Version | Datum | Änderung |
 |---|---|---|
+| 1.4.0 | 2026-09-29 | 15 statt 16 Tage (der 16. Tag kam oft ohne Werte); Tage am Ende ohne Tiefst- und Höchstwert werden weggelassen |
 | 1.3.0 | 2026-09-28 | Je Tag Uhrzeit des Tiefst- und Höchstwerts (minZeit, maxZeit) aus den Stundenwerten |
 | 1.2.0 | 2026-09-27 | 16 Tage (ab Tag 8 Trend), Wind/Sonne/Wolken/Luftdruck/Sicht/Schnee/Frost, Cache-Takt :00/:30 |
 | 1.1.0 | 2026-09-27 | Dienstblatt (Herkunft, Verarbeitung, Skalierung) |

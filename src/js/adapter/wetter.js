@@ -232,7 +232,7 @@ export function antwort(env, regenEnv = null) {
   return `${env.ort.name || 'Hier'}: jetzt ${r0(a.tempC)}°, ${zustandText(a.zustand, a.code)}. Heute ${r0(heute.minC)}° bis ${r0(heute.maxC)}°. ${schirm}${radar ? ' Radar: ' + radar : ''}`;
 }
 
-// Einstellungen der Kachel anwenden (rein, testbar): Reiter aus-/einblenden, Start-Reiter, Mini-Diagramm 24 Std. (Standard), 7 oder 16 Tage.
+// Einstellungen der Kachel anwenden (rein, testbar): Reiter aus-/einblenden, Start-Reiter, Mini-Diagramm 24 Std. (Standard), 48 Std., 7 oder 15 Tage (gespeichert „16“ von früher gilt als 15).
 // „Heute“ bleibt immer; bei Unwetter (Reiter „Hinweise“ steht vorn) bleibt der Hinweis-Reiter sichtbar und zuerst offen.
 export const WETTER_STANDARD = { radar: true, tage: true, stunden: true, hinweise: true, mehr: true, start: 'heute', mini: 24 };
 export function mitOptionen(k, env, opt = {}) {
@@ -244,7 +244,7 @@ export function mitOptionen(k, env, opt = {}) {
   const stunde = iso => +new Date(iso).toLocaleTimeString('de-DE', { timeZone: zone, hour: '2-digit', hourCycle: 'h23' }).slice(0, 2);
   const wtag = iso => new Date(iso).toLocaleDateString('de-DE', { timeZone: zone, weekday: 'short' }).replace('.', '');
   const chart = !env || !env.daten ? k.chart : +o.mini === 7 ? miniDiagramm(env.daten.tage.slice(0, 7), tagTip)
-    : +o.mini === 16 ? k.chart : miniStunden(env.daten.stunden, stunde, +o.mini === 48 ? 48 : 24, wtag, s => stundeTip(s, zone));
+    : [15, 16].includes(+o.mini) ? k.chart : miniStunden(env.daten.stunden, stunde, +o.mini === 48 ? 48 : 24, wtag, s => stundeTip(s, zone));
   return { ...k, tabs, startReiter, chart };
 }
 

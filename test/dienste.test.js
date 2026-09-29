@@ -50,8 +50,10 @@ test('Wetter: Umwandlung erfüllt den Vertrag, auch ohne Luftdaten', () => {
   const r = w.umwandeln(fx.forecast(), fx.airQuality());
   assert.deepEqual(pruefe(r.daten, w.schema), []);
   assert.equal(r.daten.stunden.length, 48);
-  assert.equal(r.daten.tage.length, 16);
-  assert.deepEqual(r.daten.tage.map(t => t.trend), [...Array(7).fill(false), ...Array(9).fill(true)]);   // ab Tag 8 Trend
+  assert.equal(r.daten.tage.length, 15);                     // 15 Tage; Tag 16 der Quelle (ohne Werte) fällt weg
+  assert.deepEqual(r.daten.tage.map(t => t.trend), [...Array(7).fill(false), ...Array(8).fill(true)]);   // ab Tag 8 Trend
+  const f = fx.forecast(); f.daily.temperature_2m_max[14] = null; f.daily.temperature_2m_min[14] = null;
+  assert.equal(w.umwandeln(f, null).daten.tage.length, 14);   // unvollständiger letzter Tag wird weggelassen
   const a = r.daten.aktuell;
   assert.deepEqual([a.windRichtung, a.windRichtungGrad, a.wolkenProzent, a.luftdruckHpa, a.druckTendenz, a.sichtweiteM, a.taupunktC, a.schneehoeheCm],
     ['W', 250, 45, 1016.2, 'fallend', 24000, 10.1, 0]);
@@ -230,12 +232,12 @@ test('Adapter Wetter: Kachel und Antwort aus dem Vertrag', async () => {
   assert.match(k.chart, /wd-miniskala-r wd-t-regen"><div class="wd-sk"><span class="wd-g5"[^>]*>0<\/span><span[^>]*>2<\/span>.*<span class="wd-g5"[^>]*>12 mm<\/span><\/div>/);   // Regen grün
   assert.match(k.chart, /<b class="wd-t-regen" title="Balkenhöhe = Regenmenge in mm · kräftigere Farbe = Regen wahrscheinlicher">Regen mm<\/b> · <b class="wd-t-max" title="Höchst = wärmster Wert des Tages">Höchst<\/b> · <b class="wd-t-min" title="Tiefst = [^"]+">Tiefst<\/b>/);
   assert.doesNotMatch(k.chart, /kräftiger = wahrscheinlicher/);                     // Erklärung nur noch als Mouseover
-  assert.match(k.chart, /data-mini-wahl="24" aria-pressed="false">24 Std\.<.*data-mini-wahl="48"[^>]*>48 Std\.<.*data-mini-wahl="7"[^>]*>7 Tage<.*data-mini-wahl="16" aria-pressed="true">16 Tage</);
-  assert.match(k.chart, /wd-marken">(<span[^>]*>(Mo|Di|Mi|Do|Fr|Sa|So)<\/span>){8}<\/div>/);   // Wochentage, bei 16 Tagen jeder zweite
+  assert.match(k.chart, /data-mini-wahl="24" aria-pressed="false">24 Std\.<.*data-mini-wahl="48"[^>]*>48 Std\.<.*data-mini-wahl="7"[^>]*>7 Tage<.*data-mini-wahl="15" aria-pressed="true">15 Tage</);
+  assert.match(k.chart, /wd-marken">(<span[^>]*>(Mo|Di|Mi|Do|Fr|Sa|So)<\/span>){8}<\/div>/);   // Wochentage, bei 15 Tagen jeder zweite
   // Sonne (Tage) als gelbe Balken von oben, Mouseover je Tag, runde Linien
   assert.doesNotMatch(k.chart, /class="wd-sonne"/);                                   // keine Sonnenbalken mehr
-  assert.match(k.chart, /<div class="wd-sonnen wd-t-sonne">(<span class="(wd-s2)?" style="left:[\d.]+%">\d+<\/span>){16}<\/div>/);   // volle Stunden je Tag
-  assert.equal((k.chart.match(/class="wd-spalte"/g) || []).length, 16);
+  assert.match(k.chart, /<div class="wd-sonnen wd-t-sonne">(<span class="(wd-s2)?" style="left:[\d.]+%">\d+<\/span>){15}<\/div>/);   // volle Stunden je Tag
+  assert.equal((k.chart.match(/class="wd-spalte"/g) || []).length, 15);
   assert.match(k.chart, /data-tip="[A-Z][a-z]\.,\s\d{1,2}\.\d{1,2}\. · -?\d+°\sbis\s-?\d+° · [^"]+ · Regen\s\d+(,\d)?\smm\s\(\d+\s%\)/);
   assert.match(k.chart, /class="wd-max" d="M[\d.]+,[\d.]+C/);
   assert.match(k.chart, /<b class="wd-t-sonne"[^>]*>Sonne<\/b>/);
@@ -245,9 +247,9 @@ test('Adapter Wetter: Kachel und Antwort aus dem Vertrag', async () => {
   assert.equal(k.zeileIcon, true);
   assert.match(k.kopf, /9°<\/b> <small class="wd-um">\(\d{1,2} Uhr\)<\/small><\/span> \/ <span class="wd-tm" title="Höchstwert[^"]*"><b class="wd-t-max">16°<\/b> <small class="wd-um">\(\d{1,2} Uhr\)<\/small>/);   // kleine Kachel: Uhrzeit in Klammern
   // Aufgeklappt: Reiter
-  assert.deepEqual(k.tabs.map(t => t.name), ['Heute', '16 Tage', '48 Std.', 'Hinweise', 'Mehr']);
+  assert.deepEqual(k.tabs.map(t => t.name), ['Heute', '15 Tage', '48 Std.', 'Hinweise', 'Mehr']);
   const tab = id => k.tabs.find(t => t.id === id).html;
-  assert.equal((tab('tage').match(/data-tip=/g) || []).length, 16);          // 16 Tagesspalten mit Hinweis
+  assert.equal((tab('tage').match(/data-tip=/g) || []).length, 15);          // 15 Tagesspalten (Tag 16 der Quelle ohne Werte fällt weg)
   assert.equal((tab('stunden').match(/data-tip=/g) || []).length, 48);       // 48 Stundenspalten
   assert.match(tab('tage'), /Teilweise bewölkt|Regen|Bedeckt/);             // Hinweis nennt den Zustand
   assert.match(tab('heute'), /<b class="wd-t-min">9°<\/b> bis <b class="wd-t-max">16°<\/b>/);

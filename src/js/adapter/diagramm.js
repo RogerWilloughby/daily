@@ -42,10 +42,10 @@ function linie(xs, ys, bis, klasse, rund = false) {
 }
 const bisVorTrend = tage => { const ab = tage.findIndex(t => t.trend); return ab < 0 ? tage.length : ab - 1; };
 
-// ── Mini-Diagramme der kleinen Kachel (24 Std., 7 Tage, 16 Tage) – gemeinsamer Aufbau ──
+// ── Mini-Diagramme der kleinen Kachel (24/48 Std., 7 Tage, 15 Tage) – gemeinsamer Aufbau ──
 // Links Temperaturskala in 5er-Schritten mit dünnen Strichen alle 5°, rechts Regenskala in mm (untere Hälfte).
 // Regenbalken: Höhe = Menge (mm), Füllstärke = Wahrscheinlichkeit (stufenlos). Jede zweite Stunde/jeder zweite Tag leicht getönt.
-// Zeitachse: Stunden alle 3 Std. bzw. Wochentage (16 Tage: jeder zweite).
+// Zeitachse: Stunden alle 3 Std. bzw. Wochentage (15 Tage: jeder zweite).
 // Regen je Linie in runden Stufen: die kleinste, bei der der stärkste Regen (mind. „mindestens“) unter die oberste Linie passt
 const MM_STUFEN = [0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500];
 export const mmStufe = (max, mindestens, abstaende) => MM_STUFEN.find(v => v * abstaende >= Math.max(max, mindestens) - 1e-9) || Math.ceil(Math.max(max, mindestens) / abstaende / 100) * 100;
@@ -98,13 +98,13 @@ function mini(d) {
     `<div class="wd-minilegende">${umschalter(d.wahl)}<span class="wd-leg">` +
     `<b class="wd-t-regen" title="Balkenhöhe = Regenmenge in mm · kräftigere Farbe = Regen wahrscheinlicher">Regen mm</b> · ${d.legende}${d.sonne ? ' · <b class="wd-t-sonne" title="Zahlen oben im Diagramm = Sonnenstunden des Tages (gerundet)">Sonne</b>' : ''}</span></div>`;
 }
-// Umschalter der kleinen Kachel: 24 Std. · 48 Std. · 7 Tage · 16 Tage (Klick → providers/weather.js speichert und zeichnet neu)
-export const MINI_WAHL = [[24, '24 Std.'], [48, '48 Std.'], [7, '7 Tage'], [16, '16 Tage']];
+// Umschalter der kleinen Kachel: 24 Std. · 48 Std. · 7 Tage · 15 Tage (Klick → providers/weather.js speichert und zeichnet neu)
+export const MINI_WAHL = [[24, '24 Std.'], [48, '48 Std.'], [7, '7 Tage'], [15, '15 Tage']];
 const umschalter = (wahl, optionen = MINI_WAHL) => `<span class="wd-wahl" role="group" aria-label="Zeitraum des Diagramms">` +
   optionen.map(([w, t]) => `<button type="button" data-mini-wahl="${w}" aria-pressed="${w === wahl}">${t}</button>`).join('') + '</span>';
 const wtagKurz = datum => new Date(datum + 'T12:00:00Z').toLocaleDateString('de-DE', { weekday: 'short', timeZone: 'UTC' }).replace('.', '');
 
-// 7 oder 16 Tage: Höchst- und Tiefstlinie (Trend gestrichelt), Regen mm/Tag, Wochentage (16 Tage: jeder zweite)
+// 7 oder 15 Tage: Höchst- und Tiefstlinie (Trend gestrichelt), Regen mm/Tag, Wochentage (15 Tage: jeder zweite)
 export function miniDiagramm(tage, tip = null) {
   if (!tage || tage.length < 2) return '';
   const n = tage.length, bis = bisVorTrend(tage);
@@ -115,7 +115,7 @@ export function miniDiagramm(tage, tip = null) {
     regen: tage.map(t => ({ mm: t.niederschlagMm || 0, p: t.regenProzent })), mmMin: 10,
     sonne: tage.map(t => t.sonnenstunden), tips: tip ? tage.map(tip) : null,
     marken: tage.map((t, i) => ({ i, text: wtagKurz(t.datum) })).filter(m => n <= 8 || m.i % 2 === 0),
-    wahl: n, legende: '<b class="wd-t-max" title="Höchst = wärmster Wert des Tages">Höchst</b> · <b class="wd-t-min" title="Tiefst = kältester Wert des Tages (meist nachts oder früh)">Tiefst</b>',
+    wahl: n > 7 ? 15 : n, legende: '<b class="wd-t-max" title="Höchst = wärmster Wert des Tages">Höchst</b> · <b class="wd-t-min" title="Tiefst = kältester Wert des Tages (meist nachts oder früh)">Tiefst</b>',
     aria: `${n} Tage: Höchstwerte bis ${r0(tmax)}°, Tiefstwerte bis ${r0(tmin)}°`
   });
 }

@@ -1,6 +1,6 @@
 # DAILY – Übergabe: aktueller Arbeitsstand
 
-Stand 28.09.2026 (App 0.24.1). Für neue Chats: hier steht, woran gerade gearbeitet wird und wie es weitergeht. Verbindliche Entscheidungen stehen in `entscheidungen.md`, die Architektur in `../architektur/dienste.md`.
+Stand 28.09.2026 (App 0.24.2). Für neue Chats: hier steht, woran gerade gearbeitet wird und wie es weitergeht. Verbindliche Entscheidungen stehen in `entscheidungen.md`, die Architektur in `../architektur/dienste.md`.
 
 ## Vorgehen (Rogers Vorgaben)
 - **Erst Plan, dann Umsetzung (Rogers Vorgabe vom 27.09.2026):** Vor jeder Umsetzung und vor jedem Schreiben ins Repo einen kurzen Plan vorlegen – was und warum, welche Dateien (neu/geändert/gelöscht), was Roger danach tun muss, was offen/unsicher ist – und auf Rogers OK warten. Nicht einfach loslegen.
@@ -30,7 +30,7 @@ Oberfläche: Standardbelegung = nur überarbeitete Kacheln (`fertig: true` in `s
 | Dienst | Kachel | Stand |
 |---|---|---|
 | `ort` | Leiste (Ort-Auswahl) | ✅ getestet. Eigener Ortsbestand aus GeoNames (feste Datei, ≈ 14.700 Orte), Suche wie eine Suchmaschine, Vorschläge beim Tippen, Ausland über Open-Meteo, Gerätestandort; mehrere Orte (bis 10) in der Auswahlbox. |
-| `wetter` | Wetter | ✅ getestet. Open-Meteo, 16 Tage (ab Tag 8 Trend), Zusatzwerte, Takt :00/:30, Diagramme, Reiter. |
+| `wetter` | Wetter | ✅ getestet. Open-Meteo, 15 Tage (ab Tag 8 Trend), Zusatzwerte, Takt :00/:30, Diagramme, Reiter. |
 | `regen` | Wetter | ✅ getestet. DWD-Radar über Bright Sky, Reiter „Radar“, „Regen in X Min.“. |
 | `wetterhinweise` | Wetter | ✅ getestet (0.11.1). Amtliche DWD-Warnungen, Abzeichen und Hinweis nur bei Warnung, Reiter „Hinweise“ immer. |
 | `feiertage` | Kalender | ✅ getestet (0.12.0). Feiertage, Schulferien (OpenHolidays), Brückentage, Zeitumstellung, KW, Aktionstage; Bundesland aus dem Ort. |
@@ -44,10 +44,10 @@ Oberfläche: Standardbelegung = nur überarbeitete Kacheln (`fertig: true` in `s
 App-Seite „Woher kommen die Daten?“ (Fußzeile → Datenquellen) zeigt die Dienstblätter aus dem Katalog `/api/v1/dienste`.
 
 ## Wetter – Entscheidungen vom 27.09.2026
-1. **Quelle Open-Meteo** (nicht DWD MOSMIX), solange DAILY nicht kommerziell ist (keine Werbung, kein Abo). Grund: am wenigsten eigener Aufwand, mehr Daten (16 Tage, UV, Luft, Pollen). Verworfen: Abruf direkt aus dem Browser des Nutzers (Nutzungsbedingungen gelten trotzdem, IP an Dritte, bricht headless). Offen bleibt die Grenze 10.000 Abrufe/Tag; Ausweg bei Wachstum: DWD MOSMIX (Abrufe unabhängig von der Nutzerzahl) oder bezahlter Tarif.
+1. **Quelle Open-Meteo** (nicht DWD MOSMIX), solange DAILY nicht kommerziell ist (keine Werbung, kein Abo). Grund: am wenigsten eigener Aufwand, mehr Daten (15 Tage, UV, Luft, Pollen). Verworfen: Abruf direkt aus dem Browser des Nutzers (Nutzungsbedingungen gelten trotzdem, IP an Dritte, bricht headless). Offen bleibt die Grenze 10.000 Abrufe/Tag; Ausweg bei Wachstum: DWD MOSMIX (Abrufe unabhängig von der Nutzerzahl) oder bezahlter Tarif.
    - Hintergrund für Rückfragen: ICON-D2 (≈ 2 km) rechnet der DWD selbst; Open-Meteo verfeinert nicht, es wählt nur die höhenpassende Zelle. MOSMIX ist kein Raster, sondern Stationsvorhersage (ICON + ECMWF, statistisch korrigiert), 10 Tage. wetter.com nennt seine Quellen nicht (16 Tage deuten auf GFS/ECMWF). ECMWF ist seit 01.10.2025 offen (CC BY 4.0, 15 Tage, 25 km).
 2. **Abruf nur auf Anfrage**, Cache gilt bis zur nächsten **vollen oder halben Stunde** (`takt: 1800`, Rahmen setzt `gueltigBis`, Router den CDN-Cache).
-3. **16 Tage**, ab Tag 8 `trend: true`; Kachel zeigt 6 Folgetage einzeln und die Trendtage zusammengefasst.
+3. **15 Tage** (bis 0.24.1: 16; Tag 16 kam oft leer), ab Tag 8 `trend: true`; Kachel zeigt 6 Folgetage einzeln und die Trendtage zusammengefasst.
 4. **Zusatzwerte:** Windrichtung, Wind/Böen je Stunde und Tagesmaximum, Sonnenstunden, Bewölkung, UV je Stunde, Luftdruck mit 3-h-Tendenz, Sichtweite, Taupunkt, Neuschnee, Schneehöhe, Nullgradgrenze, Frost, Glätte.
 5. **Regen und Radar werden ein eigener Dienst `regen`** (DWD-Radar alle 5 min + RADVOR 2 h, frei auch kommerziell; weltweit RainViewer nur nicht kommerziell). Die Wetterkachel kann beide Dienste zusammen zeigen.
 6. Später zu besprechen: „Immer meinen aktuellen Standort verwenden“; Trend über Tag 16 hinaus nicht nötig.

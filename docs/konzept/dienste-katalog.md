@@ -12,7 +12,7 @@ Status: ✅ fertig in daily/1 · 🔁 läuft, noch alte Schnittstelle · 🆕 ne
 | Dienst | Ideen aus der Liste | Art | Eingabe | Quelle (Kandidat) | Status |
 |---|---|---|---|---|---|
 | `ort` | Standort (Grundlage aller Ortsdienste): Name, Postleitzahl, Gerätestandort | Live | Name, PLZ oder Koordinaten | eigener Bestand aus GeoNames; Ausland Open-Meteo Geocoding | ✅ |
-| `wetter` | lokales Wetter (16 Tage), Luftqualität, Pollen | Live | Ort | Open-Meteo (nicht kommerziell) | ✅ |
+| `wetter` | lokales Wetter (15 Tage), Luftqualität, Pollen | Live | Ort | Open-Meteo (nicht kommerziell) | ✅ |
 | `regen` | Regenradar, „Regen in X Minuten“, Regen in der Nähe, Radarkarte | Live | Ort (Deutschland) | DWD-Radar RV über Bright Sky | ✅ |
 | `himmel` | Mondphase, Supermond, Sternschnuppen, Sonnen-/Mondfinsternisse am Ort, Jahreszeiten (Sonnenzeiten stehen im Wetter) – in der Kachel „Kalender“ | Rechnen | Ort | Astronomy Engine (MIT) | ✅ |
 | `wetterhinweise` | Warnmeldungen – freundlich als „Wetterhinweise“ mit Alltagstipp, in der Wetterkachel (keine eigene Kachel) | Live | Ort (Deutschland) | amtliche DWD-Warnungen über Bright Sky | ✅ |

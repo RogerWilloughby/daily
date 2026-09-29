@@ -125,8 +125,8 @@ function forecast() {
       cloud_cover: hours.map(() => 45), uv_index: hours.map((_, k) => Math.max(0, 3 * Math.sin((k % 24 - 7) / 12 * Math.PI))),
       visibility: hours.map(() => 24000), pressure_msl: hours.map((_, k) => 1016.2 - k * 0.5),   // fallend: -1,5 hPa in 3 h
       freezing_level_height: hours.map((_, k) => 2400 - (k % 24) * 10), snow_depth: hours.map(() => 0) },
-    daily: { time: days, weather_code: je([61, 2, 3, 80, 0, 1, 95, 73]), temperature_2m_max: je([16.2, 18.1, 14, 12.5, 17, 19.2, 21, 2]),
-      temperature_2m_min: je([9.4, 8.7, 7, 6.1, 5, 8, 12, -3.5]), precipitation_probability_max: je([55, 10, 30, 80, 0, 5, 70, 60]),
+    daily: { time: days, weather_code: je([61, 2, 3, 80, 0, 1, 95, 73]), temperature_2m_max: je([16.2, 18.1, 14, 12.5, 17, 19.2, 21, 2]).map((v, k) => (k === T - 1 ? null : v)),
+      temperature_2m_min: je([9.4, 8.7, 7, 6.1, 5, 8, 12, -3.5]).map((v, k) => (k === T - 1 ? null : v)), precipitation_probability_max: je([55, 10, 30, 80, 0, 5, 70, 60]),
       precipitation_sum: je([1.2, 0, 0.3, 6.4, 0, 0, 12, 2]), snowfall_sum: je([0, 0, 0, 0, 0, 0, 0, 3.5]),
       sunrise: days.map(d => d + 6.97 * 3600), sunset: days.map(d => d + 18.87 * 3600),
       sunshine_duration: je([14400, 30000, 9000, 0, 36000, 32000, 5000, 3600]), uv_index_max: je([3.1, 3.4, 2, 1.5, 3.8, 3.6, 2.9, 1]),

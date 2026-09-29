@@ -1,5 +1,5 @@
 // Dienst „wetter“ (Referenz-Dienst für das Austauschformat daily/1):
-// aktuelles Wetter, 48 Stunden, 16 Tage (ab Tag 8 als Trend), Luftqualität und Pollen für einen Ort.
+// aktuelles Wetter, 48 Stunden, 15 Tage (ab Tag 8 als Trend), Luftqualität und Pollen für einen Ort.
 // Quellen: Open-Meteo (Wettermodelle der Wetterdienste, u. a. DWD) und Open-Meteo Air Quality (CAMS).
 const { getJson } = require('./_lib/http');
 const { DienstFehler, iso, tagIn, runde } = require('./_lib/rahmen');
@@ -47,6 +47,7 @@ const richtung = g => g == null ? null : RICHTUNGEN[Math.round(((g % 360) + 360)
 const TENDENZEN = ['steigend', 'gleichbleibend', 'fallend'];
 const tendenz = d => d == null ? null : d >= 1 ? 'steigend' : d <= -1 ? 'fallend' : 'gleichbleibend';
 const TREND_AB_TAG = 8;   // ab dem 8. Tag nur noch Tendenz
+const TAGE = 15;          // so weit reichen die Modelle vollständig (Tag 16 kam oft leer an)
 const cmAusM = v => v == null ? null : runde(v * 100);
 
 // Antworten der Quelle → Vertrag „wetter“ v1 (reine Funktion, testbar)
@@ -82,7 +83,7 @@ function umwandeln(w, q, jetzt = Date.now()) {
   const p0 = h.pressure_msl?.[jetztK], p3 = h.pressure_msl?.[jetztK + 3];
   const druckAenderung = p0 == null || p3 == null ? null : runde(p3 - p0, 1);
 
-  const tage = (d.time || []).map((t, k) => {
+  const tage = (d.time || []).slice(0, TAGE).map((t, k) => {
     const datum = tagIn(t * 1000, zone), minC = runde(d.temperature_2m_min?.[k], 1);
     const niederschlagMm = runde(d.precipitation_sum?.[k], 1), neuschneeCm = runde(d.snowfall_sum?.[k], 1);
     const j = jeTag[datum] || {};
@@ -99,6 +100,7 @@ function umwandeln(w, q, jetzt = Date.now()) {
       sonnenaufgang: zeitU(d.sunrise?.[k]), sonnenuntergang: zeitU(d.sunset?.[k]), uvMax: runde(d.uv_index_max?.[k], 1)
     };
   });
+  while (tage.length && tage[tage.length - 1].minC == null && tage[tage.length - 1].maxC == null) tage.pop();   // unvollständige Tage am Ende weg
   const qc = q && q.current;
   const luft = qc ? {
     aqi: runde(qc.european_aqi), stufe: luftStufe(qc.european_aqi),
@@ -147,8 +149,9 @@ const SCHEMA = S.obj({
 module.exports = {
   id: 'wetter',
   version: 1,                 // Vertrag (Datenformat)
-  programmversion: '1.3.0',   // steigt bei jeder Änderung des Dienstes
+  programmversion: '1.4.0',   // steigt bei jeder Änderung des Dienstes
   aenderungen: [
+    { version: '1.4.0', datum: '2026-09-29', text: '15 statt 16 Tage (der 16. Tag kam oft ohne Werte); Tage am Ende ohne Tiefst- und Höchstwert werden weggelassen' },
     { version: '1.3.0', datum: '2026-09-28', text: 'Je Tag Uhrzeit des Tiefst- und Höchstwerts (minZeit, maxZeit) aus den Stundenwerten' },
     { version: '1.2.0', datum: '2026-09-27', text: '16 Tage (ab Tag 8 Trend), Wind/Sonne/Wolken/Luftdruck/Sicht/Schnee/Frost, Cache-Takt :00/:30' },
     { version: '1.1.0', datum: '2026-09-27', text: 'Dienstblatt (Herkunft, Verarbeitung, Skalierung)' },
@@ -164,7 +167,7 @@ module.exports = {
   quellen: QUELLEN,
   schema: SCHEMA,
   blatt: {
-    zweck: 'Wetter für einen Ort: jetzt, die nächsten 48 Stunden und 16 Tage (ab Tag 8 als Trend gekennzeichnet), mit Wind, Sonne, Wolken, Luftdruck, Sicht, Schnee und Frost, dazu Luftqualität und Pollen.',
+    zweck: 'Wetter für einen Ort: jetzt, die nächsten 48 Stunden und 15 Tage (ab Tag 8 als Trend gekennzeichnet), mit Wind, Sonne, Wolken, Luftdruck, Sicht, Schnee und Frost, dazu Luftqualität und Pollen.',
     herkunft: [
       'Open-Meteo Forecast API („best match“): für Deutschland zuerst DWD ICON-D2 (≈ 2 km, ≈ 2 Tage), dann ICON-EU (≈ 7 km, bis 5 Tage) und ICON global (bis 7,5 Tage), danach ECMWF (bis 15 Tage) und GFS (bis 16 Tage).',
       'Open-Meteo Air Quality API: Luftqualität und Pollen aus Copernicus CAMS (Europa ≈ 11 km).',
@@ -217,7 +220,7 @@ module.exports = {
       'stunden[].wolkenProzent': 'Bewölkung in %',
       'stunden[].uvIndex': 'UV-Index',
       'stunden[].sichtweiteM': 'Sichtweite in m',
-      tage: '16 Tage ab heute, zeitlich aufsteigend',
+      tage: '15 Tage ab heute, zeitlich aufsteigend (am Ende weniger, falls ein Tag ohne Tiefst- und Höchstwert käme)',
       'tage[].datum': 'Kalendertag JJJJ-MM-TT in der Zeitzone des Orts',
       'tage[].trend': 'true ab dem 8. Tag: nur Tendenz, Werte unsicher',
       'tage[].code': 'WMO-Wettercode (bedeutendstes Wetter des Tages)',
@@ -265,7 +268,7 @@ module.exports = {
     const ort = await ortAus(eingabe);
     const p = `latitude=${ort.lat}&longitude=${ort.lon}&timezone=auto&timeformat=unixtime`;
     const [w, q] = await Promise.all([
-      getJson(`https://api.open-meteo.com/v1/forecast?${p}&forecast_days=16&wind_speed_unit=kmh` +
+      getJson(`https://api.open-meteo.com/v1/forecast?${p}&forecast_days=15&wind_speed_unit=kmh` +
         '&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,is_day,wind_speed_10m,wind_gusts_10m,' +
         'wind_direction_10m,cloud_cover,uv_index,pressure_msl,visibility,dew_point_2m,snow_depth' +
         '&hourly=temperature_2m,apparent_temperature,precipitation_probability,precipitation,snowfall,weather_code,wind_speed_10m,wind_gusts_10m,' +
