@@ -22,10 +22,11 @@ module.exports = async function fetchStub(url, opts = {}) {
   if (u.includes('brightsky.dev/alerts')) return reply(F.alerts(process.env.MOCK_ALERTS !== '0'));
   if (u.includes('openholidaysapi.org/SchoolHolidays')) return reply(F.school());
   if (u.includes('tankerkoenig.de')) return reply(F.tanken());
+  if (u.includes('sgx.geodatenzentrum.de/wmts_basemapde')) { const m = u.match(/\/(\d+)\/(\d+)\/(\d+)\.png$/) || []; return new Response(F.kachelPng(+m[1], +m[3], +m[2]), { status: 200, headers: { 'content-type': 'image/png' } }); }
   if (u.includes('verkehr.autobahn.de')) { const a = F.autobahn(u); return a ? reply(a) : new Response('{}', { status: 404 }); }
   if (u.includes('api.open-meteo.com/v1/forecast')) return reply(F.forecast());
   if (u.includes('air-quality-api.open-meteo.com')) return reply(F.airQuality());
-  if (u.includes('api.brightsky.dev/radar')) return reply(F.radar());
+  if (u.includes('api.brightsky.dev/radar')) return reply(F.radar(u));
   if (u.includes('geocoding-api.open-meteo.com')) return reply(F.geocoding(new URL(u).searchParams.get('name')));
   if (u.includes('calendar.test')) return reply(F.ics(), 'text/calendar');
   return new Response('not mocked: ' + u, { status: 404 });

@@ -148,11 +148,12 @@ const GEO = {
 };
 const geocoding = q => ({ results: GEO[String(q || '').toLowerCase()] });
 
-// Bright Sky /radar (format=compressed): 53 × 53 Pixel um den Ort, 1 h zurück bis 2 h voraus.
+// Bright Sky /radar (format=compressed): (2 × distance + 1)² Pixel um den Ort, 1 h zurück bis 2 h voraus.
 // Eine Regenzelle zieht von Westen heran (am Ort ab +20 min); vor 45 bis 30 min hat es am Ort leicht geregnet.
-function radar(jetzt = now) {
+function radar(url = '', jetzt = now) {
   const zlib = require('zlib');
-  const N = 53, M = 26, t0 = Math.floor(jetzt / 300e3) * 300e3, radar = [];
+  const u = new URL(url || 'https://x/radar?lat=52.52&lon=13.41&distance=51000'), km = Math.round((+u.searchParams.get('distance') || 51000) / 1000);
+  const N = 2 * km + 1, M = km, t0 = Math.floor(jetzt / 300e3) * 300e3, radar = [];
   for (let k = -12; k <= 24; k++) {
     const t = t0 + k * 300e3, feld = Buffer.alloc(N * N * 2);
     const setze = (x, y, v) => { if (x >= 0 && y >= 0 && x < N && y < N) feld.writeUInt16LE(Math.max(v, feld.readUInt16LE(2 * (y * N + x))), 2 * (y * N + x)); };
@@ -161,7 +162,10 @@ function radar(jetzt = now) {
     const lauf = k <= 0 ? t : t0;
     radar.push({ timestamp: new Date(t).toISOString(), source: 'RADOLAN::RV::' + new Date(lauf).toISOString(), precipitation_5: zlib.deflateSync(feld).toString('base64') });
   }
-  return { radar, geometry: { type: 'Polygon', coordinates: [] }, bbox: [400, 500, 452, 552], latlon_position: { x: 26.2, y: 25.9 } };
+  // Lage im Raster wie bei Bright Sky: Pixel des Orts ± km (Projektion services/_lib/radolan.js)
+  const g = require('../services/_lib/radolan').zuRaster(+u.searchParams.get('lat') || 52.52, +u.searchParams.get('lon') || 13.41);
+  const px = Math.round(g.x), py = Math.round(g.y);
+  return { radar, geometry: { type: 'Polygon', coordinates: [] }, bbox: [py - M, px - M, py + M, px + M], latlon_position: { x: +(g.x - px + M).toFixed(3), y: +(g.y - py + M).toFixed(3) } };
 }
 
 
@@ -244,4 +248,15 @@ function autobahn(url) {
   return null;   // unbekannte Autobahn: 404
 }
 
-module.exports = { ezbKurse, ezbZinsen, ezbInflation, rss, atom, yahoo, table1, table2, matches2, pointfinder, departures, onthisday, ics, alerts, school, tanken, forecast, airQuality, geocoding, radar, autobahn };
+// Kartenkachel (basemap.de) als Ersatz: kleines graues PNG mit Gitter, damit Lage und Größe im Testserver sichtbar sind
+function kachelPng(z = 0, x = 0, y = 0) {
+  const zlib = require('zlib'), N = 32, roh = Buffer.alloc(N * (N + 1));
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) roh[r * (N + 1) + 1 + c] = r === 0 || c === 0 ? 170 : ((x + y) % 2 ? 222 : 232);
+  const crcT = Array.from({ length: 256 }, (_, n) => { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; return c >>> 0; });
+  const crc = b => { let c = 0xFFFFFFFF; for (const v of b) c = crcT[(c ^ v) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+  const teil = (typ, daten) => { const l = Buffer.alloc(4); l.writeUInt32BE(daten.length); const td = Buffer.concat([Buffer.from(typ), daten]); const c = Buffer.alloc(4); c.writeUInt32BE(crc(td)); return Buffer.concat([l, td, c]); };
+  const kopf = Buffer.alloc(13); kopf.writeUInt32BE(N, 0); kopf.writeUInt32BE(N, 4); kopf[8] = 8; kopf[9] = 0;
+  return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), teil('IHDR', kopf), teil('IDAT', zlib.deflateSync(roh)), teil('IEND', Buffer.alloc(0))]);
+}
+
+module.exports = { ezbKurse, ezbZinsen, ezbInflation, rss, atom, yahoo, table1, table2, matches2, pointfinder, departures, onthisday, ics, alerts, school, tanken, forecast, airQuality, geocoding, radar, autobahn, kachelPng };

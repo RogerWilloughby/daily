@@ -10,6 +10,7 @@ import { antwort as hinweisAntwort } from '../adapter/hinweise.js';
 import { hm } from '../core/util.js';
 import { MINI_WAHL, miniWahl } from '../adapter/diagramm.js';
 import '../ansichten/wetter.js'; // Darstellung der Wetter-Kachel (Zeitpunkt-Block)
+import '../ansichten/radar.js'; // Radarkarte: Bilder laufen lassen, Zeitleiste
 
 let env = null, regen = null, hinweise = null;
 

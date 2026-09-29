@@ -7,7 +7,7 @@
 |---|---|---|---|---|---|
 | [`ort`](ort.md) | Standort | 1.3.2 | GeoNames Postal Codes (eigener Ortsbestand), Open-Meteo Geocoding (GeoNames) | weltweit | D |
 | [`wetter`](wetter.md) | Wetter | 1.5.0 | Open-Meteo, Open-Meteo Air Quality (Copernicus CAMS) | weltweit | C |
-| [`regen`](regen.md) | Regenradar | 1.0.0 | Deutscher Wetterdienst (Radar RV), Bright Sky | DE | C |
+| [`regen`](regen.md) | Regenradar | 1.1.0 | Deutscher Wetterdienst (Radar RV), Bright Sky | DE | C |
 | [`wetterhinweise`](wetterhinweise.md) | Wetterhinweise | 1.0.0 | Deutscher Wetterdienst (amtliche Warnungen), Bright Sky | DE | C |
 | [`feiertage`](feiertage.md) | Feiertage und Ferien | 1.0.0 | DAILY (Berechnung: Feiertage, Brückentage, Zeitumstellung, Aktionstage), OpenHolidays API (Schulferien) | DE | B |
 | [`himmel`](himmel.md) | Himmel | 1.0.0 | Astronomy Engine (Berechnung), Sternschnuppen: Termine der International Meteor Organization (Mittelwerte) | weltweit | A |

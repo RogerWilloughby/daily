@@ -1,6 +1,6 @@
 # DAILY – Übergabe: aktueller Arbeitsstand
 
-Stand 29.09.2026 (App 0.28.0). Für neue Chats: hier steht, woran gerade gearbeitet wird und wie es weitergeht. Verbindliche Entscheidungen stehen in `entscheidungen.md`, die Architektur in `../architektur/dienste.md`.
+Stand 29.09.2026 (App 0.29.0). Für neue Chats: hier steht, woran gerade gearbeitet wird und wie es weitergeht. Verbindliche Entscheidungen stehen in `entscheidungen.md`, die Architektur in `../architektur/dienste.md`.
 
 ## Vorgehen (Rogers Vorgaben)
 - **Erst Plan, dann Umsetzung (Rogers Vorgabe vom 27.09.2026):** Vor jeder Umsetzung und vor jedem Schreiben ins Repo einen kurzen Plan vorlegen – was und warum, welche Dateien (neu/geändert/gelöscht), was Roger danach tun muss, was offen/unsicher ist – und auf Rogers OK warten. Nicht einfach loslegen.
@@ -34,7 +34,7 @@ Oberfläche: Standardbelegung = nur überarbeitete Kacheln (`fertig: true` in `s
 |---|---|---|
 | `ort` | Leiste (Ort-Auswahl) | ✅ getestet. Eigener Ortsbestand aus GeoNames (feste Datei, ≈ 14.700 Orte), Suche wie eine Suchmaschine, Vorschläge beim Tippen, Ausland über Open-Meteo, Gerätestandort; mehrere Orte (bis 10) in der Auswahlbox. |
 | `wetter` | Wetter | ✅ getestet. Open-Meteo, 15 Tage (ab Tag 8 Trend), Zusatzwerte, Takt :00/:30, Diagramme, Reiter. |
-| `regen` | Wetter | ✅ getestet. DWD-Radar über Bright Sky, Reiter „Radar“, „Regen in X Min.“. |
+| `regen` | Wetter | ✅ getestet. DWD-Radar über Bright Sky, Reiter „Radar“, „Regen in X Min.“. 🆕 0.29.0 (Dienst 1.1.0): Reiter „Radar“ = Werte · Karte in voller Höhe auf basemap.de · Verlauf; ≈ 100 × 100 km, −1 bis +2 Std., Zeitleiste – auf Vercel zu prüfen (Kartenbild, Lage des Radars). |
 | `wetterhinweise` | Wetter | ✅ getestet (0.11.1). Amtliche DWD-Warnungen, Abzeichen und Hinweis nur bei Warnung, Reiter „Hinweise“ immer. |
 | `feiertage` | Kalender | ✅ getestet (0.12.0). Feiertage, Schulferien (OpenHolidays), Brückentage, Zeitumstellung, KW, Aktionstage; Bundesland aus dem Ort. |
 | `himmel` | Kalender | ✅ getestet (0.12.0). Mond, Supermond, Sternschnuppen, Finsternisse am Ort, Jahreszeiten (Astronomy Engine). |
@@ -59,7 +59,8 @@ App-Seite „Woher kommen die Daten?“ (Fußzeile → Datenquellen) zeigt die D
 
 ## Backlog / bekannte Kleinigkeiten (Stand 29.09.2026)
 - Ort: 130 Kreisnamen ohne Typ („Zwickau“ statt „Landkreis Zwickau“); Stadtteilnamen der Quelle teils doppelt („Stuttgart Stuttgart-Mitte“).
-- Wetter: Luftqualität/Pollen aus DWD/UBA prüfen; Radarkarte ohne Landkarte darunter (ggf. Umrisse/Orte).
+- Wetter: Luftqualität/Pollen aus DWD/UBA prüfen. (Radarkarte mit Landkarte: erledigt 0.29.0.)
+- Radarkarte: Nutzungsbedingungen basemap.de im Wortlaut prüfen (PDF war nicht abrufbar) – `../recht/checkliste.md`; Zoom fest 9 (Kartenschrift bei großer Kachel etwas weich) – bei Bedarf Zoom 10 für große Karten; außerhalb Deutschlands keine Landkarte (heller Grund).
 - Namenstage: kleinere Tage aus dem Gedächtnis zusammengestellt – Roger meldet falsche Namen, Korrektur direkt in der Liste.
 - Vercel hat zweimal einen Push verpasst (28.09. und 29.09.) – Git-Verbindung in Vercel prüfen (Settings → Git, Deployments).
 - Wetter klein bei 1100 px: Sonnenzahl ragt aus der Kachel, Text der Wetterlage wird verdrängt (gemessen mit App 0.26.3; bei 1400 und 1920 px passt alles). Ansätze: „Wind“ weglassen, Wetterlage kürzen.

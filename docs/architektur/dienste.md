@@ -137,6 +137,8 @@ Daraus entstehen der Katalog `/api/v1/dienste`, die Dateien `docs/dienste/<id>.m
 | `services/_lib/schema.js` | Schema-Prüfer (Teilmenge von JSON Schema) und Bausteine `S.*`, Rahmen-Schema |
 | `services/_lib/ort.js` | Ort-Eingabe auflösen und runden |
 | `services/_lib/orte.js` | eigener Ortsbestand: Name, Postleitzahl, Umkehrsuche |
+| `services/_lib/radolan.js` | Radarraster des DWD ↔ Koordinaten (für `regen`, Karte) |
+| `api/karte.js` | Kartenkacheln basemap.de (BKG) für die Radarkarte, `GET /api/karte?z=&x=&y=` → PNG; kein daily/1-Dienst, nur Zoom 8–11 über Deutschland, CDN 30 Tage |
 | `services/_lib/blatt.js` | Dienstblatt prüfen und als Markdown ausgeben |
 | `services/_lib/http.js` | `getJson`, `postJson`, `send` (Cache-Header), Betriebsart |
 | `services/index.js` | Verzeichnis, `ausfuehren()`, `katalog()` |
@@ -153,6 +155,7 @@ Das allgemeine Kachelraster weiß nichts über einzelne Kacheln. Kachelbesondere
 | `src/js/core/ansichten.js` | Anmeldung: `ansicht(id, { teaser, spalte, zurueck })` für eine Kachel, `erweiterung({ nachInhalt, nachZeichnen, groesse, zeiger })` für alle |
 | `src/js/ansichten/mini-diagramm.js` | allgemeine Diagramm-Bedienung: Dichte je Platz (`miniDichte`), Hinweise der großen Diagramme, Überfahren der Spalten |
 | `src/js/ansichten/wetter.js` | Wetter-Kachel klein: Regenzeile und Zeitpunkt-Block („Jetzt“ / überfahrene Stunde oder Tag) |
+| `src/js/ansichten/radar.js` | Radarkarte im Reiter „Radar“: Bilder laufen lassen, Zeitleiste (Start/Pause, Sprung) |
 | `src/js/adapter/diagramm.js` | Wetter-Diagramme als HTML/SVG-Text und gemeinsame Bausteine (`skala`, `pfad`, `pfadRund`, `umschalter`) |
 | `src/js/adapter/kursdiagramm.js` | Mini-Kursdiagramm der Finanzen-Kachel (`miniKurs`, `kursSkala`) |
 | `src/app.css` | allgemeine Styles, Design-Tokens, Hell/Dunkel |

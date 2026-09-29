@@ -401,8 +401,13 @@ test('Regen: Radar über Bright Sky – jetzt, Beginn, letzte Stunde, Nähe, Kar
   assert.equal(d.verlauf[0].gemessen, true); assert.equal(d.verlauf[1].gemessen, false);
   assert.deepEqual(d.letzteStunde, { summeMm: 0.4, aufgehoertVorMinuten: 30 });
   assert.deepEqual([d.naehe.richtung, d.naehe.entfernungKm], ['W', 4]);   // Zelle zieht von Westen heran
-  assert.equal(d.karte.bilder.length, 9);                    // alle 15 Minuten bis +2 h
+  assert.equal(d.karte.bilder.length, 13);                   // alle 15 Minuten von −60 min bis +2 h
+  assert.equal(d.karte.bilder.map(b => (b.gemessen ? 'g' : 'v')).join(''), 'gggggvvvvvvvv');
+  assert.deepEqual([d.karte.breite, d.karte.hoehe], [52, 52]);   // ±50 km in 2-km-Zellen
   assert.equal(d.karte.bilder[0].stufen.length, d.karte.breite * d.karte.hoehe);
+  const e = d.karte.ecken;                                   // Ecken umschließen den Ort; 104 Rasterpixel ≈ 100 km (Maßstab des Rasters wahr bei 60° N)
+  assert.ok(e.nw.lat > 52.52 && e.sw.lat < 52.52 && e.nw.lon < 13.41 && e.ne.lon > 13.41);
+  assert.ok(Math.abs((e.nw.lat - e.sw.lat) * 111.2 - 100) < 2);
   assert.equal(new Date(r.body.gueltigBis).getUTCMinutes() % 5, 0);
   assert.deepEqual(r.body.quellen.map(q => q.name), ['Deutscher Wetterdienst (Radar RV)', 'Bright Sky']);
 });
@@ -414,7 +419,20 @@ test('Adapter Regen: Hinweis in der Wetterkachel und Reiter „Radar“', async 
   assert.equal(hinweis(regen), 'Regen in 20 Min. (leicht).');
   assert.equal(hinweis(null), null);
   const html = radarReiter(regen, iso => iso.slice(11, 16));
-  assert.match(html, /<svg class="rk".*@keyframes/s);          // animierte Karte
+  assert.match(html, /<svg class="rk rk-mit-land" viewBox="0 0 (\S+) \1"/);   // quadratische Karte mit Landkarte
+  const kacheln = html.match(/<image href="\/api\/karte\?z=9&amp;x=\d+&amp;y=\d+"/g) || [];
+  assert.ok(kacheln.length >= 4 && kacheln.length <= 16, 'Kacheln: ' + kacheln.length);
+  assert.match(html, /<g class="rk-radar" transform="matrix\(/);
+  assert.equal((html.match(/class="rk-bild/g) || []).length, 13);
+  assert.match(html, /<g class="rk-bild rk-an" data-i="4">/);  // „jetzt“ ist sichtbar, auch ohne Skript
+  assert.equal((html.match(/data-rk-bild="/g) || []).length, 13);
+  assert.match(html, /aria-pressed="true" title="[\d:]+ Uhr · gemessen"><i><\/i><span>jetzt<\/span>/);
+  assert.match(html, /<span>−1 Std\.<\/span>.*<span>\+1 Std\.<\/span>.*<span>\+2 Std\.<\/span>/s);
+  assert.match(html, /© GeoBasis-DE \/ BKG \(20\d\d\), basemap\.de/);
+  assert.match(html, /<dl class="rk-werte">.*<div class="rk-karte">.*<div class="rk-rechts">/s);   // Werte · Karte · Verlauf
+  const ohneLand = radarReiter({ ...regen, daten: { ...regen.daten, karte: { ...regen.daten.karte, ecken: undefined } } }, iso => iso.slice(11, 16));
+  assert.doesNotMatch(ohneLand, /<image|BKG/);               // ältere Antwort ohne Ecken: Radar ohne Landkarte
+  assert.match(ohneLand, /<svg class="rk" viewBox="0 0 52 52"/);
   assert.match(html, /4 km westlich/);
   assert.match(html, /0,4 mm, aufgehört vor 30 Min\./);
   const wetter = (await rufe('wetter', { ort: 'Berlin' })).body;
@@ -1018,4 +1036,35 @@ test('Autobahn: Vertrag, Arten, Zeiten aus dem Text, Eingaben, fehlende Autobahn
   assert.match(a.antwort('Stau?', env, { start, ziel, strassen: [] }), /Autobahnen eintragen/);
   assert.equal(a.antwort('Wann fährt die Bahn?', env, o), null);
   assert.deepEqual([a.strassenVon('a4, A 13'), a.strassenVon('B96')], [['A4', 'A13'], null]);
+});
+
+test('Radarraster: Umrechnung wie Bright Sky und DWD, Kacheln der Karte nur über Deutschland', async () => {
+  const { zuRaster, zuGrad } = require('../services/_lib/radolan');
+  const nah = (a, b, tol = 0.02) => a.every((v, i) => Math.abs(v - b[i]) <= tol);
+  // Positionen, die Bright Sky meldet (bbox-Ecke + latlon_position, abgefragt 29.09.2026)
+  const dd = zuRaster(51.05, 13.74), nord = zuRaster(54, 8);
+  assert.ok(nah([dd.x, dd.y], [815 + 3.26, 582 + 3.323]), JSON.stringify(dd));
+  assert.ok(nah([nord.x, nord.y], [405 + 2.948, 247 + 3.427]), JSON.stringify(nord));
+  // Eckpunkte des DWD-Rasters DE1200 (WGS84): äußere Kanten bei −0,5 und 1099,5 / 1199,5
+  const ecke = (lat, lon) => { const g = zuRaster(lat, lon); return [g.x, g.y]; };
+  assert.ok(nah(ecke(55.86208711, 1.463301510), [-0.5, -0.5]));
+  assert.ok(nah(ecke(45.68460578, 16.58086935), [1099.5, 1199.5]));
+  // hin und zurück
+  const g = zuGrad(dd.x, dd.y);
+  assert.ok(Math.abs(g.lat - 51.05) < 1e-6 && Math.abs(g.lon - 13.74) < 1e-6);
+  // Kacheln: nur Zoom 8–11 und über Deutschland; Antwort als Bild mit 30 Tagen Cache
+  const karte = require('../api/karte.js');
+  const x = karte.kachelX(13.74, 9), y = karte.kachelY(51.05, 9);
+  assert.deepEqual([x, y], [275, 171]);
+  assert.deepEqual([karte.erlaubt(9, x, y), karte.erlaubt(12, x, y), karte.erlaubt(9, 1, 1), karte.erlaubt(9, x + 0.5, y)], [true, false, false, false]);
+  const rufeKarte = q => new Promise(ok => { const res = { h: {}, setHeader(k, v) { this.h[k.toLowerCase()] = v; }, end(b) { ok({ code: this.statusCode, h: this.h, b }); } }; karte({ method: 'GET', query: q }, res); });
+  const r = await rufeKarte({ z: '9', x: String(x), y: String(y) });
+  assert.deepEqual([r.code, r.h['content-type'], r.b.slice(1, 4).toString()], [200, 'image/png', 'PNG']);
+  assert.match(r.h['cache-control'], /s-maxage=2592000/);
+  const falsch = await rufeKarte({ z: '9', x: '1', y: 'abc' });
+  assert.deepEqual([falsch.code, falsch.h['cache-control']], [400, 'no-store']);
+  // Adapter: Radar liegt passend auf der Karte – Ort (Mitte) und Ecken im selben Maßstab
+  const { merc } = await esm('src/js/adapter/regen.js');
+  const m = merc(51.05, 13.74);
+  assert.deepEqual([Math.floor(m.x / 256), Math.floor(m.y / 256)], [x, y]);
 });
