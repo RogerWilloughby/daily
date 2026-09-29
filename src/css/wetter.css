@@ -85,7 +85,8 @@
 .zp-l{display:flex;align-items:center;gap:5px;min-width:0}
 .zp-l svg{width:16px;height:16px;flex:none}
 .zp-l span{overflow:hidden;text-overflow:ellipsis}
-.zp-r{grid-column:2/-1;display:grid;grid-template-columns:8ch 6.5ch 11.5ch 6ch;column-gap:.6em;color:var(--muted);font-size:.92em}
+/* zweite Zeile beginnt ganz links (unter dem Zeitpunkt) – mehr Platz für Wind und Sonne */
+.zp-r{grid-column:1/-1;display:grid;grid-template-columns:8ch 6.5ch 11.5ch 6ch;column-gap:.6em;color:var(--muted);font-size:.92em}
 .zp-mm,.zp-p{color:var(--wd-regen-text)}
 /* Schirm vor Regenmenge und -wahrscheinlichkeit; bei 0 mm / 0 % schräg durchgestrichen */
 .zp-schirm{position:relative;display:inline-block;font-style:normal}
