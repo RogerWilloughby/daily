@@ -53,11 +53,12 @@ App-Seite „Woher kommen die Daten?“ (Fußzeile → Datenquellen) zeigt die D
 5. **Regen und Radar werden ein eigener Dienst `regen`** (DWD-Radar alle 5 min + RADVOR 2 h, frei auch kommerziell; weltweit RainViewer nur nicht kommerziell). Die Wetterkachel kann beide Dienste zusammen zeigen.
 6. Später zu besprechen: „Immer meinen aktuellen Standort verwenden“; Trend über Tag 16 hinaus nicht nötig.
 
-## Offen / bekannte Kleinigkeiten (28.09.2026)
+## Backlog / bekannte Kleinigkeiten (Stand 29.09.2026)
 - Ort: 130 Kreisnamen ohne Typ („Zwickau“ statt „Landkreis Zwickau“); Stadtteilnamen der Quelle teils doppelt („Stuttgart Stuttgart-Mitte“).
 - Wetter: Luftqualität/Pollen aus DWD/UBA prüfen; Radarkarte ohne Landkarte darunter (ggf. Umrisse/Orte).
 - Namenstage: kleinere Tage aus dem Gedächtnis zusammengestellt – Roger meldet falsche Namen, Korrektur direkt in der Liste.
-- Vercel hat einmal einen Push verpasst (28.09.) – beobachten; wiederholt es sich, Git-Verbindung in Vercel prüfen.
+- Vercel hat zweimal einen Push verpasst (28.09. und 29.09.) – Git-Verbindung in Vercel prüfen (Settings → Git, Deployments).
+- Wetter klein bei 1100 px: Sonnenzahl ragt aus der Kachel, Text der Wetterlage wird verdrängt (gemessen mit App 0.26.3; bei 1400 und 1920 px passt alles). Ansätze: „Wind“ weglassen, Wetterlage kürzen.
 - Später zu besprechen: „Immer meinen aktuellen Standort verwenden“, Ort je Kachel, Kachelauswahl in den Einstellungen.
 
 ## Nächste Schritte (in dieser Reihenfolge)
