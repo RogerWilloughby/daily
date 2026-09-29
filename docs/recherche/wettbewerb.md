@@ -80,8 +80,31 @@ Folge für DAILY: Mit einem weiteren Widget-Baukasten gewinnt man wenig. Das All
 5. **Ruhig statt Feed:** keine Nachrichten, keine Werbung, keine Endlosliste; „Wetterhinweise“ statt „Warnungen“.
 6. **Transparenz:** Dienstblätter und Datenquellen-Seite zeigen Herkunft und Verarbeitung jeder Angabe.
 
+## Einschätzung und Risiken (29.09.2026)
+
+**Als Rogers eigenes Werkzeug:** Ziel aus Entscheidung 1 bereits erreicht. Die Wetterkachel ist detaillierter als die meisten Wetter-Apps.
+
+**Als öffentliches Produkt:** möglich, aber eine Nische, und hart. Die eigentliche Konkurrenz sind nicht start.me und Co., sondern Gewohnheiten und Dinge, die schon da sind und nichts kosten:
+- Sperrbildschirm und Widgets auf dem Handy (Wetter, Termine),
+- die Browser-Startseite (Google, MSN in Edge),
+- die ohnehin installierte Wetter-App.
+
+Die Stärken (kein Konto, keine Werbung, keine Nachrichten, deutscher Alltag, ruhige Fläche) füllen die Lücke, die Netvibes und My Yahoo hinterlassen haben. Diese Kombination bietet derzeit niemand an.
+
+### Worauf wir achten müssen
+
+1. **Sofort nützlich, ohne Einrichtung.** Beim ersten Öffnen muss in fünf Sekunden klar sein, warum sich DAILY lohnt: Ort automatisch vorschlagen, gute Standardbelegung. Das unterscheidet DAILY von Baukästen, deren Nutzer die Lust verlieren.
+2. **Wie Leute DAILY finden und behalten.** Kaum jemand ändert von Hand die Startseite seines Browsers. Realistisch sind eine Erweiterung für den neuen Tab (wie daily.dev) und die installierte PWA. Am Handy gibt es eine echte Grenze: Eine PWA kann keine Widgets auf dem Startbildschirm anlegen, und dort schauen die meisten nach dem Wetter. Früh klären, ob Handy oder Rechner das Hauptgerät für DAILY ist.
+3. **Lizenzen der Datenquellen** – größtes verstecktes Risiko. Open-Meteo ist kostenlos nur für nicht kommerzielle Nutzung; auch bei Tankerkönig und anderen Quellen hängen die Bedingungen von der Nutzung ab. Sobald DAILY Geld einbringt (Spenden, Pro-Stufe, Sponsoring), können sich die Kosten grundlegend ändern. Vor der Veröffentlichung für jeden Dienst im Dienstblatt festhalten, was bei kommerzieller Nutzung gilt (Vorbild: `finanzdaten.md`).
+4. **Finanzierung früh entscheiden.** Ohne Nutzerdaten und Werbung bleiben Spenden, eine kleine Pro-Stufe oder ein Sponsor je Kachel. Hängt direkt an Punkt 3 und am Wechsel von Vercel Hobby zu Pro.
+5. **Tagesinhalte: Nachschub und Qualität.** Der Vorrat reicht bis 26.10.2026, danach wiederholen sich die Inhalte – treue Nutzer merken das sofort. Heikel sind die KI-Texte zu **Gesundheit** und **Beziehung**: Ein falscher Gesundheitstipp ist ein Haftungs- und Vertrauensproblem. Diese Rubriken brauchen eine Prüfung vor der Veröffentlichung oder sehr vorsichtige Inhalte.
+6. **Weniger Kacheln, dafür alle auf dem Niveau des Wetters.** Zwölf ausgereifte Kacheln sind besser als zwanzig durchwachsene. „Deine Nutzung“ wie geplant auswerten (Entscheidung 9) und konsequent streichen.
+7. **Ein-Personen-Projekt mit vielen fremden Quellen.** Jede Quelle kann ausfallen oder ihre Schnittstelle ändern. Statusanzeige und Dienstblätter helfen; trotzdem Zeit für die Pflege einplanen.
+8. **Recht und Marke.** Auch mit nur dem Ort braucht die Veröffentlichung Impressum und Datenschutzerklärung (die IP-Adresse erreicht die Server-Funktionen). Die Markenfrage „DAILY“ vor Logo und Domain klären. Keine Rechtsberatung.
+
 ## Mögliche nächste Schritte
 
+- **Test vor der Veröffentlichung:** 5–10 Leute aus Familie und Freundeskreis nutzen DAILY zwei Wochen lang. Entscheidende Kennzahl: Kommen sie nach einer Woche noch von sich aus zurück? Erfolgskriterium vorher festlegen, z. B. „mindestens die Hälfte öffnet DAILY an 4 von 7 Tagen“. Erst wenn das klappt, lohnt der Aufwand für Recht, Lizenzen und Finanzierung.
 - Markenrecherche „DAILY“ (siehe oben).
 - Die Ideenliste enthält eine „KI-Tageszusammenfassung“. Sie wäre ein Briefing als Kachel – öffentlich nur ohne Nutzerdaten und ohne Nachrichten denkbar (Entscheidungen 0 und 7).
 
