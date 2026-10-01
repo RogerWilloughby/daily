@@ -10,17 +10,22 @@ export const TOOLS = [
     lang: 'HTML- und Markdown-Dateien öffnen, bearbeiten, umwandeln und als PDF drucken. Speichert als Download, merkt sich nichts im Browser.' }
 ];
 
-// Kachel (rein, testbar)
+// Kachel (rein, testbar): Mini-Reiter (seit 0.38.0) „Alle“ (Liste, ein Klick öffnet) und je Tool ein Reiter mit Beschreibung und „Öffnen ↗“
 export function kachel(tools) {
-  const liste = tools.map(t => ({ d: t.name, t: t.text, href: t.pfad, ico: icon(t.icon, 'ico tl-ico'), gruppe: 1 }));
-  const html = tools.length ? `<ul class="tool-liste">${tools.map(t => `<li><a href="${esc(t.pfad)}" target="_blank" rel="noopener">` +
-    `${icon(t.icon)}<span class="tool-name">${esc(t.name)}</span><span class="tool-text">${esc(t.lang)}</span><span class="tool-auf">Öffnen ↗</span></a></li>`).join('')}</ul>` +
-    '<p class="note">Öffnet im neuen Tab. Die Tools arbeiten nur in deinem Browser – deine Daten bleiben in deinen Dateien auf deinem Rechner.</p>'
-    : '<p class="note">Keine Tools ausgewählt – im Zahnrad-Reiter einschalten.</p>';
+  const liste = tools.map(t => ({ d: t.name, t: t.text, href: t.pfad, ico: icon(t.icon, 'ico tl-ico'), tip: t.lang, gruppe: 1 }));
   return {
     state: 'local', m: '', ms: `${tools.length} Tools`,
     x: tools.length ? tools.map(t => `${t.name} (${t.text})`).join(' · ') : 'Keine Tools ausgewählt.',
-    liste, tabs: [{ id: 'tools', name: 'Tools', html }]
+    liste: [], startReiter: 'alle',
+    kleinReiter: [
+      { id: 'alle', name: 'Alle Tools', icon: icon('tool'), kopf: `<b>Tools</b> <small>${tools.length}</small>`, liste,
+        html: '<p class="kt-leer">Keine Tools ausgewählt – im Zahnrad einschalten.</p>' },
+      // Knopf unten (bekommt zuerst seinen Platz), die Beschreibung darüber wird bei wenig Höhe gekürzt
+      ...tools.map(t => ({ id: t.id, name: t.name, icon: icon(t.icon), kopf: `<b>${esc(t.name)}</b>`,
+        html: `<p class="kt-text" title="${esc(t.lang)}"><b>${esc(t.text)}.</b> ${esc(t.lang)}</p>`,
+        unten: `<a class="kt-knopf" href="${esc(t.pfad)}" target="_blank" rel="noopener">${esc(t.name)} öffnen ↗</a>` }))
+    ],
+    info: ['Öffnet im neuen Tab', 'Die Tools arbeiten nur in deinem Browser – deine Daten bleiben in deinen Dateien']
   };
 }
 

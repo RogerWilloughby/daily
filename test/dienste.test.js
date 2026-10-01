@@ -1261,3 +1261,28 @@ test('Kachel „Alltag“: Rezept, Gesundheit, Tech, Beziehung, Favoriten auch m
   assert.deepEqual(fl.map(z => z.aktion).sort(), ['fav:rezept|2026-10-01', 'fav:spartipp|2026-10-01']);   // Spartipp ja, Witz (Unterhaltung) nein
   assert.ok(fl.some(z => /^Spartipp: /.test(z.t)));
 });
+
+test('Lokale Kacheln: „Mein Daily“ und „Deine Nutzung“ mit Mini-Reitern', async () => {
+  const a = await esm('src/js/adapter/lokal.js');
+  const tasks = [{ id: 't1', text: 'Milch <kaufen>', done: false }, { id: 't2', text: 'Rad flicken', done: true }, { id: 't3', text: 'Rezept: Linsen', done: false }];
+  const k = a.aufgabenKachel(tasks);
+  assert.deepEqual(k.kleinReiter.map(r => r.id), ['offen', 'erledigt']);
+  assert.deepEqual([k.m, k.ms, k.kleinReiter[0].kopf], ['2 Aufgaben', '2 offen', '<b>2 offen</b> <small>1 erledigt</small>']);
+  const o = k.kleinReiter[0].html;
+  assert.match(o, /^<form class="kt-neu" data-kt-neu><input type="text" maxlength="140"/);
+  assert.match(o, /data-kt="t1"><label><input type="checkbox" aria-label="Erledigt"><span title="Milch &lt;kaufen&gt;">Milch &lt;kaufen&gt;<\/span>.*data-kt-weg/);
+  assert.doesNotMatch(o, /Rad flicken/);
+  const e = k.kleinReiter[1];
+  assert.match(e.html, /kt-z kt-fertig" data-kt="t2"><label><input type="checkbox" checked/);
+  assert.match(e.unten, /data-kt-leeren>Erledigte löschen/);
+  const leer = a.aufgabenKachel([]);
+  assert.deepEqual([leer.kleinReiter[0].kopf, leer.kleinReiter[1].unten], ['<b>Alles erledigt</b>', '']);
+  assert.match(leer.kleinReiter[0].html, /kt-neu.*Keine offenen Aufgaben/);
+  // Nutzung
+  const n = a.nutzungKachel({ start: '2026-09-27T08:00:00Z', counts: { weather: 5, money: 2, weg: 9 } }, { weather: 'Wetter', money: 'Finanzen' });
+  assert.deepEqual([n.m, n.kleinReiter[0].kopf], ['7 Klicks', '<b>7 Klicks</b> <small>seit 27. September</small>']);
+  assert.deepEqual(n.kleinReiter[0].liste.map(z => [z.d, z.t]), [['5×', 'Wetter'], ['2×', 'Finanzen']]);   // unbekannte Kachel fällt weg
+  assert.match(n.kleinReiter[0].liste[0].tip, /\(71 %\)$/);
+  assert.match(n.kleinReiter[0].unten, /data-nutzung-reset/);
+  assert.equal(a.nutzungKachel({ start: '2026-09-27T08:00:00Z', counts: {} }, {}).kleinReiter[0].unten, '');
+});

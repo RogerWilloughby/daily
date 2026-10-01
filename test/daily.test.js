@@ -156,10 +156,13 @@ test('Tools: Verzeichnis, Kachel mit Links, Seiten ohne Google Fonts', async () 
   }
   const { kachel } = await esm('src/js/tools/verzeichnis.js');
   {
-    const k = kachel(TOOLS);
-    assert.deepEqual(k.liste.map(z => [z.d, z.href]), [['Arbeitszeit', '/tools/arbeitszeit.html'], ['Setzkasten', '/tools/setzkasten.html']]);
-    assert.match(k.tabs[0].html, /href="\/tools\/setzkasten\.html" target="_blank" rel="noopener"/);
-    assert.equal(kachel([]).liste.length, 0);
+    const k = kachel(TOOLS);   // Mini-Reiter: „Alle“ plus je Tool ein Reiter, kein Aufklappen
+    assert.deepEqual(k.kleinReiter.map(r => r.id), ['alle', 'arbeitszeit', 'setzkasten']);
+    assert.equal(k.tabs, undefined); assert.deepEqual(k.liste, []);
+    assert.deepEqual(k.kleinReiter[0].liste.map(z => [z.d, z.href]), [['Arbeitszeit', '/tools/arbeitszeit.html'], ['Setzkasten', '/tools/setzkasten.html']]);
+    assert.match(k.kleinReiter[2].unten, /^<a class="kt-knopf" href="\/tools\/setzkasten\.html" target="_blank" rel="noopener">Setzkasten öffnen ↗<\/a>/);
+    assert.deepEqual(kachel([]).kleinReiter.map(r => [r.id, r.liste.length]), [['alle', 0]]);
+    assert.match(kachel([]).kleinReiter[0].html, /Keine Tools ausgewählt/);
   }
 });
 
