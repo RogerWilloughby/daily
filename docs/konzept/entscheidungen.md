@@ -38,7 +38,7 @@ Kacheln und Quellen:
 - **Rätsel & Witz, Essen, Land, Filmtipp, Gesundheit, Tech, Sparen, Beziehung** – Tagesinhalte aus `src/content/daily.json`.
 - **Wissen** – Wort, Sprichwort, „An diesem Tag“ (Wikipedia, `api/onthisday.js`).
 - **Warnungen** – seit 27.09.2026 keine eigene Kachel mehr, sondern Dienst `wetterhinweise` in der Wetterkachel (siehe unten).
-- ~~**Tanken**~~ – seit App 0.27.0 Ansicht „Tanken“ der Kachel „Verkehr“ (Dienst `tanken`). Braucht Vercel-Variable `TANKERKOENIG_API_KEY` (kostenlos: onboarding.tankerkoenig.de); ohne Schlüssel zeigt die Ansicht „Tanken einrichten“.
+- ~~**Tanken**~~ – seit App 0.27.0 Ansicht „Tanken“ der Kachel „Verkehr“ (Dienst `tanken`). Braucht Vercel-Variable `TANKERKOENIG_API_KEY` (kostenlos: onboarding.tankerkoenig.de; in Rogers Projekt gesetzt am 30.09.2026); ohne Schlüssel zeigt die Ansicht „Tanken einrichten“.
 - ~~**Himmel**~~ – Tageslänge, Sonne, Mondphase, nächster Voll-/Neumond, Sternschnuppen; ohne Netz berechnet (`src/js/lib/astro.js`).
 - **Deine Nutzung** – lokaler Klickzähler.
 - Nur privat: **Termine** (iCal, in der Kachel „Kalender“), **Schlagzeilen** (RSS).
@@ -170,7 +170,7 @@ Grau-grüner Grund, dunkelblaue aktive Kachel, Schriften Bricolage Grotesque + F
 Prototyp: `../prototyp/daily-prototyp.html`.
 
 ## Offen
-- **Roger, einmalig in Vercel (Settings → Environment Variables):** `DAILY_PRIVATE` = `1` (damit Kalender und Schlagzeilen für dich bleiben) und `TANKERKOENIG_API_KEY` (kostenlos beantragen). Danach neu veröffentlichen.
+- ~~Roger, einmalig in Vercel (Environment Variables): `DAILY_PRIVATE` = `1` und `TANKERKOENIG_API_KEY`~~ – erledigt (`DAILY_PRIVATE` 28.09., `TANKERKOENIG_API_KEY` 30.09.2026; Tanken live geprüft).
 - Aktueller Arbeitsstand und nächste Schritte: `uebergabe.md`
 - Wetterdienst überarbeiten (DWD direkt/Bright Sky vs. Open-Meteo, Raster, TTL), danach Vercel vs. AWS bei 10 Mio. Nutzern
 - Alle Dienste auf daily/1 umstellen und neue Dienste bauen (Reihenfolge in `dienste-katalog.md`)
@@ -178,6 +178,6 @@ Prototyp: `../prototyp/daily-prototyp.html`.
 - Geld für die öffentliche Version auf frei nutzbare Quellen umstellen
 - Abfahrten bundesweit: entschieden 29.09.2026 – über die Verkehrsverbünde, Start mit dem VVO (siehe „Kachel Verkehr“)
 - Domain daily.craibotics.org bei GoDaddy einrichten
-- Live-Prüfung: Warnungen (Bright Sky), Schulferien (OpenHolidays), Tanken (Tankerkönig), Autobahn (Autobahn-API) wurden nur mit Beispieldaten getestet
+- Live-Prüfung: Warnungen (Bright Sky), Schulferien (OpenHolidays), Autobahn (Autobahn-API) wurden nur mit Beispieldaten getestet (Tanken live geprüft am 30.09.2026)
 - Autobahn-Meldungen öffentlich: Nutzungserlaubnis klären (API ohne Lizenzangabe, Staumeldungen teils von INRIX) – `../recht/checkliste.md`
 - Tagesinhalte ab 27.10.2026 nachlegen

@@ -45,7 +45,7 @@ Oberfläche: Standardbelegung = nur überarbeitete Kacheln (`fertig: true` in `s
 | `finanzen` | Finanzen | 🆕 0.22.0, auf Vercel zu testen. EZB: Wechselkurse (90 Tage), Leitzinsen, Inflation; für alle gleich, Takt 1 Std. Adressen der EZB-Datenschnittstelle (Leitzinsen, Inflation) nur nach Dokumentation gebaut – bei Fehlern zuerst dort prüfen. |
 | `kurse` | Finanzen, Reiter „Märkte“ (nur privat) | 🆕 0.22.0. Yahoo (vorher `api/markets.js`), DAX, S&P 500, MSCI World, Bitcoin, Ethereum, Gold. |
 | `autobahn` | Verkehr, Ansicht „Arbeitsweg“ | 🆕 0.28.0, auf Vercel zu testen (kein Schlüssel nötig). Autobahn-API: Staus, Sperrungen, Baustellen der gewählten Autobahnen (bis 5), Takt 5 min; Start/Ziel nur im Browser, Filter auf den Weg im Browser (Korridor ≥ 10 km bzw. ¼ der Luftlinie). |
-| `tanken` | Verkehr, Ansicht „Tanken“ | 🆕 0.27.0, auf Vercel zu testen (braucht `TANKERKOENIG_API_KEY`). Alle Sorten mit einem Abruf, Umkreis 2/5/10 km, Takt 5 min. |
+| `tanken` | Verkehr, Reiter „Tanken“ | ✅ live getestet 30.09.2026 (Vercel-Variable `TANKERKOENIG_API_KEY` gesetzt). Alle Sorten mit einem Abruf, Umkreis 2/5/10 km, Takt 5 min. |
 | übrige | – | noch alte Schnittstelle (`api/*.js`): Abfahrten (in der Kachel „Verkehr“, `api/transit.js`), ausgeblendet: Sport (Fußball), Wissen (Wort, „An diesem Tag“), Tagesinhalte (Rätsel, Essen, Land, Film, Gesundheit, Tech, Sparen, Beziehung), Schlagzeilen (privat). Nach dem Umzug in `tiles.js` `fertig: true` setzen. |
 
 App-Seite „Woher kommen die Daten?“ (Fußzeile → Datenquellen) zeigt die Dienstblätter aus dem Katalog `/api/v1/dienste`.
