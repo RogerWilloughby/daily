@@ -3,11 +3,13 @@
 // und stehen nie in einer Adresse. Ersatzweise aus der Vercel-Variable CALENDAR_ICS_URL. Links nie in den Code!
 const { P } = require('./_lib/parameter');
 const ical = require('node-ical');
+const dns = require('dns').promises;
+const net = require('net');
 const { DienstFehler, iso, tagIn, text } = require('./_lib/rahmen');
 const { S } = require('./_lib/schema');
 
 const QUELLEN = [{ name: 'Deine Kalender (iCal)', lizenz: null, url: null }];
-const TAGE = 14, MAX_KALENDER = 5, MAX_TERMINE = 80;
+const TAGE = 14, MAX_KALENDER = 5, MAX_TERMINE = 80, MAX_BYTES = 2 * 1024 * 1024, MAX_WEITER = 3;
 const PRIVATER_HOST = /^(localhost|127\.|10\.|192\.168\.|169\.254\.|172\.(1[6-9]|2\d|3[01])\.|\[?::1\]?$|0\.)/i;
 // Ganztägige Termine legt node-ical in der Zeitzone des Servers an → deren lokales Datum nehmen
 const lokalTag = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -39,14 +41,53 @@ function auswerten(icsText, { von, bis, heute, zone = 'Europe/Berlin' }) {
   return out;
 }
 
+// Interne Adresse? (IPv4/IPv6: Loopback, privat, Link-Local, CGNAT, Multicast, IPv4 in IPv6)
+function internAdresse(a) {
+  const x = String(a).toLowerCase();
+  if (net.isIPv4(x)) {
+    const [p, q] = x.split('.').map(Number);
+    return p === 0 || p === 10 || p === 127 || p >= 224 || (p === 169 && q === 254) || (p === 172 && q >= 16 && q <= 31) || (p === 192 && q === 168) || (p === 100 && q >= 64 && q <= 127);
+  }
+  if (x.startsWith('::ffff:')) return internAdresse(x.slice(7));
+  return x === '::' || x === '::1' || /^(fc|fd|fe[89ab]|ff)/.test(x);
+}
+// Körper lesen, höchstens MAX_BYTES (sonst Fehler)
+async function liesText(r) {
+  if (+r.headers.get('content-length') > MAX_BYTES) throw new Error('Kalender zu groß (über 2 MB)');
+  if (!r.body || !r.body.getReader) { const t = await r.text(); if (t.length > MAX_BYTES) throw new Error('Kalender zu groß (über 2 MB)'); return t; }
+  const leser = r.body.getReader(), teile = []; let n = 0;
+  for (;;) {
+    const { done, value } = await leser.read(); if (done) break;
+    n += value.length; if (n > MAX_BYTES) { try { await leser.cancel(); } catch (e) { /* egal */ } throw new Error('Kalender zu groß (über 2 MB)'); }
+    teile.push(Buffer.from(value));
+  }
+  return Buffer.concat(teile).toString('utf8');
+}
+// Sicher abrufen (Review M2): jede Station prüfen – nur https, kein interner Name, aufgelöste Adressen nicht intern,
+// höchstens 3 Weiterleitungen (jede einzeln geprüft), höchstens 2 MB
+async function sicherHolen(url) {
+  let u = url;
+  for (let i = 0; i <= MAX_WEITER; i++) {
+    const h = new URL(u);
+    if (h.protocol !== 'https:' || PRIVATER_HOST.test(h.hostname)) throw new Error('Adresse nicht erlaubt (nur https, keine internen Adressen)');
+    let adr;
+    try { adr = await module.exports.aufloesen(h.hostname.replace(/^\[|\]$/g, '')); } catch (e) { throw new Error('Server nicht gefunden'); }
+    if (!adr.length || adr.some(a => internAdresse(a.address))) throw new Error('Adresse nicht erlaubt (zeigt auf ein internes Netz)');
+    let r;
+    try { r = await fetch(u, { redirect: 'manual', signal: AbortSignal.timeout(10000), headers: { 'user-agent': 'DAILY (privater Kalender-Abruf)' } }); }
+    catch (e) { throw new Error(e && e.name === 'TimeoutError' ? 'keine Antwort innerhalb von 10 Sekunden' : 'Server nicht erreichbar'); }
+    if (r.status >= 300 && r.status < 400 && r.headers.get('location')) { u = new URL(r.headers.get('location'), u).href; continue; }
+    return r;
+  }
+  throw new Error(`zu viele Weiterleitungen (mehr als ${MAX_WEITER})`);
+}
+
 async function lade(url, idx, rahmen) {
-  let r;
-  try { r = await fetch(url, { signal: AbortSignal.timeout(10000), headers: { 'user-agent': 'DAILY (privater Kalender-Abruf)' } }); }
-  catch (e) { throw new Error(e && e.name === 'TimeoutError' ? 'keine Antwort innerhalb von 10 Sekunden' : 'Server nicht erreichbar'); }
+  const r = await sicherHolen(url);
   if (r.status === 404) throw new Error('Link nicht gefunden (404) – ist es die „Privatadresse im iCal-Format“?');
   if (r.status === 401 || r.status === 403) throw new Error(`Zugriff verweigert (${r.status}) – Link evtl. zurückgesetzt oder nicht öffentlich`);
   if (!r.ok) throw new Error(`Fehler vom Kalender-Server (HTTP ${r.status})`);
-  return auswerten(await r.text(), rahmen).map(t => ({ ...t, kalender: idx + 1 }));
+  return auswerten(await liesText(r), rahmen).map(t => ({ ...t, kalender: idx + 1 }));
 }
 
 const SCHEMA = S.obj({
@@ -59,8 +100,9 @@ const SCHEMA = S.obj({
 module.exports = {
   id: 'termine',
   version: 1,
-  programmversion: '1.1.0',
+  programmversion: '1.2.0',
   aenderungen: [
+    { version: '1.2.0', datum: '2026-10-02', text: 'Sicher abrufen (Review M2): jede Weiterleitung einzeln geprüft (höchstens 3), aufgelöste Adresse darf nicht intern sein (auch IPv6), höchstens 2 MB je Kalender; Zugang nur mit Kennwort (Kopfzeile X-Daily-Kennwort).' },
     { version: '1.1.0', datum: '2026-10-02', text: 'Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026).' },
     { version: '1.0.0', datum: '2026-09-28', text: 'Erste Fassung als Dienst (vorher api/calendar.js): 14 Tage, Serientermine, ganztägige Termine, verständliche Fehler je Kalender; Links nur per POST' }
   ],
@@ -123,5 +165,6 @@ module.exports = {
     const bisTag = tagIn(jetzt + TAGE * 864e5, zone);
     return { daten: { verbunden: true, heute, termine: termine.filter(t => t.tag <= bisTag).slice(0, MAX_TERMINE), fehler } };
   },
-  auswerten, links
+  auswerten, links, internAdresse,
+  aufloesen: name => dns.lookup(name, { all: true })   // in Tests und im Testserver ersetzbar
 };

@@ -9,6 +9,7 @@ import { settings, saveSettings } from './core/store.js';
 import { initDialogs } from './ui/dialogs.js';
 import { initOrt } from './ui/ort.js';
 import { initKacheln } from './ui/kacheln.js';
+import { initPrivat } from './ui/privat.js';
 import { betrieb } from './core/betrieb.js';
 import './ansichten/mini-diagramm.js'; // Mini-Diagramme: Dichte, Hinweise, Zeiger (allgemein)
 import weather from './providers/weather.js';
@@ -68,6 +69,7 @@ initBoard();
 initAsk();
 initDialogs();
 initKacheln(isPrivate);
+initPrivat(isPrivate);
 initOrt(() => PROVIDERS.forEach(run));
 // Kachel-Einstellungen gespeichert → nur den Anbieter dieser Kachel neu laden
 document.addEventListener('daily:einstellungen', e => PROVIDERS.filter(p => (KACHELN[p.id] || [p.id]).includes(e.detail)).forEach(run));        // Ort geändert → alle Kacheln neu laden

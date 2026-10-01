@@ -128,7 +128,7 @@ export function kachel(fEnv, hEnv, jetzt = Date.now(), zone = 'Europe/Berlin', n
     reiter.push({ id: 'termine', name: 'Termine', icon: icon(SYM.termine), kopf: `<b>Termine</b> <small>${t && t.verbunden ? `${eigene.length} in 14 Tagen` : ''}</small>`,
       liste: t && t.verbunden ? [...eigene.map(z => ({ d: kurzTag(z, false), t: z.ganztag ? z.text : `${uhr(z.beginn, zone)} ${z.text}`, tip: tipp(z, heute), gruppe: z.datum })),
         ...t.fehler.map(e => ({ d: `Kalender ${e.kalender}`, t: e.meldung, tip: `Kalender ${e.kalender}: ${e.meldung}`, gruppe: 'fehler' }))] : [],
-      html: !t ? '<p class="kl-leer">Deine Kalender sind gerade nicht erreichbar.</p>'
+      html: !t ? (tEnv.kennwort ? '<p class="kl-leer">Kennwort für den privaten Betrieb fehlt oder ist falsch – Einstellungen → „Privater Betrieb“.</p>' : '<p class="kl-leer">Deine Kalender sind gerade nicht erreichbar.</p>')
         : !t.verbunden ? '<p class="kl-leer">Noch kein Kalender verbunden – im Zahnrad den iCal-Link eintragen (Google: Kalender-Einstellungen → dein Kalender → „Privatadresse im iCal-Format“).</p>'
           : '<p class="kl-leer">Keine Termine in den nächsten 14 Tagen.</p>' });
   }
@@ -173,7 +173,7 @@ export function namenAntwort(nEnv, jetzt = Date.now(), zone = 'Europe/Berlin') {
 // „Was steht heute an?“ / „Was habe ich morgen?“ aus dem Dienst „termine“
 export function termineAntwort(q, tEnv, jetzt = Date.now(), zone = 'Europe/Berlin') {
   if (!tEnv) return null;
-  if (!tEnv.daten) return 'Deine Kalender sind gerade nicht erreichbar.';
+  if (!tEnv.daten) return tEnv.kennwort ? 'Für deine Termine fehlt das Kennwort des privaten Betriebs (Einstellungen → „Privater Betrieb“).' : 'Deine Kalender sind gerade nicht erreichbar.';
   if (!tEnv.daten.verbunden) return 'Es ist noch kein Kalender verbunden. Trag unten unter „Einstellungen“ deinen iCal-Link ein.';
   const heute = tagImOrt(new Date(jetzt).toISOString(), zone), morgen = tagImOrt(new Date(jetzt + 864e5).toISOString(), zone);
   const l = termine(null, null, heute, zone, tEnv), fmt = x => (x.ganztag ? '' : uhr(x.beginn, zone) + ' ') + x.text;

@@ -39,7 +39,7 @@ export async function load() {
   }
   // Termine (nur privat) parallel dazu; bei Störung zeigt der Reiter „nicht erreichbar“
   const termineHolen = betrieb.privat
-    ? privatDienst('termine', { urls: settings.icsUrls || [], zeitzone: zone() }).catch(() => ({ daten: null }))
+    ? privatDienst('termine', { urls: settings.icsUrls || [], zeitzone: zone() }).catch(e => ({ daten: null, kennwort: e.code === 'nicht_berechtigt' }))
     : Promise.resolve(null);
   const [f, h, n] = await Promise.all([fP ? dienst('feiertage', fP).catch(e => e) : null, dienst('himmel', p).catch(e => e), dienst('namenstage').catch(e => e)]);
   fe = oder(f); hi = oder(h); na = oder(n);

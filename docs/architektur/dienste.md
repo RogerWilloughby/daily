@@ -58,6 +58,7 @@ Jede Antwort – auch jeder Fehler – hat diese Form:
 | `dienst_unbekannt` | 404 | Dienst gibt es nicht |
 | `nur_privat` | 404 | Dienst nur im privaten Betrieb |
 | `ort_nicht_gefunden` | 404 | Ortsname nicht auflösbar |
+| `nicht_berechtigt` | 401 | privater Dienst ohne oder mit falschem Kennwort |
 | `nicht_unterstuetzt` | 422 | Dienst deckt das Land des Orts nicht ab (siehe `laender` im Katalog) |
 | `schluessel_fehlt` | 503 | Betreiber-Schlüssel (z. B. Tankerkönig) nicht eingerichtet |
 | `quelle_fehler` | 502 | externe Quelle nicht erreichbar oder fehlerhaft |
@@ -107,7 +108,7 @@ Jeder Dienst gibt im Katalog an, wo er funktioniert: `laender: "alle"` oder eine
 | Klasse | Bedeutung |
 |---|---|
 | `oeffentlich` | ohne Nutzerdaten, CDN-Cache nach TTL, CORS offen (andere Oberflächen dürfen lesen) |
-| `privat` | nur mit `DAILY_PRIVATE=1`, nie gecacht, kein CORS (z. B. Kalender, Schlagzeilen) |
+| `privat` | nur mit `DAILY_PRIVATE=1` **und Kennwort** (Kopfzeile `X-Daily-Kennwort` = Vercel-Variable `DAILY_PRIVAT_KENNWORT`, sonst `nicht_berechtigt` 401), nie gecacht, kein CORS (z. B. Kalender, Schlagzeilen) |
 | `schluessel` (geplant) | braucht einen Betreiber-Schlüssel, sonst `schluessel_fehlt` |
 
 ## Versionen

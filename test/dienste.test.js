@@ -14,13 +14,18 @@ const BERLIN = { lat: '52.52', lon: '13.41' };   // Ortsdienste bekommen nur Koo
 // Name und Land setzt die Oberfläche ein (client.js → mitOrt), wie in der App
 const mitName = async (env, name = 'Berlin') => (await esm('src/js/dienste/client.js')).mitOrt(env, { name, land: 'DE' });
 const echtesFetch = global.fetch;
-test.before(() => { global.fetch = require('../tools/fetch-stub'); });
+test.before(() => {
+  global.fetch = require('../tools/fetch-stub');
+  process.env.DAILY_PRIVAT_KENNWORT = 'geheim';                                   // Kennwort des privaten Betriebs in den Tests
+  require('../services/termine').aufloesen = async () => [{ address: '93.184.216.34', family: 4 }];   // calendar.test: öffentliche Adresse
+});
+const KENNWORT = { 'x-daily-kennwort': 'geheim' };
 test.after(() => { global.fetch = echtesFetch; });
 
 // Router wie bei Vercel aufrufen
-async function rufe(dienst, query = {}, method = 'GET') {
+async function rufe(dienst, query = {}, method = 'GET', kopf = {}) {
   const r = { headers: {}, setHeader(k, v) { r.headers[k.toLowerCase()] = v; }, status(c) { r.code = c; return r; }, json(o) { r.body = o; } };
-  await router({ method, query: { dienst, ...query } }, r);
+  await router({ method, query: { dienst, ...query }, headers: kopf }, r);
   return r;
 }
 const gueltig = (env, datenSchema) => {
@@ -720,18 +725,40 @@ test('Namenstage: feste Liste plausibel, Dienst, Kachel und Antwort', async () =
 
 
 test('Termine (privat): nur privat, Links nur per POST, Serien, ganztägig, abgesagt, Fehler je Kalender', async () => {
-  const post = async (koerper, privat = true) => {
+  const post = async (koerper, privat = true, kopf = { 'content-type': 'application/json', ...KENNWORT }) => {
     if (privat) process.env.DAILY_PRIVATE = '1'; else delete process.env.DAILY_PRIVATE;
     const r = { headers: {}, setHeader(k, v) { r.headers[k.toLowerCase()] = v; }, status(c) { r.code = c; return r; }, json(o) { r.body = o; } };
-    await router({ method: 'POST', query: { dienst: 'termine' }, body: koerper }, r);
+    await router({ method: 'POST', query: { dienst: 'termine' }, body: koerper, headers: kopf }, r);
     delete process.env.DAILY_PRIVATE;
     return r;
   };
   // öffentlich gesperrt; Links nie per GET
   assert.equal((await post({ urls: ['https://calendar.test/a.ics'] }, false)).body.fehler.code, 'nur_privat');
   process.env.DAILY_PRIVATE = '1';
-  assert.equal((await rufe('termine', { urls: 'https://calendar.test/a.ics' })).body.fehler.code, 'eingabe_ungueltig');
+  assert.equal((await rufe('termine', { urls: 'https://calendar.test/a.ics' }, 'GET', KENNWORT)).body.fehler.code, 'eingabe_ungueltig');
   delete process.env.DAILY_PRIVATE;
+  // Kennwort (Review M2): ohne oder falsch → 401; Körper nur als JSON
+  for (const kopf of [{ 'content-type': 'application/json' }, { 'content-type': 'application/json', 'x-daily-kennwort': 'falsch' }]) {
+    const r = await post({}, true, kopf);
+    assert.deepEqual([r.code, r.body.fehler.code], [401, 'nicht_berechtigt']);
+  }
+  assert.deepEqual((await post({}, true, { 'content-type': 'text/plain', ...KENNWORT })).code, 400);
+  const ohneVariable = process.env.DAILY_PRIVAT_KENNWORT; delete process.env.DAILY_PRIVAT_KENNWORT;   // Variable fehlt → privat bleibt zu
+  assert.equal((await post({})).code, 401);
+  process.env.DAILY_PRIVAT_KENNWORT = ohneVariable;
+  // sicher abrufen: interne Ziele (auch nach Auflösung) und zu viele Weiterleitungen werden abgelehnt
+  const tm = dienste.byId.termine;
+  assert.deepEqual(['10.1.2.3', '127.0.0.1', '169.254.169.254', '100.64.0.1', '::1', 'fd00::1', 'fe80::1', '::ffff:192.168.1.1', '93.184.216.34', '2a00:1450::1'].map(tm.internAdresse),
+    [true, true, true, true, true, true, true, true, false, false]);
+  const aufl = tm.aufloesen;
+  tm.aufloesen = async () => [{ address: '10.0.0.5', family: 4 }];
+  const intern = await post({ urls: ['https://calendar.test/a.ics'] });
+  assert.match(intern.body.daten.fehler[0].meldung, /internes Netz/);
+  tm.aufloesen = aufl;
+  const echt = global.fetch; let n = 0;
+  global.fetch = async (url, o) => (String(url).includes('weiter.test') ? (n++, new Response('', { status: 302, headers: { location: 'https://weiter.test/' + n } })) : echt(url, o));
+  try { assert.match((await post({ urls: ['https://weiter.test/0'] })).body.daten.fehler[0].meldung, /zu viele Weiterleitungen/); assert.equal(n, 4); }
+  finally { global.fetch = echt; }
   // ohne Links: nicht verbunden
   const leer = await post({});
   assert.equal(leer.code, 200);
@@ -916,9 +943,10 @@ test('Finanzen: EZB-Kurse, Leitzinsen, Inflation; Kurse (Yahoo) nur privat; Kach
   assert.match(r.headers['cache-control'], /s-maxage=\d+/);
   // Kurse: öffentlich gesperrt, privat da
   delete process.env.DAILY_PRIVATE;
-  assert.equal((await rufe('kurse')).body.fehler.code, 'nur_privat');
+  assert.equal((await rufe('kurse', {}, 'GET', KENNWORT)).body.fehler.code, 'nur_privat');
   process.env.DAILY_PRIVATE = '1';
-  const k = await rufe('kurse');
+  assert.equal((await rufe('kurse')).body.fehler.code, 'nicht_berechtigt');           // privat, aber ohne Kennwort
+  const k = await rufe('kurse', {}, 'GET', KENNWORT);
   delete process.env.DAILY_PRIVATE;
   gueltig(k.body, require('../services/kurse').schema);
   assert.deepEqual(k.body.daten.werte.map(x => x.id), ['dax', 'sp500', 'world', 'btc', 'eth', 'gold']);
@@ -1163,6 +1191,16 @@ test('Meine Seiten: feste Seiten-Auswahl, Mini-Reiter mit Symbolraster, Einstell
   assert.deepEqual([ok.code, ok.h['content-type'], ok.b.slice(1, 4).toString()], [200, 'image/png', 'PNG']);
   assert.match(ok.h['cache-control'], /s-maxage=2592000/);
   assert.equal((await ruf({ s: 'https://evil.example' })).code, 400);                        // keine beliebigen Adressen
+  // Sicherheit (Review M1): eigene strenge Sicherheitsregel; Typ am Inhalt erkannt – SVG/HTML nie als Bild
+  assert.equal(ok.h['content-security-policy'], "default-src 'none'; sandbox");
+  assert.deepEqual([Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>'), Buffer.from('<!doctype html><html>…</html>'),
+    Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0, 0, 0, 0, 0, 0, 0, 0]), Buffer.from('GIF89a......'), Buffer.from([0, 0, 1, 0, 1, 0, 16, 16, 0, 0, 0, 0]), Buffer.concat([Buffer.from('RIFF'), Buffer.alloc(4), Buffer.from('WEBPVP8 ')])].map(icon.bildTyp),
+    [null, null, 'image/jpeg', 'image/gif', 'image/x-icon', 'image/webp']);
+  const echt = global.fetch;
+  global.fetch = async (url, o) => (/apple-touch-icon|favicon/.test(String(url)) ? new Response('<svg xmlns="http://www.w3.org/2000/svg"><script>x</script></svg>', { status: 200, headers: { 'content-type': 'image/svg+xml' } })
+    : /zeit\.de\/?$/.test(String(url)) ? new Response('<html><head></head></html>', { status: 200, headers: { 'content-type': 'text/html' } }) : echt(url, o));
+  try { const svg = await ruf({ s: 'zeit' }); assert.equal(svg.code, 404); }                  // nur SVG → kein Symbol (Buchstabe)
+  finally { global.fetch = echt; }
   assert.deepEqual(icon.symboleAusHtml('<link rel="icon" href="/f.ico"><link rel="apple-touch-icon" sizes="152x152" href="/a152.png"><link rel="apple-touch-icon" href="https://cdn.x.de/a.png">', 'https://www.x.de/').map(x => x.url),
     ['https://cdn.x.de/a.png', 'https://www.x.de/a152.png', 'https://www.x.de/f.ico']);
 });
@@ -1316,8 +1354,9 @@ test('Eingaben: die Adresse ist der Cache-Schlüssel – nur erlaubte Angaben in
   // privater Dienst per POST: Körper (Liste) bleibt erlaubt; GET mit Links weiter abgelehnt
   process.env.DAILY_PRIVATE = '1';
   try {
-    assert.deepEqual(await fall('termine', { urls: 'https://calendar.test/a.ics' }), [400, 'eingabe_ungueltig']);
-    assert.deepEqual(await fall('termine', { zeitzone: 'Europe/Berlin', x: '1' }), [400, 'eingabe_ungueltig']);
+    const fallK = async (id, q) => { const r = await rufe(id, q, 'GET', KENNWORT); return [r.code, r.body.fehler && r.body.fehler.code]; };
+    assert.deepEqual(await fallK('termine', { urls: 'https://calendar.test/a.ics' }), [400, 'eingabe_ungueltig']);
+    assert.deepEqual(await fallK('termine', { zeitzone: 'Europe/Berlin', x: '1' }), [400, 'eingabe_ungueltig']);
   } finally { delete process.env.DAILY_PRIVATE; }
 });
 

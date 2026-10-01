@@ -43,7 +43,7 @@ test('Abfahrten: VVO-Datum, Haltestelle und Sortierung', () => {
 });
 
 test('Tagesinhalte: 31 Tage ab 26.09.2026, alle Felder gefüllt', () => {
-  const file = JSON.parse(fs.readFileSync(path.join(__dirname, '../src/content/daily.json'), 'utf8'));
+  const file = JSON.parse(fs.readFileSync(path.join(__dirname, '../services/daten/daily.json'), 'utf8'));
   const tage = file.tage;
   assert.ok(tage.length >= 31, 'weniger als 31 Tage');
   const first = Date.parse(tage[0].datum);

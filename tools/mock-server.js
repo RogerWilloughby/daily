@@ -7,13 +7,21 @@ const path = require('path');
 // Testbetrieb: Tankerkönig-Schlüssel vortäuschen; privat nur mit MOCK_PRIVATE=1
 process.env.TANKERKOENIG_API_KEY = process.env.TANKERKOENIG_API_KEY || 'test';
 if (process.env.MOCK_PRIVATE === '1') process.env.DAILY_PRIVATE = '1';
+// Kennwort des privaten Betriebs im Testserver: „test“ (im Browser unter Einstellungen → Privater Betrieb eintragen)
+process.env.DAILY_PRIVAT_KENNWORT = process.env.DAILY_PRIVAT_KENNWORT || 'test';
 
 const ROOT = path.join(__dirname, '..', 'public');
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.woff2': 'font/woff2', '.png': 'image/png', '.webmanifest': 'application/manifest+json' };
 
+// Kopfzeilen aus vercel.json wie bei Vercel setzen (z. B. Content-Security-Policy) – so zeigt die Messung im Browser, ob die Regel etwas blockiert
+const KOPF = (require('../vercel.json').headers || []).map(h => ({ re: new RegExp('^' + h.source.split('(.*)').map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('.*') + '$'), kopf: h.headers }));
+const setzeKopf = (pfad, res) => KOPF.forEach(k => { if (k.re.test(pfad)) k.kopf.forEach(x => res.setHeader(x.key, x.value)); });
+
 // Externe Aufrufe der Funktionen abfangen (dieselben Beispieldaten wie in den Tests)
 const realFetch = global.fetch;
 global.fetch = require('./fetch-stub');
+// Kalender-Testadressen (calendar.test) gibt es im DNS nicht: Auflösung vortäuschen (öffentliche Adresse)
+require('../services/termine').aufloesen = async () => [{ address: '93.184.216.34', family: 4 }];
 
 function shim(req, res, body) {
   const u = new URL(req.url, 'http://x');
@@ -25,6 +33,7 @@ function shim(req, res, body) {
 
 http.createServer((req, res) => {
   const u = new URL(req.url, 'http://x');
+  setzeKopf(u.pathname, res);
   if (u.pathname.startsWith('/api/')) {
     let body = '';
     req.on('data', c => { body += c; });

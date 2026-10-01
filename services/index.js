@@ -23,10 +23,11 @@ const DIENSTE = [
 ];
 const byId = Object.fromEntries(DIENSTE.map(d => [d.id, d]));
 
-function finde(id) {
+function finde(id, ctx = {}) {
   const d = byId[id];
   if (!d) throw new DienstFehler('dienst_unbekannt', `Dienst „${id}“ gibt es nicht`);
   if (d.klasse === 'privat' && !isPrivate()) throw new DienstFehler('nur_privat', `Dienst „${id}“ ist nur im privaten Betrieb verfügbar`);
+  if (d.klasse === 'privat' && !ctx.berechtigt) throw new DienstFehler('nicht_berechtigt', 'Kennwort für den privaten Betrieb fehlt oder ist falsch (Einstellungen → Privater Betrieb)');
   return d;
 }
 
@@ -40,7 +41,7 @@ const FEHLER = new Map(), FEHLER_MS = 60e3;
 
 // Dienst ausführen und in den Rahmen daily/1 packen
 async function ausfuehren(id, eingabe = {}, ctx = {}) {
-  const d = finde(id);
+  const d = finde(id, ctx);
   eingabe = pruefeEingaben(d, eingabe);   // nur erlaubte Angaben in einer Schreibweise (sonst 400) – daraus auch der Schlüssel
   const privat = d.klasse === 'privat', k = schluessel(id, eingabe), jetzt = ctx.jetzt || Date.now();
   if (!privat && !ctx.jetzt) {

@@ -48,7 +48,7 @@ function parse(xml, source) {
 }
 
 module.exports = async (req, res) => {
-  if (privateOnly(res)) return; // Schlagzeilen nur im privaten Betrieb (Strategie: keine Nutzerdaten, keine Nachrichten)
+  if (privateOnly(req, res)) return; // Schlagzeilen nur im privaten Betrieb (Strategie: keine Nutzerdaten, keine Nachrichten)
   const results = await Promise.all(FEEDS.map(async f => {
     try {
       const r = await fetch(f.url, {

@@ -1,11 +1,11 @@
 // Dienst „tagesinhalt“ (öffentlich, ortlos): die Tagesinhalte eines Tags – Rätsel, Witz, Wort, Sprichwort, Rezept, Land, Film,
-// Gesundheit, Tech, Beziehung, Spartipp. Quelle: feste Datei src/content/daily.json (von DAILY vorbereitet, Abschnitt 2 der Entscheidungen).
+// Gesundheit, Tech, Beziehung, Spartipp. Quelle: feste Datei services/daten/daily.json (von DAILY vorbereitet, Abschnitt 2 der Entscheidungen).
 // Auch vergangene Tage (Verlauf, Favoriten) – nie in die Zukunft. Nach dem letzten Tag des Vorrats wiederholt er sich im Kreis.
 const { P } = require('./_lib/parameter');
 const { DienstFehler, tagIn } = require('./_lib/rahmen');
 const { S } = require('./_lib/schema');
 
-const VORRAT = require('../src/content/daily.json');
+const VORRAT = require('./daten/daily.json');   // seit App 0.42.0 hier statt in src/content/ – nicht mehr öffentlich abrufbar (Review M3)
 const ZONE = 'Europe/Berlin';
 const QUELLEN = [{ name: 'DAILY (eigene Tagesinhalte, mit KI vorbereitet)', lizenz: null, url: null }];
 const ARTEN = ['raetsel', 'witz', 'wort', 'sprichwort', 'rezept', 'land', 'film', 'gesundheit', 'tech', 'beziehung', 'spartipp'];
@@ -59,7 +59,7 @@ module.exports = {
   blatt: {
     zweck: 'Liefert die Tagesinhalte für die Themen-Kacheln (Unterhaltung, Wissen, Alltag) und den Spartipp der Finanzen – mit Verlauf: Pfeile blättern zu vergangenen Tagen, Favoriten verweisen auf einen Tag.',
     herkunft: [
-      'Eigene Inhalte von DAILY, mit KI vorbereitet und als feste Datei im Repo (src/content/daily.json, erzeugt mit tools/content_2026_10.py). Keine Nachrichten, keine Inhalte Dritter.',
+      'Eigene Inhalte von DAILY, mit KI vorbereitet und als feste Datei im Repo (services/daten/daily.json – nur der Dienst liest sie, sie wird nicht öffentlich ausgeliefert; erzeugt mit tools/content_2026_10.py). Keine Nachrichten, keine Inhalte Dritter.',
       'Rezepte, Tipps und Fakten sind allgemeine Anregungen – keine medizinische, finanzielle oder rechtliche Beratung.'
     ],
     verarbeitung: [

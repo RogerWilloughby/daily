@@ -1,4 +1,5 @@
 // Gemeinsame HTTP-Helfer für alle Dienste (services/) und die älteren Einzelfunktionen (api/).
+const crypto = require('crypto');
 const UA = 'DAILY/0.2 (privates Dashboard; https://github.com/RogerWilloughby/daily)';
 
 async function request(url, opts = {}) {
@@ -40,13 +41,21 @@ const norm = s => String(s || '').toLowerCase()
 
 // Privater Betrieb (Kalender, Schlagzeilen): nur wenn in Vercel DAILY_PRIVATE=1 gesetzt ist
 const isPrivate = () => process.env.DAILY_PRIVATE === '1';
-function privateOnly(res) {
-  if (isPrivate()) return false;
-  send(res, { error: 'Nur im privaten Betrieb verfügbar.' }, 0, 404);
-  return true;
+// Kennwort für den privaten Betrieb (Review M2, Entscheidung 02.10.2026): Vercel-Variable DAILY_PRIVAT_KENNWORT; der Browser schickt es
+// in der Kopfzeile X-Daily-Kennwort (nie in der Adresse). Fehlt die Variable, bleibt der private Teil zu – unabhängig vom Vercel-Zugangsschutz.
+function kennwortOk(kopf = {}) {
+  const soll = process.env.DAILY_PRIVAT_KENNWORT || '', ist = String((kopf && kopf['x-daily-kennwort']) || '');
+  if (!soll || !ist) return false;
+  const h = s => crypto.createHash('sha256').update(s, 'utf8').digest();
+  return crypto.timingSafeEqual(h(soll), h(ist));   // zeitkonstant
+}
+function privateOnly(req, res) {
+  if (!isPrivate()) { send(res, { error: 'Nur im privaten Betrieb verfügbar.' }, 0, 404); return true; }
+  if (!kennwortOk(req.headers)) { send(res, { error: 'Kennwort für den privaten Betrieb fehlt oder ist falsch (Einstellungen → Privater Betrieb).', kennwort: true }, 0, 401); return true; }
+  return false;
 }
 
 // Koordinaten auf 2 Nachkommastellen (≈ 1 km) runden: schützt den genauen Standort und teilt den Cache
 const coord = (v, max) => { const n = Number(v); return Number.isFinite(n) && Math.abs(n) <= max ? Math.round(n * 100) / 100 : null; };
 
-module.exports = { STALE_IF_ERROR, getText, getJson, postJson, send, norm, isPrivate, privateOnly, coord };
+module.exports = { STALE_IF_ERROR, getText, getJson, postJson, send, norm, isPrivate, kennwortOk, privateOnly, coord };

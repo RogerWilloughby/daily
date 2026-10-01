@@ -1,4 +1,4 @@
-# Erzeugt src/content/daily.json: Tagesinhalte für 31 Tage (26.09.–26.10.2026).
+# Erzeugt services/daten/daily.json (seit App 0.42.0; vorher src/content/ – war öffentlich abrufbar): Tagesinhalte für 31 Tage (26.09.–26.10.2026).
 # Alle Texte sind eigene Service-Inhalte (keine Nachrichten, keine Anlageempfehlungen).
 import json, datetime, pathlib
 
@@ -386,7 +386,7 @@ for i in range(31):
         "film": {"titel": fi[0], "jahr": fi[1], "genre": fi[2], "text": fi[3]},
     })
 
-out = pathlib.Path(__file__).resolve().parent.parent / "src" / "content" / "daily.json"
+out = pathlib.Path(__file__).resolve().parent.parent / "services" / "daten" / "daily.json"
 out.parent.mkdir(parents=True, exist_ok=True)
 out.write_text(json.dumps({"version": 1, "von": days[0]["datum"], "bis": days[-1]["datum"], "tage": days}, ensure_ascii=False, indent=1), encoding="utf-8")
 print("geschrieben:", out, len(days), "Tage", days[0]["datum"], "bis", days[-1]["datum"])

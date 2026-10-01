@@ -12,7 +12,7 @@
 | [`feiertage`](feiertage.md) | Feiertage und Ferien | 2.1.0 | DAILY (Berechnung: Feiertage, Brückentage, Zeitumstellung, Aktionstage), OpenHolidays API (Schulferien) | DE | B |
 | [`himmel`](himmel.md) | Himmel | 2.0.0 | Astronomy Engine (Berechnung), Sternschnuppen: Termine der International Meteor Organization (Mittelwerte) | weltweit | A |
 | [`namenstage`](namenstage.md) | Namenstage | 1.2.0 | DAILY-Auswahl nach dem kirchlichen Kalender (Gedenktage der Heiligen) | weltweit | A |
-| [`termine`](termine.md) | Termine | 1.1.0 | Deine Kalender (iCal) | weltweit | D |
+| [`termine`](termine.md) | Termine | 1.2.0 | Deine Kalender (iCal) | weltweit | D |
 | [`finanzen`](finanzen.md) | Finanzen | 1.1.0 | Europäische Zentralbank (EZB) – Referenzkurse, Leitzinsen, HVPI | weltweit | B |
 | [`kurse`](kurse.md) | Kurse (privat) | 1.1.0 | Yahoo Finance (nur private Nutzung) | weltweit | B |
 | [`tanken`](tanken.md) | Tanken | 2.1.0 | Tankerkönig (Daten der Markttransparenzstelle für Kraftstoffe) | DE | C |

@@ -1,3 +1,7 @@
+// Kennwort für den privaten Betrieb (Review M2): steht nur in den Einstellungen dieses Browsers; geht nur an private Dienste,
+// in der Kopfzeile X-Daily-Kennwort – nie in einer Adresse.
+import { settings } from '../core/store.js';
+export const kennwortKopf = () => (settings.kennwort ? { 'x-daily-kennwort': settings.kennwort } : {});
 // Zugriff auf die DAILY-Dienste (GET /api/v1/<id>) im Format daily/1.
 // Oberflächen holen hierüber Daten und geben sie an einen Adapter (src/js/adapter/) weiter.
 const speicher = new Map(); // Anfrage → Antwort, solange sie gültig ist
@@ -50,10 +54,10 @@ export const aufMessung = fn => hoerer.push(fn);
 const melde = (name, ms, quelle) => hoerer.forEach(fn => { try { fn(name, Math.round(ms), quelle); } catch (e) { /* egal */ } });
 const uhr = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
 
-async function hole(url) {
+async function hole(url, kopf = {}) {
   let res, r = null;
   try {
-    res = await fetch(url, { signal: AbortSignal.timeout ? AbortSignal.timeout(12000) : undefined });
+    res = await fetch(url, { headers: kopf, signal: AbortSignal.timeout ? AbortSignal.timeout(12000) : undefined });
     r = await res.json().catch(() => null);
   } catch (e) {
     throw new DienstFehler({ code: 'nicht_erreichbar', meldung: e.message });
@@ -63,13 +67,14 @@ async function hole(url) {
   return r;
 }
 
-export async function dienst(id, params = {}, { frisch = false } = {}) {
+// privat: true → mit Kennwort (private Dienste wie „kurse“)
+export async function dienst(id, params = {}, { frisch = false, privat = false } = {}) {
   const url = urlVon(id, params);
   const alt = speicher.get(url);
   if (!frisch && alt && Date.parse(alt.gueltigBis) > Date.now()) { melde(id, 0, 'speicher'); return alt; }
   const t0 = uhr();
   try {
-    const r = await hole(url);
+    const r = await hole(url, privat ? kennwortKopf() : {});
     speicher.set(url, r); merke(url, r); melde(id, uhr() - t0, 'netz');
     return r;
   } catch (e) {
@@ -84,7 +89,7 @@ export async function privatDienst(id, koerper = {}) {
   const t0 = uhr();
   let res, r = null;
   try {
-    res = await fetch(`/api/v1/${id}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(koerper),
+    res = await fetch(`/api/v1/${id}`, { method: 'POST', headers: { 'content-type': 'application/json', ...kennwortKopf() }, body: JSON.stringify(koerper),
       cache: 'no-store', signal: AbortSignal.timeout ? AbortSignal.timeout(20000) : undefined });
     r = await res.json().catch(() => null);
   } catch (e) { throw new DienstFehler({ code: 'nicht_erreichbar', meldung: e.message }); }

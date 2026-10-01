@@ -2,11 +2,17 @@
 import { set } from '../core/board.js';
 import { addAnswer } from '../core/ask.js';
 import { hm, getJson } from '../core/util.js';
+import { kennwortKopf } from '../dienste/client.js';
 
 let items = [];
 
 export async function load() {
-  const j = await getJson('/api/headlines');
+  let j;
+  try { j = await getJson('/api/headlines', { headers: kennwortKopf() }); }   // nur privat, mit Kennwort (Review M2)
+  catch (e) {
+    if (/401/.test(e.message)) set('news', { state: 'error', m: '', ms: '–', x: 'Kennwort für den privaten Betrieb fehlt oder ist falsch – Einstellungen → „Privater Betrieb“.', rows: [] });
+    throw e;
+  }
   items = j.items || [];
   const since = Date.now() - 12 * 3600e3;
   const fresh = items.filter(i => i.date && Date.parse(i.date) > since).length;

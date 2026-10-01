@@ -4,23 +4,50 @@
 //   1. /apple-touch-icon.png  2. im HTML der Startseite angegebenes Symbol (apple-touch-icon bzw. icon, das größte)  3. /favicon.ico
 // Die Seite sieht nur DAILY, nicht die IP der Nutzer. CDN und Browser halten das Symbol 30 Tage, „kein Symbol“ 1 Tag.
 // Kein Dienst im Format daily/1 (die Antwort ist ein Bild).
+// Sicherheit (Review M1, App 0.42.0): nur echte Rasterbilder – erkannt am Dateiinhalt, nicht an der Angabe der fremden Seite
+// (kein SVG: das kann Programmcode enthalten); Größe schon beim Lesen begrenzt; Antwort mit eigener strenger Sicherheitsregel.
 const KATALOG = require('../src/content/seiten.json');
 const SEITEN = Object.fromEntries(KATALOG.kategorien.flatMap(k => k.seiten).map(s => [s.id, s]));
 const UA = 'Mozilla/5.0 (compatible; DAILY-Seitensymbol; https://github.com/RogerWilloughby/daily)';
 const HALTEN = 30 * 86400, NICHTS = 86400, MAX_BYTES = 300 * 1024, TIMEOUT = 5000;
 
+// Körper lesen, höchstens „max“ Bytes; zu groß → null (Bild) bzw. abgeschnitten (HTML: nur der Kopf wird gebraucht)
+async function lies(r, max, abschneiden) {
+  const laenge = +r.headers.get('content-length');
+  if (!abschneiden && laenge > max) return null;
+  if (!r.body || !r.body.getReader) { const b = Buffer.from(await r.arrayBuffer()); return b.length > max ? (abschneiden ? b.subarray(0, max) : null) : b; }
+  const leser = r.body.getReader(), teile = [];
+  let n = 0;
+  for (;;) {
+    const { done, value } = await leser.read();
+    if (done) break;
+    teile.push(Buffer.from(value)); n += value.length;
+    if (n > max) { try { await leser.cancel(); } catch (e) { /* egal */ } if (!abschneiden) return null; break; }
+  }
+  const b = Buffer.concat(teile);
+  return abschneiden ? b.subarray(0, max) : b;
+}
 async function hole(url, art) {
   try {
     const r = await fetch(url, { headers: { 'user-agent': UA, accept: art === 'html' ? 'text/html' : 'image/*' }, redirect: 'follow', signal: AbortSignal.timeout(TIMEOUT) });
-    if (!r.ok) return null;
-    const typ = (r.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
-    const buf = Buffer.from(await r.arrayBuffer());
-    if (!buf.length) return null;
-    if (art === 'html') return { typ, buf: buf.subarray(0, 2 * MAX_BYTES), url: r.url || url };   // nur der Anfang (Kopf) wird gebraucht
-    return buf.length > MAX_BYTES ? null : { typ, buf, url: r.url || url };
+    if (!r.ok || !/^https:/.test(r.url || url)) return null;
+    const buf = art === 'html' ? await lies(r, 2 * MAX_BYTES, true) : await lies(r, MAX_BYTES, false);
+    if (!buf || !buf.length) return null;
+    return { buf, url: r.url || url };
   } catch (e) { return null; }
 }
-const istBild = x => !!x && (/^image\//.test(x.typ) || (x.typ === 'application/octet-stream' && /\.(ico|png)$/i.test(x.url)));
+// Bildtyp am Inhalt erkennen (erste Bytes) – nur Rasterbilder; alles andere (SVG, HTML …) → null
+function bildTyp(buf) {
+  if (!buf || buf.length < 12) return null;
+  const h = (...b) => b.every((x, i) => buf[i] === x);
+  if (h(0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a)) return 'image/png';
+  if (h(0xff, 0xd8, 0xff)) return 'image/jpeg';
+  if (h(0x47, 0x49, 0x46, 0x38)) return 'image/gif';
+  if (h(0x52, 0x49, 0x46, 0x46) && buf.toString('latin1', 8, 12) === 'WEBP') return 'image/webp';
+  if (h(0x00, 0x00, 0x01, 0x00)) return 'image/x-icon';
+  return null;
+}
+const istBild = x => !!(x && bildTyp(x.buf));
 
 // Symbol-Angaben aus dem HTML: <link rel="apple-touch-icon" href="…" sizes="180x180"> u. Ä. – das größte zuerst (rein, testbar)
 function symboleAusHtml(html, basis) {
@@ -49,6 +76,7 @@ module.exports = async function handler(req, res) {
   const id = String((req.query || {}).s || ''), seite = SEITEN[id];
   const ende = (status, typ, inhalt, sek) => {
     res.statusCode = status; res.setHeader('content-type', typ);
+    res.setHeader('Content-Security-Policy', "default-src 'none'; sandbox"); res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Cache-Control', sek > 0 ? `public, max-age=${sek}, s-maxage=${sek}` : 'no-store');
     res.end(inhalt);
   };
@@ -56,7 +84,8 @@ module.exports = async function handler(req, res) {
   if (!seite) return ende(400, 'text/plain; charset=utf-8', 'Unbekannte Seite', 0);
   const b = await symbol(seite);
   if (!b) return ende(404, 'text/plain; charset=utf-8', 'Kein Symbol', NICHTS);
-  ende(200, /^image\//.test(b.typ) ? b.typ : (/\.png$/i.test(b.url) ? 'image/png' : 'image/x-icon'), b.buf, HALTEN);
+  ende(200, bildTyp(b.buf), b.buf, HALTEN);
 };
 module.exports.SEITEN = SEITEN;
 module.exports.symboleAusHtml = symboleAusHtml;
+module.exports.bildTyp = bildTyp;

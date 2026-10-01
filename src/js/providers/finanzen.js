@@ -32,7 +32,7 @@ export async function load() {
   const tippTag = !tippEnv || tippEnv.daten.datum === tippEnv.daten.heute ? berlinDay() : tippEnv.daten.datum;
   const [f, k] = await Promise.all([
     dienst('finanzen').catch(e => e),
-    betrieb.privat ? dienst('kurse').catch(e => e) : Promise.resolve(null),
+    betrieb.privat ? dienst('kurse', {}, { privat: true }).catch(e => e) : Promise.resolve(null),
     holeTipp(tippTag)
   ]);
   if (f instanceof Error) { if (!fe && !alt) throw f; }

@@ -17,7 +17,7 @@ Rätsel, Witz, Wort und Sprichwort des Tages, Rezept, Land, Film, Gesundheits-, 
 Liefert die Tagesinhalte für die Themen-Kacheln (Unterhaltung, Wissen, Alltag) und den Spartipp der Finanzen – mit Verlauf: Pfeile blättern zu vergangenen Tagen, Favoriten verweisen auf einen Tag.
 
 ## Herkunft der Daten
-- Eigene Inhalte von DAILY, mit KI vorbereitet und als feste Datei im Repo (src/content/daily.json, erzeugt mit tools/content_2026_10.py). Keine Nachrichten, keine Inhalte Dritter.
+- Eigene Inhalte von DAILY, mit KI vorbereitet und als feste Datei im Repo (services/daten/daily.json – nur der Dienst liest sie, sie wird nicht öffentlich ausgeliefert; erzeugt mit tools/content_2026_10.py). Keine Nachrichten, keine Inhalte Dritter.
 - Rezepte, Tipps und Fakten sind allgemeine Anregungen – keine medizinische, finanzielle oder rechtliche Beratung.
 
 Quellen mit Lizenz:

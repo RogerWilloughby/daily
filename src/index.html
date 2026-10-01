@@ -152,6 +152,17 @@
       </div>
       <p class="k-meldung" id="k-meldung" aria-live="polite"></p>
 
+      <section id="set-privat" hidden>
+        <h3>Privater Betrieb</h3>
+        <p class="set-hinweis">Termine, Märkte und Schlagzeilen gibt es nur mit dem Kennwort, das in Vercel als <code>DAILY_PRIVAT_KENNWORT</code> hinterlegt ist. Es bleibt nur in diesem Browser und geht nur an die privaten Dienste.</p>
+        <div class="set-row">
+          <label for="set-kennwort" class="sr">Kennwort</label>
+          <input class="field" id="set-kennwort" type="password" autocomplete="current-password" placeholder="Kennwort">
+          <button type="button" class="btn" id="set-kennwort-ok">Speichern</button>
+        </div>
+        <p class="k-meldung" id="set-kennwort-meldung" aria-live="polite"></p>
+      </section>
+
       <p class="draft">Die Einstellungen bleiben nur auf diesem Gerät in diesem Browser. DAILY braucht kein Konto.</p>
       <div class="set-actions"><span class="version" data-version="lang"></span><button type="button" class="btn primary" data-doc-close>Fertig</button></div>
     </div>
