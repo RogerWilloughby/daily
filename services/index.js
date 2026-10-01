@@ -35,6 +35,8 @@ function finde(id) {
 const INSTANZ = new Map(), INSTANZ_MAX = 500;
 const schluessel = (id, e) => id + '?' + Object.keys(e).sort().map(k => `${k}=${e[k]}`).join('&');
 const laufend = new Map();   // gleichzeitige gleiche Anfragen warten auf dieselbe Berechnung
+// Quellenfehler je Anfrage 60 s merken (Review H2): solange fragt diese Instanz die kranke Quelle nicht erneut (das CDN speichert Fehler nicht)
+const FEHLER = new Map(), FEHLER_MS = 60e3;
 
 // Dienst ausführen und in den Rahmen daily/1 packen
 async function ausfuehren(id, eingabe = {}, ctx = {}) {
@@ -44,6 +46,8 @@ async function ausfuehren(id, eingabe = {}, ctx = {}) {
   if (!privat && !ctx.jetzt) {
     const alt = INSTANZ.get(k);
     if (alt && Date.parse(alt.gueltigBis) > jetzt) return alt;
+    const f = FEHLER.get(k);
+    if (f && f.bis > jetzt) throw f.fehler;
     if (laufend.has(k)) return laufend.get(k);
   }
   const p = (async () => antwort(d, { ...(await d.run(eingabe, ctx)), jetzt: ctx.jetzt }))();
@@ -53,7 +57,14 @@ async function ausfuehren(id, eingabe = {}, ctx = {}) {
     const r = await p;
     INSTANZ.set(k, r);
     if (INSTANZ.size > INSTANZ_MAX) INSTANZ.delete(INSTANZ.keys().next().value);
+    FEHLER.delete(k);
     return r;
+  } catch (e) {
+    if (e instanceof DienstFehler && e.code === 'quelle_fehler') {
+      FEHLER.set(k, { fehler: e, bis: Date.now() + FEHLER_MS });
+      if (FEHLER.size > INSTANZ_MAX) FEHLER.delete(FEHLER.keys().next().value);
+    }
+    throw e;
   } finally { laufend.delete(k); }
 }
 
@@ -68,4 +79,4 @@ function katalog() {
   }));
 }
 
-module.exports = { DIENSTE, byId, finde, ausfuehren, katalog, INSTANZ };
+module.exports = { DIENSTE, byId, finde, ausfuehren, katalog, INSTANZ, FEHLER, FEHLER_MS };

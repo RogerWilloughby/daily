@@ -60,7 +60,9 @@ Ziel: Die Seite darf bei vielen Nutzern nicht langsamer werden. Die Plattform is
 3. ~~*Bündeln:* `GET /api/v1/paket?…`~~ – **entfernt mit App 0.39.0** (Entscheidung 02.10.2026, `../konzept/entscheidungen.md` Abschnitt 14): jeder Dienst einzeln, die Adresse enthält nur seinen Cache-Schlüssel.
 4. *Instanz-Zwischenspeicher auf dem Server:* gleiche Anfragen innerhalb einer laufenden Funktion teilen sich eine Berechnung und das Ergebnis bis `gueltigBis` – dämpft den Andrang auf die Quellen zum Takt.
 
-**Vor dem öffentlichen Start:** eigene Daten für Wetter und Radar (zentral je Takt laden, Stufe 4) und ein Lasttest (Vercel-Regeln für Lasttests beachten).
+5. *Schutz der Quellen (seit App 0.41.0, Review H2):* `stale-if-error=3600` (CDN gibt bei Ausfall die letzte gute Antwort bis 1 Std. weiter; Fehler selbst speichert das Vercel-CDN nicht – nur 200/404/410/3xx); Quellenfehler merkt sich jede Instanz 60 s je Anfrage; Tankerkönig höchstens 30 Abrufe/Minute je Instanz (`services/_lib/drossel.js`).
+
+**Vor dem öffentlichen Start:** Firewall-Regel in Vercel für `/api/` (300 Anfragen/Minute je IP, Antwort 429 – Pflicht), eigene Daten für Wetter und Radar (zentral je Takt laden, Stufe 4) und ein Lasttest (Vercel-Regeln für Lasttests beachten).
 
 ## Betrieb: Vercel, AWS oder Cloudflare (Stand 27.09.2026)
 Preise laut Anbieterseiten im September 2026 (Listenpreise in USD, gerundet; Quellen unten). Überschlagsrechnung, keine Angebote.

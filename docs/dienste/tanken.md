@@ -7,7 +7,7 @@ Spritpreise (Super E5, Super E10, Diesel) der Tankstellen im Umkreis eines Orts 
 | | |
 |---|---|
 | Aufruf | `GET /api/v1/tanken` |
-| Programmversion | 2.0.0 |
+| Programmversion | 2.1.0 |
 | Vertrag (Datenformat) | daily/1, Version 1 |
 | Klasse | oeffentlich |
 | Länder | DE |
@@ -80,7 +80,7 @@ Quellen mit Lizenz:
 | | |
 |---|---|
 | Klasse | C – je Ort, rasterbar – Anfragen je gerundetem Ort bündelbar |
-| Quelle | Tankerkönig: kostenlos mit Schlüssel, Abfragegrenze je Schlüssel (nicht veröffentlicht), ohne Verfügbarkeitszusage. |
+| Quelle | Tankerkönig: kostenlos mit Schlüssel, Abfragegrenze je Schlüssel (nicht veröffentlicht), ohne Verfügbarkeitszusage. Bremse: höchstens 30 Abrufe je Minute und Funktion (darüber quelle_fehler, 60 s gemerkt). |
 | Kosten | Je Aktualisierung 1 Abruf (alle Sorten), Auswertung < 1 ms. |
 | Cache | Nur auf Anfrage; CDN und Browser halten die Antwort bis zur nächsten 5-Minuten-Marke. Je belegter 1-km-Zelle und Umkreis höchstens 288 Abrufe/Tag. |
 | Bei 10 Mio. Aufrufen/Tag | Nicht mit einem Tankerkönig-Schlüssel: bei z. B. 20.000 belegten Zellen wären es bis zu 5,8 Mio. Abrufe/Tag. Weg: DAILY als Verbraucher-Informationsdienst bei der MTS-K zulassen und die Preisdaten zentral beziehen (Abrufe unabhängig von der Nutzerzahl), dann Umkreissuche im eigenen Speicher. |
@@ -90,6 +90,7 @@ Rahmen und Stufen: `../architektur/skalierung.md`
 ## Änderungen
 | Version | Datum | Änderung |
 |---|---|---|
+| 2.1.0 | 2026-10-02 | Bremse: höchstens 30 Abrufe bei Tankerkönig je Minute und Funktion; darüber quelle_fehler (Oberfläche zeigt den letzten Stand). |
 | 2.0.0 | 2026-10-02 | Eingaben nur noch lat/lon mit höchstens 2 Nachkommastellen; Ortssuche per Name (ort=) sowie name, region, land, zeitzone entfallen – die Antwort enthält keinen Ortsnamen mehr (den kennt die Oberfläche). Umkreis nur 2, 5 oder 10 (sonst Fehler statt still 5). Ausland an den Koordinaten erkannt (Rahmen um Deutschland). Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026). |
 | 1.0.0 | 2026-09-29 | Erste Fassung im Format daily/1 (ersetzt /api/fuel): alle drei Sorten mit einem Abruf, Umkreis 2/5/10 km, günstigste und Durchschnitt je Sorte |
 

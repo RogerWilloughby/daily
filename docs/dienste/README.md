@@ -15,7 +15,7 @@
 | [`termine`](termine.md) | Termine | 1.1.0 | Deine Kalender (iCal) | weltweit | D |
 | [`finanzen`](finanzen.md) | Finanzen | 1.1.0 | Europäische Zentralbank (EZB) – Referenzkurse, Leitzinsen, HVPI | weltweit | B |
 | [`kurse`](kurse.md) | Kurse (privat) | 1.1.0 | Yahoo Finance (nur private Nutzung) | weltweit | B |
-| [`tanken`](tanken.md) | Tanken | 2.0.0 | Tankerkönig (Daten der Markttransparenzstelle für Kraftstoffe) | DE | C |
+| [`tanken`](tanken.md) | Tanken | 2.1.0 | Tankerkönig (Daten der Markttransparenzstelle für Kraftstoffe) | DE | C |
 | [`autobahn`](autobahn.md) | Autobahn | 1.1.0 | Die Autobahn GmbH des Bundes (Autobahn-API) | DE | B |
 | [`tagesinhalt`](tagesinhalt.md) | Tagesinhalte | 1.1.0 | DAILY (eigene Tagesinhalte, mit KI vorbereitet) | weltweit | B |
 | [`andiesemtag`](andiesemtag.md) | An diesem Tag | 1.1.0 | Wikipedia – „An diesem Tag“ (Wikimedia-Feed) | weltweit | B |

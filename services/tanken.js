@@ -6,6 +6,9 @@ const { P } = require('./_lib/parameter');
 const { getJson } = require('./_lib/http');
 const { DienstFehler, runde, text } = require('./_lib/rahmen');
 const { ortAus, inDeutschland } = require('./_lib/ort');
+const { drossel } = require('./_lib/drossel');
+// höchstens 30 Abrufe je Minute und Funktion (Review H2, Entscheidung 02.10.2026) – schützt den Schlüssel vor Sperrung
+const BREMSE = drossel(30);
 const { S } = require('./_lib/schema');
 
 const QUELLEN = [{ name: 'Tankerkönig (Daten der Markttransparenzstelle für Kraftstoffe)', lizenz: 'CC BY 4.0', url: 'https://creativecommons.tankerkoenig.de' }];
@@ -53,8 +56,9 @@ const SCHEMA = S.obj({
 module.exports = {
   id: 'tanken',
   version: 1,
-  programmversion: '2.0.0',
+  programmversion: '2.1.0',
   aenderungen: [
+    { version: '2.1.0', datum: '2026-10-02', text: 'Bremse: höchstens 30 Abrufe bei Tankerkönig je Minute und Funktion; darüber quelle_fehler (Oberfläche zeigt den letzten Stand).' },
     { version: '2.0.0', datum: '2026-10-02', text: 'Eingaben nur noch lat/lon mit höchstens 2 Nachkommastellen; Ortssuche per Name (ort=) sowie name, region, land, zeitzone entfallen – die Antwort enthält keinen Ortsnamen mehr (den kennt die Oberfläche). Umkreis nur 2, 5 oder 10 (sonst Fehler statt still 5). Ausland an den Koordinaten erkannt (Rahmen um Deutschland). Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026).' },
     { version: '1.0.0', datum: '2026-09-29', text: 'Erste Fassung im Format daily/1 (ersetzt /api/fuel): alle drei Sorten mit einem Abruf, Umkreis 2/5/10 km, günstigste und Durchschnitt je Sorte' }
   ],
@@ -120,7 +124,7 @@ module.exports = {
     },
     skalierung: {
       klasse: 'C',
-      quelle: 'Tankerkönig: kostenlos mit Schlüssel, Abfragegrenze je Schlüssel (nicht veröffentlicht), ohne Verfügbarkeitszusage.',
+      quelle: 'Tankerkönig: kostenlos mit Schlüssel, Abfragegrenze je Schlüssel (nicht veröffentlicht), ohne Verfügbarkeitszusage. Bremse: höchstens 30 Abrufe je Minute und Funktion (darüber quelle_fehler, 60 s gemerkt).',
       kosten: 'Je Aktualisierung 1 Abruf (alle Sorten), Auswertung < 1 ms.',
       cache: 'Nur auf Anfrage; CDN und Browser halten die Antwort bis zur nächsten 5-Minuten-Marke. Je belegter 1-km-Zelle und Umkreis höchstens 288 Abrufe/Tag.',
       bei10Mio: 'Nicht mit einem Tankerkönig-Schlüssel: bei z. B. 20.000 belegten Zellen wären es bis zu 5,8 Mio. Abrufe/Tag. Weg: DAILY als Verbraucher-Informationsdienst bei der MTS-K zulassen und die Preisdaten zentral beziehen (Abrufe unabhängig von der Nutzerzahl), dann Umkreissuche im eigenen Speicher.'
@@ -131,6 +135,7 @@ module.exports = {
     if (!key) throw new DienstFehler('schluessel_fehlt', 'Tankerkönig-Schlüssel ist nicht eingerichtet (Vercel-Variable TANKERKOENIG_API_KEY)');
     const ort = await ortAus(eingabe);
     if (!inDeutschland(ort.lat, ort.lon)) throw new DienstFehler('nicht_unterstuetzt', 'Spritpreise gibt es für Orte in Deutschland');
+    if (!BREMSE()) throw new DienstFehler('quelle_fehler', 'Tankerkönig gerade ausgelastet – zu viele Abrufe in kurzer Zeit, gleich wieder');
     const umkreisKm = eingabe.umkreis == null ? 5 : +eingabe.umkreis;   // 2, 5 oder 10 (geprüft in _lib/parameter.js)
     let q;
     try {
@@ -140,5 +145,5 @@ module.exports = {
     try { daten = umwandeln(q, umkreisKm); } catch (e) { throw new DienstFehler('quelle_fehler', 'Tankerkönig: ' + e.message); }
     return { ort, daten };
   },
-  umwandeln, SORTEN, UMKREISE
+  umwandeln, SORTEN, UMKREISE, BREMSE
 };

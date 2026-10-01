@@ -24,9 +24,12 @@ const postJson = async (url, data, opts = {}) => (await request(url, {
   headers: { 'content-type': 'application/json', ...(opts.headers || {}) }, body: JSON.stringify(data)
 })).json();
 
-// Antwort mit Cache-Angabe für das Vercel-CDN (Sekunden)
+// Antwort mit Cache-Angabe für das Vercel-CDN (Sekunden). stale-if-error: Fällt die Quelle aus, darf das CDN die letzte gute Antwort
+// bis zu 1 Stunde weitergeben (Review H2, Entscheidung 02.10.2026); die Oberfläche zeigt dann „Stand …“ (altes erstellt/gueltigBis).
+// Fehler (4xx/5xx) speichert das Vercel-CDN ohnehin nicht – dafür merkt sich services/index.js Quellenfehler 60 s je Instanz.
+const STALE_IF_ERROR = 3600;
 function send(res, data, maxAge = 300, status = 200) {
-  res.setHeader('Cache-Control', maxAge > 0 ? `s-maxage=${maxAge}, stale-while-revalidate=${maxAge * 3}` : 'private, no-store');
+  res.setHeader('Cache-Control', maxAge > 0 ? `s-maxage=${maxAge}, stale-while-revalidate=${maxAge * 3}, stale-if-error=${STALE_IF_ERROR}` : 'private, no-store');
   res.status(status).json(data);
 }
 
@@ -46,4 +49,4 @@ function privateOnly(res) {
 // Koordinaten auf 2 Nachkommastellen (≈ 1 km) runden: schützt den genauen Standort und teilt den Cache
 const coord = (v, max) => { const n = Number(v); return Number.isFinite(n) && Math.abs(n) <= max ? Math.round(n * 100) / 100 : null; };
 
-module.exports = { getText, getJson, postJson, send, norm, isPrivate, privateOnly, coord };
+module.exports = { STALE_IF_ERROR, getText, getJson, postJson, send, norm, isPrivate, privateOnly, coord };

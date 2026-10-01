@@ -142,7 +142,8 @@ Daraus entstehen der Katalog `/api/v1/dienste`, die Dateien `docs/dienste/<id>.m
 | `api/icon.js` | Seitensymbole für „Meine Seiten“, `GET /api/icon?s=<id>` → Bild; nur Seiten aus `src/content/seiten.json`, direkt von der Seite (apple-touch-icon, HTML, favicon), CDN 30 Tage |
 | `api/karte.js` | Kartenkacheln basemap.de (BKG) für die Radarkarte, `GET /api/karte?z=&x=&y=` → PNG; kein daily/1-Dienst, nur Zoom 8–11 über Deutschland, CDN 30 Tage |
 | `services/_lib/blatt.js` | Dienstblatt prüfen und als Markdown ausgeben |
-| `services/_lib/http.js` | `getJson`, `postJson`, `send` (Cache-Header), Betriebsart |
+| `services/_lib/http.js` | `getJson`, `postJson`, `send` (Cache-Header: `s-maxage` bis `gueltigBis`, `stale-while-revalidate`, `stale-if-error=3600`), Betriebsart |
+| `services/_lib/drossel.js` | Bremse für Quellen mit Schlüssel (z. B. Tankerkönig 30 Abrufe/Minute je Instanz) |
 | `services/index.js` | Verzeichnis, `ausfuehren()`, `katalog()` |
 | `api/v1/[dienst].js` | HTTP-Einstieg |
 | `src/js/dienste/client.js` | Abruf im Browser, Zwischenspeicher bis `gueltigBis`, Fehler mit Code |

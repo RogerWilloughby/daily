@@ -1320,3 +1320,41 @@ test('Eingaben: die Adresse ist der Cache-Schlüssel – nur erlaubte Angaben in
     assert.deepEqual(await fall('termine', { zeitzone: 'Europe/Berlin', x: '1' }), [400, 'eingabe_ungueltig']);
   } finally { delete process.env.DAILY_PRIVATE; }
 });
+
+test('Schutz der Quellen (H2): letzte gute Antwort bei Ausfall, Quellenfehler 60 s gemerkt, Tankerkönig-Bremse', async () => {
+  // CDN: Erfolg mit stale-if-error=3600, Fehler ohne Zwischenspeicher
+  const ok = await rufe('finanzen');
+  assert.match(ok.headers['cache-control'], /^s-maxage=\d+, stale-while-revalidate=\d+, stale-if-error=3600$/);
+  assert.equal((await rufe('finanzen', { x: '1' })).headers['cache-control'], 'private, no-store');
+  // Quelle fällt aus: innerhalb von 60 s nur EIN Abruf, danach wieder
+  const echt = global.fetch; let abrufe = 0;
+  global.fetch = async (url, o) => { if (String(url).includes('api.brightsky.dev/alerts')) { abrufe++; throw new Error('Quelle weg'); } return echt(url, o); };
+  dienste.INSTANZ.clear(); dienste.FEHLER.clear();
+  try {
+    const q = { lat: '50.11', lon: '8.68' };
+    const a = await rufe('wetterhinweise', q), b = await rufe('wetterhinweise', q);
+    assert.deepEqual([a.code, a.body.fehler.code, b.body.fehler.code, abrufe], [502, 'quelle_fehler', 'quelle_fehler', 1]);
+    assert.equal(a.headers['cache-control'], 'private, no-store');
+    const k = 'wetterhinweise?lat=50.11&lon=8.68';
+    dienste.FEHLER.get(k).bis = Date.now() - 1;                                      // 60 s vorbei
+    await rufe('wetterhinweise', q);
+    assert.equal(abrufe, 2);
+    global.fetch = echt;
+    dienste.FEHLER.get(k).bis = Date.now() - 1;
+    assert.equal((await rufe('wetterhinweise', q)).code, 200);                       // Quelle wieder da → Fehler vergessen
+    assert.equal(dienste.FEHLER.has(k), false);
+  } finally { global.fetch = echt; }
+  // Bremse: gleitendes Fenster
+  const { drossel } = require('../services/_lib/drossel');
+  const d = drossel(3, 60e3);
+  assert.deepEqual([d(0), d(1000), d(2000), d(3000), d(60001), d(60500)], [true, true, true, false, true, false]);
+  // Tankerkönig: 31. Abruf in einer Minute wird abgewiesen
+  const t = dienste.byId.tanken, alt = process.env.TANKERKOENIG_API_KEY;
+  process.env.TANKERKOENIG_API_KEY = 'test';
+  try {
+    t.BREMSE.zuruecksetzen(); for (let i = 0; i < 30; i++) assert.equal(t.BREMSE(), true);
+    const r = await rufe('tanken', { lat: '50.94', lon: '6.96' });
+    assert.deepEqual([r.code, r.body.fehler.code], [502, 'quelle_fehler']);
+    assert.match(r.body.fehler.meldung, /ausgelastet/);
+  } finally { t.BREMSE.zuruecksetzen(); dienste.FEHLER.clear(); if (alt === undefined) delete process.env.TANKERKOENIG_API_KEY; else process.env.TANKERKOENIG_API_KEY = alt; }
+});
