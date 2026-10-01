@@ -152,10 +152,11 @@ Das allgemeine Kachelraster weiß nichts über einzelne Kacheln. Kachelbesondere
 
 | Datei | Zweck |
 |---|---|
-| `src/js/core/board.js` | allgemeines Kachelraster: Raster, Aktivieren, Reiter, Listen, Einstellungen, **Mini-Reiter** (`kleinReiter`: Symbolspalte, gespeicherte Wahl, nur ganze Zeilen, Einstellungsfenster; Feld `unten` für ein Diagramm unter der Liste) – ohne Wetter/Finanzen |
+| `src/js/core/board.js` | allgemeines Kachelraster: Raster, Aktivieren, Reiter, Listen, Einstellungen, **Mini-Reiter** (`kleinReiter`: Symbolspalte, gespeicherte Wahl, nur ganze Zeilen, Einstellungsfenster; Feld `unten` für ein Diagramm unter der Liste; Listenzeile mit `aktion` → `data-aktion`) – ohne Wetter/Finanzen |
 | `src/js/core/ansichten.js` | Anmeldung: `ansicht(id, { teaser, spalte, zurueck })` für eine Kachel, `erweiterung({ nachInhalt, nachZeichnen, groesse, zeiger })` für alle |
 | `src/js/ansichten/mini-diagramm.js` | allgemeine Diagramm-Bedienung: Dichte je Platz (`miniDichte`), Hinweise der großen Diagramme, Überfahren der Spalten |
 | `src/js/ansichten/wetter.js` | Wetter-Kachel: Zeitpunkt-Block im Mini-Reiter „Jetzt“ („Jetzt“ / überfahrene Stunde oder Tag); HTML aus `adapter/wetter.js` (`zpHtml`, `jetztHtml`) |
+| `src/js/providers/thema.js` | Anbieter der Themen-Kacheln (Unterhaltung, Wissen, Alltag): Dienst `tagesinhalt` je Tag, Blättern, Favoriten, „+ Aufgabe“ |
 | `src/js/ansichten/radar.js` | Radarkarte (Mini-Reiter „Radar“, bis zur Umstellung auch aufgeklappt): Bilder laufen lassen, Zeitleiste (Start/Pause, Sprung) |
 | `src/js/adapter/diagramm.js` | Wetter-Diagramme als HTML/SVG-Text und gemeinsame Bausteine (`skala`, `pfad`, `pfadRund`, `umschalter`) |
 | `src/js/adapter/kursdiagramm.js` | Mini-Kursdiagramm der Finanzen-Kachel (`miniKurs`, `kursSkala`) |
@@ -179,6 +180,7 @@ Neue Kachel mit eigener Darstellung: Datei unter `src/js/ansichten/`, vom Provid
 | `termine` | ✅ daily/1, **nur privat** – eigene Termine aus iCal (14 Tage), Links nur per POST, nie zwischengespeichert; in der Kachel „Kalender“ (Kennzahl „14:00 Zahnarzt“, Reiter „Termine“) |
 | `finanzen` | ✅ daily/1 – EZB: Wechselkurse (90 Tage), Leitzinsen, Inflation; Kachel „Finanzen“ |
 | `tanken` | ✅ daily/1 – Tankerkönig (MTS-K): E5, E10, Diesel im Umkreis 2/5/10 km; Kachel „Verkehr“, Ansicht „Tanken“ |
+| `tagesinhalt` | ✅ daily/1 – Tagesinhalte aus der festen Datei, je Tag (Verlauf), nie Zukunft; Themen-Kacheln (Unterhaltung; Wissen, Alltag folgen) |
 | `autobahn` | ✅ daily/1 – Autobahn-API: Staus, Sperrungen, Baustellen je Autobahn (bis 5); Kachel „Verkehr“, Ansicht „Arbeitsweg“ – Start/Ziel nur im Browser, Filter auf den Weg im Adapter |
 | `kurse` | ✅ daily/1, **nur privat** – Yahoo (DAX, S&P 500, MSCI World, Bitcoin, Ethereum, Gold); Kachel „Finanzen“, Reiter „Märkte“ |
 | Abfahrten, Sport, Wissen, Tagesinhalte | ⏳ noch alte Einzelfunktionen bzw. im Browser berechnet |

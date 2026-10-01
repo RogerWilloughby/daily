@@ -36,6 +36,8 @@ function renderTasks(el) {
     li.querySelector('.task-del').addEventListener('click', () => { tasks.splice(tasks.indexOf(t), 1); saveTasks(); paintTasks(); });
   });
 }
+// Aufgaben aus anderen Kacheln (z. B. „+ Aufgabe“ bei den Tagesinhalten) → neu zeichnen
+document.addEventListener('daily:aufgaben', () => paintTasks());
 addAnswer(/aufgabe|to-?do|erledig|mein daily/i, () => {
   const open = tasks.filter(t => !t.done);
   return open.length ? `Offen: ${open.map(t => t.text).join(', ')}.` : 'Keine offenen Aufgaben.';

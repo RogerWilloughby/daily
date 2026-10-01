@@ -1,0 +1,18 @@
+/* DAILY – Themen-Kacheln der Tagesinhalte (Unterhaltung, Wissen, Alltag): Zeile ‹ Datum › ☆ + Aufgabe, Inhalt, Lösung. */
+.ti-nav{display:flex;align-items:center;gap:4px;flex:none;font-size:12px;color:var(--muted)}
+.ti-nav button{min-width:24px;height:22px;padding:0 6px;border:1px solid var(--line);border-radius:6px;background:none;color:var(--ink);font:inherit;font-size:12px;line-height:1;cursor:pointer}
+.ti-nav button:hover:not([disabled]){border-color:var(--muted)}
+.ti-nav button[disabled]{opacity:.35;cursor:default}
+.ti-datum{min-width:5.5em;text-align:center;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+.ti-nav .ti-stern{margin-left:auto;font-size:14px;color:var(--wd-sonne-text,#B8860B)}
+.ti-nav .ti-aufgabe{white-space:nowrap}
+.ti-inhalt{min-height:0;overflow:hidden}
+.ti-text{margin:2px 0 4px;font-size:13px;line-height:1.4}
+.ti-klein{margin:0 0 4px;font-size:12px;line-height:1.4;color:var(--muted)}
+.ti-antwort{margin:2px 0 0;font-size:13px;font-weight:600;color:var(--accent)}
+.ti-loesung{padding:2px 8px;border:1px solid var(--line);border-radius:6px;background:none;color:var(--ink);font:inherit;font-size:12px;cursor:pointer}
+.ti-hinweis{margin:0;font-size:12px;line-height:1.4;color:var(--muted)}
+.ti-tag{font-weight:500;color:var(--muted);margin-left:4px}
+/* schmale Kachel: „+ Aufgabe“ nur als „+“ (Name beim Überfahren) */
+.kr-feld:has(.ti-nav){container-type:inline-size}
+@container (max-width:230px){.ti-nav .ti-lang{display:none}.ti-datum{min-width:4.8em}}

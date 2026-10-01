@@ -83,6 +83,11 @@ export const tasks = read(TKEY, null) || [
 ];
 export function saveTasks() { return write(TKEY, tasks); }
 
+// ---- Favoriten der Tagesinhalte (Kopie des Inhalts: { art, datum, kurz, text }) – nur auf diesem Gerät ----
+const FKEY = 'daily-favoriten';
+export const favoriten = read(FKEY, null) || [];
+export function saveFavoriten() { return write(FKEY, favoriten); }
+
 // ---- Meine Seiten (Links zu den eigenen Portalen) ----
 const LKEY = 'daily-links';
 export const links = read(LKEY, null) || [

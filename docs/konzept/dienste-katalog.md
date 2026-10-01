@@ -63,7 +63,7 @@ Quellen und Lizenzlage: siehe [Recherche Finanzdaten](../recherche/finanzdaten.m
 | – | TV-Programm, TV-Highlights, Primetime | Live | – | nur lizenzierte Quelle | ⛔ Lizenz |
 
 ## 6. Tagesinhalte „des Tages“ (ein Dienst, viele Rubriken)
-Ein Dienst `tagesinhalt?rubrik=<rubrik>&datum=<JJJJ-MM-TT>` liefert alle vorbereiteten Inhalte. Alle Rubriken haben dasselbe Grundgerüst (Titel, Kurztitel, Text, Zusatzfelder je Rubrik), damit Adapter sie einheitlich darstellen können. Heute liegen sie in `src/content/daily.json`.
+**Seit 0.34.0:** Dienst `tagesinhalt?datum=<JJJJ-MM-TT>` (daily/1) liefert alle Inhalte eines Tags aus `src/content/daily.json` – auch vergangene Tage (Verlauf), nie in die Zukunft; Themen-Kacheln Unterhaltung (✅ 0.34.0), Wissen und Alltag (folgen) mit Blättern, Favoriten, „+ Aufgabe“, Top 11 vorbereitet. Ursprünglicher Plan: Ein Dienst `tagesinhalt?rubrik=<rubrik>&datum=<JJJJ-MM-TT>` liefert alle vorbereiteten Inhalte. Alle Rubriken haben dasselbe Grundgerüst (Titel, Kurztitel, Text, Zusatzfelder je Rubrik), damit Adapter sie einheitlich darstellen können. Heute liegen sie in `src/content/daily.json`.
 
 | Rubrik | Ideen | Status |
 |---|---|---|

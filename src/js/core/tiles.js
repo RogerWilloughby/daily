@@ -15,11 +15,10 @@ export const CATALOG = [
   T('verkehr', 'Verkehr', 'Verkehr', 'tram', { fertig: true, hover: 'Verkehr' }),   // Abfahrten, Tanken (später Arbeitsweg); ersetzt „Abfahrten“ und „Tanken“
   T('sport', 'Sport', 'Sport', 'ball'),
   T('money', 'Finanzen', 'Finanzen', 'money', { fertig: true, hover: 'Finanzen' }),   // Mini-Reiter: Kurse, Zinsen & Inflation (EZB), privat Märkte, Spartipp (ersetzt „Sparen“)
-  T('play', 'Rätsel & Witz', 'Rätsel', 'dice', { state: 'content' }),
+  T('unterhaltung', 'Unterhaltung', 'Spaß', 'lachen', { state: 'content', fertig: true, hover: 'Unterhaltung' }),   // Rätsel, Witz, Film mit Verlauf und Favoriten (ersetzt „Rätsel & Witz“ und „Filmtipp“)
   T('food', 'Essen', 'Essen', 'food', { state: 'content' }),
   T('knowledge', 'Wissen', 'Wissen', 'book'),
   T('travel', 'Land des Tages', 'Reisen', 'globe', { state: 'content' }),
-  T('film', 'Filmtipp', 'Film', 'film', { state: 'content' }),
   T('health', 'Gesundheit', 'Fitness', 'heart', { state: 'content' }),
   T('tech', 'Tech', 'Tech', 'chip', { state: 'content' }),
   T('relation', 'Beziehung', 'Paar', 'pair', { state: 'content' }),
@@ -36,14 +35,14 @@ export const SLOTS = 20, STANDARD_ANZAHL = 12;
 export const LAYOUTS = {
   public: [
     'weather', 'kalender', 'links', 'tasks', 'verkehr',
-    'sport', 'money', 'play', 'food', 'knowledge',
-    'travel', 'film',
+    'sport', 'money', 'unterhaltung', 'food', 'knowledge',
+    'travel',
     'health', 'tech', 'relation', 'tools', 'usage'
   ],
   private: [
     'weather', 'kalender', 'news', 'tasks', 'verkehr',
-    'sport', 'money', 'play', 'food', 'knowledge',
-    'film', 'relation', 'links', 'tech',
+    'sport', 'money', 'unterhaltung', 'food', 'knowledge',
+    'relation', 'links', 'tech',
     'travel', 'tools', 'usage'
   ]
 };
@@ -57,7 +56,7 @@ export const byId = Object.fromEntries(CATALOG.map(t => [t.id, t]));
 export const TILES = [];
 export const erlaubt = (id, isPrivate) => !!byId[id] && (isPrivate || byId[id].scope === 'public');
 // Frühere Kacheln, die in einer anderen aufgegangen sind: gespeicherte eigene Belegungen zeigen die neue Kachel
-export const ERSETZT = { transit: 'verkehr', fuel: 'verkehr', saving: 'money' };   // „Sparen“ seit 0.31.0 als Reiter „Spartipp“ in „Finanzen“
+export const ERSETZT = { transit: 'verkehr', fuel: 'verkehr', saving: 'money', play: 'unterhaltung', film: 'unterhaltung' };   // „Sparen“ seit 0.31.0 als Reiter „Spartipp“ in „Finanzen“
 export function chooseLayout(isPrivate, custom) {
   const eigene = Array.isArray(custom);
   const std = LAYOUTS[isPrivate ? 'private' : 'public'];

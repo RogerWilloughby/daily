@@ -1141,3 +1141,48 @@ test('Meine Seiten: feste Seiten-Auswahl, Mini-Reiter mit Symbolraster, Einstell
   assert.deepEqual(icon.symboleAusHtml('<link rel="icon" href="/f.ico"><link rel="apple-touch-icon" sizes="152x152" href="/a152.png"><link rel="apple-touch-icon" href="https://cdn.x.de/a.png">', 'https://www.x.de/').map(x => x.url),
     ['https://cdn.x.de/a.png', 'https://www.x.de/a152.png', 'https://www.x.de/f.ico']);
 });
+
+test('Tagesinhalte: Dienst je Tag (Verlauf, nie Zukunft), Themen-Kachel mit Blättern, Favoriten, Aufgabe, Top 11 vorbereitet', async () => {
+  const d = dienste.byId.tagesinhalt;
+  for (const tag of d.VORRAT.tage) assert.deepEqual(pruefe(d.umwandeln(tag, tag.datum, { heute: tag.datum, erster: d.VORRAT.von, wiederholt: false }), d.schema), [], tag.datum);   // ganzer Vorrat erfüllt den Vertrag
+  const jetzt = Date.parse('2026-10-01T10:00:00Z');
+  const heute = await dienste.ausfuehren('tagesinhalt', {}, { jetzt });
+  gueltig(heute, d.schema);
+  assert.deepEqual([heute.daten.datum, heute.daten.heute, heute.daten.erster, heute.daten.wiederholt], ['2026-10-01', '2026-10-01', '2026-09-26', false]);
+  assert.equal(heute.daten.inhalt.raetsel.frage, d.VORRAT.tage.find(t => t.datum === '2026-10-01').raetsel.frage);
+  assert.equal((await dienste.ausfuehren('tagesinhalt', { datum: '2026-09-27' }, { jetzt })).daten.datum, '2026-09-27');   // vergangener Tag
+  for (const [x, code] of [['2026-10-02', 'eingabe_ungueltig'], ['2026-09-25', 'eingabe_ungueltig'], ['gestern', 'eingabe_ungueltig']])
+    await assert.rejects(dienste.ausfuehren('tagesinhalt', { datum: x }, { jetzt }), e => e.code === code, x);
+  const spaet = await dienste.ausfuehren('tagesinhalt', { datum: '2026-11-15' }, { jetzt: Date.parse('2026-11-15T10:00:00Z') });
+  assert.equal(spaet.daten.wiederholt, true);                                                 // nach dem Vorrat im Kreis
+  const r = await rufe('tagesinhalt', { datum: '2026-09-28' });
+  assert.equal(r.code, 200);
+  // Adapter: Themen-Kachel „Unterhaltung“
+  const a = await esm('src/js/adapter/tagesinhalt.js');
+  assert.deepEqual([a.datumText('2026-10-01'), a.datumText('2026-10-01', true), a.tagPlus('2026-10-01', -1), a.tagPlus('2026-09-30', 1)], ['Do 1.10.', '1.10.', '2026-09-30', '2026-10-01']);
+  const k = a.kachel('unterhaltung', heute, {});
+  assert.deepEqual(k.kleinReiter.map(x => x.id), ['raetsel', 'witz', 'film', 'favoriten']);   // Top 11 erst mit Liste
+  assert.ok(k.kleinReiter.every(x => /^<svg class="ico"/.test(x.icon)));
+  const rae = k.kleinReiter[0].html;
+  assert.match(rae, /<button type="button" data-ti="zurueck"[^>]*>‹<\/button><span class="ti-datum">Do 1\.10\.<\/span><button type="button" data-ti="vor"[^>]* disabled>›/);   // heute: nicht weiter vor
+  assert.match(rae, /data-ti="fav" aria-pressed="false"[^>]*>☆<.*data-ti="aufgabe"[^>]*>\+<span class="ti-lang"> Aufgabe</s);
+  assert.match(rae, /data-ti="loesung">Lösung zeigen</);
+  assert.doesNotMatch(rae, /ti-antwort/);
+  assert.match(a.kachel('unterhaltung', heute, { loesung: true }).kleinReiter[0].html, /class="ti-antwort">Lösung: /);
+  const erster = await dienste.ausfuehren('tagesinhalt', { datum: '2026-09-26' }, { jetzt });
+  assert.match(a.kachel('unterhaltung', erster, {}).kleinReiter[0].html, /data-ti="zurueck"[^>]* disabled>‹/);   // erster Tag: nicht weiter zurück
+  // Favoriten: Kopie, im Reiter neueste zuerst, Zeile öffnet den Tag; Stern gefüllt
+  const fav = [a.favEintrag('witz', erster), a.favEintrag('film', heute), { art: 'rezept', datum: '2026-09-30', kurz: 'x', text: 'x' }];
+  assert.deepEqual(Object.keys(fav[0]), ['art', 'datum', 'kurz', 'text']);
+  const kf = a.kachel('unterhaltung', heute, { favoriten: fav });
+  const fl = kf.kleinReiter.find(x => x.id === 'favoriten').liste;
+  assert.deepEqual(fl.map(z => z.aktion), ['fav:film|2026-10-01', 'fav:witz|2026-09-26']);     // nur Arten dieses Themas, neueste zuerst
+  assert.match(fl[0].t, /^Film: /);
+  assert.match(kf.kleinReiter.find(x => x.id === 'film').html, /aria-pressed="true"[^>]*>★</);
+  assert.match(a.kachel('unterhaltung', heute, {}).kleinReiter.find(x => x.id === 'favoriten').html, /Noch keine Favoriten/);
+  // Einstellungen: Reiter aus; Top 11 vorbereitet (erscheint mit Liste)
+  assert.deepEqual(a.kachel('unterhaltung', heute, { opt: { witz: false, favoriten: false } }).kleinReiter.map(x => x.id), ['raetsel', 'film']);
+  const top = a.kachel('unterhaltung', heute, { top: [{ art: 'witz', datum: '2026-09-26', kurz: 'K', text: 'T' }] });
+  assert.deepEqual([top.kleinReiter.at(-1).id, top.kleinReiter.at(-1).liste[0].d], ['top', '1.']);
+  assert.equal(a.kachel('unterhaltung', null, {}).state, 'error');
+});

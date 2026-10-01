@@ -1,6 +1,6 @@
 # DAILY – Übergabe: aktueller Arbeitsstand
 
-Stand 01.10.2026 (App 0.33.0). Für neue Chats: hier steht, woran gerade gearbeitet wird und wie es weitergeht. Verbindliche Entscheidungen stehen in `entscheidungen.md`, die Architektur in `../architektur/dienste.md`.
+Stand 01.10.2026 (App 0.34.0). Für neue Chats: hier steht, woran gerade gearbeitet wird und wie es weitergeht. Verbindliche Entscheidungen stehen in `entscheidungen.md`, die Architektur in `../architektur/dienste.md`.
 
 ## Vorgehen (Rogers Vorgaben)
 - **Rückfragen IMMER EINZELN (Rogers Vorgabe vom 01.10.2026):** immer nur eine Frage auf einmal stellen, auf die Antwort warten, dann die nächste – nie mehrere Fragen gesammelt (auch nicht nummeriert am Ende eines Plans). Steht auch im Projekt-Wegweiser `claude/LIES-MICH-ZUERST.md`.
@@ -45,6 +45,7 @@ Oberfläche: Standardbelegung = nur überarbeitete Kacheln (`fertig: true` in `s
 | `termine` | Kalender (nur privat) | ✅ getestet (0.15.0). Eigene Termine aus iCal, 14 Tage, Links per POST, nie zwischengespeichert. |
 | `finanzen` | Finanzen | 🆕 0.22.0, auf Vercel zu testen. EZB: Wechselkurse (90 Tage), Leitzinsen, Inflation; für alle gleich, Takt 1 Std. Adressen der EZB-Datenschnittstelle (Leitzinsen, Inflation) nur nach Dokumentation gebaut – bei Fehlern zuerst dort prüfen. |
 | `kurse` | Finanzen, Reiter „Märkte“ (nur privat) | 🆕 0.22.0. Yahoo (vorher `api/markets.js`), DAX, S&P 500, MSCI World, Bitcoin, Ethereum, Gold. |
+| `tagesinhalt` | Unterhaltung (später Wissen, Alltag, Spartipp) | 🆕 0.34.0. Alle Tagesinhalte eines Tags aus `src/content/daily.json`, Verlauf bis zum ersten Tag, nie Zukunft; Kachel „Unterhaltung“ mit Blättern, Favoriten, „+ Aufgabe“. |
 | `autobahn` | Verkehr, Ansicht „Arbeitsweg“ | 🆕 0.28.0, auf Vercel zu testen (kein Schlüssel nötig). Autobahn-API: Staus, Sperrungen, Baustellen der gewählten Autobahnen (bis 5), Takt 5 min; Start/Ziel nur im Browser, Filter auf den Weg im Browser (Korridor ≥ 10 km bzw. ¼ der Luftlinie). |
 | `tanken` | Verkehr, Reiter „Tanken“ | ✅ live getestet 30.09.2026 (Vercel-Variable `TANKERKOENIG_API_KEY` gesetzt). Alle Sorten mit einem Abruf, Umkreis 2/5/10 km, Takt 5 min. |
 | übrige | – | noch alte Schnittstelle (`api/*.js`): Abfahrten (in der Kachel „Verkehr“, `api/transit.js`), ausgeblendet: Sport (Fußball), Wissen (Wort, „An diesem Tag“), Tagesinhalte (Rätsel, Essen, Land, Film, Gesundheit, Tech, Sparen, Beziehung), Schlagzeilen (privat). Nach dem Umzug in `tiles.js` `fertig: true` setzen. |
@@ -72,6 +73,7 @@ App-Seite „Woher kommen die Daten?“ (Fußzeile → Datenquellen) zeigt die D
 - Autobahn öffentlich: API ohne Lizenzangabe, Staumeldungen teils INRIX – vor dem öffentlichen Start klären (`../recht/checkliste.md`).
 
 ## Nächste Schritte (in dieser Reihenfolge)
+0a. **Tagesinhalte mit Verlauf und Favoriten** (`entscheidungen.md` → „Tagesinhalte mit Verlauf …“): Schritt 1 Dienst `tagesinhalt` + Kachel „Unterhaltung“ ✅ 0.34.0. Als Nächstes Schritt 2 Kachel **Wissen** (Wort & Sprichwort, Land, An diesem Tag; ersetzt „Wissen“ und „Land des Tages“), Schritt 3 Kachel **Alltag** (Rezept, Gesundheit, Tech, Beziehung) + Spartipp in Finanzen mit ‹ › ☆ „+ Aufgabe“. Offen: Top 11 – wer bestimmt sie (Roger entscheidet später). **Je Schritt Plan vorlegen.**
 0. **Mini-Reiter umsetzen** (Konzept-Entscheidung 29.09.2026, `entscheidungen.md` Abschnitt 13): (1) Baustein im Kachelraster + Kachel „Verkehr“ ✅ 0.30.0; Kachel „Finanzen“ ✅ 0.31.0 (Kurse · Zinsen & Inflation · Märkte · Spartipp; Baustein-Feld `unten`). Für Finanzen folgen die Dienste `krypto` (Reiter Märkte öffentlich, CoinGecko-Demo-Schlüssel nötig) und `strompreis` (Reiter Strom, Energy-Charts) – je eigener Plan. (2) Wetter ✅ 0.32.0 (Jetzt · Radar · Hinweise · Mehr). (3) „Meine Seiten“ ✅ 0.33.0 (Meine + Kategorien als Symbolraster). Als Nächstes (3) Kalender, Tools und übrige lokale Kacheln, dann (4) Code fürs Aufklappen entfernen (u. a. große Radar-Ansicht, große Diagramme). Handy pausiert (Roger 29.09.: nur am PC darstellen, auf neue Dienste konzentrieren). **Je Schritt Plan vorlegen.**
 1. **Kachel „Verkehr“ weiter ausbauen** (Entscheidungen in `entscheidungen.md` → „Kachel Verkehr“): Schritt 2 Dienst `autobahn` ✅ 0.28.0 (Roger testet auf Vercel: Zahnrad → Autobahnen, Start, Ziel). Als Nächstes Schritt 3 Bus/Bahn über Verkehrsverbünde (`abfahrten`, `verbindung`, Start VVO). **Vorher Plan vorlegen.**
 2. **Nächste Kachel auf daily/1 umziehen** – Roger wählt aus: Sport, Geld (privat), Wissen, Tagesinhalte, Schlagzeilen (privat). Vorschlag laut `dienste-katalog.md`: `tanken`, `abfahrten`, `fussball`, `an-diesem-tag`, `tagesinhalt`, `kurse`. **Vorher Plan vorlegen.** Je Dienst: Dienstblatt, Version, Tests, Frag DAILY, Kachel mit `fertig: true`, Einstellungen im Zahnrad-Reiter der Kachel.

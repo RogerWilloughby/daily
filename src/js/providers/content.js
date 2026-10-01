@@ -22,11 +22,6 @@ export async function getToday() {
   return d;
 }
 
-function renderPlay(el) {
-  el.innerHTML = `<h4>Rätsel</h4>
-    <details class="reveal"><summary>Lösung zeigen</summary><p>${esc(today.raetsel.loesung)}</p></details>
-    <h4>Witz des Tages</h4><p>${esc(today.witz)}</p>`;
-}
 function renderFood(el) {
   const r = today.rezept;
   el.innerHTML = `<p>${r.minuten} Minuten · für 2 Personen${r.vegetarisch ? ' · vegetarisch' : ''}</p>
@@ -37,13 +32,11 @@ function renderFood(el) {
 export async function load() {
   today = await getToday();
   const t = today;
-  set('play', { state: 'content', m: 'Rätsel', ms: '1 neu', x: t.raetsel.frage, render: renderPlay });
+  // Rätsel, Witz, Film: seit 0.34.0 Kachel „Unterhaltung“ (providers/unterhaltung.js, Dienst „tagesinhalt“)
   set('food', { state: 'content', m: t.rezept.name, ms: t.rezept.minuten + ' min',
     x: `${t.rezept.minuten} Minuten · für 2${t.rezept.vegetarisch ? ' · vegetarisch' : ''}`, render: renderFood });
   set('travel', { state: 'content', m: t.land.name, ms: t.land.name, x: t.land.fakt,
     rows: [['Hauptstadt', t.land.hauptstadt], ['Sprache', t.land.sprache], ['Währung', t.land.waehrung], ['Typisches Gericht', t.land.gericht], ['Wissenswert', t.land.fakt]] });
-  set('film', { state: 'content', m: t.film.titel, ms: String(t.film.jahr), x: `${t.film.genre} · ${t.film.jahr}`,
-    rows: [['Film', `${t.film.titel} (${t.film.jahr})`], ['Genre', t.film.genre], ['Worum geht’s', t.film.text], ['Hinweis', 'Empfehlung ohne Programmdaten – wo er gerade läuft, zeigt dein Streamingdienst.']] });
   set('tech', { state: 'content', m: t.tech.kategorie, ms: t.tech.kategorie, x: t.tech.text, rows: [[t.tech.kategorie, t.tech.text]] });
   // Spartipp: seit 0.31.0 Reiter „Spartipp“ der Kachel „Finanzen“ (providers/finanzen.js holt ihn über getToday)
   set('relation', { state: 'content', m: t.beziehung.kurz, ms: 'Idee', x: rest(t.beziehung), rows: [['Idee für heute', t.beziehung.text]] });
@@ -52,8 +45,6 @@ export async function load() {
 }
 
 addAnswer(/rezept|koch|essen|abendbrot|mittag/i, () => today ? `Heute: ${today.rezept.name} (${today.rezept.minuten} Minuten${today.rezept.vegetarisch ? ', vegetarisch' : ''}). Zutaten: ${today.rezept.zutaten.join(', ')}.` : null);
-addAnswer(/rätsel|raetsel|witz|lösung|loesung/i, q => today ? (/lösung|loesung/i.test(q) ? `Lösung: ${today.raetsel.loesung}` : `Rätsel: ${today.raetsel.frage} – Witz: ${today.witz}`) : null);
-addAnswer(/film|serie|fernsehen|abend/i, () => today ? `Filmtipp: ${today.film.titel} (${today.film.jahr}), ${today.film.genre}. ${today.film.text}` : null);
 addAnswer(/land|reise|urlaub/i, () => today ? `Land des Tages: ${today.land.name}, Hauptstadt ${today.land.hauptstadt}. ${today.land.fakt}` : null);
 addAnswer(/spar|geld sparen/i, () => today ? `Spartipp: ${today.spartipp.text}` : null);
 addAnswer(/beziehung|partner|date|paar/i, () => today ? `Idee für heute: ${today.beziehung.text}` : null);

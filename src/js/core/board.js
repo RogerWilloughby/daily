@@ -123,10 +123,12 @@ function einstellungenOeffnen(id) {
 
 // Liste für die kleine Kachel: [{ d, t, gruppe, tip? }] – zwischen Gruppen ein kleiner Abstand; tip = Text beim Überfahren
 function listeHtml(l) {
-  // z.href: Zeile ist ein Link (neuer Tab, klappt die Kachel nicht auf); z.ico: Symbol-HTML davor (nur aus eigenem Code)
+  // z.href: Zeile ist ein Link (neuer Tab, klappt die Kachel nicht auf); z.aktion: Zeile ist ein Knopf der Kachel; z.ico: Symbol-HTML davor (nur aus eigenem Code)
   return l.map((z, i) => {
-    const cls = `tl-z${i && z.gruppe !== l[i - 1].gruppe ? ' tl-neu' : ''}${z.href ? ' tl-link' : ''}`, tip = z.tip ? ` title="${esc(z.tip)}"` : '';
+    const cls = `tl-z${i && z.gruppe !== l[i - 1].gruppe ? ' tl-neu' : ''}${z.href ? ' tl-link' : ''}${z.aktion ? ' tl-aktion' : ''}`, tip = z.tip ? ` title="${esc(z.tip)}"` : '';
     const inhalt = `${z.ico || ''}<span class="tl-d">${esc(z.d)}</span> <span class="tl-t">${esc(z.t)}</span>`;
+    // z.aktion: Zeile löst eine Aktion der Kachel aus (data-aktion, der Anbieter hört darauf), z. B. einen Favoriten öffnen
+    if (z.aktion) return `<span class="${cls}"${tip} role="button" tabindex="0" data-aktion="${esc(z.aktion)}">${inhalt}</span>`;
     return z.href ? `<a class="${cls}"${tip} href="${esc(z.href)}" target="_blank" rel="noopener">${inhalt}</a>` : `<span class="${cls}"${tip}>${inhalt}</span>`;
   }).join('');
 }

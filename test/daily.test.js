@@ -115,12 +115,13 @@ test('Layouts: öffentlich ohne private Kacheln, Standard 12 (fertige zuerst), R
   // Standard (keine eigene Belegung): 12 Kacheln, überarbeitete zuerst, dann Vorschau-Kacheln in Standardreihenfolge
   const pub = chooseLayout(false).map(t => t.id);
   assert.equal(pub.length, STANDARD_ANZAHL);
-  assert.deepEqual(pub.slice(0, 8), ['weather', 'kalender', 'links', 'tasks', 'verkehr', 'money', 'tools', 'usage']);
-  assert.deepEqual(pub.slice(8, 10), ['sport', 'play']);
+  assert.deepEqual(pub.slice(0, 9), ['weather', 'kalender', 'links', 'tasks', 'verkehr', 'money', 'unterhaltung', 'tools', 'usage']);
+  assert.deepEqual(pub.slice(9, 11), ['sport', 'food']);
+  assert.deepEqual(chooseLayout(false, ['play', 'film', 'saving']).map(t => t.id), ['unterhaltung', 'money']);   // „Rätsel & Witz“ und „Film“ → Unterhaltung, „Sparen“ → Finanzen
   assert.ok(!CATALOG.some(t => t.id === 'transit' || t.id === 'fuel'));
   assert.ok(!pub.includes('news') && !pub.includes('alerts'));
   const priv = chooseLayout(true).map(t => t.id);
-  assert.deepEqual(priv.slice(0, 9), ['weather', 'kalender', 'tasks', 'verkehr', 'money', 'links', 'tools', 'usage', 'news']);
+  assert.deepEqual(priv.slice(0, 10), ['weather', 'kalender', 'tasks', 'verkehr', 'money', 'unterhaltung', 'links', 'tools', 'usage', 'news']);
   // Raster: Rechner (quer, Wunschform 1,4) und Handy (hochkant, quadratisch)
   const r = (n, w, h, a, v) => { const x = raster(n, w, h, a, v); return `${x.cols}x${x.rows}`; };
   assert.deepEqual([1, 2, 4, 6, 9, 12, 20].map(n => r(n, 1344, 700)), ['1x1', '2x1', '2x2', '3x2', '3x3', '4x3', '5x4']);

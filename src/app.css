@@ -428,3 +428,5 @@ a.tl-z.tl-link:hover .tl-d{text-decoration:underline}
 .kr-liste .tl-z{flex:none}   /* Zeilen nie stauchen – was nicht passt, blendet krZeilen aus */
 .kr-liste .tl-z[hidden]{display:none}
 .kr-feld .kr-z[hidden]{display:none}
+.tl-aktion{cursor:pointer;border-radius:4px}
+.tl-aktion:hover{background:var(--line)}
