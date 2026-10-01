@@ -907,7 +907,8 @@ test('Finanzen: EZB-Kurse, Leitzinsen, Inflation; Kurse (Yahoo) nur privat; Kach
   // Kachel
   const a = await esm('src/js/adapter/finanzen.js');
   // Mini-Reiter: Kurse · Zinsen & Inflation · (privat) Märkte · Spartipp
-  const tipp = { kurz: 'Deckel auf den Topf', text: 'Deckel auf den Topf: spart Energie beim Kochen.' };
+  const tEnv = { daten: { datum: '2026-09-30', heute: '2026-10-01', erster: '2026-09-26', wiederholt: false, inhalt: { spartipp: { kurz: 'Deckel auf den Topf', text: 'Deckel auf den Topf: spart Energie beim Kochen.' } } } };
+  const tipp = { env: tEnv, fav: true };
   const kk = a.kachel(r.body, null, {}, tipp), R = id => kk.kleinReiter.find(x => x.id === id);
   assert.deepEqual(kk.kleinReiter.map(x => x.id), ['kurse', 'zinsen', 'tipp']);                    // öffentlich ohne „Märkte“
   assert.ok(kk.kleinReiter.every(x => /^<svg class="ico"/.test(x.icon)));
@@ -921,7 +922,9 @@ test('Finanzen: EZB-Kurse, Leitzinsen, Inflation; Kurse (Yahoo) nur privat; Kach
   assert.equal(R('zinsen').liste[0].d + ' ' + R('zinsen').liste[0].t, '2,00 % Einlagesatz · seit 11.6.2025');
   assert.match(R('zinsen').liste[0].tip, /\(vorher 2,50 %\) – derzeit der maßgebliche Leitzins/);
   assert.deepEqual(R('zinsen').liste.map(l => l.gruppe), [1, 1, 1, 2, 2]);                          // 3 Leitzinsen, dann Inflation DE und Euroraum
-  assert.match(R('tipp').html, /spart Energie beim Kochen\.<\/p><p class="fi-text">Allgemeiner Tipp, keine Anlageempfehlung/);
+  assert.match(R('tipp').html, /spart Energie beim Kochen\.<\/p><p class="ti-hinweis">Allgemeiner Tipp, keine Anlageempfehlung/);
+  assert.match(R('tipp').html, /data-ti="zurueck"[^>]*>‹<\/button><span class="ti-datum">Mi 30\.9\.<\/span><button type="button" data-ti="vor"[^>]*>›<\/button><button[^>]*aria-pressed="true"[^>]*>★<.*data-ti="aufgabe"/);   // Spartipp mit ‹ › ☆ + Aufgabe
+  assert.match(R('tipp').kopf, /Spartipp<\/b> <small class="fi-klein">Mi 30\.9\./);
   assert.equal(kk.tabs, undefined); assert.deepEqual(kk.liste, []);                                // kein Aufklappen mehr
   const opt = a.kachel(r.body, k.body, { haupt: 'CHF', weitere: ['USD'], zinsen: false, tage: 90, tipp: false }, tipp);
   assert.match(opt.kleinReiter[0].kopf, /1 € = <b>0,\d{4} CHF<\/b>/);
@@ -1222,4 +1225,22 @@ test('An diesem Tag: Dienst je Datum (Wikipedia, neueste zuerst), Kachel „Wiss
   assert.match(ohne.kleinReiter.find(x => x.id === 'geschichte').html, /Wikipedia ist gerade nicht erreichbar/);
   assert.match(ohne.kleinReiter[1].html, /class="ti-inhalt"/);
   assert.equal(a.jahrText(-44), '44 v. Chr.');
+});
+
+test('Kachel „Alltag“: Rezept, Gesundheit, Tech, Beziehung, Favoriten auch mit Spartipp (öffnet in Finanzen)', async () => {
+  const a = await esm('src/js/adapter/tagesinhalt.js');
+  const t = await dienste.ausfuehren('tagesinhalt', {}, { jetzt: Date.parse('2026-10-01T10:00:00Z') });
+  const k = a.kachel('alltag', t, {});
+  assert.deepEqual(k.kleinReiter.map(x => x.id), ['rezept', 'gesundheit', 'tech', 'beziehung', 'favoriten']);
+  assert.ok(k.kleinReiter.every(x => /^<svg class="ico"/.test(x.icon)));
+  const rez = k.kleinReiter[0].html;
+  assert.match(rez, /data-ti="aufgabe"/);
+  assert.match(rez, /<div class="ti-inhalt" title="[^"]+ Zutaten: [^"]+"><p class="ti-text"><b>[^<]+<\/b> <small>\d+ Min\. · für 2/);
+  assert.match(k.kleinReiter[1].html, /keine medizinische Beratung/);
+  const sp = a.favEintrag('spartipp', t);
+  assert.deepEqual([sp.art, sp.datum], ['spartipp', '2026-10-01']);
+  assert.match(a.artInhalt('spartipp', t.daten.inhalt).html, /keine Anlageempfehlung/);
+  const fl = a.kachel('alltag', t, { favoriten: [sp, a.favEintrag('rezept', t), a.favEintrag('witz', t)] }).kleinReiter.at(-1).liste;
+  assert.deepEqual(fl.map(z => z.aktion).sort(), ['fav:rezept|2026-10-01', 'fav:spartipp|2026-10-01']);   // Spartipp ja, Witz (Unterhaltung) nein
+  assert.ok(fl.some(z => /^Spartipp: /.test(z.t)));
 });

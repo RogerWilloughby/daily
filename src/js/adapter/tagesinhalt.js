@@ -6,12 +6,13 @@ import { esc, icon } from '../core/util.js';
 export const ART = {
   raetsel: { name: 'Rätsel', icon: 'frage' }, witz: { name: 'Witz', icon: 'lachen' }, film: { name: 'Film', icon: 'film' },
   wort: { name: 'Wort & Sprichwort', icon: 'book' }, land: { name: 'Land', icon: 'globe' }, geschichte: { name: 'An diesem Tag', icon: 'clock' },
-  rezept: { name: 'Rezept', icon: 'food' }, gesundheit: { name: 'Gesundheit', icon: 'heart' }, tech: { name: 'Tech', icon: 'chip' }, beziehung: { name: 'Beziehung', icon: 'pair' }
+  rezept: { name: 'Rezept', icon: 'food' }, gesundheit: { name: 'Gesundheit', icon: 'heart' }, tech: { name: 'Tech', icon: 'chip' }, beziehung: { name: 'Beziehung', icon: 'pair' },
+  spartipp: { name: 'Spartipp', icon: 'piggy' }
 };
 export const THEMEN = {
   unterhaltung: { name: 'Unterhaltung', arten: ['raetsel', 'witz', 'film'] },
   wissen: { name: 'Wissen', arten: ['wort', 'land', 'geschichte'] },
-  alltag: { name: 'Alltag', arten: ['rezept', 'gesundheit', 'tech', 'beziehung'] }
+  alltag: { name: 'Alltag', arten: ['rezept', 'gesundheit', 'tech', 'beziehung'], favAuch: ['spartipp'] }   // Spartipp: Reiter in „Finanzen“, Favoriten hier
 };
 
 // „Do 1.10.“ / kurz „1.10.“
@@ -49,8 +50,9 @@ export function artInhalt(art, inhalt, { loesung = false } = {}) {
       const info = [r.minuten ? `${r.minuten} Min.` : '', 'für 2', r.vegetarisch ? 'vegetarisch' : ''].filter(Boolean).join(' · ');
       return { kurz: r.name, text: `${r.name} (${info}). Zutaten: ${(r.zutaten || []).join(', ')}. ${r.zubereitung || ''}`.trim(),
         html: `<p class="ti-text"><b>${esc(r.name)}</b> <small>${esc(info)}</small></p>` + p((r.zutaten || []).join(' · '), 'ti-klein') + (r.zubereitung ? p(r.zubereitung, 'ti-klein') : '') }; }
-    case 'gesundheit': case 'beziehung': { const t = i[art]; if (!t) return null;
-      return { kurz: t.kurz || t.text, text: t.text, html: p(t.text) + (art === 'gesundheit' ? p('Allgemeine Anregung, keine medizinische Beratung.', 'ti-hinweis') : '') }; }
+    case 'gesundheit': case 'beziehung': case 'spartipp': { const t = i[art]; if (!t) return null;
+      const hinweis = { gesundheit: 'Allgemeine Anregung, keine medizinische Beratung.', spartipp: 'Allgemeiner Tipp, keine Anlageempfehlung.' }[art];
+      return { kurz: t.kurz || t.text, text: t.text, html: p(t.text) + (hinweis ? p(hinweis, 'ti-hinweis') : '') }; }
     case 'geschichte': { const g = i.geschichte; if (!g || !g.ereignisse || !g.ereignisse.length) return null;
       const jahr = +String(g.datum || '').slice(0, 4), ev = g.ereignisse, zeile = e => `${jahrText(e.jahr)}: ${e.text}`;
       return { kurz: zeile(ev[0]), text: ev.map(zeile).join(' · '),
@@ -77,7 +79,7 @@ export const favEintrag = (art, env) => { const a = artInhalt(art, env.daten.inh
 // Themen-Kachel. favoriten: Liste aller Favoriten (alle Themen); opt: Kachel-Einstellungen (Reiter ein/aus); top: vorbereitete Top 11 (null = noch nicht entschieden)
 export function kachel(thema, env, { favoriten = [], loesung = false, opt = {}, top = null } = {}) {
   const t = THEMEN[thema], d = env && env.daten;
-  const favs = favoriten.filter(f => t.arten.includes(f.art)).sort((a, b) => (b.datum + b.art).localeCompare(a.datum + a.art));
+  const favs = favoriten.filter(f => t.arten.includes(f.art) || (t.favAuch || []).includes(f.art)).sort((a, b) => (b.datum + b.art).localeCompare(a.datum + a.art));
   const reiter = t.arten.filter(a => opt[a] !== false).map(a => {
     const inh = d ? artInhalt(a, d.inhalt, { loesung }) : null;
     const fav = d && favoriten.some(f => f.art === a && f.datum === d.datum);

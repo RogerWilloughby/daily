@@ -1,6 +1,7 @@
 // Kachel „Finanzen“: Dienst „finanzen“ (EZB: Wechselkurse, Leitzinsen, Inflation – für alle) und im privaten Betrieb
 // zusätzlich „kurse“ (DAX, Krypto, Gold über Yahoo – nur privat). Reine Kursangaben, keine Anlageempfehlung.
 // Mini-Reiter in der kleinen Kachel (Kurse · Zinsen & Inflation · Märkte · Spartipp, Zahnrad → Einstellungsfenster), kein Aufklappen.
+// Spartipp seit 0.36.0 aus dem Dienst „tagesinhalt“ mit ‹ › (vergangene Tage), ☆ Favorit (erscheint in „Alltag“) und „+ Aufgabe“.
 import { set } from '../core/board.js';
 import { kachelOpt, kachelOptSpeichern } from '../core/store.js';
 import { kachelEinstellungen } from '../core/einstellungen.js';
@@ -8,25 +9,32 @@ import { addAnswer } from '../core/ask.js';
 import { dienst, gespeichert } from '../dienste/client.js';
 import { kachel, antwort, FINANZ_STANDARD, AUSWAHL } from '../adapter/finanzen.js';
 import { betrieb } from '../core/betrieb.js';
-import { hm } from '../core/util.js';
-import { getToday } from './content.js';
+import { hm, berlinDay } from '../core/util.js';
+import { tagPlus } from '../adapter/tagesinhalt.js';
+import { favUmschalten, istFavorit, alsAufgabe } from './thema.js';
 
-let fe = null, ku = null, tipp = null;
+let fe = null, ku = null, tippEnv = null, tippHeute = null;
 const oder = x => (x instanceof Error ? null : x);
 const opt = () => kachelOpt('money', FINANZ_STANDARD);
 const stand = e => (e && (e.veraltet || Date.parse(e.gueltigBis) < Date.now()) ? `Stand ${hm(e.erstellt)}` : '');
-const zeichne = () => set('money', { ...kachel(fe, ku, opt(), tipp), tag: stand(fe) });
+const tipp = () => (tippEnv ? { env: tippEnv, fav: istFavorit('spartipp', tippEnv) } : null);
+const zeichne = () => set('money', { ...kachel(fe, ku, opt(), tipp()), tag: stand(fe) });
+// Spartipp eines Tags (Fehler: der bisherige bleibt)
+async function holeTipp(d) {
+  try { const r = await dienst('tagesinhalt', { datum: d }); tippEnv = r; if (r.daten.datum === r.daten.heute) tippHeute = r; } catch (e) { /* bisheriger bleibt */ }
+}
 
 // EZB-Daten (Takt 1 Stunde, für alle gleich) – beim Öffnen sofort der gespeicherte Stand; privat die Kurse parallel
 export async function load() {
   const alt = gespeichert('finanzen');
-  if (alt && !fe) set('money', { ...kachel(alt, null, opt(), tipp), tag: stand(alt) });
-  const [f, k, t] = await Promise.all([
+  if (alt && !fe) set('money', { ...kachel(alt, null, opt(), tipp()), tag: stand(alt) });
+  // Spartipp: heute – ist man zurückgeblättert, bleibt der Tag
+  const tippTag = !tippEnv || tippEnv.daten.datum === tippEnv.daten.heute ? berlinDay() : tippEnv.daten.datum;
+  const [f, k] = await Promise.all([
     dienst('finanzen').catch(e => e),
     betrieb.privat ? dienst('kurse').catch(e => e) : Promise.resolve(null),
-    getToday().catch(() => null)   // Spartipp des Tages (Tagesinhalte)
+    holeTipp(tippTag)
   ]);
-  if (t && t.spartipp) tipp = t.spartipp;
   if (f instanceof Error) { if (!fe && !alt) throw f; }
   else fe = f;
   if (!fe) fe = alt;
@@ -34,6 +42,7 @@ export async function load() {
   zeichne();
 }
 
+addAnswer(/spartipp|spar|geld sparen/i, () => (tippHeute && tippHeute.daten.inhalt.spartipp ? `Spartipp: ${tippHeute.daten.inhalt.spartipp.text}` : null));
 addAnswer(/leitzins|zins|inflation|teuerung|preissteigerung|dollar|pfund|franken|zloty|złoty|krone|yen|yuan|forint|lira|wechselkurs|währung|waehrung|kurs|euro|dax|börse|boerse|aktie|bitcoin|krypto|ethereum|gold/i,
   q => antwort(q, fe, ku));
 
@@ -42,6 +51,22 @@ document.addEventListener('click', e => {
   const b = e.target.closest('#tile-money [data-mini-wahl]'); if (!b) return;
   kachelOptSpeichern('money', { ...opt(), tage: +b.dataset.miniWahl });
   if (fe) zeichne();
+});
+
+// Spartipp: ‹ › Datum, ☆ Favorit, + Aufgabe
+document.addEventListener('click', e => {
+  const b = e.target.closest('#tile-money [data-ti]'); if (!b || b.disabled || !tippEnv) return;
+  const ti = b.dataset.ti, d = tippEnv.daten.datum;
+  if (ti === 'zurueck' || ti === 'vor') holeTipp(tagPlus(d, ti === 'vor' ? 1 : -1)).then(() => fe && zeichne());
+  else if (ti === 'fav') favUmschalten('spartipp', tippEnv);
+  else if (ti === 'aufgabe') alsAufgabe('spartipp', tippEnv, b);
+});
+document.addEventListener('daily:favoriten', () => { if (fe) zeichne(); });
+// Favorit „Spartipp“ aus der Kachel „Alltag“ öffnen: Reiter „Spartipp“, dieser Tag
+document.addEventListener('daily:tagesinhalt', e => {
+  if (e.detail.art !== 'spartipp') return;
+  kachelOptSpeichern('money', { reiter: 'tipp' });
+  holeTipp(e.detail.datum).then(() => fe && zeichne());
 });
 
 // Einstellungen der Kachel (Zahnrad in der Reiterspalte → Einstellungsfenster)

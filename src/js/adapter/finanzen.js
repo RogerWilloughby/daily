@@ -2,6 +2,7 @@
 // Reine Kursangaben, keine Anlageempfehlung. Rein, ohne DOM – testbar.
 import { esc, icon } from '../core/util.js';
 import { miniKurs } from './kursdiagramm.js';
+import { artInhalt, navZeile, datumText } from './tagesinhalt.js';
 
 export const FINANZ_STANDARD = { haupt: 'USD', weitere: ['GBP', 'CHF', 'PLN', 'CZK'], tage: 30, zinsen: true, maerkte: true, tipp: true };
 // Zur Wahl in den Einstellungen (Reihenfolge)
@@ -31,7 +32,7 @@ export const euroText = x => `1 € = ${kursZahl(x.kurs)} ${x.zeichen}`;
 
 // Kachel mit Mini-Reitern (core/board.js, entscheidungen.md Abschnitt 13): Kurse · Zinsen & Inflation · Märkte (nur mit kEnv) · Tipp.
 // opt siehe FINANZ_STANDARD (zinsen = Reiter „Zinsen & Inflation“; früher getrennt zinsen/inflation – beide aus = Reiter aus);
-// kEnv nur im privaten Betrieb; tipp = Spartipp des Tages aus den Tagesinhalten ({ kurz, text }) oder null.
+// kEnv nur im privaten Betrieb; tipp = Spartipp aus dem Dienst „tagesinhalt“ ({ env, fav }) oder null – mit ‹ › ☆ „+ Aufgabe“ wie die Themen-Kacheln.
 export function kachel(fEnv, kEnv = null, opt = {}, tipp = null) {
   const o = { ...FINANZ_STANDARD, ...opt };
   const d = fEnv && fEnv.daten;
@@ -66,8 +67,12 @@ export function kachel(fEnv, kEnv = null, opt = {}, tipp = null) {
     kopf: '<b>Märkte</b> <small class="fi-klein">zum Vortag</small>',
     liste: kw.map(x => ({ d: x.name, t: x.kurs == null ? 'gerade nicht verfügbar' : `${marktText(x)}  ${aend(x.aenderungProzent)}`,
       tip: `${x.name} · Quelle: Yahoo Finance (nur privat) · ${HINWEIS}`, gruppe: 1 })) });
-  if (tipp && tipp.text && o.tipp !== false) reiter.push({ id: 'tipp', name: 'Spartipp', icon: icon('piggy'), kopf: '<b>Spartipp</b> <small class="fi-klein">des Tages</small>',
-    html: `<p class="fi-tipp">${esc(tipp.text)}</p><p class="fi-text">Allgemeiner Tipp, keine Anlageempfehlung.</p>` });
+  const td = tipp && tipp.env && tipp.env.daten;
+  if (td && o.tipp !== false) {
+    const inh = artInhalt('spartipp', td.inhalt);
+    reiter.push({ id: 'tipp', name: 'Spartipp', icon: icon('piggy'), kopf: `<b>Spartipp</b> <small class="fi-klein">${esc(datumText(td.datum))}</small>`,
+      html: navZeile(td, tipp.fav) + (inh ? `<div class="ti-inhalt">${inh.html}</div>` : '<p class="ti-hinweis">Für diesen Tag gibt es hier nichts.</p>') });
+  }
   const zusatz = [einlage ? `Leitzins ${prozent(einlage.satzProzent)}` : '', de ? `Inflation ${prozent(de.rateProzent, 1)} (${monatName(de.monat).split(' ')[0]})` : ''].filter(Boolean).join(', ');
   return {
     state: 'live',

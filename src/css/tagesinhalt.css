@@ -6,7 +6,7 @@
 .ti-datum{min-width:5.5em;text-align:center;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
 .ti-nav .ti-stern{margin-left:auto;font-size:14px;color:var(--wd-sonne-text,#B8860B)}
 .ti-nav .ti-aufgabe{white-space:nowrap}
-.ti-inhalt{min-height:0;overflow:hidden}
+.ti-inhalt{min-height:0;overflow:hidden auto;scrollbar-width:thin}   /* langer Inhalt (Rezept): in der Kachel blättern */
 .ti-text{margin:2px 0 4px;font-size:13px;line-height:1.4}
 .ti-klein{margin:0 0 4px;font-size:12px;line-height:1.4;color:var(--muted)}
 .ti-antwort{margin:2px 0 0;font-size:13px;font-weight:600;color:var(--accent)}

@@ -107,15 +107,16 @@ test('Layouts: öffentlich ohne private Kacheln, Standard 12 (fertige zuerst), R
   // Standard (keine eigene Belegung): 12 Kacheln, überarbeitete zuerst, dann Vorschau-Kacheln in Standardreihenfolge
   const pub = chooseLayout(false).map(t => t.id);
   assert.equal(pub.length, STANDARD_ANZAHL);
-  assert.deepEqual(pub.slice(0, 10), ['weather', 'kalender', 'links', 'tasks', 'verkehr', 'money', 'unterhaltung', 'wissen', 'tools', 'usage']);
-  assert.deepEqual(pub.slice(10, 12), ['sport', 'food']);
+  assert.deepEqual(pub, ['weather', 'kalender', 'links', 'tasks', 'verkehr', 'money', 'unterhaltung', 'alltag', 'wissen', 'tools', 'usage', 'sport']);
   assert.deepEqual(chooseLayout(false, ['play', 'film', 'saving']).map(t => t.id), ['unterhaltung', 'money']);   // „Rätsel & Witz“ und „Film“ → Unterhaltung, „Sparen“ → Finanzen
   assert.deepEqual(chooseLayout(false, ['knowledge', 'travel', 'weather']).map(t => t.id), ['wissen', 'weather']);   // „Wissen“ und „Land des Tages“ → Wissen
   assert.ok(!CATALOG.some(t => t.id === 'knowledge' || t.id === 'travel'));
+  assert.deepEqual(chooseLayout(false, ['food', 'health', 'tech', 'relation', 'money']).map(t => t.id), ['alltag', 'money']);   // Essen, Gesundheit, Tech, Beziehung → Alltag
+  assert.ok(!CATALOG.some(t => ['food', 'health', 'tech', 'relation'].includes(t.id)));
   assert.ok(!CATALOG.some(t => t.id === 'transit' || t.id === 'fuel'));
   assert.ok(!pub.includes('news') && !pub.includes('alerts'));
   const priv = chooseLayout(true).map(t => t.id);
-  assert.deepEqual(priv.slice(0, 11), ['weather', 'kalender', 'tasks', 'verkehr', 'money', 'unterhaltung', 'wissen', 'links', 'tools', 'usage', 'news']);
+  assert.deepEqual(priv.slice(0, 12), ['weather', 'kalender', 'tasks', 'verkehr', 'money', 'unterhaltung', 'alltag', 'wissen', 'links', 'tools', 'usage', 'news']);
   // Raster: Rechner (quer, Wunschform 1,4) und Handy (hochkant, quadratisch)
   const r = (n, w, h, a, v) => { const x = raster(n, w, h, a, v); return `${x.cols}x${x.rows}`; };
   assert.deepEqual([1, 2, 4, 6, 9, 12, 20].map(n => r(n, 1344, 700)), ['1x1', '2x1', '2x2', '3x2', '3x3', '4x3', '5x4']);

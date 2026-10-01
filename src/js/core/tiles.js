@@ -16,11 +16,8 @@ export const CATALOG = [
   T('sport', 'Sport', 'Sport', 'ball'),
   T('money', 'Finanzen', 'Finanzen', 'money', { fertig: true, hover: 'Finanzen' }),   // Mini-Reiter: Kurse, Zinsen & Inflation (EZB), privat Märkte, Spartipp (ersetzt „Sparen“)
   T('unterhaltung', 'Unterhaltung', 'Spaß', 'lachen', { state: 'content', fertig: true, hover: 'Unterhaltung' }),   // Rätsel, Witz, Film mit Verlauf und Favoriten (ersetzt „Rätsel & Witz“ und „Filmtipp“)
-  T('food', 'Essen', 'Essen', 'food', { state: 'content' }),
   T('wissen', 'Wissen', 'Wissen', 'book', { state: 'content', fertig: true, hover: 'Wissen' }),   // Wort & Sprichwort, Land, An diesem Tag (Wikipedia) mit Verlauf und Favoriten (ersetzt „Wissen“ und „Land des Tages“)
-  T('health', 'Gesundheit', 'Fitness', 'heart', { state: 'content' }),
-  T('tech', 'Tech', 'Tech', 'chip', { state: 'content' }),
-  T('relation', 'Beziehung', 'Paar', 'pair', { state: 'content' }),
+  T('alltag', 'Alltag', 'Alltag', 'haus', { state: 'content', fertig: true, hover: 'Alltag' }),   // Rezept, Gesundheit, Tech, Beziehung mit Verlauf und Favoriten (ersetzt „Essen“, „Gesundheit“, „Tech“, „Beziehung“)
   T('tools', 'Tools', 'Tools', 'tool', { state: 'local', fertig: true, hover: 'Tools' }),   // eigenständige Werkzeuge (src/tools/), öffnen im neuen Tab
   T('usage', 'Deine Nutzung', 'Nutzung', 'bars', { state: 'local', fertig: true }),
   // nur privat
@@ -34,14 +31,13 @@ export const SLOTS = 20, STANDARD_ANZAHL = 12;
 export const LAYOUTS = {
   public: [
     'weather', 'kalender', 'links', 'tasks', 'verkehr',
-    'sport', 'money', 'unterhaltung', 'food', 'wissen',
-    'health', 'tech', 'relation', 'tools', 'usage'
+    'sport', 'money', 'unterhaltung', 'alltag', 'wissen',
+    'tools', 'usage'
   ],
   private: [
     'weather', 'kalender', 'news', 'tasks', 'verkehr',
-    'sport', 'money', 'unterhaltung', 'food', 'wissen',
-    'relation', 'links', 'tech',
-    'tools', 'usage'
+    'sport', 'money', 'unterhaltung', 'alltag', 'wissen',
+    'links', 'tools', 'usage'
   ]
 };
 
@@ -54,7 +50,7 @@ export const byId = Object.fromEntries(CATALOG.map(t => [t.id, t]));
 export const TILES = [];
 export const erlaubt = (id, isPrivate) => !!byId[id] && (isPrivate || byId[id].scope === 'public');
 // Frühere Kacheln, die in einer anderen aufgegangen sind: gespeicherte eigene Belegungen zeigen die neue Kachel
-export const ERSETZT = { transit: 'verkehr', fuel: 'verkehr', saving: 'money', play: 'unterhaltung', film: 'unterhaltung', knowledge: 'wissen', travel: 'wissen' };   // „Sparen“ seit 0.31.0 als Reiter „Spartipp“ in „Finanzen“
+export const ERSETZT = { transit: 'verkehr', fuel: 'verkehr', saving: 'money', play: 'unterhaltung', film: 'unterhaltung', knowledge: 'wissen', travel: 'wissen', food: 'alltag', health: 'alltag', tech: 'alltag', relation: 'alltag' };   // „Sparen“ seit 0.31.0 als Reiter „Spartipp“ in „Finanzen“
 export function chooseLayout(isPrivate, custom) {
   const eigene = Array.isArray(custom);
   const std = LAYOUTS[isPrivate ? 'private' : 'public'];
