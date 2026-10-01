@@ -154,8 +154,8 @@ Das allgemeine Kachelraster weiß nichts über einzelne Kacheln. Kachelbesondere
 | `src/js/core/board.js` | allgemeines Kachelraster: Raster, Aktivieren, Reiter, Listen, Einstellungen, **Mini-Reiter** (`kleinReiter`: Symbolspalte, gespeicherte Wahl, nur ganze Zeilen, Einstellungsfenster; Feld `unten` für ein Diagramm unter der Liste) – ohne Wetter/Finanzen |
 | `src/js/core/ansichten.js` | Anmeldung: `ansicht(id, { teaser, spalte, zurueck })` für eine Kachel, `erweiterung({ nachInhalt, nachZeichnen, groesse, zeiger })` für alle |
 | `src/js/ansichten/mini-diagramm.js` | allgemeine Diagramm-Bedienung: Dichte je Platz (`miniDichte`), Hinweise der großen Diagramme, Überfahren der Spalten |
-| `src/js/ansichten/wetter.js` | Wetter-Kachel klein: Regenzeile und Zeitpunkt-Block („Jetzt“ / überfahrene Stunde oder Tag) |
-| `src/js/ansichten/radar.js` | Radarkarte im Reiter „Radar“: Bilder laufen lassen, Zeitleiste (Start/Pause, Sprung) |
+| `src/js/ansichten/wetter.js` | Wetter-Kachel: Zeitpunkt-Block im Mini-Reiter „Jetzt“ („Jetzt“ / überfahrene Stunde oder Tag); HTML aus `adapter/wetter.js` (`zpHtml`, `jetztHtml`) |
+| `src/js/ansichten/radar.js` | Radarkarte (Mini-Reiter „Radar“, bis zur Umstellung auch aufgeklappt): Bilder laufen lassen, Zeitleiste (Start/Pause, Sprung) |
 | `src/js/adapter/diagramm.js` | Wetter-Diagramme als HTML/SVG-Text und gemeinsame Bausteine (`skala`, `pfad`, `pfadRund`, `umschalter`) |
 | `src/js/adapter/kursdiagramm.js` | Mini-Kursdiagramm der Finanzen-Kachel (`miniKurs`, `kursSkala`) |
 | `src/app.css` | allgemeine Styles, Design-Tokens, Hell/Dunkel |

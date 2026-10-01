@@ -133,3 +133,38 @@
 .zp-schirm{font-style:normal}
 .zp-s{color:var(--wd-sonne-text)}
 .wh-badge.wd-radar{background:var(--wd-regen);color:#fff}
+/* ---- Mini-Reiter der Wetterkachel (entscheidungen.md Abschnitt 13, Variante 1a) ---- */
+/* Jetzt: Zeitpunkt-Block mit festen Spalten (beim Überfahren des Diagramms wechseln nur die Werte), darunter das Diagramm (.kr-unten) */
+.wz-jetzt{flex:0 0 auto;min-width:0}
+.wz-jetzt .t-zp{display:grid;grid-template-columns:9.5ch 5.5ch 7.5ch minmax(0,1fr);column-gap:.5em;align-items:center;row-gap:1px;
+  font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--ink);font-size:12.5px}
+.wz-jetzt .zp-r{grid-template-columns:8ch 6.5ch 11.5ch 6ch}
+/* Hinweise: farbiger Punkt der Warnstufe vor jeder Zeile */
+.wh-punkt{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--wh);margin-right:6px;vertical-align:1px}
+.wh-dwd{font-weight:500;color:var(--muted);font-size:.85em;margin-left:4px}
+/* Radar klein: links die Karte (so hoch wie das Feld, Zeitleiste darunter), rechts die Werte; Farben der kleinen Kachel */
+.kr-feld:has(.rk-klein){container-type:size}
+.rk-klein{display:flex;gap:10px;height:100%;min-height:0}
+.rk-klein .rk-karte{order:0;flex:none;width:min(calc(100cqh - 30px),62cqw);gap:4px}
+.rk-klein .rk-werte{flex:1;min-width:0;grid-template-columns:1fr;gap:3px;font-size:12px;line-height:1.3;align-content:start;overflow:hidden}
+.rk-klein .rk-werte div{border-top-color:var(--line)}
+.rk-klein .rk-werte dt{color:var(--muted);font-size:10.5px}
+.rk-klein .rk-leiste{color:var(--muted);gap:6px}
+.rk-klein .rk-uhr{display:none}
+.rk-klein .rk-start{border-color:var(--line);color:var(--ink);width:24px;height:20px}
+.rk-klein .rk-felder i{background:var(--line)}
+.rk-klein .rk-felder button:hover i{background:var(--muted)}
+.rk-klein .rk-felder button[aria-pressed="true"] i{background:var(--ink)}
+/* schmale Kachel: Zeitpunkt-Block ohne „gefühlt“ und Wind, Radar ohne Werte (die stehen im Kopf), Legende des Diagramms endet mit „…“ */
+.kr-feld:has(.wz-jetzt){container-type:inline-size}
+@container (max-width:240px){
+  .wz-jetzt .t-zp{grid-template-columns:8.5ch 4.5ch minmax(0,1fr)}
+  .wz-jetzt :is(.zp-g,.zp-w){display:none}
+  .wz-jetzt .zp-r{grid-template-columns:7.5ch 5.5ch 5ch}
+  .rk-klein .rk-werte{display:none}
+  .rk-klein .rk-karte{width:min(calc(100cqh - 30px),100cqw)}
+  .kr-unten .wd-leg{display:none}
+  .kr-unten .wd-wahl button{padding-left:4px;padding-right:4px}
+}
+.kr-unten .wd-minilegende{overflow:hidden}
+.kr-unten .wd-leg{overflow:hidden;text-overflow:ellipsis;min-width:0}

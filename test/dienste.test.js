@@ -260,21 +260,23 @@ test('Adapter Wetter: Kachel und Antwort aus dem Vertrag', async () => {
   assert.match(k.chart, /class="wd-max" d="M[\d.]+,[\d.]+C/);
   assert.match(k.chart, /<b class="wd-t-sonne"[^>]*>Sonne<\/b>/);
   assert.match(k.chart, /wd-max.*wd-min/);
-  assert.doesNotMatch(k.chart + k.tabs.map(t => t.html).join(''), /wd-trend|Trend|unsicher/);   // keine Trend-Kennzeichnung mehr in der Oberfläche
+  assert.doesNotMatch(k.chart + JSON.stringify(k.kleinReiter), /wd-trend|Trend|unsicher/);   // keine Trend-Kennzeichnung mehr in der Oberfläche
   assert.ok(!k.rows.some(([l, v]) => /Trend|unsicher/.test(l + v)));
   // Kopfzeile mit farbigen Zahlen
   assert.match(k.titleHtml, /^Berlin 15° · <span class="wd-tm" title="Tiefstwert heute: 9° um \d{1,2} Uhr"><b class="wd-t-min">9°<\/b> <small class="wd-um">\d{1,2} Uhr<\/small><\/span> \/ <span class="wd-tm" title="Höchstwert heute: 16° um \d{1,2} Uhr"><b class="wd-t-max">16°<\/b> <small class="wd-um">\d{1,2} Uhr<\/small><\/span>$/);
   assert.equal(k.zeileIcon, true);
   assert.match(k.kopf, /9°<\/b> <small class="wd-um">\(\d{1,2} Uhr\)<\/small><\/span> \/ <span class="wd-tm" title="Höchstwert[^"]*"><b class="wd-t-max">16°<\/b> <small class="wd-um">\(\d{1,2} Uhr\)<\/small>/);   // kleine Kachel: Uhrzeit in Klammern
-  // Aufgeklappt: Reiter
-  assert.deepEqual(k.tabs.map(t => t.name), ['Heute', '15 Tage', '48 Std.', 'Hinweise', 'Mehr']);
-  const tab = id => k.tabs.find(t => t.id === id).html;
-  assert.equal((tab('tage').match(/data-tip=/g) || []).length, 15);          // 15 Tagesspalten (Tag 16 der Quelle ohne Werte fällt weg)
-  assert.equal((tab('stunden').match(/data-tip=/g) || []).length, 48);       // 48 Stundenspalten
-  assert.match(tab('tage'), /Teilweise bewölkt|Regen|Bedeckt/);             // Hinweis nennt den Zustand
-  assert.match(tab('heute'), /<b class="wd-t-min">9°<\/b> bis <b class="wd-t-max">16°<\/b>/);
-  assert.match(tab('mehr'), /Luftqualität.*Taupunkt/s);
-  assert.ok(!/<path[^>]*d=""/.test(k.tabs.map(t => t.html).join('') + k.chart), 'leerer Pfad');
+  // Mini-Reiter (kein Aufklappen): Jetzt · Mehr – Radar nur mit Radar-Antwort, Hinweise nur bei Warnung
+  assert.equal(k.tabs, undefined);
+  assert.deepEqual(k.kleinReiter.map(r => r.id), ['jetzt', 'mehr']);
+  assert.ok(k.kleinReiter.every(r => /^<svg class="ico"/.test(r.icon)));
+  assert.match(k.kleinReiter[0].html, /^<div class="wz-jetzt"><span class="t-zp" data-jetzt="[^"]+"><span class="zp-z">Jetzt<\/span><span class="zp-t">15°<\/span>/);
+  const mehr = k.kleinReiter[1].liste;
+  assert.ok(['Morgen', 'Regen', 'Wind', 'Sonne', 'Luft', 'Pollen', 'Druck', 'Feuchte'].every(x => mehr.some(z => z.d === x)), mehr.map(z => z.d).join());
+  assert.equal(mehr[0].d, 'Morgen');                                          // wichtigste zuerst
+  assert.match(mehr.find(z => z.d === 'Feuchte').t, /Taupunkt/);
+  assert.ok(k.info.some(x => /^Stand \d\d:\d\d Uhr$/.test(x)));
+  assert.ok(!/<path[^>]*d=""/.test(JSON.stringify(k.kleinReiter) + k.chart), 'leerer Pfad');
   // Sonne unbekannt ≠ 0 Stunden
   const { tageDiagramm } = await esm('src/js/adapter/diagramm.js');
   const ohneSonne = env.daten.tage.map((t, i) => (i === 2 ? { ...t, sonnenstunden: null } : t));
@@ -437,9 +439,13 @@ test('Adapter Regen: Hinweis in der Wetterkachel und Reiter „Radar“', async 
   assert.match(html, /0,4 mm, aufgehört vor 30 Min\./);
   const wetter = (await rufe('wetter', { ort: 'Berlin' })).body;
   const k = kachel(wetter, regen);
-  assert.deepEqual(k.tabs.map(t => t.id), ['heute', 'radar', 'tage', 'stunden', 'hinweise', 'mehr']);
+  assert.deepEqual(k.kleinReiter.map(r => r.id), ['jetzt', 'radar', 'mehr']);
+  const rk = k.kleinReiter[1];
+  assert.equal(rk.kopf, 'Regen in 20 Min. (leicht).');
+  assert.match(rk.html, /^<div class="rk-klein"><div class="rk-karte"><svg class="rk rk-mit-land".*<div class="rk-leiste".*<dl class="rk-werte">.*4 km westlich/s);
+  assert.ok(k.info.some(x => /^Radar: Deutscher Wetterdienst/.test(x)) && k.info.some(x => /GeoBasis-DE/.test(x)));
   assert.equal(k.zeile2.text, "Regen in 20 Min. (leicht)."); assert.doesNotMatch(k.x, /Regen in/);   // Radar geht vor, eigene Zeile
-  assert.deepEqual(kachel(wetter, null).tabs.map(t => t.id), ['heute', 'tage', 'stunden', 'hinweise', 'mehr']);   // ohne Radar
+  assert.deepEqual(kachel(wetter, null).kleinReiter.map(r => r.id), ['jetzt', 'mehr']);   // ohne Radar
   assert.match(text(wetter, regen), /Radar: Regen in 20 Min\./);
 });
 
@@ -546,13 +552,19 @@ test('Adapter Wetterhinweise: Abzeichen, kurzer Hinweis und Reiter in der Wetter
   const k = kachel(wetter, null, env);
   assert.match(k.titleHtml, /wh-badge/);
   assert.match(k.x, /gefühlt .*°\. Sturmböen ab/);
-  assert.deepEqual(k.tabs.map(t => t.id), ['heute', 'tage', 'stunden', 'hinweise', 'mehr']);
+  assert.deepEqual(k.kleinReiter.map(r => r.id), ['jetzt', 'hinweise', 'mehr']);              // Mini-Reiter „Hinweise“ nur bei Warnung
+  const hr = k.kleinReiter[1];
+  assert.match(hr.kopf, /wh-badge wh-s2/);
+  assert.deepEqual(hr.liste.map(z => z.t), ['Sturmböen', 'Starke böen']);
+  assert.match(hr.liste[0].d, /^ab /);
+  assert.match(hr.liste[0].ico, /wh-punkt wh-s2/);
+  assert.match(hr.liste[0].tip, /^Markantes Wetter: Amtliche WARNUNG vor STURMBÖEN \(.*\)\nEs treten Sturmböen um 70 km\/h auf\.\nEmpfehlung: Achten Sie.*\nTipp \(DAILY\): /);
   // ohne Hinweis: kein Abzeichen, kein Hinweis im Text – der Reiter sagt ruhig „keine“
   const leer = kachel(wetter, null, { erstellt: new Date().toISOString(), daten: { gebiet: 'Berlin', hoechsteStufe: 0, hinweise: [] } });
   assert.doesNotMatch(leer.titleHtml, /wh-badge/);
   assert.doesNotMatch(leer.x, /Sturm/);
-  assert.match(leer.tabs.find(t => t.id === 'hinweise').html, /Keine amtlichen Wetterhinweise für Berlin\..*Stand .*Deutscher Wetterdienst/s);
-  assert.match(kachel(wetter, null, null).tabs.find(t => t.id === 'hinweise').html, /gerade nicht erreichbar/);
+  assert.deepEqual(leer.kleinReiter.map(r => r.id), ['jetzt', 'mehr']);                        // ohne Warnung kein Reiter
+  assert.deepEqual(kachel(wetter, null, null).kleinReiter.map(r => r.id), ['jetzt', 'mehr']);
   assert.match(h.reiter(null, 'Europe/Rome', Date.now(), { name: 'Rom', land: 'IT' }), /nur für Orte in Deutschland/);
   // Unwetter (Stufe 3–4): deutlich, zuerst, nicht verharmlost
   const u = { daten: { gebiet: 'Dresden', hoechsteStufe: 4, hinweise: [{ art: 'wind', stufe: 4, stufeName: 'extrem', ereignis: 'ORKANBÖEN', titel: 'Amtliche WARNUNG vor ORKANBÖEN',
@@ -560,8 +572,10 @@ test('Adapter Wetterhinweise: Abzeichen, kurzer Hinweis und Reiter in der Wetter
   const ku = kachel(wetter, null, u);
   assert.match(ku.titleHtml, /wh-s4[^>]*>! Unwetter: Orkanböen</);
   assert.match(ku.x, /^Extreme Unwetterwarnung: Orkanböen bis/);
-  assert.equal(ku.tabs[0].id, 'hinweise');
-  assert.match(ku.tabs[0].html, /Aufenthalt im Freien vermeiden!/);
+  assert.equal(ku.unwetter, 'ORKANBÖEN|' + u.daten.hinweise[0].beginn);                       // Kennung: einmal automatisch auf „Hinweise“
+  const ur = ku.kleinReiter.find(r => r.id === 'hinweise');
+  assert.equal(ur.liste[0].t, 'Extreme Unwetterwarnung: Orkanböen');
+  assert.match(ur.liste[0].tip, /Aufenthalt im Freien vermeiden!/);
 });
 
 test('Feiertage: Bundesland aus dem Ort, Feiertage, Brückentage, Ferien, Zeitumstellung, KW, Aktionstage', async () => {
@@ -776,20 +790,22 @@ test('Einstellungen: Kachel-Formular, Wetter-Optionen, Kachel-Listen', async () 
   // Wetter: Reiter aus, Start-Reiter, Mini-Diagramm 7 Tage; Unwetter bleibt vorn
   const { kachel, mitOptionen } = await esm('src/js/adapter/wetter.js');
   const w = (await rufe('wetter', { ort: 'Berlin' })).body, r = (await rufe('regen', { lat: '52.52', lon: '13.41' })).body;
-  const k = mitOptionen(kachel(w, r, null), w, { radar: false, stunden: false, start: 'tage', mini: 7 });
-  assert.deepEqual(k.tabs.map(t => t.id), ['heute', 'tage', 'hinweise', 'mehr']);
-  assert.equal(k.startReiter, 'tage');
-  assert.match(k.chart, /7 Tage: /);
-  assert.equal(mitOptionen(kachel(w, r, null), w, { start: 'radar', radar: false }).startReiter, 'heute');   // ausgeblendeter Start → Heute
+  const C = k => k.kleinReiter.find(x => x.id === 'jetzt').unten;                      // Diagramm unter dem Zeitpunkt-Block im Reiter „Jetzt“
+  const k = mitOptionen(kachel(w, r, null), w, { radar: false, mini: 7 });
+  assert.deepEqual(k.kleinReiter.map(x => x.id), ['jetzt', 'mehr']);
+  assert.equal(k.startReiter, 'jetzt');
+  assert.match(C(k), /7 Tage: /);
+  assert.equal(k.chart, '');                                                             // nicht mehr im Kopf der Kachel
+  assert.deepEqual(mitOptionen(kachel(w, r, null), w, { mehr: false }).kleinReiter.map(x => x.id), ['jetzt', 'radar']);
   // Standard: Mini-Diagramm Heute (0–24 Uhr; Temperatur + Regen mm, Deckkraft nach Wahrscheinlichkeit)
   const k24 = mitOptionen(kachel(w, r, null), w, {});
-  assert.match(k24.chart, /data-mini-wahl="1" aria-pressed="true">Heute<.*<b class="wd-t-regen"[^>]*>Regen mm<\/b> · <b class="wd-t-max" title="Temperatur je Stunde, heute 0 bis 24 Uhr">Temperatur<\/b>/);
-  assert.equal((k24.chart.match(/class="wd-spalte"/g) || []).length, w.daten.heute.length);
-  assert.match(k24.chart, /wd-marken"><span[^>]*>3<\/span><span[^>]*>6<\/span>.*>21<\/span><\/div>/);   // 0–24 Uhr, alle 3 Std.
-  assert.equal(mitOptionen(kachel(w, r, null), w, { mini: 24 }).chart, k24.chart);          // früher „24 Std.“ → Heute
+  assert.match(C(k24), /data-mini-wahl="1" aria-pressed="true">Heute<.*<b class="wd-t-regen"[^>]*>Regen mm<\/b> · <b class="wd-t-max" title="Temperatur je Stunde, heute 0 bis 24 Uhr">Temperatur<\/b>/);
+  assert.equal((C(k24).match(/class="wd-spalte"/g) || []).length, w.daten.heute.length);
+  assert.match(C(k24), /wd-marken"><span[^>]*>3<\/span><span[^>]*>6<\/span>.*>21<\/span><\/div>/);   // 0–24 Uhr, alle 3 Std.
+  assert.equal(C(mitOptionen(kachel(w, r, null), w, { mini: 24 })), C(k24));          // früher „24 Std.“ → Heute
   // Kopfzeile klein: Wind heute (Höchstwert und Böen)
   assert.match(k24.kopf, /<span class="wd-wind" title="Wind heute: bis 18 km\/h aus W, Böen bis 38 km\/h">· Wind 18\/38 km\/h<\/span>/);
-  const z24 = JSON.parse(k24.chart.match(/data-zp="([^"]*)"/)[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
+  const z24 = JSON.parse(C(k24).match(/data-zp="([^"]*)"/)[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
   assert.deepEqual(Object.keys(z24), ['z', 't', 'g', 'i', 'l', 'mm', 'p', 'w', 's']);   // gleiche Felder wie beim Tag
   assert.match(z24.z, /^(Mo|Di|Mi|Do|Fr|Sa|So) \d{1,2} Uhr$/);
   assert.match(z24.w, /^Wind \d+ km\/h$/);
@@ -799,15 +815,15 @@ test('Einstellungen: Kachel-Formular, Wetter-Optionen, Kachel-Listen', async () 
   assert.deepEqual(Object.keys(kk.zp), ['z', 't', 'g', 'i', 'l', 'mm', 'p', 'w', 's']);
   assert.equal(kk.zp.z, 'Jetzt');
   assert.match(kk.kopf, /class="wh-badge wd-radar" title="Regenradar: Regen in 20 Min\. \(leicht\)\.">☂ in 20 Min\. \(leicht\)<\/span>/);
-  assert.doesNotMatch(k24.chart, /wd-sonnen/);                                        // Sonne nur bei Tagen
+  assert.doesNotMatch(C(k24), /wd-sonnen/);                                        // Sonne nur bei Tagen
   // 3 Tage: 12 Tageszeiten, Wochentag mittig je Tag, jeder zweite Tag hinterlegt, Sonne je Tageszeit; früher „48 Std.“ → 3 Tage
   const k48 = mitOptionen(kachel(w, r, null), w, { mini: 48 });
-  assert.match(k48.chart, /data-mini-wahl="3" aria-pressed="true">3 Tage</);
-  assert.equal((k48.chart.match(/class="wd-spalte"/g) || []).length, 12);
-  assert.equal((k48.chart.match(/wd-streifen/g) || []).length, 1);
-  assert.match(k48.chart, /wd-marken">(<span style="left:(16\.7|50\.0|83\.3)%">(Mo|Di|Mi|Do|Fr|Sa|So)<\/span>){3}<\/div>/);
-  assert.match(k48.chart, /<div class="wd-sonnen wd-t-sonne">(<span class="(wd-s2)?" style="left:[\d.]+%">\d+<\/span>){12}<\/div>/);
-  const z3 = JSON.parse(k48.chart.match(/data-zp="([^"]*)"/)[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
+  assert.match(C(k48), /data-mini-wahl="3" aria-pressed="true">3 Tage</);
+  assert.equal((C(k48).match(/class="wd-spalte"/g) || []).length, 12);
+  assert.equal((C(k48).match(/wd-streifen/g) || []).length, 1);
+  assert.match(C(k48), /wd-marken">(<span style="left:(16\.7|50\.0|83\.3)%">(Mo|Di|Mi|Do|Fr|Sa|So)<\/span>){3}<\/div>/);
+  assert.match(C(k48), /<div class="wd-sonnen wd-t-sonne">(<span class="(wd-s2)?" style="left:[\d.]+%">\d+<\/span>){12}<\/div>/);
+  const z3 = JSON.parse(C(k48).match(/data-zp="([^"]*)"/)[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
   assert.deepEqual(Object.keys(z3), ['z', 't', 'g', 'i', 'l', 'mm', 'p', 'w', 's']);
   assert.match(z3.z, /^(Mo|Di|Mi|Do|Fr|Sa|So) Morgen$/);
   // Zeitpunkt-Block: Schirm vor Regenmenge und -wahrscheinlichkeit, auch bei 0 (nicht durchgestrichen)
@@ -819,8 +835,8 @@ test('Einstellungen: Kachel-Formular, Wetter-Optionen, Kachel-Listen', async () 
   assert.match(zr('0,4 mm', ''), /<span class="zp-p"><\/span>/);                    // ohne Wahrscheinlichkeit kein Schirm
   // Ältere Antwort ohne heute/tageszeiten → 15 Tage wie bisher
   const alt = { ...w, daten: { ...w.daten, heute: undefined, tageszeiten: undefined } };
-  assert.equal(mitOptionen(kachel(alt, r, null), alt, { mini: 3 }).chart, kachel(alt, r, null).chart);
-  assert.doesNotMatch(k24.chart, />jetzt</);
+  assert.equal(C(mitOptionen(kachel(alt, r, null), alt, { mini: 3 })), kachel(alt, r, null).chart);
+  assert.doesNotMatch(C(k24), />jetzt</);
   const { miniHeute } = await esm('src/js/adapter/diagramm.js');
   const probe = Array.from({ length: 24 }, (_, i) => ({ zeit: new Date(Date.UTC(2026, 8, 28, i)).toISOString(), tempC: 10 + i % 5, regenProzent: i === 3 ? 80 : i === 4 ? 40 : 0, niederschlagMm: i === 3 ? 2 : 0.2 }));
   const m = miniHeute(probe, iso => new Date(iso).getUTCHours());
@@ -837,10 +853,11 @@ test('Einstellungen: Kachel-Formular, Wetter-Optionen, Kachel-Listen', async () 
   const { mmStufe, deckkraft } = await esm('src/js/adapter/diagramm.js');
   assert.deepEqual([mmStufe(0.3, 2, 4), mmStufe(3, 2, 4), mmStufe(12, 10, 6), mmStufe(34, 10, 4), mmStufe(0, 2, 2)], [0.5, 1, 2, 10, 1]);
   assert.deepEqual([deckkraft(0), deckkraft(100), deckkraft(null)], [0.2, 1, 0.6]);
-  assert.equal(mitOptionen(kachel(w, r, null), w, { mini: 16 }).chart, kachel(w, r, null).chart);
+  assert.equal(C(mitOptionen(kachel(w, r, null), w, { mini: 16 })), kachel(w, r, null).chart);
   const u = { daten: { gebiet: 'X', hoechsteStufe: 3, hinweise: [{ art: 'wind', stufe: 3, stufeName: 'unwetter', ereignis: 'ORKANBÖEN', titel: 'T', beginn: null, ende: null, aktiv: true, beschreibung: '', empfehlung: '', tipp: 't' }] } };
-  const ku = mitOptionen(kachel(w, r, u), w, { hinweise: false, start: 'mehr' });
-  assert.deepEqual([ku.tabs[0].id, ku.startReiter], ['hinweise', 'hinweise']);
+  const ku = mitOptionen(kachel(w, r, u), w, { hinweise: false, mehr: false });
+  assert.deepEqual(ku.kleinReiter.map(x => x.id), ['jetzt', 'radar', 'hinweise']);        // Hinweise bei Warnung nicht abwählbar
+  assert.equal(ku.unwetter, 'ORKANBÖEN|');
   // Kachel-Listen (rein)
   const kl = await esm('src/js/ui/kacheln.js');
   assert.deepEqual(kl.verschieben(['weather'], 'kalender').aktiv, ['weather', 'kalender']);

@@ -1,6 +1,6 @@
 // Radarkarte im Reiter „Radar“ (adapter/regen.js): Bilder laufen von selbst (ein Bild je 15 Minuten, −60 min bis +2 Std.),
 // die Zeitleiste darunter hält an oder springt zu einem Zeitpunkt. Ohne Skript bleibt das Bild „jetzt“ stehen.
-// Gilt für jede Radarkarte in einer aufgeklappten Kachel oder im Handy-Vollbild.
+// Gilt für jede Radarkarte: Mini-Reiter „Radar“ der kleinen Kachel, aufgeklappte Kachel oder Handy-Vollbild.
 import { erweiterung } from '../core/ansichten.js';
 
 const TAKT_MS = 900, PAUSE_AM_ENDE = 2;   // am letzten Bild zwei Takte stehen bleiben
@@ -43,4 +43,5 @@ function starte(karte) {
   });
 }
 
-erweiterung({ nachInhalt(el) { el.querySelectorAll('.rk-karte').forEach(starte); } });
+// nachInhalt: aufgeklappte Kachel (bis zur Umstellung); nachZeichnen: Mini-Reiter „Radar“ in der kleinen Kachel
+erweiterung({ nachInhalt(el) { el.querySelectorAll('.rk-karte').forEach(starte); }, nachZeichnen(el) { el.querySelectorAll('.kr .rk-karte').forEach(starte); } });

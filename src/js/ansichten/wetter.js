@@ -1,19 +1,15 @@
-// Ansicht der Wetterkachel (klein): Regenzeile und Zeitpunkt-Block mit festen Feldern
+// Ansicht der Wetterkachel (klein): Zeitpunkt-Block mit festen Feldern (im Mini-Reiter „Jetzt“)
 // (Zeitpunkt · Temperatur · gefühlt · Symbol+Wetterlage / Regen mm · Regen % · Wind · Sonne des Tages).
 // Beim Überfahren des Mini-Diagramms wechseln nur die Werte (Stunde/Tag aus data-zp der Spalte), beim Verlassen zurück auf „Jetzt“.
 import { ansicht } from '../core/ansichten.js';
 import { esc, glyph } from '../core/util.js';
+import { zpHtml } from '../adapter/wetter.js';
 
-export function zpHtml(z) {
-  const f = (k, v) => `<span class="zp-${k}">${esc(v || '')}</span>`;
-  // Regenmenge und -wahrscheinlichkeit mit Schirm (blau)
-  const schirm = (k, v) => `<span class="zp-${k}">${v ? `<i class="zp-schirm" aria-hidden="true">☂</i> ${esc(v)}` : ''}</span>`;
-  return f('z', z.z) + f('t', z.t) + f('g', z.g) + `<span class="zp-l">${glyph(z.i)}<span>${esc(z.l)}</span></span>` +
-    `<span class="zp-r">${schirm('mm', z.mm)}${schirm('p', z.p)}${f('w', z.w)}${f('s', z.s)}</span>`;
-}
+export { zpHtml };
 
 ansicht('weather', {
   teaser(t) {
+    if (t.kleinReiter && t.kleinReiter.length) return null;   // Mini-Reiter: Zeitpunkt-Block steht im Reiter „Jetzt“ (adapter/wetter.js → jetztHtml)
     const zeile2 = t.zeile2 && t.zeile2.text
       ? `<span class="t-zeile2">${t.zeile2.glyph ? `<span class="t-icon">${t.zeile2.glyph}</span>` : ''}${esc(t.zeile2.text)}</span>` : '';
     const zp = t.zp ? `<span class="t-zp" data-jetzt="${esc(JSON.stringify(t.zp))}">${zpHtml(t.zp)}</span>` : '';

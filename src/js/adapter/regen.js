@@ -89,6 +89,27 @@ function leiste(k, uhr, j) {
     `<span class="rk-uhr" aria-live="off">${esc(titel(k.bilder[j]))}</span></div>`;
 }
 
+// Mini-Reiter „Radar“ (kleine Kachel): links die Karte mit Zeitleiste, so hoch wie das Feld; rechts die Werte (was nicht passt, wird abgeschnitten).
+// Legende und Quellen stehen im (i)-Feld der Kachel (radarInfo).
+export function radarKlein(env, uhr) {
+  if (!env || !env.daten || !env.daten.karte) return '';
+  const d = env.daten, k = d.karte;
+  const lage = d.beginnt ? `Regen ab ${uhr(d.beginnt.zeit)}` : d.endet ? `endet ${uhr(d.endet.zeit)}` : d.regnet ? 'Regen hält an' : 'trocken';
+  const werte = [
+    ['Jetzt', d.regnet ? `${STUFE_TEXT[d.jetzt.stufe]}, ${komma(d.jetzt.mmH)} mm/h` : 'trocken'],
+    ['2 Std.', lage + (d.maxMmH ? ` · bis ${komma(d.maxMmH)} mm/h` : '')],
+    ['Nähe', d.naehe ? (d.naehe.entfernungKm === 0 ? `am Ort (${STUFE_TEXT[d.naehe.stufe]})` : `${d.naehe.entfernungKm} km ${RICHTUNG_TEXT[d.naehe.richtung]}`) : 'nichts bis 25 km'],
+    ['Letzte Std.', `${komma((d.letzteStunde || {}).summeMm ?? 0)} mm`]
+  ];
+  return `<div class="rk-klein"><div class="rk-karte">${karte(k, env.ort, d.jetzt.zeit)}${leiste(k, uhr, jetztIndex(k, d.jetzt.zeit))}</div>` +
+    `<dl class="rk-werte">${werte.map(([a, b]) => `<div><dt>${esc(a)}</dt><dd>${esc(b)}</dd></div>`).join('')}</dl></div>`;
+}
+// Kopf des Reiters „Radar“ und Angaben fürs (i)-Feld
+export const radarKopf = env => hinweis(env) || (env && env.daten && env.daten.regnet ? 'Regen am Ort' : 'Kein Regen in der Nähe');
+export const radarInfo = env => (env && env.daten ? ['Radar: Deutscher Wetterdienst (über Bright Sky), Bild alle 15 Min. von −1 bis +2 Std.',
+  ...(env.daten.karte && env.daten.karte.ecken ? [`Karte: © GeoBasis-DE / BKG (${String(env.erstellt || '').slice(0, 4)}), basemap.de`] : []),
+  'Stufen: leicht · mäßig · stark · sehr stark (je dunkler, desto stärker)'] : []);
+
 // Reiter „Radar“: links die Werte, in der Mitte die Karte (volle Höhe) mit Zeitleiste, rechts Verlauf und Legende
 export function radarReiter(env, uhr) {
   if (!env || !env.daten) return '';

@@ -76,6 +76,18 @@ export function reiter(env, zone = 'Europe/Berlin', jetzt = Date.now(), ort = {}
   return `<div class="wh-feld">${karten}${mehr}<p class="wh-quelle">Amtliche Warnungen: Deutscher Wetterdienst${gebiet}. Tipps: DAILY.</p></div>`;
 }
 
+// Mini-Reiter „Hinweise“ (nur bei Warnung): je Hinweis eine Zeile – Zeitraum, amtliches Ereignis, farbiger Punkt der Stufe;
+// beim Überfahren Stufe, amtliche Überschrift, Zeitraum, amtlicher Text unverändert, Empfehlung und Tipp. Leer, wenn nichts vorliegt.
+export function zeilen(env, zone = 'Europe/Berlin', jetzt = Date.now()) {
+  return liste(env).map(h => ({
+    ico: `<span class="wh-punkt wh-s${h.stufe}" aria-hidden="true"></span>`,
+    d: zeitraum(h, zone, jetzt), t: (h.stufe >= 3 ? STUFE_TEXT[h.stufe] + ': ' : '') + ereignisText(h.ereignis),
+    tip: [`${STUFE_TEXT[h.stufe]}: ${h.titel || ereignisText(h.ereignis)} (${zeitraum(h, zone, jetzt, true)})`, h.beschreibung,
+      h.empfehlung ? 'Empfehlung: ' + h.empfehlung : '', h.tipp ? 'Tipp (DAILY): ' + h.tipp : ''].filter(Boolean).join('\n'),
+    gruppe: 1
+  }));
+}
+
 // Antwort für „Frag DAILY“
 export function antwort(env, ortName = '', zone = 'Europe/Berlin', jetzt = Date.now()) {
   if (!env || !env.daten) return 'Die Wetterhinweise sind gerade nicht erreichbar.';

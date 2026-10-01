@@ -1,6 +1,6 @@
 # DAILY – Übergabe: aktueller Arbeitsstand
 
-Stand 01.10.2026 (App 0.31.0). Für neue Chats: hier steht, woran gerade gearbeitet wird und wie es weitergeht. Verbindliche Entscheidungen stehen in `entscheidungen.md`, die Architektur in `../architektur/dienste.md`.
+Stand 01.10.2026 (App 0.32.0). Für neue Chats: hier steht, woran gerade gearbeitet wird und wie es weitergeht. Verbindliche Entscheidungen stehen in `entscheidungen.md`, die Architektur in `../architektur/dienste.md`.
 
 ## Vorgehen (Rogers Vorgaben)
 - **Erst Plan, dann Umsetzung (Rogers Vorgabe vom 27.09.2026):** Vor jeder Umsetzung und vor jedem Schreiben ins Repo einen kurzen Plan vorlegen – was und warum, welche Dateien (neu/geändert/gelöscht), was Roger danach tun muss, was offen/unsicher ist – und auf Rogers OK warten. Nicht einfach loslegen.
@@ -65,13 +65,13 @@ App-Seite „Woher kommen die Daten?“ (Fußzeile → Datenquellen) zeigt die D
 - Radarkarte: Nutzungsbedingungen basemap.de im Wortlaut prüfen (PDF war nicht abrufbar) – `../recht/checkliste.md`; Zoom fest 9 (Kartenschrift bei großer Kachel etwas weich) – bei Bedarf Zoom 10 für große Karten; außerhalb Deutschlands keine Landkarte (heller Grund).
 - Namenstage: kleinere Tage aus dem Gedächtnis zusammengestellt – Roger meldet falsche Namen, Korrektur direkt in der Liste.
 - Vercel hat zweimal einen Push verpasst (28.09. und 29.09.) – Git-Verbindung in Vercel prüfen (Settings → Git, Deployments).
-- Wetter klein bei 1100 px: Sonnenzahl ragt aus der Kachel, Text der Wetterlage wird verdrängt (gemessen mit App 0.26.3; bei 1400 und 1920 px passt alles). Ansätze: „Wind“ weglassen, Wetterlage kürzen.
+- ~~Wetter klein bei 1100 px: Sonnenzahl ragt heraus~~ – überholt durch die Mini-Reiter (0.32.0); schmale Form des Zeitpunkt-Blocks.
 - Später zu besprechen: „Immer meinen aktuellen Standort verwenden“, Ort je Kachel, Kachelauswahl in den Einstellungen.
 - Arbeitsweg Auto: Autobahnen aus Start und Ziel vorschlagen (heute von Hand); aufgelöster Start/Ziel („→ Dresden (Sachsen)“) erscheint im Zahnrad erst beim nächsten Öffnen; Richtung nicht gefiltert (beide Richtungen, für Hin- und Rückweg gewollt).
 - Autobahn öffentlich: API ohne Lizenzangabe, Staumeldungen teils INRIX – vor dem öffentlichen Start klären (`../recht/checkliste.md`).
 
 ## Nächste Schritte (in dieser Reihenfolge)
-0. **Mini-Reiter umsetzen** (Konzept-Entscheidung 29.09.2026, `entscheidungen.md` Abschnitt 13): (1) Baustein im Kachelraster + Kachel „Verkehr“ ✅ 0.30.0; Kachel „Finanzen“ ✅ 0.31.0 (Kurse · Zinsen & Inflation · Märkte · Spartipp; Baustein-Feld `unten`). Für Finanzen folgen die Dienste `krypto` (Reiter Märkte öffentlich, CoinGecko-Demo-Schlüssel nötig) und `strompreis` (Reiter Strom, Energy-Charts) – je eigener Plan. Danach (2) Wetter (Variante 1a: Jetzt · Radar · Hinweise · Mehr), dann (3) Kalender, Finanzen, Tools, lokale Kacheln, (4) Aufklappen entfernen. Handy pausiert (Roger 29.09.: nur am PC darstellen, auf neue Dienste konzentrieren). **Je Schritt Plan vorlegen.**
+0. **Mini-Reiter umsetzen** (Konzept-Entscheidung 29.09.2026, `entscheidungen.md` Abschnitt 13): (1) Baustein im Kachelraster + Kachel „Verkehr“ ✅ 0.30.0; Kachel „Finanzen“ ✅ 0.31.0 (Kurse · Zinsen & Inflation · Märkte · Spartipp; Baustein-Feld `unten`). Für Finanzen folgen die Dienste `krypto` (Reiter Märkte öffentlich, CoinGecko-Demo-Schlüssel nötig) und `strompreis` (Reiter Strom, Energy-Charts) – je eigener Plan. (2) Wetter ✅ 0.32.0 (Jetzt · Radar · Hinweise · Mehr). Als Nächstes (3) Kalender, Tools und lokale Kacheln, dann (4) Code fürs Aufklappen entfernen (u. a. große Radar-Ansicht, große Diagramme). Handy pausiert (Roger 29.09.: nur am PC darstellen, auf neue Dienste konzentrieren). **Je Schritt Plan vorlegen.**
 1. **Kachel „Verkehr“ weiter ausbauen** (Entscheidungen in `entscheidungen.md` → „Kachel Verkehr“): Schritt 2 Dienst `autobahn` ✅ 0.28.0 (Roger testet auf Vercel: Zahnrad → Autobahnen, Start, Ziel). Als Nächstes Schritt 3 Bus/Bahn über Verkehrsverbünde (`abfahrten`, `verbindung`, Start VVO). **Vorher Plan vorlegen.**
 2. **Nächste Kachel auf daily/1 umziehen** – Roger wählt aus: Sport, Geld (privat), Wissen, Tagesinhalte, Schlagzeilen (privat). Vorschlag laut `dienste-katalog.md`: `tanken`, `abfahrten`, `fussball`, `an-diesem-tag`, `tagesinhalt`, `kurse`. **Vorher Plan vorlegen.** Je Dienst: Dienstblatt, Version, Tests, Frag DAILY, Kachel mit `fertig: true`, Einstellungen im Zahnrad-Reiter der Kachel.
 3. Neue Dienst-Ideen von Roger aufnehmen (`dienste-katalog.md`).

@@ -425,4 +425,5 @@ a.tl-z.tl-link:hover .tl-d{text-decoration:underline}
 .kr-feld>.kr-liste{flex:0 1 auto;min-height:0;overflow:hidden}
 .kr-unten{flex:1 1 0;min-height:84px;display:flex;flex-direction:column}
 .kr-liste{display:flex;flex-direction:column;gap:2px}
+.kr-liste .tl-z{flex:none}   /* Zeilen nie stauchen – was nicht passt, blendet krZeilen aus */
 .kr-liste .tl-z[hidden]{display:none}
