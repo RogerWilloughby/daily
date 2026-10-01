@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "stand": "2026-10-01",
+  "hinweis": "Auswahl bekannter Seiten je Kategorie für die Kachel „Meine Seiten“ (nur Links, keine Inhalte). Symbole holt api/icon.js direkt von der Seite. Änderungen hier = Commit.",
+  "kategorien": [
+    { "id": "news", "name": "News", "icon": "news", "seiten": [
+      { "id": "tagesschau", "name": "Tagesschau", "url": "https://www.tagesschau.de" },
+      { "id": "spiegel", "name": "Spiegel", "url": "https://www.spiegel.de" },
+      { "id": "zeit", "name": "Zeit", "url": "https://www.zeit.de" },
+      { "id": "faz", "name": "FAZ", "url": "https://www.faz.net" },
+      { "id": "sz", "name": "SZ", "url": "https://www.sueddeutsche.de" },
+      { "id": "welt", "name": "Welt", "url": "https://www.welt.de" },
+      { "id": "ntv", "name": "n-tv", "url": "https://www.n-tv.de" },
+      { "id": "tonline", "name": "t-online", "url": "https://www.t-online.de" },
+      { "id": "mdr", "name": "MDR", "url": "https://www.mdr.de" },
+      { "id": "heise", "name": "heise", "url": "https://www.heise.de" }
+    ] },
+    { "id": "social", "name": "Social Media", "icon": "sprech", "seiten": [
+      { "id": "facebook", "name": "Facebook", "url": "https://www.facebook.com" },
+      { "id": "instagram", "name": "Instagram", "url": "https://www.instagram.com" },
+      { "id": "x", "name": "X", "url": "https://x.com" },
+      { "id": "linkedin", "name": "LinkedIn", "url": "https://www.linkedin.com" },
+      { "id": "tiktok", "name": "TikTok", "url": "https://www.tiktok.com" },
+      { "id": "reddit", "name": "Reddit", "url": "https://www.reddit.com" },
+      { "id": "mastodon", "name": "Mastodon", "url": "https://mastodon.social" },
+      { "id": "whatsapp", "name": "WhatsApp", "url": "https://web.whatsapp.com" },
+      { "id": "pinterest", "name": "Pinterest", "url": "https://www.pinterest.de" }
+    ] },
+    { "id": "mail", "name": "Mail", "icon": "mail", "seiten": [
+      { "id": "gmail", "name": "Gmail", "url": "https://mail.google.com" },
+      { "id": "outlook", "name": "Outlook", "url": "https://outlook.live.com" },
+      { "id": "gmx", "name": "GMX", "url": "https://www.gmx.net" },
+      { "id": "webde", "name": "WEB.DE", "url": "https://web.de" },
+      { "id": "tonlinemail", "name": "T-Online Mail", "url": "https://email.t-online.de" },
+      { "id": "icloud", "name": "iCloud", "url": "https://www.icloud.com/mail" },
+      { "id": "proton", "name": "Proton", "url": "https://mail.proton.me" },
+      { "id": "yahoo", "name": "Yahoo", "url": "https://mail.yahoo.com" }
+    ] },
+    { "id": "video", "name": "Video & Musik", "icon": "film", "seiten": [
+      { "id": "youtube", "name": "YouTube", "url": "https://www.youtube.com" },
+      { "id": "netflix", "name": "Netflix", "url": "https://www.netflix.com" },
+      { "id": "prime", "name": "Prime Video", "url": "https://www.primevideo.com" },
+      { "id": "disney", "name": "Disney+", "url": "https://www.disneyplus.com" },
+      { "id": "ard", "name": "ARD Mediathek", "url": "https://www.ardmediathek.de" },
+      { "id": "zdf", "name": "ZDF", "url": "https://www.zdf.de" },
+      { "id": "spotify", "name": "Spotify", "url": "https://open.spotify.com" },
+      { "id": "twitch", "name": "Twitch", "url": "https://www.twitch.tv" }
+    ] },
+    { "id": "shopping", "name": "Shopping", "icon": "tasche", "seiten": [
+      { "id": "amazon", "name": "Amazon", "url": "https://www.amazon.de" },
+      { "id": "ebay", "name": "eBay", "url": "https://www.ebay.de" },
+      { "id": "kleinanzeigen", "name": "Kleinanzeigen", "url": "https://www.kleinanzeigen.de" },
+      { "id": "otto", "name": "Otto", "url": "https://www.otto.de" },
+      { "id": "zalando", "name": "Zalando", "url": "https://www.zalando.de" },
+      { "id": "idealo", "name": "idealo", "url": "https://www.idealo.de" },
+      { "id": "mediamarkt", "name": "MediaMarkt", "url": "https://www.mediamarkt.de" },
+      { "id": "lidl", "name": "Lidl", "url": "https://www.lidl.de" }
+    ] },
+    { "id": "wissen", "name": "Wissen & Werkzeuge", "icon": "book", "seiten": [
+      { "id": "wikipedia", "name": "Wikipedia", "url": "https://de.wikipedia.org" },
+      { "id": "google", "name": "Google", "url": "https://www.google.de" },
+      { "id": "deepl", "name": "DeepL", "url": "https://www.deepl.com/translator" },
+      { "id": "chatgpt", "name": "ChatGPT", "url": "https://chatgpt.com" },
+      { "id": "claude", "name": "Claude", "url": "https://claude.ai" },
+      { "id": "maps", "name": "Maps", "url": "https://maps.google.com" },
+      { "id": "drive", "name": "Drive", "url": "https://drive.google.com" },
+      { "id": "gkalender", "name": "Kalender", "url": "https://calendar.google.com" }
+    ] },
+    { "id": "reisen", "name": "Reisen", "icon": "globe", "seiten": [
+      { "id": "bahn", "name": "Bahn", "url": "https://www.bahn.de" },
+      { "id": "booking", "name": "Booking.com", "url": "https://www.booking.com" },
+      { "id": "airbnb", "name": "Airbnb", "url": "https://www.airbnb.de" },
+      { "id": "adac", "name": "ADAC", "url": "https://www.adac.de" },
+      { "id": "flightradar", "name": "Flightradar24", "url": "https://www.flightradar24.com" }
+    ] }
+  ],
+  "standard": ["news", "social", "mail"]
+}

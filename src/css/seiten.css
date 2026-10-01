@@ -1,0 +1,11 @@
+/* DAILY – Kachel „Meine Seiten“: Symbolraster in den Mini-Reitern (Reiterspalte allgemein in app.css, .kr-*). */
+.ms-raster{display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:4px 2px;align-content:start}
+.ms-z{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;padding:4px 2px;border-radius:8px;color:var(--ink);text-decoration:none}
+.ms-z:hover{background:var(--line)}
+.ms-z:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.ms-z[hidden]{display:none}
+.ms-sym{position:relative;width:32px;height:32px;flex:none;display:grid;place-items:center;overflow:hidden;border-radius:8px;
+  background:hsl(var(--ms-h) 42% 46%);color:#fff;font-weight:700;font-size:15px}
+.ms-sym img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff;padding:2px;box-sizing:border-box}
+.ms-name{max-width:100%;font-size:11px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ms-text{margin:0;color:var(--muted);font-size:13px;line-height:1.4}

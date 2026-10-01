@@ -1098,3 +1098,46 @@ test('Radarraster: Umrechnung wie Bright Sky und DWD, Kacheln der Karte nur übe
   const m = merc(51.05, 13.74);
   assert.deepEqual([Math.floor(m.x / 256), Math.floor(m.y / 256)], [x, y]);
 });
+
+test('Meine Seiten: feste Seiten-Auswahl, Mini-Reiter mit Symbolraster, Einstellungen, Seitensymbole nur für die Auswahl', async () => {
+  const katalog = require('../src/content/seiten.json');
+  const ids = katalog.kategorien.flatMap(k => k.seiten.map(s => s.id));
+  assert.equal(new Set(ids).size, ids.length);                                               // Kennungen eindeutig
+  assert.ok(katalog.kategorien.flatMap(k => k.seiten).every(s => /^https:\/\/[a-z0-9.-]+\.[a-z]{2,}(\/|$)/.test(s.url)), 'nur https');
+  assert.deepEqual(katalog.standard, ['news', 'social', 'mail']);
+  const a = await esm('src/js/adapter/seiten.js');
+  const links = [{ id: 'l1', name: 'Tagesschau', url: 'https://www.tagesschau.de' }, { id: 'l2', name: 'Gmail', url: 'https://mail.google.com' }, { id: 'l9', name: 'Sächsische', url: 'https://www.saechsische.de/' }];
+  const k = a.kachel(links, katalog, {});
+  assert.deepEqual(k.kleinReiter.map(r => r.id), ['meine', 'news', 'social', 'mail']);         // Standard
+  assert.ok(k.kleinReiter.every(r => /^<svg class="ico"/.test(r.icon)));
+  const meine = k.kleinReiter[0].html;
+  assert.equal((meine.match(/class="ms-z kr-z"/g) || []).length, 3);
+  assert.match(meine, /href="https:\/\/www\.tagesschau\.de" target="_blank" rel="noopener noreferrer" title="Tagesschau · tagesschau\.de"><span class="ms-sym" style="--ms-h:\d+"><b>T<\/b><img class="ms-bild" src="\/api\/icon\?s=tagesschau"/);
+  assert.match(meine, /title="Sächsische · saechsische\.de"><span class="ms-sym" style="--ms-h:\d+"><b>S<\/b><\/span>/);   // eigene Seite: nur Buchstabe
+  assert.equal((k.kleinReiter[1].html.match(/ms-bild/g) || []).length, 10);                  // News: 10 Seiten mit Symbol
+  assert.deepEqual(a.kachel(links, katalog, { kategorien: ['video', 'news', 'reisen', 'wissen', 'shopping'] }).kleinReiter.map(r => r.id), ['meine', 'news', 'video', 'shopping', 'wissen']);   // höchstens 4, Reihenfolge der Datei
+  assert.match(a.kachel([], katalog, {}).kleinReiter[0].html, /Noch keine eigenen Seiten/);
+  assert.equal(a.kachel(links, null, {}).kleinReiter.length, 1);                              // Auswahl noch nicht geladen
+  // Einstellungsfenster
+  const f = a.felder(links, katalog, {});
+  assert.deepEqual(f.filter(x => x.key && x.key.startsWith('r_') && x.wert).map(x => x.key), ['r_news', 'r_social', 'r_mail']);
+  assert.deepEqual(f.filter(x => x.key && x.key.startsWith('m_') && x.wert).map(x => x.key), ['m_tagesschau', 'm_gmail']);
+  assert.equal(f.find(x => x.key === 'eigene').wert, 'Sächsische | https://www.saechsische.de/');
+  // Speichern: Spiegel dazu, Gmail weg, eigene Seite geändert und eine neue; Reihenfolge der Auswahl bleibt
+  const w = { r_news: true, r_video: true, m_tagesschau: true, m_spiegel: true, eigene: 'Sächsische Zeitung | saechsische.de\nDresden | dresden.de\nkaputt | ::\nzdf.de' };
+  const r = a.ausEinstellung(w, links, katalog);
+  assert.deepEqual(r.links.map(l => l.name), ['Tagesschau', 'Sächsische Zeitung', 'Spiegel', 'ZDF', 'Dresden']);   // ZDF als eigene Zeile → Seite aus der Auswahl
+  assert.deepEqual(r.kategorien, ['news', 'video']);
+  assert.equal(r.zuviel, false);
+  assert.equal(a.ausEinstellung({ r_news: 1, r_social: 1, r_mail: 1, r_video: 1, r_shopping: 1 }, links, katalog).zuviel, true);
+  assert.deepEqual(a.eigeneAus('a | javascript:alert(1)\nb | http://x.de'), [{ name: 'b', url: 'http://x.de/' }]);   // nur http(s)
+  // Seitensymbole: nur Kennungen aus der Auswahl, Bild mit 30 Tagen Cache; Symbol-Angaben aus dem HTML
+  const icon = require('../api/icon.js');
+  const ruf = q => new Promise(ok => { const res = { h: {}, setHeader(k2, v) { this.h[k2.toLowerCase()] = v; }, end(b) { ok({ code: this.statusCode, h: this.h, b }); } }; icon({ method: 'GET', query: q }, res); });
+  const ok = await ruf({ s: 'spiegel' });
+  assert.deepEqual([ok.code, ok.h['content-type'], ok.b.slice(1, 4).toString()], [200, 'image/png', 'PNG']);
+  assert.match(ok.h['cache-control'], /s-maxage=2592000/);
+  assert.equal((await ruf({ s: 'https://evil.example' })).code, 400);                        // keine beliebigen Adressen
+  assert.deepEqual(icon.symboleAusHtml('<link rel="icon" href="/f.ico"><link rel="apple-touch-icon" sizes="152x152" href="/a152.png"><link rel="apple-touch-icon" href="https://cdn.x.de/a.png">', 'https://www.x.de/').map(x => x.url),
+    ['https://cdn.x.de/a.png', 'https://www.x.de/a152.png', 'https://www.x.de/f.ico']);
+});

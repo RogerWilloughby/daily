@@ -88,10 +88,10 @@ function krHtml(t) {
   return `<div class="kr-leiste" role="tablist" aria-label="Ansichten">${t.kleinReiter.map(knopf).join('')}${einst}</div>` +
     `<div class="kr-feld" role="tabpanel">${inhalt}</div>`;
 }
-// Zeilen ausblenden, die unten über den Rand ragen würden
+// Zeilen (bzw. Raster-Elemente .kr-z) ausblenden, die unten über den Rand ragen würden
 function krZeilen(el) {
   const feld = el.querySelector('.kr-feld'); if (!feld) return;
-  const zeilen = [...feld.querySelectorAll('.kr-liste .tl-z')];
+  const zeilen = [...feld.querySelectorAll('.kr-liste .tl-z, .kr-z')];   // Listenzeilen und Kacheln eines Rasters (z. B. Seitensymbole)
   zeilen.forEach(z => { z.hidden = false; });
   // mit Diagramm darunter: Grenze ist das Ende der Liste (sie bekommt den Platz über dem Diagramm), sonst das Feld
   const rahmen = feld.querySelector('.kr-unten') ? feld.querySelector('.kr-liste') : feld;

@@ -138,6 +138,7 @@ Daraus entstehen der Katalog `/api/v1/dienste`, die Dateien `docs/dienste/<id>.m
 | `services/_lib/ort.js` | Ort-Eingabe auflösen und runden |
 | `services/_lib/orte.js` | eigener Ortsbestand: Name, Postleitzahl, Umkehrsuche |
 | `services/_lib/radolan.js` | Radarraster des DWD ↔ Koordinaten (für `regen`, Karte) |
+| `api/icon.js` | Seitensymbole für „Meine Seiten“, `GET /api/icon?s=<id>` → Bild; nur Seiten aus `src/content/seiten.json`, direkt von der Seite (apple-touch-icon, HTML, favicon), CDN 30 Tage |
 | `api/karte.js` | Kartenkacheln basemap.de (BKG) für die Radarkarte, `GET /api/karte?z=&x=&y=` → PNG; kein daily/1-Dienst, nur Zoom 8–11 über Deutschland, CDN 30 Tage |
 | `services/_lib/blatt.js` | Dienstblatt prüfen und als Markdown ausgeben |
 | `services/_lib/http.js` | `getJson`, `postJson`, `send` (Cache-Header), Betriebsart |
