@@ -7,7 +7,7 @@ Gesetzliche Feiertage und Schulferien des Bundeslands, Brückentage, Zeitumstell
 | | |
 |---|---|
 | Aufruf | `GET /api/v1/feiertage` |
-| Programmversion | 2.0.0 |
+| Programmversion | 2.1.0 |
 | Vertrag (Datenformat) | daily/1, Version 1 |
 | Klasse | oeffentlich |
 | Länder | DE |
@@ -76,6 +76,7 @@ Rahmen und Stufen: `../architektur/skalierung.md`
 ## Änderungen
 | Version | Datum | Änderung |
 |---|---|---|
+| 2.1.0 | 2026-10-02 | Kürzel nur in Großbuchstaben (SN, nicht sn). Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026). |
 | 2.0.0 | 2026-10-02 | Eingabe nur noch das Bundesland (bundesland=SN): eine Antwort je Bundesland statt je Ort – höchstens 16 Ferien-Abrufe am Tag. Ort, Koordinaten und Name entfallen. |
 | 1.0.0 | 2026-09-27 | Erste Fassung als Dienst: Feiertage je Bundesland, Schulferien (OpenHolidays), Brückentage, Zeitumstellung, Kalenderwoche, Aktions- und Brauchtumstage; Bundesland aus dem Ort |
 

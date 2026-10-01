@@ -1,6 +1,7 @@
 // Dienst „feiertage“: was im Kalender des Orts wichtig ist – gesetzliche Feiertage des Bundeslands, Schulferien,
 // Brückentage, Zeitumstellung, Kalenderwoche und bekannte Aktions- und Brauchtumstage (Muttertag, Advent …).
 // Feiertage, Brückentage, Zeitumstellung und Aktionstage rechnet DAILY selbst; Schulferien kommen von OpenHolidays.
+const { P } = require('./_lib/parameter');
 const { getJson } = require('./_lib/http');
 const { DienstFehler, tagIn, text } = require('./_lib/rahmen');
 const { S } = require('./_lib/schema');
@@ -152,14 +153,16 @@ const SCHEMA = S.obj({
 module.exports = {
   id: 'feiertage',
   version: 1,
-  programmversion: '2.0.0',
+  programmversion: '2.1.0',
   aenderungen: [
+    { version: '2.1.0', datum: '2026-10-02', text: 'Kürzel nur in Großbuchstaben (SN, nicht sn). Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026).' },
     { version: '2.0.0', datum: '2026-10-02', text: 'Eingabe nur noch das Bundesland (bundesland=SN): eine Antwort je Bundesland statt je Ort – höchstens 16 Ferien-Abrufe am Tag. Ort, Koordinaten und Name entfallen.' },
     { version: '1.0.0', datum: '2026-09-27', text: 'Erste Fassung als Dienst: Feiertage je Bundesland, Schulferien (OpenHolidays), Brückentage, Zeitumstellung, Kalenderwoche, Aktions- und Brauchtumstage; Bundesland aus dem Ort' }
   ],
   titel: 'Feiertage und Ferien',
   beschreibung: 'Gesetzliche Feiertage und Schulferien des Bundeslands, Brückentage, Zeitumstellung, Kalenderwoche und bekannte Aktionstage – für gut ein Jahr ab heute.',
   eingaben: { bundesland: 'Kürzel des Bundeslands (Pflicht): BW, BY, BE, BB, HB, HH, HE, MV, NI, NW, RP, SL, SN, ST, SH, TH' },
+  parameter: { bundesland: P.wahl(Object.values(LAENDER)) },   // erlaubte Angaben = Cache-Schlüssel (_lib/parameter.js)
   laender: ['DE'],
   klasse: 'oeffentlich',
   ttl: 86400,

@@ -7,7 +7,7 @@ Regen am Ort jetzt und in den nächsten 2 Stunden (5-Minuten-Schritte), „Regen
 | | |
 |---|---|
 | Aufruf | `GET /api/v1/regen` |
-| Programmversion | 1.1.0 |
+| Programmversion | 2.0.0 |
 | Vertrag (Datenformat) | daily/1, Version 1 |
 | Klasse | oeffentlich |
 | Länder | DE |
@@ -27,15 +27,11 @@ Quellen mit Lizenz:
 ## Eingabe
 | Parameter | Bedeutung |
 |---|---|
-| `ort` | Ortsname (z. B. Berlin) – oder – |
-| `lat` | Breitengrad |
-| `lon` | Längengrad |
-| `name` | Anzeigename (optional) |
-| `region` | Bundesland (optional) |
-| `land` | Ländercode (optional) |
+| `lat` | Breitengrad, höchstens 2 Nachkommastellen (z. B. 51.05) |
+| `lon` | Längengrad, höchstens 2 Nachkommastellen (z. B. 13.74) |
 
 ## Verarbeitung
-- Ort auf 2 Nachkommastellen (≈ 1 km) gerundet; Ausschnitt ±50 km, 1 Stunde zurück bis 2 Stunden voraus.
+- Ort nur als lat/lon mit höchstens 2 Nachkommastellen (≈ 1 km), andere Angaben werden abgelehnt; Ausschnitt ±50 km, 1 Stunde zurück bis 2 Stunden voraus.
 - Rohwert 0,01 mm je 5 Minuten → mm/h (× 0,12). Stufen: leicht unter 2,5 mm/h, mäßig bis 10, stark bis 50, sehr stark darüber.
 - Jetzt = jüngstes gemessenes Bild; Bilder danach sind Vorhersage (gemessen: false). „Beginnt/endet“ = erster Wechsel zwischen Regen und trocken im Verlauf.
 - Regen in der Nähe: nächste Zelle mit Regen im Umkreis von 25 km, Richtung vom Ort aus (Rasterwinkel auf geografisch Nord umgerechnet).
@@ -106,6 +102,7 @@ Rahmen und Stufen: `../architektur/skalierung.md`
 ## Änderungen
 | Version | Datum | Änderung |
 |---|---|---|
+| 2.0.0 | 2026-10-02 | Eingaben nur noch lat/lon mit höchstens 2 Nachkommastellen; Ortssuche per Name (ort=) sowie name, region, land, zeitzone entfallen – die Antwort enthält keinen Ortsnamen mehr (den kennt die Oberfläche). Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026). |
 | 1.1.0 | 2026-09-29 | Karte größer: Ausschnitt ±50 km (vorher ±25), Bilder von −60 min bis +2 Std., Ecken als Koordinaten (karte.ecken) für die Landkarte darunter; Regen in der Nähe bleibt bei 25 km |
 | 1.0.0 | 2026-09-27 | Erste Fassung: DWD-Radar über Bright Sky – jetzt, 2 Stunden, letzte Stunde, Regen in der Nähe, kleine Karte |
 

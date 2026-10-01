@@ -3,6 +3,7 @@
 // Neuer Dienst = Modul in services/ + Eintrag hier. Aufruf: GET /api/v1/<id>
 const { DienstFehler, antwort } = require('./_lib/rahmen');
 const { isPrivate } = require('./_lib/http');
+const { pruefeEingaben } = require('./_lib/parameter');
 
 const DIENSTE = [
   require('./ort'),
@@ -38,6 +39,7 @@ const laufend = new Map();   // gleichzeitige gleiche Anfragen warten auf diesel
 // Dienst ausführen und in den Rahmen daily/1 packen
 async function ausfuehren(id, eingabe = {}, ctx = {}) {
   const d = finde(id);
+  eingabe = pruefeEingaben(d, eingabe);   // nur erlaubte Angaben in einer Schreibweise (sonst 400) – daraus auch der Schlüssel
   const privat = d.klasse === 'privat', k = schluessel(id, eingabe), jetzt = ctx.jetzt || Date.now();
   if (!privat && !ctx.jetzt) {
     const alt = INSTANZ.get(k);

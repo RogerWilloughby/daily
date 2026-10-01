@@ -22,6 +22,7 @@ module.exports = async (req, res) => {
   } else if (req.method !== 'GET') return send(res, fehlerAntwort(id, new DienstFehler('eingabe_ungueltig', privat ? 'Nur GET oder POST' : 'Nur GET')), 0, 405);
   try {
     if (id === 'dienste') {
+      if (Object.keys(q).length) throw new DienstFehler('eingabe_ungueltig', `Unbekannte Angabe „${Object.keys(q)[0]}“ – der Katalog kennt keine Angaben`);
       return send(res, antwort({ id: 'dienste', version: 1, ttl: 300, quellen: [] }, { daten: { app: require('../../services/_lib/version').APP, dienste: katalog() } }), 300);
     }
     const r = await ausfuehren(id, q);

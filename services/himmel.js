@@ -1,6 +1,7 @@
 // Dienst „himmel“: Mond (Phase, Beleuchtung, Auf- und Untergang), die nächsten Mondphasen mit Supermond,
 // Sternschnuppen-Nächte, Sonnen- und Mondfinsternisse, die am Ort zu sehen sind, und der Beginn der Jahreszeiten.
 // Alles wird gerechnet – mit Astronomy Engine (MIT-Lizenz, Genauigkeit etwa eine Minute), ohne Abruf fremder Quellen.
+const { P } = require('./_lib/parameter');
 const A = require('astronomy-engine');
 const { iso, runde } = require('./_lib/rahmen');
 const { ortAus } = require('./_lib/ort');
@@ -130,13 +131,15 @@ const SCHEMA = S.obj({
 module.exports = {
   id: 'himmel',
   version: 1,
-  programmversion: '1.0.0',
+  programmversion: '2.0.0',
   aenderungen: [
+    { version: '2.0.0', datum: '2026-10-02', text: 'Eingaben nur noch lat/lon mit höchstens 2 Nachkommastellen; Ortssuche per Name (ort=) sowie name, region, land, zeitzone entfallen – die Antwort enthält keinen Ortsnamen mehr (den kennt die Oberfläche). Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026).' },
     { version: '1.0.0', datum: '2026-09-27', text: 'Erste Fassung als Dienst: Mond, Mondphasen mit Supermond, Sternschnuppen, Finsternisse am Ort, Jahreszeiten – gerechnet mit Astronomy Engine' }
   ],
   titel: 'Himmel',
   beschreibung: 'Mond, Mondphasen, Sternschnuppen, Sonnen- und Mondfinsternisse, die am Ort zu sehen sind, und der Beginn der Jahreszeiten.',
-  eingaben: { ort: 'Ortsname (z. B. Dresden) – oder –', lat: 'Breitengrad', lon: 'Längengrad', name: 'Anzeigename (optional)' },
+  eingaben: { lat: 'Breitengrad, höchstens 2 Nachkommastellen (z. B. 51.05)', lon: 'Längengrad, höchstens 2 Nachkommastellen (z. B. 13.74)' },
+  parameter: { lat: P.lat, lon: P.lon },   // erlaubte Angaben = Cache-Schlüssel (_lib/parameter.js)
   laender: 'alle',
   klasse: 'oeffentlich',
   ttl: 3600,

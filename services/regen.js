@@ -1,6 +1,7 @@
 // Dienst „regen“: Regenradar für einen Ort – jetzt, die nächsten 2 Stunden (5-Minuten-Schritte), letzte Stunde,
 // Regen in der Nähe und eine Radarkarte (±50 km, 1 Stunde zurück bis 2 Stunden voraus). Quelle: DWD-Radar (RV-Produkt, 1 km, alle 5 Minuten, Vorhersage +2 h),
 // abgerufen über Bright Sky (liefert nur den Ausschnitt um den Ort).
+const { P } = require('./_lib/parameter');
 const zlib = require('zlib');
 const { getJson } = require('./_lib/http');
 const { DienstFehler, iso, runde } = require('./_lib/rahmen');
@@ -134,14 +135,16 @@ const SCHEMA = S.obj({
 module.exports = {
   id: 'regen',
   version: 1,
-  programmversion: '1.1.0',
+  programmversion: '2.0.0',
   aenderungen: [
+    { version: '2.0.0', datum: '2026-10-02', text: 'Eingaben nur noch lat/lon mit höchstens 2 Nachkommastellen; Ortssuche per Name (ort=) sowie name, region, land, zeitzone entfallen – die Antwort enthält keinen Ortsnamen mehr (den kennt die Oberfläche). Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026).' },
     { version: '1.1.0', datum: '2026-09-29', text: 'Karte größer: Ausschnitt ±50 km (vorher ±25), Bilder von −60 min bis +2 Std., Ecken als Koordinaten (karte.ecken) für die Landkarte darunter; Regen in der Nähe bleibt bei 25 km' },
     { version: '1.0.0', datum: '2026-09-27', text: 'Erste Fassung: DWD-Radar über Bright Sky – jetzt, 2 Stunden, letzte Stunde, Regen in der Nähe, kleine Karte' }
   ],
   titel: 'Regenradar',
   beschreibung: 'Regen am Ort jetzt und in den nächsten 2 Stunden (5-Minuten-Schritte), „Regen in X Minuten“, letzte Stunde, Regen in der Nähe und eine Radarkarte (100 × 100 km, −1 bis +2 Stunden).',
-  eingaben: { ort: 'Ortsname (z. B. Berlin) – oder –', lat: 'Breitengrad', lon: 'Längengrad', name: 'Anzeigename (optional)', region: 'Bundesland (optional)', land: 'Ländercode (optional)' },
+  eingaben: { lat: 'Breitengrad, höchstens 2 Nachkommastellen (z. B. 51.05)', lon: 'Längengrad, höchstens 2 Nachkommastellen (z. B. 13.74)' },
+  parameter: { lat: P.lat, lon: P.lon },   // erlaubte Angaben = Cache-Schlüssel (_lib/parameter.js)
   laender: ['DE'],
   klasse: 'oeffentlich',
   ttl: 300,
@@ -155,7 +158,7 @@ module.exports = {
       'Abgerufen über Bright Sky (freie JSON-Schnittstelle zu DWD-Daten, Open Source): nur der Ausschnitt von 50 km um den Ort. Bright Sky lässt sich bei Bedarf selbst betreiben.'
     ],
     verarbeitung: [
-      'Ort auf 2 Nachkommastellen (≈ 1 km) gerundet; Ausschnitt ±50 km, 1 Stunde zurück bis 2 Stunden voraus.',
+      'Ort nur als lat/lon mit höchstens 2 Nachkommastellen (≈ 1 km), andere Angaben werden abgelehnt; Ausschnitt ±50 km, 1 Stunde zurück bis 2 Stunden voraus.',
       'Rohwert 0,01 mm je 5 Minuten → mm/h (× 0,12). Stufen: leicht unter 2,5 mm/h, mäßig bis 10, stark bis 50, sehr stark darüber.',
       'Jetzt = jüngstes gemessenes Bild; Bilder danach sind Vorhersage (gemessen: false). „Beginnt/endet“ = erster Wechsel zwischen Regen und trocken im Verlauf.',
       'Regen in der Nähe: nächste Zelle mit Regen im Umkreis von 25 km, Richtung vom Ort aus (Rasterwinkel auf geografisch Nord umgerechnet).',

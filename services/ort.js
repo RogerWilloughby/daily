@@ -3,6 +3,7 @@
 //    nach Name (q=Neustadt), nach Postleitzahl (q=01844) und nach Koordinaten (lat, lon – Gerätestandort)
 //  – im Ausland nur nach Name, und nur wenn es in Deutschland keinen Treffer gibt: Open-Meteo Geocoding
 // Das Ort-Objekt ist die Eingabe fast aller anderen Dienste.
+const { P } = require('./_lib/parameter');
 const { getJson } = require('./_lib/http');
 const { DienstFehler, runde, text } = require('./_lib/rahmen');
 const { S, ORT_VOLL } = require('./_lib/schema');
@@ -63,8 +64,9 @@ const suche = async (q, anzahl = 6) => (await finde(q, anzahl)).orte;
 module.exports = {
   id: 'ort',
   version: 1,                 // Vertrag (Datenformat)
-  programmversion: '1.3.2',   // steigt bei jeder Änderung des Dienstes
+  programmversion: '1.4.0',   // steigt bei jeder Änderung des Dienstes
   aenderungen: [
+    { version: '1.4.0', datum: '2026-10-02', text: 'Koordinaten der Umkehrsuche mit höchstens 2 Nachkommastellen; land nur DE. Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026).' },
     { version: '1.3.2', datum: '2026-09-27', text: 'Ortsbestand ist eine feste Datei – keine monatliche Action mehr (Orte ändern sich kaum); bei Bedarf einmalig mit tools/orte-daten.js neu erzeugen' },
     { version: '1.3.1', datum: '2026-09-27', text: 'Ortsbestand wird jetzt über die gemeinsame Action „Daten erneuern“ erzeugt (Dienstblatt angepasst)' },
     { version: '1.3.0', datum: '2026-09-27', text: 'Doppelte zusammengefasst, Stadtstaaten korrigiert, weitere Firmennamen gefiltert' },
@@ -75,6 +77,7 @@ module.exports = {
   titel: 'Standort',
   beschreibung: 'Findet Orte nach Name, Postleitzahl oder Koordinaten – mit Landkreis, Bundesland, Postleitzahlen und Zeitzone. Deutschland aus eigenem Bestand, Ausland nach Name.',
   eingaben: { q: 'Ortsname oder Postleitzahl (mind. 2 Zeichen) – oder –', lat: 'Breitengrad (Umkehrsuche, nur Deutschland)', lon: 'Längengrad (Umkehrsuche, nur Deutschland)', land: 'optional „DE“: nur Deutschland (für Vorschläge beim Tippen, ohne Auslandsabruf)' },
+  parameter: { q: P.text(60, null, 'Neustadt Sachsen'), lat: P.lat, lon: P.lon, land: P.wahl(['DE']) },   // erlaubte Angaben = Cache-Schlüssel (_lib/parameter.js)
   laender: 'alle',
   klasse: 'oeffentlich',
   ttl: 86400,

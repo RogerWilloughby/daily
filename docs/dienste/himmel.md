@@ -7,7 +7,7 @@ Mond, Mondphasen, Sternschnuppen, Sonnen- und Mondfinsternisse, die am Ort zu se
 | | |
 |---|---|
 | Aufruf | `GET /api/v1/himmel` |
-| Programmversion | 1.0.0 |
+| Programmversion | 2.0.0 |
 | Vertrag (Datenformat) | daily/1, Version 1 |
 | Klasse | oeffentlich |
 | Länder | weltweit |
@@ -27,10 +27,8 @@ Quellen mit Lizenz:
 ## Eingabe
 | Parameter | Bedeutung |
 |---|---|
-| `ort` | Ortsname (z. B. Dresden) – oder – |
-| `lat` | Breitengrad |
-| `lon` | Längengrad |
-| `name` | Anzeigename (optional) |
+| `lat` | Breitengrad, höchstens 2 Nachkommastellen (z. B. 51.05) |
+| `lon` | Längengrad, höchstens 2 Nachkommastellen (z. B. 13.74) |
 
 ## Verarbeitung
 - Mond: Phase aus dem Winkel zwischen Sonne und Mond; Voll- und Neumond heißen so, solange sie weniger als etwa 20 Stunden entfernt sind.
@@ -88,5 +86,6 @@ Rahmen und Stufen: `../architektur/skalierung.md`
 ## Änderungen
 | Version | Datum | Änderung |
 |---|---|---|
+| 2.0.0 | 2026-10-02 | Eingaben nur noch lat/lon mit höchstens 2 Nachkommastellen; Ortssuche per Name (ort=) sowie name, region, land, zeitzone entfallen – die Antwort enthält keinen Ortsnamen mehr (den kennt die Oberfläche). Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026). |
 | 1.0.0 | 2026-09-27 | Erste Fassung als Dienst: Mond, Mondphasen mit Supermond, Sternschnuppen, Finsternisse am Ort, Jahreszeiten – gerechnet mit Astronomy Engine |
 

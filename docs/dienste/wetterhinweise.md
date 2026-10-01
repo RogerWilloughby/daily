@@ -7,7 +7,7 @@ Amtliche Wetterwarnungen des Deutschen Wetterdienstes für einen Ort – mit Art
 | | |
 |---|---|
 | Aufruf | `GET /api/v1/wetterhinweise` |
-| Programmversion | 1.0.0 |
+| Programmversion | 2.0.0 |
 | Vertrag (Datenformat) | daily/1, Version 1 |
 | Klasse | oeffentlich |
 | Länder | DE |
@@ -27,12 +27,8 @@ Quellen mit Lizenz:
 ## Eingabe
 | Parameter | Bedeutung |
 |---|---|
-| `ort` | Ortsname (z. B. Berlin) – oder – |
-| `lat` | Breitengrad |
-| `lon` | Längengrad |
-| `name` | Anzeigename (optional) |
-| `region` | Bundesland (optional) |
-| `land` | Ländercode (optional) |
+| `lat` | Breitengrad, höchstens 2 Nachkommastellen (z. B. 51.05) |
+| `lon` | Längengrad, höchstens 2 Nachkommastellen (z. B. 13.74) |
 
 ## Verarbeitung
 - Testmeldungen und abgelaufene Warnungen werden entfernt; Sortierung: höchste Stufe zuerst, dann nach Beginn.
@@ -73,5 +69,6 @@ Rahmen und Stufen: `../architektur/skalierung.md`
 ## Änderungen
 | Version | Datum | Änderung |
 |---|---|---|
+| 2.0.0 | 2026-10-02 | Eingaben nur noch lat/lon mit höchstens 2 Nachkommastellen; Ortssuche per Name (ort=) sowie name, region, land, zeitzone entfallen – die Antwort enthält keinen Ortsnamen mehr (den kennt die Oberfläche). Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026). |
 | 1.0.0 | 2026-09-27 | Erste Fassung: amtliche DWD-Warnungen über Bright Sky, Art, Stufe, Zeitraum und Alltagstipp; ersetzt die Kachel „Warnungen“ |
 

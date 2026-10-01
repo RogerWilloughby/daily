@@ -4,7 +4,7 @@
 import { set } from '../core/board.js';
 import { settings, kachelOpt, kachelOptSpeichern } from '../core/store.js';
 import { addAnswer } from '../core/ask.js';
-import { dienst, gespeichert, ortParams } from '../dienste/client.js';
+import { dienst, gespeichert, ortParams, mitOrt } from '../dienste/client.js';
 import { kachel, antwort, mitOptionen, WETTER_STANDARD } from '../adapter/wetter.js';
 import { kachelEinstellungen } from '../core/einstellungen.js';
 import { antwort as hinweisAntwort } from '../adapter/hinweise.js';
@@ -32,14 +32,15 @@ function zeige(w, r, h) {
 }
 export async function load() {
   const p = ortParams(settings.place);
-  const altW = gespeichert('wetter', p), altR = gespeichert('regen', p), altH = gespeichert('wetterhinweise', p);
+  const o = x => mitOrt(x, settings.place);   // Name und Land des gewählten Orts (die Dienste liefern nur Koordinaten)
+  const altW = o(gespeichert('wetter', p)), altR = o(gespeichert('regen', p)), altH = o(gespeichert('wetterhinweise', p));
   if (altW && !env) set('weather', { ...zeige(altW, altR, altH), tag: stand(altW) });
   else if (!altW) set('weather', { title: settings.place.name });
   const zusatz = Promise.all([dienst('regen', p).catch(e => e), dienst('wetterhinweise', p).catch(e => e)]);
-  env = await dienst('wetter', p);                       // Fehler: Anbieter meldet „nicht erreichbar“, der gespeicherte Stand bleibt
+  env = o(await dienst('wetter', p));                       // Fehler: Anbieter meldet „nicht erreichbar“, der gespeicherte Stand bleibt
   set('weather', { ...zeige(env, regen, hinweise), tag: stand(env) });
   const [r, h] = await zusatz;
-  regen = oder(r); hinweise = oder(h);
+  regen = o(oder(r)); hinweise = o(oder(h));
   set('weather', { ...zeige(env, regen, hinweise), tag: stand(env) });
 }
 

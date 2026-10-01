@@ -1,6 +1,7 @@
 // Dienst „finanzen“ (öffentlich): Euro-Wechselkurse, Leitzinsen und Inflation – alles von der Europäischen Zentralbank (EZB).
 // Für alle Nutzer gleich (keine Eingabe) → ein Abruf je Stunde reicht für alle. Reine Kursangaben, keine Anlageempfehlung.
 // Weiterverwendung laut EZB: kostenlos, auch kommerziell, Quelle nennen, Werte nicht verändern.
+const { P } = require('./_lib/parameter');
 const { getText } = require('./_lib/http');
 const { DienstFehler, runde } = require('./_lib/rahmen');
 const { S } = require('./_lib/schema');
@@ -122,13 +123,15 @@ const SCHEMA = S.obj({
 module.exports = {
   id: 'finanzen',
   version: 1,
-  programmversion: '1.0.0',
+  programmversion: '1.1.0',
   aenderungen: [
+    { version: '1.1.0', datum: '2026-10-02', text: 'Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026).' },
     { version: '1.0.0', datum: '2026-09-28', text: 'Erste Fassung: Euro-Referenzkurse (90 Tage), Leitzinsen und Inflation (HVPI) von der EZB' }
   ],
   titel: 'Finanzen',
   beschreibung: 'Euro-Wechselkurse der letzten 90 Tage, die Leitzinsen der EZB und die Inflation in Deutschland und im Euroraum – reine Angaben der Europäischen Zentralbank, keine Anlageempfehlung.',
   eingaben: {},
+  parameter: {},   // erlaubte Angaben = Cache-Schlüssel (_lib/parameter.js)
   laender: 'alle',
   klasse: 'oeffentlich',
   ttl: 3600,

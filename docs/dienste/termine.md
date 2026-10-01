@@ -7,7 +7,7 @@ Deine eigenen Termine aus iCal-Kalendern für heute und die nächsten 14 Tage �
 | | |
 |---|---|
 | Aufruf | `GET /api/v1/termine` |
-| Programmversion | 1.0.0 |
+| Programmversion | 1.1.0 |
 | Vertrag (Datenformat) | daily/1, Version 1 |
 | Klasse | privat |
 | Länder | weltweit |
@@ -66,5 +66,6 @@ Rahmen und Stufen: `../architektur/skalierung.md`
 ## Änderungen
 | Version | Datum | Änderung |
 |---|---|---|
+| 1.1.0 | 2026-10-02 | Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026). |
 | 1.0.0 | 2026-09-28 | Erste Fassung als Dienst (vorher api/calendar.js): 14 Tage, Serientermine, ganztägige Termine, verständliche Fehler je Kalender; Links nur per POST |
 

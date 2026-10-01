@@ -1,6 +1,7 @@
 // Dienst „wetter“ (Referenz-Dienst für das Austauschformat daily/1):
 // aktuelles Wetter, heutiger Tag, 48 Stunden, Tageszeiten (3 Tage), 15 Tage (ab Tag 8 als Trend), Luftqualität und Pollen für einen Ort.
 // Quellen: Open-Meteo (Wettermodelle der Wetterdienste, u. a. DWD) und Open-Meteo Air Quality (CAMS).
+const { P } = require('./_lib/parameter');
 const { getJson } = require('./_lib/http');
 const { DienstFehler, iso, tagIn, runde } = require('./_lib/rahmen');
 const { ortAus } = require('./_lib/ort');
@@ -193,8 +194,9 @@ const SCHEMA = S.obj({
 module.exports = {
   id: 'wetter',
   version: 1,                 // Vertrag (Datenformat)
-  programmversion: '1.5.0',   // steigt bei jeder Änderung des Dienstes
+  programmversion: '2.0.0',   // steigt bei jeder Änderung des Dienstes
   aenderungen: [
+    { version: '2.0.0', datum: '2026-10-02', text: 'Eingaben nur noch lat/lon mit höchstens 2 Nachkommastellen; Ortssuche per Name (ort=) sowie name, region, land, zeitzone entfallen – die Antwort enthält keinen Ortsnamen mehr (den kennt die Oberfläche). Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026).' },
     { version: '1.5.0', datum: '2026-09-29', text: 'Neu: „heute“ (alle Stunden des heutigen Tages, 0–23 Uhr Ortszeit), „tageszeiten“ (heute und die zwei Folgetage je Morgen, Mittag, Abend, Nacht) und Sonnenminuten je Stunde (sonnenMin)' },
     { version: '1.4.1', datum: '2026-09-29', text: 'Dienstblatt: Hinweis „ohne Gewähr“ und zur abnehmenden Genauigkeit; das Feld „trend“ bleibt als Angabe, DAILY stellt es nicht mehr gesondert dar' },
     { version: '1.4.0', datum: '2026-09-29', text: '15 statt 16 Tage (der 16. Tag kam oft ohne Werte); Tage am Ende ohne Tiefst- und Höchstwert werden weggelassen' },
@@ -205,7 +207,8 @@ module.exports = {
   ],
   titel: 'Wetter',
   beschreibung: 'Aktuelles Wetter, heutiger Tag Stunde für Stunde, 48 Stunden, Tageszeiten für 3 Tage und 15-Tage-Vorhersage mit Wind, Sonne, Wolken, Luftdruck, Sicht, Schnee und Frost, dazu Luftqualität und Pollen für einen Ort.',
-  eingaben: { ort: 'Ortsname (z. B. Berlin) – oder –', lat: 'Breitengrad', lon: 'Längengrad', name: 'Anzeigename (optional)', region: 'Bundesland (optional)', land: 'Ländercode (optional)' },
+  eingaben: { lat: 'Breitengrad, höchstens 2 Nachkommastellen (z. B. 51.05)', lon: 'Längengrad, höchstens 2 Nachkommastellen (z. B. 13.74)' },
+  parameter: { lat: P.lat, lon: P.lon },   // erlaubte Angaben = Cache-Schlüssel (_lib/parameter.js)
   laender: 'alle',
   klasse: 'oeffentlich',
   ttl: 1800,
@@ -221,7 +224,7 @@ module.exports = {
       'Frei nutzbar nur nicht kommerziell (keine Werbung, kein Abo): höchstens 600 Aufrufe/Minute, 5.000/Stunde, 10.000/Tag. Entscheidung 27.09.2026: Open-Meteo, solange DAILY nicht kommerziell ist.'
     ],
     verarbeitung: [
-      'Ort wird über den Dienst „ort“ aufgelöst oder als lat/lon übernommen und auf 2 Nachkommastellen (≈ 1 km) gerundet.',
+      'Ort nur als lat/lon mit höchstens 2 Nachkommastellen (≈ 1 km); andere Angaben werden abgelehnt. Die Antwort enthält keinen Ortsnamen – den kennt die Oberfläche.',
       'Open-Meteo wählt die Modellzelle mit ähnlicher Höhe (Höhenmodell 90 m) und rechnet die Temperatur auf die Höhe des Orts um.',
       'Nur auf Anfrage: Der Server fragt Open-Meteo erst, wenn ein Nutzer diesen Ort anfordert und keine frische Antwort im Cache liegt.',
       'Takt: Antworten gelten bis zur nächsten vollen oder halben Stunde – alle Nutzer einer 1-km-Zelle teilen sich einen Abruf und sehen denselben Stand.',

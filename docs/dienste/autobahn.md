@@ -7,7 +7,7 @@ Aktuelle Staus, Verkehrsmeldungen, Sperrungen und Baustellen auf den gewählten 
 | | |
 |---|---|
 | Aufruf | `GET /api/v1/autobahn` |
-| Programmversion | 1.0.0 |
+| Programmversion | 1.1.0 |
 | Vertrag (Datenformat) | daily/1, Version 1 |
 | Klasse | oeffentlich |
 | Länder | DE |
@@ -27,7 +27,7 @@ Quellen mit Lizenz:
 ## Eingabe
 | Parameter | Bedeutung |
 |---|---|
-| `strassen` | Autobahnen, durch Komma getrennt (z. B. A4,A13), höchstens 5 |
+| `strassen` | Autobahnen, durch Komma getrennt, aufsteigend und ohne Doppelte (z. B. A4,A13), höchstens 5 |
 
 ## Verarbeitung
 - Eingabe: bis zu 5 Autobahnen (A1 … A999), Schreibweise egal („a4, A 13“), sortiert und ohne Doppelte – gleiche Auswahl, gleiche Antwort.
@@ -84,5 +84,6 @@ Rahmen und Stufen: `../architektur/skalierung.md`
 ## Änderungen
 | Version | Datum | Änderung |
 |---|---|---|
+| 1.1.0 | 2026-10-02 | Autobahnen nur in einer Schreibweise: aufsteigend, ohne Doppelte (A4,A13 – nicht A13,A4). Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026). |
 | 1.0.0 | 2026-09-29 | Erste Fassung: Staus, Verkehrsmeldungen, Sperrungen und Baustellen der gewählten Autobahnen (bis 5), Beginn/Ende/Länge/Tempo aus dem amtlichen Text |
 

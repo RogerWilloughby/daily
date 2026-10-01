@@ -7,7 +7,7 @@ Findet Orte nach Name, Postleitzahl oder Koordinaten – mit Landkreis, Bundesla
 | | |
 |---|---|
 | Aufruf | `GET /api/v1/ort` |
-| Programmversion | 1.3.2 |
+| Programmversion | 1.4.0 |
 | Vertrag (Datenformat) | daily/1, Version 1 |
 | Klasse | oeffentlich |
 | Länder | weltweit |
@@ -78,6 +78,7 @@ Rahmen und Stufen: `../architektur/skalierung.md`
 ## Änderungen
 | Version | Datum | Änderung |
 |---|---|---|
+| 1.4.0 | 2026-10-02 | Koordinaten der Umkehrsuche mit höchstens 2 Nachkommastellen; land nur DE. Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026). |
 | 1.3.2 | 2026-09-27 | Ortsbestand ist eine feste Datei – keine monatliche Action mehr (Orte ändern sich kaum); bei Bedarf einmalig mit tools/orte-daten.js neu erzeugen |
 | 1.3.1 | 2026-09-27 | Ortsbestand wird jetzt über die gemeinsame Action „Daten erneuern“ erzeugt (Dienstblatt angepasst) |
 | 1.3.0 | 2026-09-27 | Doppelte zusammengefasst, Stadtstaaten korrigiert, weitere Firmennamen gefiltert |

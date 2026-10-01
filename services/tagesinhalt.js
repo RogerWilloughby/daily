@@ -1,6 +1,7 @@
 // Dienst „tagesinhalt“ (öffentlich, ortlos): die Tagesinhalte eines Tags – Rätsel, Witz, Wort, Sprichwort, Rezept, Land, Film,
 // Gesundheit, Tech, Beziehung, Spartipp. Quelle: feste Datei src/content/daily.json (von DAILY vorbereitet, Abschnitt 2 der Entscheidungen).
 // Auch vergangene Tage (Verlauf, Favoriten) – nie in die Zukunft. Nach dem letzten Tag des Vorrats wiederholt er sich im Kreis.
+const { P } = require('./_lib/parameter');
 const { DienstFehler, tagIn } = require('./_lib/rahmen');
 const { S } = require('./_lib/schema');
 
@@ -41,11 +42,14 @@ const SCHEMA = S.obj({
 module.exports = {
   id: 'tagesinhalt',
   version: 1,
-  programmversion: '1.0.0',
-  aenderungen: [{ version: '1.0.0', datum: '2026-10-01', text: 'Erste Fassung: alle Tagesinhalte eines Tags aus der festen Datei, auch vergangene Tage (Verlauf), nie in die Zukunft' }],
+  programmversion: '1.1.0',
+  aenderungen: [
+    { version: '1.1.0', datum: '2026-10-02', text: 'Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026).' },
+    { version: '1.0.0', datum: '2026-10-01', text: 'Erste Fassung: alle Tagesinhalte eines Tags aus der festen Datei, auch vergangene Tage (Verlauf), nie in die Zukunft' }],
   titel: 'Tagesinhalte',
   beschreibung: 'Rätsel, Witz, Wort und Sprichwort des Tages, Rezept, Land, Film, Gesundheits-, Tech-, Beziehungs- und Spartipp – für heute oder einen vergangenen Tag.',
   eingaben: { datum: 'Kalendertag JJJJ-MM-TT (Standard: heute in Deutschland); nicht in der Zukunft, nicht vor dem ersten Tag' },
+  parameter: { datum: P.datum },   // erlaubte Angaben = Cache-Schlüssel (_lib/parameter.js)
   laender: 'alle',
   klasse: 'oeffentlich',
   ttl: 86400,

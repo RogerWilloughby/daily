@@ -2,9 +2,10 @@
 // Quelle: Tankerkönig (Daten der Markttransparenzstelle für Kraftstoffe, MTS-K). Ein Abruf liefert alle drei Sorten –
 // so teilen sich alle Nutzer einer 1-km-Zelle eine Antwort, egal welche Sorte sie gewählt haben.
 // Braucht einen kostenlosen Schlüssel als Vercel-Variable TANKERKOENIG_API_KEY (https://onboarding.tankerkoenig.de).
+const { P } = require('./_lib/parameter');
 const { getJson } = require('./_lib/http');
 const { DienstFehler, runde, text } = require('./_lib/rahmen');
-const { ortAus } = require('./_lib/ort');
+const { ortAus, inDeutschland } = require('./_lib/ort');
 const { S } = require('./_lib/schema');
 
 const QUELLEN = [{ name: 'Tankerkönig (Daten der Markttransparenzstelle für Kraftstoffe)', lizenz: 'CC BY 4.0', url: 'https://creativecommons.tankerkoenig.de' }];
@@ -52,13 +53,15 @@ const SCHEMA = S.obj({
 module.exports = {
   id: 'tanken',
   version: 1,
-  programmversion: '1.0.0',
+  programmversion: '2.0.0',
   aenderungen: [
+    { version: '2.0.0', datum: '2026-10-02', text: 'Eingaben nur noch lat/lon mit höchstens 2 Nachkommastellen; Ortssuche per Name (ort=) sowie name, region, land, zeitzone entfallen – die Antwort enthält keinen Ortsnamen mehr (den kennt die Oberfläche). Umkreis nur 2, 5 oder 10 (sonst Fehler statt still 5). Ausland an den Koordinaten erkannt (Rahmen um Deutschland). Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026).' },
     { version: '1.0.0', datum: '2026-09-29', text: 'Erste Fassung im Format daily/1 (ersetzt /api/fuel): alle drei Sorten mit einem Abruf, Umkreis 2/5/10 km, günstigste und Durchschnitt je Sorte' }
   ],
   titel: 'Tanken',
   beschreibung: 'Spritpreise (Super E5, Super E10, Diesel) der Tankstellen im Umkreis eines Orts in Deutschland, mit der günstigsten geöffneten Tankstelle und dem Durchschnittspreis je Sorte.',
-  eingaben: { ort: 'Ortsname (z. B. Berlin) – oder –', lat: 'Breitengrad', lon: 'Längengrad', name: 'Anzeigename (optional)', region: 'Bundesland (optional)', land: 'Ländercode (optional)', umkreis: 'Umkreis in km: 2, 5 (Standard) oder 10' },
+  eingaben: { lat: 'Breitengrad, höchstens 2 Nachkommastellen (z. B. 51.05)', lon: 'Längengrad, höchstens 2 Nachkommastellen (z. B. 13.74)', umkreis: 'Umkreis in km: 2, 5 (Standard) oder 10' },
+  parameter: { lat: P.lat, lon: P.lon, umkreis: P.wahl(['2', '5', '10']) },   // erlaubte Angaben = Cache-Schlüssel (_lib/parameter.js)
   laender: ['DE'],
   klasse: 'oeffentlich',
   ttl: 300,
@@ -72,7 +75,7 @@ module.exports = {
       'Abgerufen über die Tankerkönig-API (list.php, alle Sorten): kostenlos mit Schlüssel, Daten unter CC BY 4.0, Abfragegrenze je Schlüssel (nicht veröffentlicht), ohne Gewähr. Die Weitergabe der Datensätze als solche ist laut Nutzungsbedingungen nicht gestattet – DAILY zeigt sie nur in der eigenen Oberfläche an.'
     ],
     verarbeitung: [
-      'Ort auf 2 Nachkommastellen (≈ 1 km) gerundet; Umkreis 2, 5 oder 10 km (andere Werte → 5 km).',
+      'Ort nur als lat/lon mit höchstens 2 Nachkommastellen (≈ 1 km); Umkreis 2, 5 (Standard) oder 10 km, andere Werte und Angaben werden abgelehnt. Außerhalb Deutschlands (grober Rahmen um Deutschland): nicht_unterstuetzt.',
       'Ein Abruf mit allen drei Sorten; Preise ≤ 0 oder fehlend → null. Tankstellen nach Entfernung sortiert, höchstens die nächsten 25.',
       'Günstigste je Sorte: nur geöffnete Tankstellen mit Preis, bei gleichem Preis die nähere. Durchschnitt: Mittel der geöffneten mit Preis.',
       'Takt: Antworten gelten bis zur nächsten 5-Minuten-Marke (die Meldepflicht der Tankstellen liegt bei 5 Minuten).',
@@ -127,8 +130,8 @@ module.exports = {
     const key = process.env.TANKERKOENIG_API_KEY;
     if (!key) throw new DienstFehler('schluessel_fehlt', 'Tankerkönig-Schlüssel ist nicht eingerichtet (Vercel-Variable TANKERKOENIG_API_KEY)');
     const ort = await ortAus(eingabe);
-    if (ort.land && ort.land !== 'DE') throw new DienstFehler('nicht_unterstuetzt', 'Spritpreise gibt es für Orte in Deutschland');
-    const umkreisKm = UMKREISE.includes(+eingabe.umkreis) ? +eingabe.umkreis : 5;
+    if (!inDeutschland(ort.lat, ort.lon)) throw new DienstFehler('nicht_unterstuetzt', 'Spritpreise gibt es für Orte in Deutschland');
+    const umkreisKm = eingabe.umkreis == null ? 5 : +eingabe.umkreis;   // 2, 5 oder 10 (geprüft in _lib/parameter.js)
     let q;
     try {
       q = await getJson(`https://creativecommons.tankerkoenig.de/json/list.php?lat=${ort.lat}&lng=${ort.lon}&rad=${umkreisKm}&sort=dist&type=all&apikey=${encodeURIComponent(key)}`, { timeout: 8000 });

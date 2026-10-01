@@ -1,6 +1,7 @@
 // Dienst „andiesemtag“ (öffentlich, ortlos): „An diesem Tag“ aus der deutschen Wikipedia (Wikimedia-Feed, CC BY-SA 4.0) –
 // ausgewählte Ereignisse eines Kalendertags, neueste zuerst, mit Link zum Artikel. Auch vergangene Tage (Verlauf der Kachel „Wissen“).
 // Ersetzt seit App 0.35.0 die Einzelfunktion api/onthisday.js (die nur „heute“ kannte).
+const { P } = require('./_lib/parameter');
 const { getJson } = require('./_lib/http');
 const { DienstFehler, tagIn } = require('./_lib/rahmen');
 const { S } = require('./_lib/schema');
@@ -31,11 +32,14 @@ const SCHEMA = S.obj({
 module.exports = {
   id: 'andiesemtag',
   version: 1,
-  programmversion: '1.0.0',
-  aenderungen: [{ version: '1.0.0', datum: '2026-10-01', text: 'Erste Fassung: ersetzt api/onthisday.js, jetzt mit Datum (Verlauf), nie in die Zukunft' }],
+  programmversion: '1.1.0',
+  aenderungen: [
+    { version: '1.1.0', datum: '2026-10-02', text: 'Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026).' },
+    { version: '1.0.0', datum: '2026-10-01', text: 'Erste Fassung: ersetzt api/onthisday.js, jetzt mit Datum (Verlauf), nie in die Zukunft' }],
   titel: 'An diesem Tag',
   beschreibung: 'Ausgewählte geschichtliche Ereignisse eines Kalendertags aus der deutschen Wikipedia, neueste zuerst, mit Link zum Artikel.',
   eingaben: { datum: `Kalendertag JJJJ-MM-TT (Standard: heute in Deutschland); nicht in der Zukunft, nicht vor ${FRUEHESTENS}` },
+  parameter: { datum: P.datum },   // erlaubte Angaben = Cache-Schlüssel (_lib/parameter.js)
   laender: 'alle',
   klasse: 'oeffentlich',
   ttl: 86400,

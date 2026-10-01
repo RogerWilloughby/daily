@@ -7,7 +7,7 @@ Ausgewählte geschichtliche Ereignisse eines Kalendertags aus der deutschen Wiki
 | | |
 |---|---|
 | Aufruf | `GET /api/v1/andiesemtag` |
-| Programmversion | 1.0.0 |
+| Programmversion | 1.1.0 |
 | Vertrag (Datenformat) | daily/1, Version 1 |
 | Klasse | oeffentlich |
 | Länder | weltweit |
@@ -57,5 +57,6 @@ Rahmen und Stufen: `../architektur/skalierung.md`
 ## Änderungen
 | Version | Datum | Änderung |
 |---|---|---|
+| 1.1.0 | 2026-10-02 | Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026). |
 | 1.0.0 | 2026-10-01 | Erste Fassung: ersetzt api/onthisday.js, jetzt mit Datum (Verlauf), nie in die Zukunft |
 

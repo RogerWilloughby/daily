@@ -17,7 +17,7 @@ GET /api/v1/<dienst>?<eingaben>
 GET /api/v1/dienste            → Katalog aller Dienste (mit Eingaben, Klasse, TTL, Quellen, Schema)
 POST /api/v1/<privater dienst>  {JSON}   → private Dienste auch per POST (z. B. termine mit den iCal-Links im Körper; nie in der Adresse)
 ```
-**Grundsatz (02.10.2026):** Jeder Dienst ist einzeln abrufbar und verhält sich im Betrieb wie allein – es gibt **kein Paket** mehr (bis App 0.38.0: `/api/v1/paket`). **Die Adresse ist der Cache-Schlüssel:** Sie enthält nur, wovon die Antwort abhängt (Ortsdienste nur `lat`/`lon` mit höchstens 2 Nachkommastellen, `feiertage` nur `bundesland`, Dienste ohne Eingaben gar nichts); Unbekanntes wird abgelehnt (ab App 0.40.0). Liste je Dienst: `../konzept/entscheidungen.md`, Abschnitt 14.
+**Grundsatz (02.10.2026):** Jeder Dienst ist einzeln abrufbar und verhält sich im Betrieb wie allein – es gibt **kein Paket** mehr (bis App 0.38.0: `/api/v1/paket`). **Die Adresse ist der Cache-Schlüssel:** Sie enthält nur, wovon die Antwort abhängt (Ortsdienste nur `lat`/`lon` mit höchstens 2 Nachkommastellen, `feiertage` nur `bundesland`, Dienste ohne Eingaben gar nichts); Unbekanntes wird abgelehnt (seit App 0.40.0). Liste je Dienst: `../konzept/entscheidungen.md`, Abschnitt 14.
 Eine einzige Vercel-Funktion (`api/v1/[dienst].js`) bedient alle Dienste (Grenze Hobby-Tarif: 12 Funktionen).
 
 ## Austauschformat daily/1 (Rahmen)
@@ -28,7 +28,7 @@ Jede Antwort – auch jeder Fehler – hat diese Form:
   "format": "daily/1",
   "dienst": "wetter",
   "version": 1,
-  "ort": { "name": "Berlin", "region": "Berlin", "land": "DE", "lat": 52.52, "lon": 13.41, "zeitzone": "Europe/Berlin" },
+  "ort": { "name": null, "region": null, "land": null, "lat": 52.52, "lon": 13.41, "zeitzone": "Europe/Berlin" },
   "erstellt": "2026-09-27T06:15:00Z",
   "gueltigBis": "2026-09-27T06:30:00Z",
   "quellen": [ { "name": "Open-Meteo", "lizenz": "CC BY 4.0", "url": "https://open-meteo.com" } ],
@@ -96,11 +96,9 @@ Ort-Objekt (Pflicht: `name`, `lat`, `lon`; der Dienst `ort` liefert immer alle F
 | `zeitzone` | `Europe/Berlin` | IANA-Zeitzone |
 
 ## Eingabe „Ort“ für andere Dienste
-Ortsbezogene Dienste akzeptieren
-- `ort=<Name oder Postleitzahl>` → wird über den Dienst `ort` aufgelöst (erster Treffer), oder
-- `lat`, `lon` (+ optional `name`, `region`, `land`, `zeitzone`) – so ruft die App auf.
+Ortsbezogene Dienste (`wetter`, `regen`, `wetterhinweise`, `himmel`, `tanken`) nehmen **nur Koordinaten**: `lat`, `lon` mit **höchstens 2 Nachkommastellen (≈ 1 km)** in der kurzen Schreibweise (`51.05`, `13.7` – nicht `51.050`, nicht `51.0512`). Alles andere wird abgelehnt (seit App 0.40.0, `entscheidungen.md` Abschnitt 14): kein `ort=<Name>` (Ortsnamen löst nur der Dienst `ort` auf), kein `name`, `region`, `land`, `zeitzone`. Grund: Die Adresse ist der Cache-Schlüssel – Berlin ergibt genau ein Fach.
 
-Koordinaten werden **auf 2 Nachkommastellen (≈ 1 km) gerundet**: Datenschutz und gemeinsamer Cache.
+Die Antwort enthält im Rahmen `ort` die gerundeten Koordinaten (und bei `wetter` die Zeitzone aus der Quelle), **keinen Ortsnamen**: Den kennt die Oberfläche, sie setzt Name und Land des gewählten Orts selbst ein (`src/js/dienste/client.js → mitOrt`). So bleibt jeder Dienst unabhängig vom Ortsbestand, und angezeigt wird immer genau der gewählte Ort, auch im Ausland. Dienste mit Quellen nur in Deutschland (z. B. `tanken`) erkennen das Ausland an einem groben Rahmen um Deutschland (`_lib/ort.js → inDeutschland`).
 
 ## Länder
 Jeder Dienst gibt im Katalog an, wo er funktioniert: `laender: "alle"` oder eine Liste wie `["DE"]`. Liegt der Ort außerhalb, antwortet der Dienst mit `nicht_unterstuetzt`; Oberflächen können solche Dienste ausblenden. Der Dienst `ort` findet weltweit, sortiert Deutschland aber nach vorn.
@@ -123,7 +121,8 @@ Daraus entstehen der Katalog `/api/v1/dienste`, die Dateien `docs/dienste/<id>.m
 
 ## Einen Dienst bauen
 0. **Datenhaltung prüfen (vor dem Plan):** Kommt der Dienst mit festen Dateien im Repo (`services/daten/`), Rechnen oder Live-Abruf + CDN-Zwischenspeicher aus? Wenn nicht (wachsende Daten, Nutzerdaten über Geräte), erst mit Roger klären – keine Datenbank ohne Entscheidung (`../konzept/entscheidungen.md`, Abschnitt 12).
-1. `services/<id>.js` mit `id, version, titel, beschreibung, eingaben, laender, klasse, ttl, quellen, schema, blatt` und `run(eingabe) → { daten, ort?, hinweise?, quellen? }`.
+1. `services/<id>.js` mit `id, version, titel, beschreibung, eingaben, parameter, laender, klasse, ttl, quellen, schema, blatt` und `run(eingabe) → { daten, ort?, hinweise?, quellen? }`.
+   `parameter` = erlaubte Angaben mit Prüfung (`services/_lib/parameter.js`: `P.lat`, `P.lon`, `P.datum`, `P.wahl([...])`, `P.text(...)`); dieselben Namen wie in `eingaben` (ein Test prüft das). `ausfuehren` lehnt alles andere ab (400) und bildet den Instanz-Schlüssel nur aus diesen Angaben.
    **Eingaben = Cache-Schlüssel:** nur aufnehmen, wovon die Antwort wirklich abhängt, in genau einer Schreibweise (z. B. Bundesland statt Ort, wenn nur das Bundesland zählt; keine Anzeigenamen).
    Die Umwandlung der Quelle als eigene, reine Funktion `umwandeln()` exportieren (testbar ohne Netz).
 2. In `services/index.js` eintragen.
@@ -136,7 +135,8 @@ Daraus entstehen der Katalog `/api/v1/dienste`, die Dateien `docs/dienste/<id>.m
 |---|---|
 | `services/_lib/rahmen.js` | Rahmen daily/1, Fehlerklasse, Zeit- und Rundungshilfen |
 | `services/_lib/schema.js` | Schema-Prüfer (Teilmenge von JSON Schema) und Bausteine `S.*`, Rahmen-Schema |
-| `services/_lib/ort.js` | Ort-Eingabe auflösen und runden |
+| `services/_lib/ort.js` | Ort-Eingabe (nur Koordinaten) und grober Deutschland-Rahmen |
+| `services/_lib/parameter.js` | erlaubte Angaben je Dienst prüfen (Adresse = Cache-Schlüssel), Bausteine `P.*` |
 | `services/_lib/orte.js` | eigener Ortsbestand: Name, Postleitzahl, Umkehrsuche |
 | `services/_lib/radolan.js` | Radarraster des DWD ↔ Koordinaten (für `regen`, Karte) |
 | `api/icon.js` | Seitensymbole für „Meine Seiten“, `GET /api/icon?s=<id>` → Bild; nur Seiten aus `src/content/seiten.json`, direkt von der Seite (apple-touch-icon, HTML, favicon), CDN 30 Tage |

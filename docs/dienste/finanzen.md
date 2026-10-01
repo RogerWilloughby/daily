@@ -7,7 +7,7 @@ Euro-Wechselkurse der letzten 90 Tage, die Leitzinsen der EZB und die Inflation 
 | | |
 |---|---|
 | Aufruf | `GET /api/v1/finanzen` |
-| Programmversion | 1.0.0 |
+| Programmversion | 1.1.0 |
 | Vertrag (Datenformat) | daily/1, Version 1 |
 | Klasse | oeffentlich |
 | Länder | weltweit |
@@ -79,5 +79,6 @@ Rahmen und Stufen: `../architektur/skalierung.md`
 ## Änderungen
 | Version | Datum | Änderung |
 |---|---|---|
+| 1.1.0 | 2026-10-02 | Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026). |
 | 1.0.0 | 2026-09-28 | Erste Fassung: Euro-Referenzkurse (90 Tage), Leitzinsen und Inflation (HVPI) von der EZB |
 

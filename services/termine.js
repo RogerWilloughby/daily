@@ -1,6 +1,7 @@
 // Dienst „termine“ (nur privat): eigene Termine aus iCal-Kalendern (Google, Outlook, iCloud …) für heute und die nächsten 14 Tage.
 // Die iCal-Links kommen aus den DAILY-Einstellungen im Browser – nur per POST, werden nie gespeichert, nie zwischengespeichert
 // und stehen nie in einer Adresse. Ersatzweise aus der Vercel-Variable CALENDAR_ICS_URL. Links nie in den Code!
+const { P } = require('./_lib/parameter');
 const ical = require('node-ical');
 const { DienstFehler, iso, tagIn, text } = require('./_lib/rahmen');
 const { S } = require('./_lib/schema');
@@ -58,13 +59,15 @@ const SCHEMA = S.obj({
 module.exports = {
   id: 'termine',
   version: 1,
-  programmversion: '1.0.0',
+  programmversion: '1.1.0',
   aenderungen: [
+    { version: '1.1.0', datum: '2026-10-02', text: 'Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026).' },
     { version: '1.0.0', datum: '2026-09-28', text: 'Erste Fassung als Dienst (vorher api/calendar.js): 14 Tage, Serientermine, ganztägige Termine, verständliche Fehler je Kalender; Links nur per POST' }
   ],
   titel: 'Termine',
   beschreibung: 'Deine eigenen Termine aus iCal-Kalendern für heute und die nächsten 14 Tage – nur im privaten Betrieb.',
   eingaben: { urls: 'iCal-Links (Liste, höchstens 5) – nur per POST im JSON-Körper, nie in der Adresse', zeitzone: 'Zeitzone (optional, Standard Europe/Berlin)' },
+  parameter: { urls: P.koerper, zeitzone: P.text(60, /^[A-Za-z_]+(\/[A-Za-z_+-]+)*$/, 'Europe/Berlin') },   // erlaubte Angaben = Cache-Schlüssel (_lib/parameter.js)
   laender: 'alle',
   klasse: 'privat',
   ttl: 60,

@@ -2,6 +2,7 @@
 // Quelle: Autobahn-API der Autobahn GmbH des Bundes (verkehr.autobahn.de), ohne Schlüssel.
 // Start und Ziel des Arbeitswegs kommen nie hierher: der Dienst liefert alle Meldungen der Autobahnen, den Weg filtert der Browser.
 // So ist die Antwort für alle gleich, die dieselben Autobahnen gewählt haben (gemeinsamer Cache).
+const { P } = require('./_lib/parameter');
 const { getJson } = require('./_lib/http');
 const { DienstFehler, iso, runde } = require('./_lib/rahmen');
 const { S } = require('./_lib/schema');
@@ -148,13 +149,15 @@ const SCHEMA = S.obj({
 module.exports = {
   id: 'autobahn',
   version: 1,
-  programmversion: '1.0.0',
+  programmversion: '1.1.0',
   aenderungen: [
+    { version: '1.1.0', datum: '2026-10-02', text: 'Autobahnen nur in einer Schreibweise: aufsteigend, ohne Doppelte (A4,A13 – nicht A13,A4). Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026).' },
     { version: '1.0.0', datum: '2026-09-29', text: 'Erste Fassung: Staus, Verkehrsmeldungen, Sperrungen und Baustellen der gewählten Autobahnen (bis 5), Beginn/Ende/Länge/Tempo aus dem amtlichen Text' }
   ],
   titel: 'Autobahn',
   beschreibung: 'Aktuelle Staus, Verkehrsmeldungen, Sperrungen und Baustellen auf den gewählten Autobahnen in Deutschland – für den Arbeitsweg mit dem Auto.',
-  eingaben: { strassen: 'Autobahnen, durch Komma getrennt (z. B. A4,A13), höchstens 5' },
+  eingaben: { strassen: 'Autobahnen, durch Komma getrennt, aufsteigend und ohne Doppelte (z. B. A4,A13), höchstens 5' },
+  parameter: { strassen: { pruefe: v => { const s = strassenAus(v); return !!s && s.length > 0 && s.join(',') === v; }, hilfe: 'Autobahnen A1 … A999, aufsteigend, ohne Doppelte, durch Komma getrennt (z. B. A4,A13), höchstens 5' } },   // erlaubte Angaben = Cache-Schlüssel (_lib/parameter.js)
   laender: ['DE'],
   klasse: 'oeffentlich',
   ttl: TAKT,

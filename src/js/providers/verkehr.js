@@ -5,7 +5,7 @@ import { set } from '../core/board.js';
 import { settings, saveSettings, kachelOpt, kachelOptSpeichern } from '../core/store.js';
 import { kachelEinstellungen } from '../core/einstellungen.js';
 import { addAnswer } from '../core/ask.js';
-import { dienst, gespeichert, ortParams } from '../dienste/client.js';
+import { dienst, gespeichert, ortParams, mitOrt } from '../dienste/client.js';
 import { ansicht as tankAnsicht, antwort as tankAntwort, sorteVon, SORTE_NAME, UMKREISE } from '../adapter/tanken.js';
 import { ansicht as wegAnsicht, antwort as wegAntwort, strassenVon, FRAGE as WEG_FRAGE } from '../adapter/autobahn.js';
 import { hm, getJson, esc, icon } from '../core/util.js';
@@ -59,7 +59,7 @@ function tankenAnsicht() {
     const t = 'Spritpreise gibt es nur für Orte in Deutschland.';
     return { kopf: 'Tanken', ms: '–', x: t, html: text(t) };
   }
-  const a = tankAnsicht(tk, sorteVon(settings.fuel));
+  const a = tankAnsicht(mitOrt(tk, settings.place), sorteVon(settings.fuel));
   return a.liste.length ? a : { ...a, html: text(a.x) };
 }
 
@@ -119,7 +119,7 @@ export async function load() {
 // Frag DAILY
 // Autobahn vor Bus/Bahn: „Autobahn“ enthält „bahn“
 addAnswer(WEG_FRAGE, q => wegAntwort(q, aw, { ...wegOrte(), strassen: strassen() }));
-addAnswer(/tank|benzin|diesel|sprit|super|\be10\b|\be5\b/i, q => tankAntwort(q, tk, settings.fuel));
+addAnswer(/tank|benzin|diesel|sprit|super|\be10\b|\be5\b/i, q => tankAntwort(q, mitOrt(tk, settings.place), settings.fuel));
 addAnswer(/bus|bahn|tram|straßenbahn|strassenbahn|abfahrt|haltestelle|öpnv|oepnv/i, () => {
   if (!ab || !ab.found) return 'Die Abfahrten sind gerade nicht verfügbar.';
   const deps = kommende().slice(0, 4);

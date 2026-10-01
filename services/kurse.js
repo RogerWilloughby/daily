@@ -1,6 +1,7 @@
 // Dienst „kurse“ (nur privat): Börsenindizes, ETF, Krypto und Gold als reine Kursangaben – keine Anlageempfehlung.
 // Quelle: inoffizielle Chart-Schnittstelle von Yahoo Finance. Deren Bedingungen erlauben nur die private Nutzung,
 // daher nur im privaten Betrieb (Vercel-Variable DAILY_PRIVATE=1). Siehe docs/recherche/finanzdaten.md.
+const { P } = require('./_lib/parameter');
 const { getJson } = require('./_lib/http');
 const { DienstFehler, iso, runde } = require('./_lib/rahmen');
 const { S } = require('./_lib/schema');
@@ -35,13 +36,15 @@ const SCHEMA = S.obj({
 module.exports = {
   id: 'kurse',
   version: 1,
-  programmversion: '1.0.0',
+  programmversion: '1.1.0',
   aenderungen: [
+    { version: '1.1.0', datum: '2026-10-02', text: 'Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026).' },
     { version: '1.0.0', datum: '2026-09-28', text: 'Umzug aus api/markets.js in das Format daily/1; nur noch privat' }
   ],
   titel: 'Kurse (privat)',
   beschreibung: 'DAX, S&P 500, MSCI World, Bitcoin, Ethereum und Gold als reine Kursangaben mit Veränderung zum Vortag – nur im privaten Betrieb.',
   eingaben: {},
+  parameter: {},   // erlaubte Angaben = Cache-Schlüssel (_lib/parameter.js)
   laender: 'alle',
   klasse: 'privat',
   ttl: 300,

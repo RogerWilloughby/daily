@@ -7,7 +7,7 @@ DAX, S&P 500, MSCI World, Bitcoin, Ethereum und Gold als reine Kursangaben mit V
 | | |
 |---|---|
 | Aufruf | `GET /api/v1/kurse` |
-| Programmversion | 1.0.0 |
+| Programmversion | 1.1.0 |
 | Vertrag (Datenformat) | daily/1, Version 1 |
 | Klasse | privat |
 | Länder | weltweit |
@@ -59,5 +59,6 @@ Rahmen und Stufen: `../architektur/skalierung.md`
 ## Änderungen
 | Version | Datum | Änderung |
 |---|---|---|
+| 1.1.0 | 2026-10-02 | Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026). |
 | 1.0.0 | 2026-09-28 | Umzug aus api/markets.js in das Format daily/1; nur noch privat |
 

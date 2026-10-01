@@ -9,6 +9,12 @@ export function ortParams(p) {
   return { lat: r(p.lat), lon: r(p.lon) };
 }
 
+// Ortsdienste liefern seit 0.40.0 keinen Ortsnamen mehr (die Adresse enthält nur die Koordinaten): Name, Region und Land
+// des gewählten Orts setzt die Oberfläche hier ein – angezeigt wird so immer genau der gewählte Ort, auch im Ausland.
+export const mitOrt = (env, ort) => (env && env.ort && ort
+  ? { ...env, ort: { ...env.ort, name: ort.name || null, region: ort.admin || ort.region || null, land: ort.land || 'DE', zeitzone: env.ort.zeitzone || ort.zeitzone || null } }
+  : env);
+
 export class DienstFehler extends Error {
   constructor(fehler) { super(fehler.meldung || fehler.code); this.code = fehler.code; }
 }

@@ -2,6 +2,7 @@
 // Daten: feste, von DAILY gepflegte Liste services/daten/namenstage.json nach dem kirchlichen Kalender
 // (Allgemeiner Römischer Kalender, Regionalkalender für das deutsche Sprachgebiet). Keine Abrufe, keine Automatik:
 // Namenstage ändern sich praktisch nie; Korrekturen direkt in der Datei.
+const { P } = require('./_lib/parameter');
 const { DienstFehler, tagIn, text } = require('./_lib/rahmen');
 const { S } = require('./_lib/schema');
 
@@ -47,8 +48,9 @@ const SCHEMA = S.obj({
 module.exports = {
   id: 'namenstage',
   version: 1,
-  programmversion: '1.1.0',
+  programmversion: '1.2.0',
   aenderungen: [
+    { version: '1.2.0', datum: '2026-10-02', text: 'Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026).' },
     { version: '1.1.0', datum: '2026-09-27', text: 'Feste, gepflegte Liste deutscher Namenstage nach dem kirchlichen Kalender statt Wikidata-Abruf (lieferte keine brauchbaren deutschen Namen); keine Action mehr' },
     { version: '1.0.2', datum: '2026-09-27', text: 'Deutsche Namen: Vorname aus dem deutschen Namen des Heiligen (nur mit Artikel in der deutschen Wikipedia), Prüfung an bekannten Namenstagen; Bestände ohne Fassung 2 werden ignoriert' },
     { version: '1.0.1', datum: '2026-09-27', text: 'Wikidata-Abruf in kleinen Schritten (die große Abfrage lief in den 60-s-Abbruch); erzeugt über die gemeinsame Action „Daten erneuern“' },
@@ -57,6 +59,7 @@ module.exports = {
   titel: 'Namenstage',
   beschreibung: 'Wer heute und in den nächsten Tagen Namenstag hat – und wann ein bestimmter Vorname Namenstag hat.',
   eingaben: { name: 'Vorname (optional, z. B. Josef) – liefert dessen Namenstage' },
+  parameter: { name: P.text(40, /^[\p{L}][\p{L}' -]*$/u, 'Josef') },   // erlaubte Angaben = Cache-Schlüssel (_lib/parameter.js)
   laender: 'alle',
   klasse: 'oeffentlich',
   ttl: 86400,

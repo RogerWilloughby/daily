@@ -7,7 +7,7 @@ Spritpreise (Super E5, Super E10, Diesel) der Tankstellen im Umkreis eines Orts 
 | | |
 |---|---|
 | Aufruf | `GET /api/v1/tanken` |
-| Programmversion | 1.0.0 |
+| Programmversion | 2.0.0 |
 | Vertrag (Datenformat) | daily/1, Version 1 |
 | Klasse | oeffentlich |
 | Länder | DE |
@@ -26,16 +26,12 @@ Quellen mit Lizenz:
 ## Eingabe
 | Parameter | Bedeutung |
 |---|---|
-| `ort` | Ortsname (z. B. Berlin) – oder – |
-| `lat` | Breitengrad |
-| `lon` | Längengrad |
-| `name` | Anzeigename (optional) |
-| `region` | Bundesland (optional) |
-| `land` | Ländercode (optional) |
+| `lat` | Breitengrad, höchstens 2 Nachkommastellen (z. B. 51.05) |
+| `lon` | Längengrad, höchstens 2 Nachkommastellen (z. B. 13.74) |
 | `umkreis` | Umkreis in km: 2, 5 (Standard) oder 10 |
 
 ## Verarbeitung
-- Ort auf 2 Nachkommastellen (≈ 1 km) gerundet; Umkreis 2, 5 oder 10 km (andere Werte → 5 km).
+- Ort nur als lat/lon mit höchstens 2 Nachkommastellen (≈ 1 km); Umkreis 2, 5 (Standard) oder 10 km, andere Werte und Angaben werden abgelehnt. Außerhalb Deutschlands (grober Rahmen um Deutschland): nicht_unterstuetzt.
 - Ein Abruf mit allen drei Sorten; Preise ≤ 0 oder fehlend → null. Tankstellen nach Entfernung sortiert, höchstens die nächsten 25.
 - Günstigste je Sorte: nur geöffnete Tankstellen mit Preis, bei gleichem Preis die nähere. Durchschnitt: Mittel der geöffneten mit Preis.
 - Takt: Antworten gelten bis zur nächsten 5-Minuten-Marke (die Meldepflicht der Tankstellen liegt bei 5 Minuten).
@@ -94,5 +90,6 @@ Rahmen und Stufen: `../architektur/skalierung.md`
 ## Änderungen
 | Version | Datum | Änderung |
 |---|---|---|
+| 2.0.0 | 2026-10-02 | Eingaben nur noch lat/lon mit höchstens 2 Nachkommastellen; Ortssuche per Name (ort=) sowie name, region, land, zeitzone entfallen – die Antwort enthält keinen Ortsnamen mehr (den kennt die Oberfläche). Umkreis nur 2, 5 oder 10 (sonst Fehler statt still 5). Ausland an den Koordinaten erkannt (Rahmen um Deutschland). Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026). |
 | 1.0.0 | 2026-09-29 | Erste Fassung im Format daily/1 (ersetzt /api/fuel): alle drei Sorten mit einem Abruf, Umkreis 2/5/10 km, günstigste und Durchschnitt je Sorte |
 

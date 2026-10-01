@@ -10,6 +10,9 @@ const dienste = require('../services');
 const router = require('../api/v1/[dienst].js');
 
 const esm = p => import(pathToFileURL(path.join(__dirname, '..', p)).href);
+const BERLIN = { lat: '52.52', lon: '13.41' };   // Ortsdienste bekommen nur Koordinaten (seit 0.40.0)
+// Name und Land setzt die Oberfläche ein (client.js → mitOrt), wie in der App
+const mitName = async (env, name = 'Berlin') => (await esm('src/js/dienste/client.js')).mitOrt(env, { name, land: 'DE' });
 const echtesFetch = global.fetch;
 test.before(() => { global.fetch = require('../tools/fetch-stub'); });
 test.after(() => { global.fetch = echtesFetch; });
@@ -82,14 +85,12 @@ test('Wetter: Umwandlung erfüllt den Vertrag, auch ohne Luftdaten', () => {
   assert.deepEqual(pruefe(ohne.daten, w.schema), []);
 });
 
-test('Router: /api/v1/wetter?ort=Berlin liefert daily/1 mit gerundetem Ort', async () => {
-  const r = await rufe('wetter', { ort: 'Berlin' });
+test('Router: /api/v1/wetter?lat=…&lon=… liefert daily/1 – Koordinaten, Zeitzone aus der Quelle, kein Ortsname', async () => {
+  const r = await rufe('wetter', BERLIN);
   assert.equal(r.code, 200);
   gueltig(r.body, dienste.byId.wetter.schema);
   const o = r.body.ort;
-  assert.deepEqual([o.name, o.region, o.land, o.kreis, o.kreisSchluessel, o.typ, o.zeitzone], ['Berlin', 'Berlin', 'DE', 'Berlin', '11000', 'ort', 'Europe/Berlin']);
-  assert.ok(Math.abs(o.lat - 52.5) < 0.1 && Math.abs(o.lon - 13.4) < 0.1, `${o.lat},${o.lon}`);
-  assert.equal(o.lat, Math.round(o.lat * 100) / 100);
+  assert.deepEqual([o.name, o.region, o.land, o.lat, o.lon, o.zeitzone], [null, null, null, 52.52, 13.41, 'Europe/Berlin']);   // Name kennt die Oberfläche
   // Takt: gültig bis zur nächsten vollen oder halben Stunde, CDN-Cache genau so lange
   const bis = new Date(r.body.gueltigBis);
   assert.ok([0, 30].includes(bis.getUTCMinutes()) && bis.getUTCSeconds() === 0, r.body.gueltigBis);
@@ -98,11 +99,12 @@ test('Router: /api/v1/wetter?ort=Berlin liefert daily/1 mit gerundetem Ort', asy
   assert.equal(r.headers['access-control-allow-origin'], '*');
 });
 
-test('Router: Koordinaten statt Name, Zeitzone aus der Quelle', async () => {
-  const r = await rufe('wetter', { lat: '51.050912', lon: '13.738', name: 'Dresden', region: 'Sachsen', land: 'DE' });
+test('Router: Koordinaten nur mit höchstens 2 Nachkommastellen, kein Name, keine Region', async () => {
+  for (const q of [{ lat: '51.050912', lon: '13.738' }, { lat: '51.050', lon: '13.74' }, { lat: '51.05', lon: '13.74', name: 'Dresden' }, { lat: '51.05', lon: '13.74', region: 'Sachsen' }])
+    assert.equal((await rufe('wetter', q)).body.fehler.code, 'eingabe_ungueltig', JSON.stringify(q));
+  const r = await rufe('wetter', { lat: '51.05', lon: '13.74' });
   assert.equal(r.code, 200);
-  assert.equal(r.body.ort.lat, 51.05);
-  assert.equal(r.body.ort.zeitzone, 'Europe/Berlin');
+  assert.deepEqual([r.body.ort.lat, r.body.ort.zeitzone], [51.05, 'Europe/Berlin']);
 });
 
 test('Router: Fehler kommen im Rahmen mit passendem Status', async () => {
@@ -112,9 +114,9 @@ test('Router: Fehler kommen im Rahmen mit passendem Status', async () => {
   assert.equal(kaputt.code, 400); assert.equal(kaputt.body.fehler.code, 'eingabe_ungueltig');
   const unbekannt = await rufe('gibtsnicht');
   assert.equal(unbekannt.code, 404); assert.equal(unbekannt.body.fehler.code, 'dienst_unbekannt');
-  const nirgends = await rufe('wetter', { ort: 'Atlantis' });
-  assert.equal(nirgends.code, 404); assert.equal(nirgends.body.fehler.code, 'ort_nicht_gefunden');
-  const post = await rufe('wetter', { ort: 'Berlin' }, 'POST');
+  const name = await rufe('wetter', { ort: 'Atlantis' });            // Ortssuche per Name gibt es nur noch im Dienst „ort“
+  assert.equal(name.code, 400); assert.match(name.body.fehler.meldung, /Unbekannte Angabe „ort“ – wetter kennt lat, lon/);
+  const post = await rufe('wetter', BERLIN, 'POST');
   assert.equal(post.code, 405);
 });
 
@@ -188,7 +190,7 @@ test('Standort: Ausland nur, wenn kein deutscher Ort so heißt', async () => {
   assert.equal(leer.code, 200); assert.deepEqual(leer.body.daten.orte, []);
 });
 
-test('Standort: Postleitzahl aus dem eigenen Bestand, auch als Ort-Eingabe anderer Dienste', async () => {
+test('Standort: Postleitzahl aus dem eigenen Bestand; andere Dienste nehmen keine Ortsnamen mehr', async () => {
   const o = await rufe('ort', { q: '01844' });
   assert.equal(o.code, 200);
   gueltig(o.body, dienste.byId.ort.schema);
@@ -197,12 +199,12 @@ test('Standort: Postleitzahl aus dem eigenen Bestand, auch als Ort-Eingabe ander
   assert.deepEqual([ns.kreis, ns.kreisSchluessel, ns.region, ns.plz], ['Landkreis Sächsische Schweiz-Osterzgebirge', '14628', 'Sachsen', ['01844']]);
   assert.ok(Math.abs(ns.lat - 51.02) < 0.05 && Math.abs(ns.lon - 14.22) < 0.05);
   assert.equal((await rufe('ort', { q: '99999' })).body.daten.orte.length, 0);
-  const w = await rufe('wetter', { ort: '01067' });
-  assert.equal(w.code, 200); assert.equal(w.body.ort.name, 'Dresden');
+  assert.equal((await rufe('wetter', { ort: '01067' })).body.fehler.code, 'eingabe_ungueltig');
 });
 
 test('Standort: Umkehrsuche aus Koordinaten – gerundet, Stadtteil → Ort, außerhalb leer', async () => {
-  const o = await rufe('ort', { lat: '51.050409', lon: '13.737262' });
+  assert.equal((await rufe('ort', { lat: '51.050409', lon: '13.737262' })).body.fehler.code, 'eingabe_ungueltig');   // der Browser rundet vorher
+  const o = await rufe('ort', { lat: '51.05', lon: '13.74' });
   assert.equal(o.code, 200);
   gueltig(o.body, dienste.byId.ort.schema);
   const d = o.body.daten.orte[0];
@@ -227,7 +229,7 @@ test('Katalog: jeder Dienst vollständig beschrieben, mit Ländern', async () =>
 
 test('Adapter Wetter: Kachel und Antwort aus dem Vertrag', async () => {
   const { kachel, antwort: text } = await esm('src/js/adapter/wetter.js');
-  const env = (await rufe('wetter', { ort: 'Berlin' })).body;
+  const env = await mitName((await rufe('wetter', BERLIN)).body);
   const k = kachel(env);
   assert.match(k.title, /^Berlin 15° · 9° \(\d{1,2} Uhr\) \/ 16° \(\d{1,2} Uhr\)$/);   // Ort, jetzt, Tiefst/Höchst mit Uhrzeit in einer Zeile
   assert.ok(env.daten.tage[0].minZeit && env.daten.tage[0].maxZeit);
@@ -381,7 +383,7 @@ test('Versionen: App-Nummer gleich in package.json und Oberfläche, Programmvers
   assert.match(APP.version, /^\d+\.\d+\.\d+$/);
   assert.equal(versionText({ version: '0.6.0', stand: '2026-09-27T12:32:00Z', commit: 'b518008' }), 'DAILY 0.6.0 · 27.09.2026 14:32 · b518008');
   assert.equal(versionText({ version: '0.6.0', stand: null, commit: null }), 'DAILY 0.6.0');
-  const w = await rufe('wetter', { ort: 'Berlin' });
+  const w = await rufe('wetter', BERLIN);
   assert.equal(w.body.programm, dienste.byId.wetter.programmversion);
   const k = (await rufe('dienste')).body.daten;
   assert.equal(k.app.version, APP.version);
@@ -390,11 +392,11 @@ test('Versionen: App-Nummer gleich in package.json und Oberfläche, Programmvers
     assert.equal(d.aenderungen[0].version, d.programmversion, d.id);
   }
   const { seite } = await esm('src/js/adapter/katalog.js');
-  assert.match(seite({ daten: k }, 'DAILY 0.6.0'), /DAILY 0\.6\.0.*wetter 1\.\d+\.\d+/s);
+  assert.match(seite({ daten: k }, 'DAILY 0.6.0'), /DAILY 0\.6\.0.*wetter \d+\.\d+\.\d+/s);
 });
 
 test('Regen: Radar über Bright Sky – jetzt, Beginn, letzte Stunde, Nähe, Karte, Takt 5 Minuten', async () => {
-  const r = await rufe('regen', { lat: '52.52', lon: '13.41', name: 'Berlin' });
+  const r = await rufe('regen', BERLIN);
   assert.equal(r.code, 200);
   gueltig(r.body, dienste.byId.regen.schema);
   const d = r.body.daten;
@@ -437,7 +439,7 @@ test('Adapter Regen: Hinweis in der Wetterkachel und Reiter „Radar“', async 
   assert.match(ohneLand, /<svg class="rk" viewBox="0 0 52 52"/);
   assert.match(html, /4 km westlich/);
   assert.match(html, /0,4 mm, aufgehört vor 30 Min\./);
-  const wetter = (await rufe('wetter', { ort: 'Berlin' })).body;
+  const wetter = await mitName((await rufe('wetter', BERLIN)).body);
   const k = kachel(wetter, regen);
   assert.deepEqual(k.kleinReiter.map(r => r.id), ['jetzt', 'radar', 'mehr']);
   const rk = k.kleinReiter[1];
@@ -506,7 +508,7 @@ test('Client: Einzelabfragen mit nur den Koordinaten, sofort anzeigen aus dem Sp
 });
 
 test('Wetterhinweise: DWD-Warnungen über Bright Sky – ohne Testmeldungen, höchste Stufe zuerst, mit Tipp', async () => {
-  const r = await rufe('wetterhinweise', { lat: '51.05', lon: '13.74', name: 'Dresden' });
+  const r = await rufe('wetterhinweise', { lat: '51.05', lon: '13.74' });
   assert.equal(r.code, 200);
   gueltig(r.body, dienste.byId.wetterhinweise.schema);
   const d = r.body.daten;
@@ -532,7 +534,7 @@ test('Adapter Wetterhinweise: Abzeichen, kurzer Hinweis und Reiter in der Wetter
   const h = await esm('src/js/adapter/hinweise.js');
   const { kachel } = await esm('src/js/adapter/wetter.js');
   const env = (await rufe('wetterhinweise', { lat: '51.05', lon: '13.74' })).body;
-  const wetter = (await rufe('wetter', { ort: 'Berlin' })).body;
+  const wetter = await mitName((await rufe('wetter', BERLIN)).body);
   assert.match(h.abzeichen(env), /class="wh-badge wh-s2"[^>]*>Sturmböen \+1</);
   assert.match(h.kurz(env), /^Sturmböen ab (morgen )?\d{1,2}(:\d\d)? Uhr\.$/);
   const html = h.reiter(env);
@@ -580,7 +582,8 @@ test('Feiertage: je Bundesland (nicht je Ort), Feiertage, Brückentage, Ferien, 
   const d = r.body.daten;
   assert.deepEqual([d.bundesland, d.kuerzel], ['Sachsen', 'SN']);
   assert.deepEqual(d.ferien.map(f => f.name), ['Herbstferien', 'Weihnachtsferien']);
-  assert.equal((await rufe('feiertage', { bundesland: 'by' })).body.daten.bundesland, 'Bayern');
+  assert.equal((await rufe('feiertage', { bundesland: 'BY' })).body.daten.bundesland, 'Bayern');
+  assert.equal((await rufe('feiertage', { bundesland: 'by' })).body.fehler.code, 'eingabe_ungueltig');   // nur eine Schreibweise
   assert.equal((await rufe('feiertage', {})).body.fehler.code, 'eingabe_fehlt');
   assert.equal((await rufe('feiertage', { bundesland: 'XX' })).body.fehler.code, 'eingabe_ungueltig');
   // Browser: Bundesland des gewählten Orts → Kürzel (gleiche Liste wie im Dienst); Ausland → kein Abruf
@@ -610,7 +613,7 @@ test('Feiertage: je Bundesland (nicht je Ort), Feiertage, Brückentage, Ferien, 
 
 test('Himmel: Mond, Mondphasen, Sternschnuppen, Finsternisse am Ort, Jahreszeiten', async () => {
   const hi = dienste.byId.himmel;
-  const r = await rufe('himmel', { lat: '51.05', lon: '13.74', name: 'Dresden' });
+  const r = await rufe('himmel', { lat: '51.05', lon: '13.74' });
   assert.equal(r.code, 200);
   gueltig(r.body, hi.schema);
   const d = hi.berechne(51.05, 13.74, Date.parse('2026-09-27T10:00:00Z'));
@@ -805,7 +808,7 @@ test('Einstellungen: Kachel-Formular, Wetter-Optionen, Kachel-Listen', async () 
   assert.doesNotMatch(html, /Speichern|type="submit"/);                              // kein Knopf – Änderungen gelten sofort
   // Wetter: Reiter aus, Start-Reiter, Mini-Diagramm 7 Tage; Unwetter bleibt vorn
   const { kachel, mitOptionen } = await esm('src/js/adapter/wetter.js');
-  const w = (await rufe('wetter', { ort: 'Berlin' })).body, r = (await rufe('regen', { lat: '52.52', lon: '13.41' })).body;
+  const w = await mitName((await rufe('wetter', BERLIN)).body), r = (await rufe('regen', BERLIN)).body;
   const C = k => k.kleinReiter.find(x => x.id === 'jetzt').unten;                      // Diagramm unter dem Zeitpunkt-Block im Reiter „Jetzt“
   const k = mitOptionen(kachel(w, r, null), w, { radar: false, mini: 7 });
   assert.deepEqual(k.kleinReiter.map(x => x.id), ['jetzt', 'mehr']);
@@ -990,8 +993,9 @@ test('Tanken: Vertrag, alle Sorten mit einem Abruf, Günstigste/Durchschnitt, Sc
   gueltig(r.body, w.schema);
   assert.equal(r.body.daten.umkreisKm, 10);
   assert.equal(Date.parse(r.body.gueltigBis) % 300e3, 0);
-  assert.equal((await rufe('tanken', { lat: '51.05', lon: '13.74', umkreis: '7' })).body.daten.umkreisKm, 5);
-  assert.equal((await rufe('tanken', { lat: '48.2', lon: '16.37', land: 'AT' })).body.fehler.code, 'nicht_unterstuetzt');
+  assert.equal((await rufe('tanken', { lat: '51.05', lon: '13.74', umkreis: '7' })).body.fehler.code, 'eingabe_ungueltig');   // nur 2, 5, 10
+  assert.equal((await rufe('tanken', { lat: '51.05', lon: '13.74' })).body.daten.umkreisKm, 5);
+  assert.equal((await rufe('tanken', { lat: '48.2', lon: '16.37' })).body.fehler.code, 'nicht_unterstuetzt');   // Wien: außerhalb Deutschlands
   if (alt === undefined) delete process.env.TANKERKOENIG_API_KEY; else process.env.TANKERKOENIG_API_KEY = alt;
   // Ansicht „Tanken“ der Kachel „Verkehr“ und Frag DAILY
   const a = await esm('src/js/adapter/tanken.js');
@@ -1039,7 +1043,9 @@ test('Autobahn: Vertrag, Arten, Zeiten aus dem Text, Eingaben, fehlende Autobahn
   assert.ok(ms.every(m => !m.text.includes('')));                                                       // ohne Leerzeilen
   // Router: sortiert, Takt 5 Minuten, Fehler
   w.JE_STRASSE.clear();
-  const r = await rufe('autobahn', { strassen: 'A13,a4' });
+  assert.equal((await rufe('autobahn', { strassen: 'A13,A4' })).body.fehler.code, 'eingabe_ungueltig');   // nur aufsteigend
+  assert.equal((await rufe('autobahn', { strassen: 'a4,A13' })).body.fehler.code, 'eingabe_ungueltig');
+  const r = await rufe('autobahn', { strassen: 'A4,A13' });
   assert.equal(r.code, 200);
   gueltig(r.body, w.schema);
   assert.deepEqual([r.body.daten.strassen, r.body.ort, r.body.daten.meldungen.at(-1).strasse], [['A4', 'A13'], null, 'A13']);
@@ -1284,4 +1290,33 @@ test('Lokale Kacheln: „Mein Daily“ und „Deine Nutzung“ mit Mini-Reitern'
   assert.match(n.kleinReiter[0].liste[0].tip, /\(71 %\)$/);
   assert.match(n.kleinReiter[0].unten, /data-nutzung-reset/);
   assert.equal(a.nutzungKachel({ start: '2026-09-27T08:00:00Z', counts: {} }, {}).kleinReiter[0].unten, '');
+});
+
+test('Eingaben: die Adresse ist der Cache-Schlüssel – nur erlaubte Angaben in einer Schreibweise, sonst 400', async () => {
+  const { kurzeZahl } = require('../services/_lib/parameter');
+  assert.deepEqual(['51.05', '13.7', '9', '-0.5', '51.050', '51.051', '051.05', '+51', '1e1', '', '91'].map(v => kurzeZahl(v, 90)),
+    [true, true, true, true, false, false, false, false, false, false, false]);
+  for (const d of dienste.DIENSTE) {                                          // jeder Dienst nennt seine Angaben, Dienstblatt passt dazu
+    assert.ok(d.parameter && typeof d.parameter === 'object', d.id + ': parameter fehlt');
+    assert.deepEqual(Object.keys(d.parameter), Object.keys(d.eingaben), d.id + ': eingaben ≠ parameter');
+  }
+  const fall = async (id, q) => { const r = await rufe(id, q); return [r.code, r.body.fehler && r.body.fehler.code]; };
+  assert.deepEqual(await fall('finanzen', { x: '1' }), [400, 'eingabe_ungueltig']);          // Dienst ohne Eingaben: jede Angabe abgelehnt
+  assert.deepEqual(await fall('dienste', { x: '1' }), [400, 'eingabe_ungueltig']);
+  assert.deepEqual(await fall('tagesinhalt', { datum: '1.10.2026' }), [400, 'eingabe_ungueltig']);
+  assert.deepEqual(await fall('regen', { lat: '52.52', lon: '13.410' }), [400, 'eingabe_ungueltig']);
+  assert.deepEqual(await fall('himmel', { lat: '52.52', lon: '13.41', zeitzone: 'Europe/Berlin' }), [400, 'eingabe_ungueltig']);
+  assert.deepEqual(await fall('ort', { q: 'Berlin', land: 'AT' }), [400, 'eingabe_ungueltig']);
+  assert.deepEqual(await fall('namenstage', { name: 'Josef<script>' }), [400, 'eingabe_ungueltig']);
+  assert.equal((await rufe('finanzen')).code, 200);
+  // Instanz-Zwischenspeicher: Schlüssel nur aus den geprüften Angaben
+  dienste.INSTANZ.clear();
+  await rufe('wetter', BERLIN);
+  assert.deepEqual([...dienste.INSTANZ.keys()], ['wetter?lat=52.52&lon=13.41']);
+  // privater Dienst per POST: Körper (Liste) bleibt erlaubt; GET mit Links weiter abgelehnt
+  process.env.DAILY_PRIVATE = '1';
+  try {
+    assert.deepEqual(await fall('termine', { urls: 'https://calendar.test/a.ics' }), [400, 'eingabe_ungueltig']);
+    assert.deepEqual(await fall('termine', { zeitzone: 'Europe/Berlin', x: '1' }), [400, 'eingabe_ungueltig']);
+  } finally { delete process.env.DAILY_PRIVATE; }
 });

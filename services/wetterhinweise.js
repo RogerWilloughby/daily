@@ -1,6 +1,7 @@
 // Dienst „wetterhinweise“: amtliche Wetterwarnungen des Deutschen Wetterdienstes für einen Ort – freundlich aufbereitet:
 // Art (Glätte, Sturm …), Stufe 1–4, Zeitraum, amtlicher Text unverändert, dazu ein kurzer Alltagstipp von DAILY.
 // Quelle: DWD (CAP-Warnungen) über Bright Sky. Bei Unwettern (Stufe 3–4) bleibt die amtliche Warnung im Vordergrund.
+const { P } = require('./_lib/parameter');
 const { getJson } = require('./_lib/http');
 const { DienstFehler, iso, text } = require('./_lib/rahmen');
 const { ortAus } = require('./_lib/ort');
@@ -81,13 +82,15 @@ const SCHEMA = S.obj({
 module.exports = {
   id: 'wetterhinweise',
   version: 1,
-  programmversion: '1.0.0',
+  programmversion: '2.0.0',
   aenderungen: [
+    { version: '2.0.0', datum: '2026-10-02', text: 'Eingaben nur noch lat/lon mit höchstens 2 Nachkommastellen; Ortssuche per Name (ort=) sowie name, region, land, zeitzone entfallen – die Antwort enthält keinen Ortsnamen mehr (den kennt die Oberfläche). Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026).' },
     { version: '1.0.0', datum: '2026-09-27', text: 'Erste Fassung: amtliche DWD-Warnungen über Bright Sky, Art, Stufe, Zeitraum und Alltagstipp; ersetzt die Kachel „Warnungen“' }
   ],
   titel: 'Wetterhinweise',
   beschreibung: 'Amtliche Wetterwarnungen des Deutschen Wetterdienstes für einen Ort – mit Art, Stufe, Zeitraum, amtlichem Text und einem kurzen Alltagstipp.',
-  eingaben: { ort: 'Ortsname (z. B. Berlin) – oder –', lat: 'Breitengrad', lon: 'Längengrad', name: 'Anzeigename (optional)', region: 'Bundesland (optional)', land: 'Ländercode (optional)' },
+  eingaben: { lat: 'Breitengrad, höchstens 2 Nachkommastellen (z. B. 51.05)', lon: 'Längengrad, höchstens 2 Nachkommastellen (z. B. 13.74)' },
+  parameter: { lat: P.lat, lon: P.lon },   // erlaubte Angaben = Cache-Schlüssel (_lib/parameter.js)
   laender: ['DE'],
   klasse: 'oeffentlich',
   ttl: 300,

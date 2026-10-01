@@ -7,7 +7,7 @@ Aktuelles Wetter, heutiger Tag Stunde für Stunde, 48 Stunden, Tageszeiten für 
 | | |
 |---|---|
 | Aufruf | `GET /api/v1/wetter` |
-| Programmversion | 1.5.0 |
+| Programmversion | 2.0.0 |
 | Vertrag (Datenformat) | daily/1, Version 1 |
 | Klasse | oeffentlich |
 | Länder | weltweit |
@@ -29,15 +29,11 @@ Quellen mit Lizenz:
 ## Eingabe
 | Parameter | Bedeutung |
 |---|---|
-| `ort` | Ortsname (z. B. Berlin) – oder – |
-| `lat` | Breitengrad |
-| `lon` | Längengrad |
-| `name` | Anzeigename (optional) |
-| `region` | Bundesland (optional) |
-| `land` | Ländercode (optional) |
+| `lat` | Breitengrad, höchstens 2 Nachkommastellen (z. B. 51.05) |
+| `lon` | Längengrad, höchstens 2 Nachkommastellen (z. B. 13.74) |
 
 ## Verarbeitung
-- Ort wird über den Dienst „ort“ aufgelöst oder als lat/lon übernommen und auf 2 Nachkommastellen (≈ 1 km) gerundet.
+- Ort nur als lat/lon mit höchstens 2 Nachkommastellen (≈ 1 km); andere Angaben werden abgelehnt. Die Antwort enthält keinen Ortsnamen – den kennt die Oberfläche.
 - Open-Meteo wählt die Modellzelle mit ähnlicher Höhe (Höhenmodell 90 m) und rechnet die Temperatur auf die Höhe des Orts um.
 - Nur auf Anfrage: Der Server fragt Open-Meteo erst, wenn ein Nutzer diesen Ort anfordert und keine frische Antwort im Cache liegt.
 - Takt: Antworten gelten bis zur nächsten vollen oder halben Stunde – alle Nutzer einer 1-km-Zelle teilen sich einen Abruf und sehen denselben Stand.
@@ -170,6 +166,7 @@ Rahmen und Stufen: `../architektur/skalierung.md`
 ## Änderungen
 | Version | Datum | Änderung |
 |---|---|---|
+| 2.0.0 | 2026-10-02 | Eingaben nur noch lat/lon mit höchstens 2 Nachkommastellen; Ortssuche per Name (ort=) sowie name, region, land, zeitzone entfallen – die Antwort enthält keinen Ortsnamen mehr (den kennt die Oberfläche). Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026). |
 | 1.5.0 | 2026-09-29 | Neu: „heute“ (alle Stunden des heutigen Tages, 0–23 Uhr Ortszeit), „tageszeiten“ (heute und die zwei Folgetage je Morgen, Mittag, Abend, Nacht) und Sonnenminuten je Stunde (sonnenMin) |
 | 1.4.1 | 2026-09-29 | Dienstblatt: Hinweis „ohne Gewähr“ und zur abnehmenden Genauigkeit; das Feld „trend“ bleibt als Angabe, DAILY stellt es nicht mehr gesondert dar |
 | 1.4.0 | 2026-09-29 | 15 statt 16 Tage (der 16. Tag kam oft ohne Werte); Tage am Ende ohne Tiefst- und Höchstwert werden weggelassen |
