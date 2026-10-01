@@ -1,7 +1,7 @@
 // Adapter „kalender“: macht aus den Diensten „feiertage“, „himmel“, „namenstage“ und (privat) „termine“ die Kachel „Kalender“
 // und die Antworten für „Frag DAILY“.
 // Ohne DOM, testbar. Zeiten in der Zeitzone des Orts (Standard Europe/Berlin).
-const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+import { esc, icon } from '../core/util.js';
 
 export const MOND_TEXT = { neumond: 'Neumond', zunehmende_sichel: 'Zunehmende Sichel', erstes_viertel: 'Erstes Viertel', zunehmender_mond: 'Zunehmender Mond',
   vollmond: 'Vollmond', abnehmender_mond: 'Abnehmender Mond', letztes_viertel: 'Letztes Viertel', abnehmende_sichel: 'Abnehmende Sichel' };
@@ -49,50 +49,17 @@ export function termine(fEnv, hEnv, heute, zone = 'Europe/Berlin', tEnv = null) 
     || (a.art === 'termin' && b.art === 'termin' ? (b.ganztag - a.ganztag) || String(a.beginn).localeCompare(String(b.beginn)) : 0));
 }
 
-// Zeile einer Liste: „Sa., 3.10. · in 6 Tagen   Tag der Deutschen Einheit“
-function zeile(t, heute) {
-  const n = tageBis(heute, t.datum);
-  const datum = t.laeuft ? `bis ${wtag(t.bis)}` : t.bis ? `${wtag(t.datum)} – ${wtag(t.bis)}` : wtag(t.datum);
-  const abstand = t.laeuft ? 'läuft' : wann(n);
-  return `<li class="kl-z kl-${t.art}${t.wichtig ? ' kl-wichtig' : ''}"><span class="kl-d">${esc(datum)}<small>${esc(abstand)}</small></span>` +
-    `<span class="kl-t"><i class="kl-punkt" title="${esc(ART_TEXT[t.art])}"></i>${esc(t.text)}${t.zusatz ? ` <small>${esc(t.zusatz)}</small>` : ''}</span></li>`;
-}
-const liste = (l, heute, leer) => l.length ? `<ul class="kl-liste">${l.map(t => zeile(t, heute)).join('')}</ul>` : `<p class="kl-leer">${esc(leer)}</p>`;
-
-// Reiter „Himmel“: Mond jetzt, dann die Liste der Himmelsereignisse
-function himmelReiter(h, heute, zone) {
-  if (!h) return '<p class="kl-leer">Die Himmelsdaten sind gerade nicht erreichbar.</p>';
-  const m = h.mond;
-  const mondZeile = `<p class="kl-jetzt"><b>${esc(MOND_TEXT[m.name])}</b>, ${m.beleuchtung} % beleuchtet` +
-    (m.aufgang ? ` · Aufgang ${uhr(m.aufgang, zone)}` : '') + (m.untergang ? ` · Untergang ${uhr(m.untergang, zone)}` : '') + '</p>';
-  // je Art nur die nächsten: 2 Mondtermine, 1 Sternschnuppen-Nacht, 2 Finsternisse, 1 Jahreszeit – passt ohne Scrollen
-  const alle = termine(null, { daten: h }, heute, zone), je = { mond: 2, sterne: 1, finsternis: 2, jahreszeit: 1 }, n = {};
-  const l = alle.filter(t => (n[t.art] = (n[t.art] || 0) + 1) <= je[t.art]);
-  return mondZeile + liste(l, heute, 'Keine Ereignisse.') +
-    '<p class="kl-quelle">Berechnet (Astronomy Engine), Finsternisse nur, wenn am Ort zu sehen. Sonne nur mit Schutzbrille ansehen.</p>';
-}
-
 // Namen als kurzer Text: „Wenzel, Lioba …“
 export const namenText = (l, max = 3) => !l || !l.length ? '' : l.length <= max ? l.join(', ') : `${l.slice(0, max).join(', ')} …`;
 
-// Reiter „Namenstage“: heute und die nächsten 6 Tage
-function namenReiter(n, heute) {
-  const z = n.woche.map(w => `<li class="kl-z kl-namen${w.datum === heute ? ' kl-wichtig' : ''}"><span class="kl-d">${esc(wtag(w.datum))}<small>${esc(wann(tageBis(heute, w.datum)))}</small></span>` +
-    `<span class="kl-t">${esc(w.namen.join(', ') || '–')}</span></li>`).join('');
-  return `<ul class="kl-liste">${z}</ul><p class="kl-quelle">Namenstage nach den Gedenktagen der Heiligen – eine Auswahl, Kalender unterscheiden sich je Region und Konfession.</p>`;
-}
-
-// Reiter „Termine“ (privat): eigene Termine, Hinweis zum Verbinden, Fehler je Kalender
-function termineReiter(tEnv, alle, heute) {
-  if (!tEnv || !tEnv.daten) return '<p class="kl-leer">Deine Kalender sind gerade nicht erreichbar.</p>';
-  const t = tEnv.daten;
-  if (!t.verbunden) return '<p class="kl-jetzt">Noch kein Kalender verbunden.</p><p class="kl-leer">Unten in der Leiste auf „Einstellungen“ → „Kalender“ den iCal-Link eintragen (Google: Kalender-Einstellungen → dein Kalender → „Privatadresse im iCal-Format“).</p>';
-  const fehler = t.fehler.map(x => `<p class="kl-quelle">Kalender ${x.kalender}: ${esc(x.meldung)}</p>`).join('');
-  return liste(alle.filter(x => x.art === 'termin').slice(0, t.fehler.length ? 7 : 9), heute, 'Keine Termine in den nächsten 14 Tagen.') + fehler;
-}
+// Symbole der Mini-Reiter (eigener Code, util.js)
+const SYM = { naechste: 'cal', termine: 'clock', frei: 'flag', himmel: 'moon', namen: 'etikett' };
+// Zeile beim Überfahren: „Feiertag · Sa., 3.10. (in 6 Tagen) · am Wochenende“
+const tipp = (t, heute) => [ART_TEXT[t.art], t.laeuft ? `läuft bis ${wtag(t.bis)}` : `${t.bis ? `${wtag(t.datum)} – ${wtag(t.bis)}` : wtag(t.datum)} (${wann(tageBis(heute, t.datum))})`, t.zusatz].filter(Boolean).join(' · ');
 
 // Die Kachel. fEnv (feiertage) kann fehlen (Ausland, Störung), hEnv (himmel) und nEnv (namenstage) ebenso.
 // tEnv: nur im privaten Betrieb – { daten } vom Dienst „termine“ oder { daten: null } bei Störung; null = öffentlich (kein Reiter)
+// Mini-Reiter (seit 0.37.0, kein Aufklappen): Nächste · Termine (privat) · Feiertage & Ferien · Himmel · Namenstage
 export function kachel(fEnv, hEnv, jetzt = Date.now(), zone = 'Europe/Berlin', nEnv = null, tEnv = null) {
   const heute = tagImOrt(new Date(jetzt).toISOString(), zone);
   const f = fEnv && fEnv.daten, h = hEnv && hEnv.daten;
@@ -114,21 +81,22 @@ export function kachel(fEnv, hEnv, jetzt = Date.now(), zone = 'Europe/Berlin', n
   const heuteFrei = frei.find(t => t.datum === heute && t.art === 'feiertag');
   const laufend = frei.find(t => t.laeuft);
   const naechst = heuteFrei || laufend || frei[0] || alle.find(t => t.wichtig) || alle[0];
-  let m = naechst ? naechst.text : (h ? MOND_TEXT[h.mond.name] : 'Kalender'), ms = '–', lead = '';
+  let m = naechst ? naechst.text : (h ? MOND_TEXT[h.mond.name] : 'Kalender'), ms = '–', lead = '', kopfZusatz = '';
   if (terminHeute) {   // eigener Termin heute geht vor: „14:00 Zahnarzt“
     m = terminHeute.ganztag ? terminHeute.text : `${uhr(terminHeute.beginn, zone)} ${terminHeute.text}`;
     ms = terminHeute.ganztag ? 'heute' : uhr(terminHeute.beginn, zone);
     const danach = offen.filter(x => x !== terminHeute && !x.ganztag)[0];
     lead = danach ? `Danach ${uhr(danach.beginn, zone)} ${danach.text}` : offen.length > 1 ? `Heute ${offen.length} Termine` : '';
+    kopfZusatz = terminHeute.ganztag ? 'heute' : '';
   } else if (terminSpaeter) {
     m = `${kurzTag(terminSpaeter)} ${terminSpaeter.text}`;
     ms = tageBis(heute, terminSpaeter.datum) === 1 ? 'morgen' : wtag(terminSpaeter.datum);
   } else if (naechst) {
     const n = tageBis(heute, naechst.datum);
-    if (naechst === laufend) { ms = 'Ferien'; lead = `bis ${wtag(naechst.bis)}`; }
-    else { ms = n === 0 ? 'heute' : n === 1 ? 'morgen' : `${n} Tage`; lead = `${gross(wann(n))} (${wtag(naechst.datum)})`; }
+    if (naechst === laufend) { ms = 'Ferien'; lead = `bis ${wtag(naechst.bis)}`; kopfZusatz = lead; }
+    else { ms = n === 0 ? 'heute' : n === 1 ? 'morgen' : `${n} Tage`; lead = `${gross(wann(n))} (${wtag(naechst.datum)})`; kopfZusatz = wann(n); }   // Datum beim Überfahren (Text x), damit der Kopf einzeilig bleibt
   }
-  // Zeile darunter: danach das nächste Freie und höchstens ein weiterer Termin der nächsten 7 Tage (Welttage nicht)
+  // Text (Vorlesen, Handy): danach das nächste Freie und höchstens ein weiterer Termin der nächsten 7 Tage (Welttage nicht)
   const kuenftig = !terminHeute && !terminSpaeter && alle.find(x => x.art === 'termin' && x.datum > heute && tageBis(heute, x.datum) <= 7);
   const weitere = [
     ...(kuenftig ? [`Nächster Termin: ${tageBis(heute, kuenftig.datum) === 1 ? 'morgen' : wtag(kuenftig.datum)}${kuenftig.ganztag ? '' : ' ' + uhr(kuenftig.beginn, zone)} ${kuenftig.text}`] : []),
@@ -138,35 +106,56 @@ export function kachel(fEnv, hEnv, jetzt = Date.now(), zone = 'Europe/Berlin', n
   ];
   const heuteNamen = nEnv && nEnv.daten ? nEnv.daten.heute.namen : [];
   const x = [lead, ...weitere, heuteNamen.length ? `Namenstag: ${namenText(heuteNamen, 2)}` : ''].filter(Boolean).join(' · ');
+  const kwText = kw ? `<small class="kl-kw">KW ${kw}</small> ` : '';
 
-  const tabs = [
-    { id: 'naechste', name: 'Nächste', html: (heuteNamen.length ? `<p class="kl-jetzt">Namenstag heute: <b>${esc(namenText(heuteNamen, 5))}</b></p>` : '') +
-      liste(alle.slice(0, heuteNamen.length ? 8 : 9), heute, 'Keine Termine.') },
-    ...(tEnv ? [{ id: 'termine', name: 'Termine', html: termineReiter(tEnv, alle, heute) }] : []),
-    ...(f ? [
-      { id: 'feiertage', name: 'Feiertage', html: `<p class="kl-kopf">${esc(f.bundesland)} · landesweite Feiertage</p>` +
-        liste(alle.filter(t => t.art === 'feiertag' || t.art === 'brueckentag').slice(0, 8), heute, 'Keine Feiertage.') },
-      { id: 'ferien', name: 'Ferien', html: f.ferien ? `<p class="kl-kopf">Schulferien ${esc(f.bundesland)}</p>` +
-        liste(alle.filter(t => t.art === 'ferien').slice(0, 8), heute, 'Keine Ferientermine gefunden.') + '<p class="kl-quelle">Quelle: OpenHolidays API</p>'
-        : '<p class="kl-leer">Die Schulferien sind gerade nicht erreichbar.</p>' }
-    ] : []),
-    { id: 'himmel', name: 'Himmel', html: himmelReiter(h, heute, zone) },
-    ...(nEnv && nEnv.daten && nEnv.daten.woche.some(w => w.namen.length) ? [{ id: 'namen', name: 'Namenstage', html: namenReiter(nEnv.daten, heute) }] : [])
-  ];
-  const titel = kw ? `Kalender · KW ${kw}` : 'Kalender';
-  const rows = alle.slice(0, 12).map(t => [wtag(t.datum), t.text + (t.zusatz ? ` (${t.zusatz})` : '')]);
-  // Kleine Kachel: untereinander – erst eigene Termine (mit der großen Zeile höchstens 3), kleiner Abstand,
-  // dann Freies (Feiertag, Ferien, Brückentag, Zeitumstellung), ein Aktionstag der nächsten 7 Tage und der Namenstag
+  // Reiter „Nächste“: Kopf = die große Zeile; darunter erst eigene Termine, kleiner Abstand, dann Freies,
+  // ein Aktionstag der nächsten 7 Tage und der Namenstag – Zeilen, die nicht passen, blendet die Kachel aus
   const gross1 = terminHeute || terminSpaeter;
   const termineWeiter = alle.filter(t => t.art === 'termin' && t !== gross1 && !(t.datum === heute && !t.ganztag && (t.ende || t.beginn) <= jetztIso))
-    .slice(0, gross1 ? 2 : 3).map(t => ({ d: kurzTag(t), t: t.text, gruppe: 1 }));
-  const freiWeiter = frei.filter(t => t !== (gross1 ? null : naechst)).slice(0, 3)
-    .map(t => ({ d: t.laeuft ? `bis ${wtag(t.bis)}` : kurzTag(t, false), t: t.text, gruppe: 2 }));
+    .slice(0, 4).map(t => ({ d: kurzTag(t), t: t.text, tip: tipp(t, heute), gruppe: 1 }));
+  const freiWeiter = frei.filter(t => t !== (gross1 ? null : naechst)).slice(0, 4)
+    .map(t => ({ d: t.laeuft ? `bis ${wtag(t.bis)}` : kurzTag(t, false), t: t.text, tip: tipp(t, heute), gruppe: 2 }));
   const aktion = alle.find(t => t.art === 'aktion' && tageBis(heute, t.datum) <= 7 && !/Welt|Tag der Erde/.test(t.text));
-  const liste2 = [...termineWeiter, ...freiWeiter, ...(aktion ? [{ d: kurzTag(aktion, false), t: aktion.text, gruppe: 2 }] : []),
-    ...(heuteNamen.length ? [{ d: 'Namenstag', t: namenText(heuteNamen, 3), gruppe: 2 }] : [])].slice(0, 5);   // 5 Zeilen passen in die kleine Kachel
-  // KW klein unten in der kleinen Kachel (Fußzeile)
-  return { state: 'live', title: titel, m, ms, x, liste: liste2, chart: kw ? `<span class="kl-fuss">KW ${kw}</span>` : '', tabs, rows };
+  const naechsteListe = [...termineWeiter, ...freiWeiter, ...(aktion ? [{ d: kurzTag(aktion, false), t: aktion.text, tip: tipp(aktion, heute), gruppe: 2 }] : []),
+    ...(heuteNamen.length ? [{ d: 'Namenstag', t: namenText(heuteNamen, 3), tip: `Namenstag heute: ${heuteNamen.join(', ')}`, gruppe: 2 }] : [])];
+  const reiter = [{ id: 'naechste', name: 'Nächste', icon: icon(SYM.naechste),
+    kopf: `${kwText}<b>${esc(m)}</b>${kopfZusatz ? ` <small>${esc(kopfZusatz)}</small>` : ''}`,
+    liste: naechsteListe, html: '<p class="kl-leer">Nichts Besonderes in Sicht.</p>' }];
+
+  // Termine (nur privat): je Tag eine Gruppe, Fehler je Kalender darunter
+  if (tEnv) {
+    const t = tEnv.daten, eigene = alle.filter(z => z.art === 'termin');
+    reiter.push({ id: 'termine', name: 'Termine', icon: icon(SYM.termine), kopf: `<b>Termine</b> <small>${t && t.verbunden ? `${eigene.length} in 14 Tagen` : ''}</small>`,
+      liste: t && t.verbunden ? [...eigene.map(z => ({ d: kurzTag(z, false), t: z.ganztag ? z.text : `${uhr(z.beginn, zone)} ${z.text}`, tip: tipp(z, heute), gruppe: z.datum })),
+        ...t.fehler.map(e => ({ d: `Kalender ${e.kalender}`, t: e.meldung, tip: `Kalender ${e.kalender}: ${e.meldung}`, gruppe: 'fehler' }))] : [],
+      html: !t ? '<p class="kl-leer">Deine Kalender sind gerade nicht erreichbar.</p>'
+        : !t.verbunden ? '<p class="kl-leer">Noch kein Kalender verbunden – im Zahnrad den iCal-Link eintragen (Google: Kalender-Einstellungen → dein Kalender → „Privatadresse im iCal-Format“).</p>'
+          : '<p class="kl-leer">Keine Termine in den nächsten 14 Tagen.</p>' });
+  }
+  // Feiertage & Ferien (nur Deutschland): Feiertage, Brückentage, Ferien, Zeitumstellung nach Datum
+  if (f) reiter.push({ id: 'frei', name: 'Feiertage & Ferien', icon: icon(SYM.frei), kopf: `<b>Feiertage &amp; Ferien</b> <small>${esc(f.bundesland)}</small>`,
+    liste: frei.map(t => ({ d: t.laeuft ? `bis ${wtag(t.bis)}` : t.bis ? `ab ${wtag(t.datum)}` : wtag(t.datum), t: t.text + (t.zusatz ? ` (${t.zusatz})` : ''), tip: tipp(t, heute), gruppe: 1 })),
+    html: '<p class="kl-leer">Keine Feiertage oder Ferien gefunden.</p>' });
+  // Himmel: Mond jetzt, dann je Art nur die nächsten (2 Mondtermine, 1 Sternschnuppen-Nacht, 2 Finsternisse, 1 Jahreszeit)
+  if (h) {
+    const md = h.mond, je = { mond: 2, sterne: 1, finsternis: 2, jahreszeit: 1 }, n = {};
+    const auf = [md.aufgang ? `Aufgang ${uhr(md.aufgang, zone)}` : '', md.untergang ? `Untergang ${uhr(md.untergang, zone)}` : ''].filter(Boolean).join(' · ');
+    reiter.push({ id: 'himmel', name: 'Himmel', icon: icon(SYM.himmel), kopf: `<b>${esc(MOND_TEXT[md.name])}</b> <small>${md.beleuchtung} % beleuchtet</small>`,
+      liste: [...(auf ? [{ d: 'Mond', t: auf, tip: `Mond heute: ${auf}`, gruppe: 0 }] : []),
+        ...termine(null, { daten: h }, heute, zone).filter(t => (n[t.art] = (n[t.art] || 0) + 1) <= je[t.art])
+          .map(t => ({ d: wtag(t.datum), t: t.text + (t.zusatz ? ` (${t.zusatz})` : ''), tip: tipp(t, heute), gruppe: 1 }))] });
+  }
+  // Namenstage: heute und die nächsten 6 Tage
+  if (nEnv && nEnv.daten && nEnv.daten.woche.some(w => w.namen.length)) reiter.push({ id: 'namen', name: 'Namenstage', icon: icon(SYM.namen),
+    kopf: `<b>Namenstage</b>${heuteNamen.length ? ` <small>heute ${esc(namenText(heuteNamen, 2))}</small>` : ''}`,
+    liste: nEnv.daten.woche.map(w => ({ d: w.datum === heute ? 'heute' : tageBis(heute, w.datum) === 1 ? 'morgen' : wtag(w.datum), t: w.namen.join(', ') || '–', tip: `${wtag(w.datum)}: ${w.namen.join(', ') || 'kein Namenstag eingetragen'}`, gruppe: 1 })) });
+
+  return {
+    state: 'live', title: kw ? `Kalender · KW ${kw}` : 'Kalender', m, ms, x, liste: [], kleinReiter: reiter, startReiter: 'naechste',
+    info: [kw ? `Kalenderwoche ${kw}` : null, f ? `Feiertage berechnet (${f.bundesland}, landesweit)${f.ferien ? ', Schulferien: OpenHolidays API' : ', Schulferien gerade nicht erreichbar'}` : 'Feiertage und Ferien nur für Orte in Deutschland',
+      h ? 'Himmel berechnet (Astronomy Engine); Finsternisse nur, wenn am Ort zu sehen – Sonne nur mit Schutzbrille ansehen' : null,
+      nEnv && nEnv.daten ? 'Namenstage: Auswahl nach den Gedenktagen der Heiligen' : null, tEnv ? 'Termine: nur privat, nie zwischengespeichert' : null].filter(Boolean)
+  };
 }
 
 // Antwort auf „Wann hat Josef Namenstag?“ aus der Dienstantwort mit name=… (nEnv) bzw. „Wer hat heute Namenstag?“

@@ -642,16 +642,27 @@ test('Adapter Kalender: Kachel aus Feiertagen und Himmel, Reiter, Antworten', as
   assert.equal(k.m, 'Tag der Deutschen Einheit');
   assert.equal(k.ms, '6 Tage');
   assert.match(k.x, /^In 6 Tagen \(Sa\., 3\.10\.\) · Herbstferien ab Mo\., 12\.10\./);
-  assert.deepEqual(k.tabs.map(t => t.id), ['naechste', 'feiertage', 'ferien', 'himmel']);
-  assert.match(k.tabs[0].html, /Tag der Deutschen Einheit.*am Wochenende/);
-  assert.match(k.tabs[3].html, /Vollmond<\/b>, \d+ % beleuchtet/);
-  assert.match(k.tabs[3].html, /Partielle Sonnenfinsternis/);
+  // Mini-Reiter (seit 0.37.0): Nächste · Feiertage & Ferien · Himmel; kein Aufklappen
+  const R = (kk, id) => kk.kleinReiter.find(x => x.id === id);
+  assert.deepEqual(k.kleinReiter.map(t => t.id), ['naechste', 'frei', 'himmel']);
+  assert.ok(k.kleinReiter.every(x => /^<svg class="ico"/.test(x.icon)));
+  assert.equal(k.tabs, undefined); assert.deepEqual(k.liste, []); assert.equal(k.startReiter, 'naechste');
+  assert.equal(R(k, 'naechste').kopf, '<small class="kl-kw">KW 39</small> <b>Tag der Deutschen Einheit</b> <small>in 6 Tagen</small>');
+  assert.deepEqual(R(k, 'naechste').liste.map(z => z.t).slice(0, 2), ['Herbstferien', 'Winterzeit: Uhr zurück (3 → 2 Uhr)']);   // die große Zeile steht im Kopf
+  assert.match(R(k, 'frei').kopf, /Feiertage &amp; Ferien<\/b> <small>Sachsen/);
+  const fr = R(k, 'frei').liste;
+  assert.deepEqual([fr[0].d, fr[0].t], ['Sa., 3.10.', 'Tag der Deutschen Einheit (am Wochenende)']);
+  assert.ok(fr.some(z => z.d === 'ab Mo., 12.10.' && z.t === 'Herbstferien'));
+  assert.match(fr[0].tip, /^Feiertag · Sa\., 3\.10\. \(in 6 Tagen\)/);
+  assert.match(R(k, 'himmel').kopf, /^<b>Vollmond<\/b> <small>\d+ % beleuchtet/);
+  assert.ok(R(k, 'himmel').liste.some(z => /Partielle Sonnenfinsternis/.test(z.t)));
+  assert.ok(k.info.some(z => /OpenHolidays/.test(z)) && k.info.some(z => /Astronomy Engine/.test(z)));
   // laufende Ferien gehen vor
   const k2 = kachel({ daten: { ...fe.daten, feiertage: [], ferien: [{ name: 'Herbstferien', von: '2026-09-20', bis: '2026-10-02' }] } }, hi, jetzt);
   assert.deepEqual([k2.m, k2.ms, k2.x.split(' · ')[0]], ['Herbstferien', 'Ferien', 'bis Fr., 2.10.']);
   // Ausland: nur Himmel
   const k3 = kachel(null, hi, jetzt);
-  assert.deepEqual(k3.tabs.map(t => t.id), ['naechste', 'himmel']);
+  assert.deepEqual(k3.kleinReiter.map(t => t.id), ['naechste', 'himmel']);
   assert.equal(k3.title, 'Kalender');
   assert.ok(termine(fe, hi, '2026-09-27').every((t, i, a) => !i || a[i - 1].datum <= t.datum));
   // Frag DAILY
@@ -696,8 +707,10 @@ test('Namenstage: feste Liste plausibel, Dienst, Kachel und Antwort', async () =
   const nEnv = { daten: na.auswerten({ stand: '2026-09-01', tage }, '2026-09-28') };
   const k = kachel(null, { daten: dienste.byId.himmel.berechne(51.05, 13.74, jetzt) }, jetzt, 'Europe/Berlin', nEnv);
   assert.match(k.x, /Namenstag: Wenzel, Lioba$/);
-  assert.match(k.tabs[0].html, /Namenstag heute: <b>Wenzel, Lioba<\/b>/);
-  assert.equal(k.tabs.at(-1).id, 'namen');
+  assert.deepEqual(k.kleinReiter[0].liste.at(-1), { d: 'Namenstag', t: 'Wenzel, Lioba', tip: 'Namenstag heute: Wenzel, Lioba', gruppe: 2 });
+  assert.equal(k.kleinReiter.at(-1).id, 'namen');
+  assert.equal(k.kleinReiter.at(-1).kopf, '<b>Namenstage</b> <small>heute Wenzel, Lioba</small>');
+  assert.deepEqual(k.kleinReiter.at(-1).liste.slice(0, 2).map(z => z.d), ['heute', 'morgen']);
   assert.equal(namenAntwort(nEnv, jetzt), 'Heute haben Namenstag: Wenzel, Lioba.');
   assert.equal(namenAntwort({ daten: d }, jetzt), 'Josef hat Namenstag am Fr., 19.3. (in 172 Tagen).');
   assert.equal(namenAntwort({ daten: { ...d, stand: null } }, jetzt), 'Die Namenstage werden gerade erst aufgebaut.');
@@ -752,26 +765,30 @@ test('Adapter Kalender: eigene Termine – Kennzahl, Reiter, Antwort', async () 
   const k = kachel(fe, null, jetzt, 'Europe/Berlin', null, tEnv);
   assert.deepEqual([k.m, k.ms], ['14:00 Zahnarzt', '14:00']);                      // Frühstück ist vorbei
   assert.match(k.x, /^Danach 18:00 Sport · Tag der Deutschen Einheit Sa\., 3\.10\./);
-  assert.deepEqual(k.tabs.map(t => t.id).slice(0, 2), ['naechste', 'termine']);
-  assert.match(k.tabs[1].html, /Geburtstag Anna.*ganztägig.*Zahnarzt.*Elternabend.*Kalender 2: Server nicht erreichbar/s);
-  // Nächste: Termine heute vor dem Rest, ganztägig zuerst
-  assert.match(k.tabs[0].html, /Geburtstag Anna.*Frühstück.*Zahnarzt/s);
-  // kleine Kachel: KW im Kopf, Liste untereinander – erst Termine (mit großer Zeile höchstens 3), dann Freies
-  assert.equal(k.kopf, undefined);
-  assert.match(k.chart, /KW 40/);                                                    // KW unten in der kleinen Kachel
-  assert.deepEqual(k.liste.map(z => [z.d, z.t, z.gruppe]).slice(0, 3), [['heute', 'Geburtstag Anna', 1], ['18:00', 'Sport', 1], ['Sa., 3.10.', 'Tag der Deutschen Einheit', 2]]);
-  assert.ok(!k.liste.some(z => z.t === 'Frühstück' || z.t === 'Zahnarzt'));        // vorbei bzw. schon in der großen Zeile
+  assert.deepEqual(k.kleinReiter.map(t => t.id), ['naechste', 'termine', 'frei']);
+  const te = k.kleinReiter[1];
+  assert.equal(te.kopf, '<b>Termine</b> <small>5 in 14 Tagen</small>');
+  assert.deepEqual(te.liste.map(z => [z.d, z.t]), [['heute', 'Geburtstag Anna'], ['heute', '08:00 Frühstück'], ['heute', '14:00 Zahnarzt'], ['heute', '18:00 Sport'],
+    ['Mi., 30.9.', '19:00 Elternabend'], ['Kalender 2', 'Server nicht erreichbar']]);
+  assert.deepEqual([...new Set(te.liste.map(z => z.gruppe))], ['2026-09-28', '2026-09-30', 'fehler']);   // je Tag eine Gruppe
+  // Nächste: KW und große Zeile im Kopf, darunter erst Termine, dann Freies
+  const nl = k.kleinReiter[0];
+  assert.equal(nl.kopf, '<small class="kl-kw">KW 40</small> <b>14:00 Zahnarzt</b>');
+  assert.deepEqual(nl.liste.map(z => [z.d, z.t, z.gruppe]).slice(0, 4), [['heute', 'Geburtstag Anna', 1], ['18:00', 'Sport', 1], ['Mi., 30.9. 19:00', 'Elternabend', 1], ['Sa., 3.10.', 'Tag der Deutschen Einheit', 2]]);
+  assert.ok(!nl.liste.some(z => z.t === 'Frühstück' || z.t === 'Zahnarzt'));        // vorbei bzw. schon im Kopf
   // keine Termine heute → der nächste Termin steht trotzdem vorn
   const k2 = kachel(fe, null, jetzt, 'Europe/Berlin', null, { daten: { ...tEnv.daten, termine: tEnv.daten.termine.slice(4) } });
   assert.deepEqual([k2.m, k2.ms], ['Mi., 30.9. 19:00 Elternabend', 'Mi., 30.9.']);
-  assert.equal(k2.liste[0].t, 'Tag der Deutschen Einheit');
+  assert.equal(k2.kleinReiter[0].liste[0].t, 'Tag der Deutschen Einheit');
   // öffentlich (ohne Termine): große Zeile = Feiertag, Liste ohne ihn
   const k3 = kachel(fe, null, jetzt);
   assert.equal(k3.m, 'Tag der Deutschen Einheit');
-  assert.ok(!k3.liste.some(z => z.t === 'Tag der Deutschen Einheit'));
+  assert.ok(!k3.kleinReiter[0].liste.some(z => z.t === 'Tag der Deutschen Einheit'));
   // nicht verbunden / öffentlich
-  assert.match(kachel(fe, null, jetzt, 'Europe/Berlin', null, { daten: { verbunden: false, heute: '2026-09-28', termine: [], fehler: [] } }).tabs[1].html, /Noch kein Kalender verbunden/);
-  assert.ok(!kachel(fe, null, jetzt).tabs.some(t => t.id === 'termine'));
+  const nv = kachel(fe, null, jetzt, 'Europe/Berlin', null, { daten: { verbunden: false, heute: '2026-09-28', termine: [], fehler: [] } }).kleinReiter[1];
+  assert.deepEqual([nv.liste.length, /Noch kein Kalender verbunden/.test(nv.html)], [0, true]);
+  assert.match(kachel(fe, null, jetzt, 'Europe/Berlin', null, { daten: null }).kleinReiter[1].html, /gerade nicht erreichbar/);
+  assert.ok(!kachel(fe, null, jetzt).kleinReiter.some(t => t.id === 'termine'));
   // Frag DAILY
   assert.equal(termineAntwort('Was steht heute an?', tEnv, jetzt), 'Heute: Geburtstag Anna, 08:00 Frühstück, 14:00 Zahnarzt, 18:00 Sport.');
   assert.equal(termineAntwort('Was habe ich morgen?', tEnv, jetzt), 'Morgen stehen keine Termine an.');

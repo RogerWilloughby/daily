@@ -1,5 +1,6 @@
 // Kachel „Kalender“: Feiertage, Ferien, Himmel und Namenstage (öffentlich, eine Anfrage als Paket) und im privaten Betrieb
 // zusätzlich die eigenen Termine (Dienst „termine“, per POST mit den iCal-Links aus den Einstellungen, nie zwischengespeichert).
+// Seit 0.37.0 Mini-Reiter in der kleinen Kachel (Nächste · Termine · Feiertage & Ferien · Himmel · Namenstage, Zahnrad), kein Aufklappen.
 import { set } from '../core/board.js';
 import { settings, saveSettings, kachelOpt, kachelOptSpeichern } from '../core/store.js';
 import { kachelEinstellungen } from '../core/einstellungen.js';
