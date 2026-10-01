@@ -7,7 +7,7 @@ Gesetzliche Feiertage und Schulferien des Bundeslands, Brückentage, Zeitumstell
 | | |
 |---|---|
 | Aufruf | `GET /api/v1/feiertage` |
-| Programmversion | 1.0.0 |
+| Programmversion | 2.0.0 |
 | Vertrag (Datenformat) | daily/1, Version 1 |
 | Klasse | oeffentlich |
 | Länder | DE |
@@ -28,14 +28,10 @@ Quellen mit Lizenz:
 ## Eingabe
 | Parameter | Bedeutung |
 |---|---|
-| `ort` | Ortsname (z. B. Dresden) – oder – |
-| `lat` | Breitengrad |
-| `lon` | Längengrad |
-| `region` | Bundesland (optional, sonst aus dem Ort) |
-| `land` | Ländercode (optional) |
+| `bundesland` | Kürzel des Bundeslands (Pflicht): BW, BY, BE, BB, HB, HH, HE, MV, NI, NW, RP, SL, SN, ST, SH, TH |
 
 ## Verarbeitung
-- Bundesland aus der Eingabe „region“ oder, wenn sie fehlt, über den nächsten Ort im eigenen Ortsbestand.
+- Bundesland aus der Eingabe „bundesland“ (Kürzel). Den Ort kennt der Dienst nicht – die Oberfläche schickt das Bundesland des gewählten Orts.
 - Zeitraum: heute bis 400 Tage voraus; „heute“ in der Zeitzone Europe/Berlin.
 - Brückentag: Feiertag am Dienstag → Montag davor, am Donnerstag → Freitag danach.
 - Aktionstage, die im Land ohnehin Feiertag sind (z. B. Frauentag in Berlin), erscheinen nur als Feiertag.
@@ -72,13 +68,14 @@ Quellen mit Lizenz:
 | Klasse | B – für alle gleich – ein Abruf je Zeitraum reicht für alle Nutzer |
 | Quelle | OpenHolidays: frei, ohne Schlüssel, keine veröffentlichte Grenze. Alles andere wird gerechnet. |
 | Kosten | Je Bundesland und Tag 1 Abruf der Ferien; Rechnen < 1 ms. |
-| Cache | Gültig bis Mitternacht (UTC, Takt 1 Tag); nur 16 Bundesländer → fast nur Cache-Treffer. |
-| Bei 10 Mio. Aufrufen/Tag | Unproblematisch: höchstens 16 Ferien-Abrufe am Tag, unabhängig von der Nutzerzahl. Später Ferien einmal im Monat per GitHub Action ablegen. |
+| Cache | Gültig bis Mitternacht (UTC, Takt 1 Tag); die Adresse enthält nur das Bundesland → 16 Fächer für ganz Deutschland, fast nur Cache-Treffer. |
+| Bei 10 Mio. Aufrufen/Tag | Unproblematisch: höchstens 16 verschiedene Antworten am Tag (je Bundesland eine) und damit höchstens 16 Ferien-Abrufe, unabhängig von der Nutzerzahl. |
 
 Rahmen und Stufen: `../architektur/skalierung.md`
 
 ## Änderungen
 | Version | Datum | Änderung |
 |---|---|---|
+| 2.0.0 | 2026-10-02 | Eingabe nur noch das Bundesland (bundesland=SN): eine Antwort je Bundesland statt je Ort – höchstens 16 Ferien-Abrufe am Tag. Ort, Koordinaten und Name entfallen. |
 | 1.0.0 | 2026-09-27 | Erste Fassung als Dienst: Feiertage je Bundesland, Schulferien (OpenHolidays), Brückentage, Zeitumstellung, Kalenderwoche, Aktions- und Brauchtumstage; Bundesland aus dem Ort |
 

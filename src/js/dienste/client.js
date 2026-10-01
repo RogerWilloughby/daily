@@ -2,10 +2,11 @@
 // Oberflächen holen hierüber Daten und geben sie an einen Adapter (src/js/adapter/) weiter.
 const speicher = new Map(); // Anfrage → Antwort, solange sie gültig ist
 
-// Ort aus den Einstellungen → Anfrage-Parameter (Koordinaten auf ~1 km gerundet: Datenschutz und gemeinsamer Cache)
+// Ort aus den Einstellungen → Anfrage-Parameter: NUR die Koordinaten, auf ~1 km gerundet (Datenschutz und gemeinsamer Cache).
+// Name, Bundesland, Land, Zeitzone kennt der Browser selbst – in der Adresse würden sie den Cache je Schreibweise zersplittern (02.10.2026).
 export function ortParams(p) {
   const r = v => Math.round(v * 100) / 100;
-  return { lat: r(p.lat), lon: r(p.lon), name: p.name, region: p.admin || p.region, land: p.land, zeitzone: p.zeitzone };
+  return { lat: r(p.lat), lon: r(p.lon) };
 }
 
 export class DienstFehler extends Error {
@@ -87,26 +88,3 @@ export async function privatDienst(id, koerper = {}) {
   return r;
 }
 
-// Mehrere Dienste für denselben Ort mit einer Anfrage (/api/v1/paket). Liefert { id: Antwort | DienstFehler }.
-// Noch gültige Antworten kommen aus dem Speicher; nur die abgelaufenen werden geholt.
-export async function paket(ids, params = {}) {
-  const out = {}, fehlend = [];
-  for (const id of ids) {
-    const alt = speicher.get(urlVon(id, params));
-    if (alt && Date.parse(alt.gueltigBis) > Date.now()) out[id] = alt; else fehlend.push(id);
-  }
-  if (!fehlend.length) { melde('paket', 0, 'speicher'); return out; }
-  const t0 = uhr();
-  let antworten = null, netzFehler = null;
-  try { antworten = (await hole(urlVon('paket', { dienste: fehlend.join(','), ...params }))).daten.antworten || {}; }
-  catch (e) { netzFehler = e; }
-  melde('paket', uhr() - t0, netzFehler ? 'fehler' : 'netz');
-  for (const id of fehlend) {
-    const url = urlVon(id, params), a = antworten && antworten[id];
-    if (a && !a.fehler) { speicher.set(url, a); merke(url, a); out[id] = a; continue; }
-    const f = netzFehler || new DienstFehler(a && a.fehler ? a.fehler : { code: 'antwort_ungueltig' });
-    const letzt = speicher.get(url) || erinnere(url);
-    out[id] = letzt && RUECKFALL.has(f.code) ? alsVeraltet(letzt) : f;
-  }
-  return out;
-}

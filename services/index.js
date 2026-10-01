@@ -1,7 +1,7 @@
 // Dienst-Verzeichnis: jeder Dienst ist ein Modul mit id, version, titel, beschreibung, eingaben, laender ('alle' oder Liste wie ['DE']), klasse,
 // ttl (Sekunden), quellen, schema (Vertrag für „daten“), blatt (Dienstblatt, siehe _lib/blatt.js) und run(eingabe) → { daten, ort?, hinweise?, quellen? }.
 // Neuer Dienst = Modul in services/ + Eintrag hier. Aufruf: GET /api/v1/<id>
-const { DienstFehler, antwort, fehlerAntwort, iso } = require('./_lib/rahmen');
+const { DienstFehler, antwort } = require('./_lib/rahmen');
 const { isPrivate } = require('./_lib/http');
 
 const DIENSTE = [
@@ -55,22 +55,8 @@ async function ausfuehren(id, eingabe = {}, ctx = {}) {
   } finally { laufend.delete(k); }
 }
 
-// Paket: mehrere Dienste für denselben Ort in einer Anfrage (weniger Anfragen, schneller auf dem Handy).
-// Jeder Dienst behält seinen Rahmen; ein Fehler betrifft nur seinen Teil. Gültig bis zum frühesten gueltigBis.
-async function paket(ids, eingabe = {}, ctx = {}) {
-  const liste = [...new Set(ids)].slice(0, 10);
-  if (!liste.length) throw new DienstFehler('eingabe_fehlt', 'Parameter dienste fehlt (z. B. dienste=wetter,regen)');
-  const antworten = {};
-  await Promise.all(liste.map(async id => {
-    try { antworten[id] = await ausfuehren(id, eingabe, ctx); }
-    catch (e) { antworten[id] = fehlerAntwort(id, e instanceof DienstFehler ? e : new DienstFehler('intern'), ctx.jetzt); }
-  }));
-  const jetzt = ctx.jetzt || Date.now();
-  const gueltig = Object.values(antworten).filter(a => !a.fehler).map(a => Date.parse(a.gueltigBis));
-  const bis = gueltig.length ? Math.min(...gueltig) : jetzt + 60e3;
-  return { format: 'daily/1', dienst: 'paket', version: 1, programm: null, ort: null, erstellt: iso(jetzt), gueltigBis: iso(bis),
-    quellen: [], hinweise: [], daten: { antworten }, fehler: null };
-}
+// Kein Paket mehr (seit App 0.39.0, Entscheidung 02.10.2026): jeder Dienst ist einzeln abrufbar und verhält sich im Betrieb wie allein –
+// eigene Adresse, eigenes Fach im Cache, eigene Gültigkeit, eigene Fehler.
 
 // Katalog: was es gibt, was es braucht, wie die Daten aussehen
 function katalog() {
@@ -80,4 +66,4 @@ function katalog() {
   }));
 }
 
-module.exports = { DIENSTE, byId, finde, ausfuehren, paket, katalog, INSTANZ };
+module.exports = { DIENSTE, byId, finde, ausfuehren, katalog, INSTANZ };

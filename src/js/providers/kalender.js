@@ -1,11 +1,12 @@
-// Kachel „Kalender“: Feiertage, Ferien, Himmel und Namenstage (öffentlich, eine Anfrage als Paket) und im privaten Betrieb
+// Kachel „Kalender“: Feiertage, Ferien, Himmel und Namenstage (öffentlich, je Dienst eine eigene Anfrage) und im privaten Betrieb
 // zusätzlich die eigenen Termine (Dienst „termine“, per POST mit den iCal-Links aus den Einstellungen, nie zwischengespeichert).
 // Seit 0.37.0 Mini-Reiter in der kleinen Kachel (Nächste · Termine · Feiertage & Ferien · Himmel · Namenstage, Zahnrad), kein Aufklappen.
 import { set } from '../core/board.js';
 import { settings, saveSettings, kachelOpt, kachelOptSpeichern } from '../core/store.js';
 import { kachelEinstellungen } from '../core/einstellungen.js';
 import { addAnswer } from '../core/ask.js';
-import { paket, gespeichert, ortParams, dienst, privatDienst } from '../dienste/client.js';
+import { gespeichert, ortParams, dienst, privatDienst } from '../dienste/client.js';
+import { bundeslandVon } from '../lib/bundesland.js';
 import { kachel, antwort, namenAntwort, termineAntwort } from '../adapter/kalender.js';
 import { betrieb } from '../core/betrieb.js';
 import { hm } from '../core/util.js';
@@ -25,23 +26,24 @@ const stand = e => (e && (e.veraltet || Date.parse(e.gueltigBis) < Date.now()) ?
 
 // Feiertage, Namenstage (Takt 1 Tag) und Himmel (Takt 1 Stunde) zusammen; öffentlich beim Öffnen sofort der gespeicherte Stand.
 // Privat NICHT: Termine werden nie gespeichert – ein Zwischenstand ohne Termine sähe anders aus und „spränge“ dann um.
-// Stattdessen warten, bis Paket und Termine da sind (höchstens 3 s, dann ohne Termine; Termine werden nachgereicht).
+// Stattdessen warten, bis Feiertage/Himmel/Namenstage und Termine da sind (höchstens 3 s, dann ohne Termine; Termine werden nachgereicht).
 // Beim regelmäßigen Auffrischen bleiben bis dahin die bisherigen Termine stehen. Feiertage gibt es nur in Deutschland.
 export const WARTEN_MS = 3000;
 const zeichne = () => set('kalender', { ...zeige(fe, hi, na, te), tag: stand(hi || fe) });
 export async function load() {
-  const p = ortParams(settings.place);
+  // Jeder Dienst mit genau seinen Angaben (kein Paket mehr, seit 0.39.0): Himmel je Ort, Feiertage je Bundesland, Namenstage für alle gleich
+  const p = ortParams(settings.place), bl = bundeslandVon(settings.place), fP = bl ? { bundesland: bl } : null;
   if (!betrieb.privat) {
-    const altF = gespeichert('feiertage', p), altH = gespeichert('himmel', p), altN = gespeichert('namenstage', p);
+    const altF = fP && gespeichert('feiertage', fP), altH = gespeichert('himmel', p), altN = gespeichert('namenstage');
     if ((altF || altH) && !fe && !hi) set('kalender', { ...zeige(altF, altH, altN, null), tag: stand(altH || altF) });
   }
-  // Termine (nur privat) parallel zum Paket; bei Störung zeigt der Reiter „nicht erreichbar“
+  // Termine (nur privat) parallel dazu; bei Störung zeigt der Reiter „nicht erreichbar“
   const termineHolen = betrieb.privat
     ? privatDienst('termine', { urls: settings.icsUrls || [], zeitzone: zone() }).catch(() => ({ daten: null }))
     : Promise.resolve(null);
-  const r = await paket(['feiertage', 'himmel', 'namenstage'], p);
-  fe = oder(r.feiertage); hi = oder(r.himmel); na = oder(r.namenstage);
-  if (!fe && !hi) throw r.himmel;
+  const [f, h, n] = await Promise.all([fP ? dienst('feiertage', fP).catch(e => e) : null, dienst('himmel', p).catch(e => e), dienst('namenstage').catch(e => e)]);
+  fe = oder(f); hi = oder(h); na = oder(n);
+  if (!fe && !hi) throw (h instanceof Error ? h : new Error('Kalender nicht erreichbar'));
   const zuSpaet = Symbol('zu spät');
   const t = await Promise.race([termineHolen, new Promise(ok => setTimeout(() => ok(zuSpaet), WARTEN_MS))]);
   if (t !== zuSpaet) { te = t; zeichne(); return; }

@@ -4,7 +4,7 @@
 import { set } from '../core/board.js';
 import { settings, kachelOpt, kachelOptSpeichern } from '../core/store.js';
 import { addAnswer } from '../core/ask.js';
-import { paket, gespeichert, ortParams } from '../dienste/client.js';
+import { dienst, gespeichert, ortParams } from '../dienste/client.js';
 import { kachel, antwort, mitOptionen, WETTER_STANDARD } from '../adapter/wetter.js';
 import { kachelEinstellungen } from '../core/einstellungen.js';
 import { antwort as hinweisAntwort } from '../adapter/hinweise.js';
@@ -18,7 +18,8 @@ let env = null, regen = null, hinweise = null;
 // „Stand 10:30“ an der Kachel, wenn ein älterer Stand gezeigt wird (beim Öffnen oder weil die Quelle gerade nicht antwortet)
 const stand = e => (e && (e.veraltet || Date.parse(e.gueltigBis) < Date.now()) ? `Stand ${hm(e.erstellt)}` : '');
 
-// Wetter (Takt 30 min), Regenradar und Wetterhinweise (Takt 5 min) mit EINER Anfrage (Paket); der Client holt nur, was abgelaufen ist.
+// Wetter (Takt 30 min), Regenradar und Wetterhinweise (Takt 5 min) einzeln und gleichzeitig (kein Paket mehr, seit 0.39.0): jeder Dienst hat
+// seine eigene Gültigkeit – der Client holt nur, was abgelaufen ist; das Wetter erscheint, sobald es da ist, Radar und Hinweise kommen dazu.
 // Beim Öffnen erscheint sofort der zuletzt gespeicherte Stand, die neuen Daten kommen im Hintergrund.
 // Radar und Hinweise sind optional: außerhalb Deutschlands oder bei Störung zeigt die Kachel das Wetter ohne sie.
 const oder = x => (x instanceof Error ? null : x);
@@ -34,9 +35,11 @@ export async function load() {
   const altW = gespeichert('wetter', p), altR = gespeichert('regen', p), altH = gespeichert('wetterhinweise', p);
   if (altW && !env) set('weather', { ...zeige(altW, altR, altH), tag: stand(altW) });
   else if (!altW) set('weather', { title: settings.place.name });
-  const r = await paket(['wetter', 'regen', 'wetterhinweise'], p);
-  if (r.wetter instanceof Error) throw r.wetter;
-  env = r.wetter; regen = oder(r.regen); hinweise = oder(r.wetterhinweise);
+  const zusatz = Promise.all([dienst('regen', p).catch(e => e), dienst('wetterhinweise', p).catch(e => e)]);
+  env = await dienst('wetter', p);                       // Fehler: Anbieter meldet „nicht erreichbar“, der gespeicherte Stand bleibt
+  set('weather', { ...zeige(env, regen, hinweise), tag: stand(env) });
+  const [r, h] = await zusatz;
+  regen = oder(r); hinweise = oder(h);
   set('weather', { ...zeige(env, regen, hinweise), tag: stand(env) });
 }
 

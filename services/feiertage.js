@@ -3,7 +3,6 @@
 // Feiertage, Brückentage, Zeitumstellung und Aktionstage rechnet DAILY selbst; Schulferien kommen von OpenHolidays.
 const { getJson } = require('./_lib/http');
 const { DienstFehler, tagIn, text } = require('./_lib/rahmen');
-const { ortAus } = require('./_lib/ort');
 const { S } = require('./_lib/schema');
 
 const QUELLEN = [
@@ -140,12 +139,6 @@ function berechne(st, heute) {
 }
 
 // Bundesland des Orts: aus der Eingabe (region) oder über den nächsten Ort im eigenen Bestand
-function bundesland(ort) {
-  if (LAENDER[ort.region]) return ort.region;
-  if (ort.land && ort.land !== 'DE') return null;
-  const n = require('./_lib/orte').naechster(ort.lat, ort.lon);
-  return n && LAENDER[n.region] ? n.region : null;
-}
 
 const SCHEMA = S.obj({
   bundesland: S.text(), kuerzel: S.text(),
@@ -159,13 +152,14 @@ const SCHEMA = S.obj({
 module.exports = {
   id: 'feiertage',
   version: 1,
-  programmversion: '1.0.0',
+  programmversion: '2.0.0',
   aenderungen: [
+    { version: '2.0.0', datum: '2026-10-02', text: 'Eingabe nur noch das Bundesland (bundesland=SN): eine Antwort je Bundesland statt je Ort – höchstens 16 Ferien-Abrufe am Tag. Ort, Koordinaten und Name entfallen.' },
     { version: '1.0.0', datum: '2026-09-27', text: 'Erste Fassung als Dienst: Feiertage je Bundesland, Schulferien (OpenHolidays), Brückentage, Zeitumstellung, Kalenderwoche, Aktions- und Brauchtumstage; Bundesland aus dem Ort' }
   ],
   titel: 'Feiertage und Ferien',
   beschreibung: 'Gesetzliche Feiertage und Schulferien des Bundeslands, Brückentage, Zeitumstellung, Kalenderwoche und bekannte Aktionstage – für gut ein Jahr ab heute.',
-  eingaben: { ort: 'Ortsname (z. B. Dresden) – oder –', lat: 'Breitengrad', lon: 'Längengrad', region: 'Bundesland (optional, sonst aus dem Ort)', land: 'Ländercode (optional)' },
+  eingaben: { bundesland: 'Kürzel des Bundeslands (Pflicht): BW, BY, BE, BB, HB, HH, HE, MV, NI, NW, RP, SL, SN, ST, SH, TH' },
   laender: ['DE'],
   klasse: 'oeffentlich',
   ttl: 86400,
@@ -180,7 +174,7 @@ module.exports = {
       'Aktions- und Brauchtumstage: feste Liste von DAILY (Muttertag, Erntedank, Advent, Welttage …), Termine berechnet.'
     ],
     verarbeitung: [
-      'Bundesland aus der Eingabe „region“ oder, wenn sie fehlt, über den nächsten Ort im eigenen Ortsbestand.',
+      'Bundesland aus der Eingabe „bundesland“ (Kürzel). Den Ort kennt der Dienst nicht – die Oberfläche schickt das Bundesland des gewählten Orts.',
       'Zeitraum: heute bis 400 Tage voraus; „heute“ in der Zeitzone Europe/Berlin.',
       'Brückentag: Feiertag am Dienstag → Montag davor, am Donnerstag → Freitag danach.',
       'Aktionstage, die im Land ohnehin Feiertag sind (z. B. Frauentag in Berlin), erscheinen nur als Feiertag.',
@@ -213,15 +207,16 @@ module.exports = {
       klasse: 'B',
       quelle: 'OpenHolidays: frei, ohne Schlüssel, keine veröffentlichte Grenze. Alles andere wird gerechnet.',
       kosten: 'Je Bundesland und Tag 1 Abruf der Ferien; Rechnen < 1 ms.',
-      cache: 'Gültig bis Mitternacht (UTC, Takt 1 Tag); nur 16 Bundesländer → fast nur Cache-Treffer.',
-      bei10Mio: 'Unproblematisch: höchstens 16 Ferien-Abrufe am Tag, unabhängig von der Nutzerzahl. Später Ferien einmal im Monat per GitHub Action ablegen.'
+      cache: 'Gültig bis Mitternacht (UTC, Takt 1 Tag); die Adresse enthält nur das Bundesland → 16 Fächer für ganz Deutschland, fast nur Cache-Treffer.',
+      bei10Mio: 'Unproblematisch: höchstens 16 verschiedene Antworten am Tag (je Bundesland eine) und damit höchstens 16 Ferien-Abrufe, unabhängig von der Nutzerzahl.'
     }
   },
   async run(eingabe, { jetzt = Date.now() } = {}) {
-    const ort = await ortAus(eingabe);
-    const land = bundesland(ort);
-    if (!land) throw new DienstFehler('nicht_unterstuetzt', 'Feiertage und Ferien gibt es für Orte in Deutschland');
-    const st = LAENDER[land], heute = tagIn(jetzt, 'Europe/Berlin');
+    const st = String(eingabe.bundesland || '').trim().toUpperCase();
+    if (!st) throw new DienstFehler('eingabe_fehlt', 'Bundesland fehlt: bundesland=<Kürzel>, z. B. bundesland=SN');
+    const land = Object.keys(LAENDER).find(n => LAENDER[n] === st);
+    if (!land) throw new DienstFehler('eingabe_ungueltig', `Unbekanntes Bundesland „${st}“ – erlaubt: ${Object.values(LAENDER).join(', ')}`);
+    const heute = tagIn(jetzt, 'Europe/Berlin');
     const daten = { bundesland: land, kuerzel: st, ...berechne(st, heute), ferien: null };
     const hinweise = [];
     const bis = tag(plus(new Date(heute + 'T00:00:00Z'), TAGE));
@@ -231,7 +226,7 @@ module.exports = {
     } catch (e) { hinweise.push('ferien_nicht_erreichbar'); }
     // Reihenfolge der Felder wie im Vertrag
     const { bundesland: b, kuerzel, heute: h, kalenderwoche, feiertage, ferien, zeitumstellung, aktionstage } = daten;
-    return { ort, hinweise, daten: { bundesland: b, kuerzel, heute: h, kalenderwoche, feiertage, ferien, zeitumstellung, aktionstage } };
+    return { hinweise, daten: { bundesland: b, kuerzel, heute: h, kalenderwoche, feiertage, ferien, zeitumstellung, aktionstage } };
   },
   berechne, ostern, kalenderwoche, ferienAus, LAENDER
 };

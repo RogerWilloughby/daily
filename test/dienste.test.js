@@ -470,22 +470,12 @@ test('Mehrere Orte: Auswahlbox, hinzufügen, wechseln, entfernen', async () => {
   assert.equal(st.settings.orte.length, st.MAX_ORTE);
 });
 
-test('Paket: mehrere Dienste in einer Anfrage, Fehler nur im eigenen Teil, gültig bis zum frühesten Takt', async () => {
-  const r = await rufe('paket', { dienste: 'wetter,regen,wetterhinweise,gibtsnicht', lat: '52.52', lon: '13.41', name: 'Berlin' });
-  assert.equal(r.code, 200);
-  gueltig(r.body);
-  const a = r.body.daten.antworten;
-  assert.equal(a.wetter.dienst, 'wetter'); assert.equal(a.regen.dienst, 'regen'); assert.equal(a.wetterhinweise.dienst, 'wetterhinweise');
-  assert.equal(a.gibtsnicht.fehler.code, 'dienst_unbekannt');
-  assert.equal(r.body.gueltigBis, a.regen.gueltigBis);                 // Radar (5 min) bestimmt die Gültigkeit
-  assert.equal((await rufe('paket', {})).body.fehler.code, 'eingabe_fehlt');
-});
-
-test('Client: Paket, sofort anzeigen aus dem Speicher, Rückfall auf letzten Stand bei Störung, Messung', async () => {
+test('Client: Einzelabfragen mit nur den Koordinaten, sofort anzeigen aus dem Speicher, Rückfall auf letzten Stand, Messung; kein Paket mehr', async () => {
   const lager = {};
   global.localStorage = { getItem: k => lager[k] ?? null, setItem: (k, v) => { lager[k] = String(v); }, removeItem: k => { delete lager[k]; } };
   const echt = global.fetch; let stoerung = false;
-  global.fetch = async url => {
+  global.fetch = async (url, o) => {
+    if (!String(url).startsWith('/api/v1/')) return echt(url, o);   // Abrufe der Dienste bei ihren Quellen: Beispieldaten (fetch-stub)
     if (stoerung) throw new Error('offline');
     const u = new URL(url, 'http://x'); const q = Object.fromEntries(u.searchParams);
     const r = await rufe(u.pathname.split('/').pop(), q);
@@ -495,19 +485,22 @@ test('Client: Paket, sofort anzeigen aus dem Speicher, Rückfall auf letzten Sta
     const neu = z => import(pathToFileURL(path.join(__dirname, '..', 'src/js/dienste/client.js')).href + '?t=' + z);   // frisches Modul = Browser-Neustart
     const c = await neu(1);
     const zeiten = []; c.aufMessung((n, ms, q) => zeiten.push([n, q]));
-    const p = { lat: 52.52, lon: 13.41, name: 'Berlin' };
+    const p = c.ortParams({ lat: 52.5201, lon: 13.4049, name: 'Berlin', admin: 'Berlin', land: 'DE', zeitzone: 'Europe/Berlin' });
+    assert.deepEqual(p, { lat: 52.52, lon: 13.4 });                             // nur gerundete Koordinaten – kein Name, Bundesland, Land, Zeitzone
     assert.equal(c.gespeichert('wetter', p), null);
-    const r1 = await c.paket(['wetter', 'regen'], p);
-    assert.equal(r1.wetter.dienst, 'wetter'); assert.equal(r1.regen.dienst, 'regen');
-    assert.deepEqual(zeiten.at(-1), ['paket', 'netz']);
-    assert.ok(Object.keys(lager).some(k => k.includes('/api/v1/wetter?')));   // für das nächste Öffnen gespeichert
+    const [w1, r1] = await Promise.all([c.dienst('wetter', p), c.dienst('regen', p)]);
+    assert.equal(w1.dienst, 'wetter'); assert.equal(r1.dienst, 'regen');
+    assert.deepEqual(zeiten.at(-1)[1], 'netz');
+    assert.ok(Object.keys(lager).some(k => k.endsWith('/api/v1/wetter?lat=52.52&lon=13.4')));   // eine Adresse je Dienst und Zelle, für das nächste Öffnen gespeichert
+    assert.equal(c.paket, undefined);
+    assert.equal((await rufe('paket', { dienste: 'wetter' })).body.fehler.code, 'dienst_unbekannt');   // Paket gibt es nicht mehr
     // Speicher im Browser wie nach einem Neustart: nur localStorage bleibt
     const c2 = await neu(2);
     assert.equal(c2.gespeichert('wetter', p).dienst, 'wetter');                // sofort anzeigen
     stoerung = true;
-    const r2 = await c2.paket(['wetter', 'regen'], p);                         // Netz weg → letzter Stand, als veraltet markiert
-    assert.equal(r2.wetter.veraltet, true);
-    assert.equal(r2.regen.veraltet, true);
+    const [w2, r2] = await Promise.all([c2.dienst('wetter', p), c2.dienst('regen', p)]);   // Netz weg → letzter Stand, als veraltet markiert
+    assert.equal(w2.veraltet, true);
+    assert.equal(r2.veraltet, true);
     await assert.rejects(c2.dienst('ort', { q: 'Berlin' }), e => e.code === 'nicht_erreichbar');   // nichts gespeichert → Fehler
   } finally { global.fetch = echt; delete global.localStorage; }
 });
@@ -578,16 +571,22 @@ test('Adapter Wetterhinweise: Abzeichen, kurzer Hinweis und Reiter in der Wetter
   assert.match(ur.liste[0].tip, /Aufenthalt im Freien vermeiden!/);
 });
 
-test('Feiertage: Bundesland aus dem Ort, Feiertage, Brückentage, Ferien, Zeitumstellung, KW, Aktionstage', async () => {
+test('Feiertage: je Bundesland (nicht je Ort), Feiertage, Brückentage, Ferien, Zeitumstellung, KW, Aktionstage', async () => {
   const fe = dienste.byId.feiertage;
-  const r = await rufe('feiertage', { lat: '51.05', lon: '13.74', name: 'Dresden' });     // ohne region → Bundesland aus dem Ortsbestand
+  const r = await rufe('feiertage', { bundesland: 'SN' });                                // seit 2.0.0: nur das Bundesland (16 Fächer statt je Ort)
   assert.equal(r.code, 200);
   gueltig(r.body, fe.schema);
+  assert.equal(r.body.ort, null);                                                          // der Dienst kennt keinen Ort
   const d = r.body.daten;
   assert.deepEqual([d.bundesland, d.kuerzel], ['Sachsen', 'SN']);
   assert.deepEqual(d.ferien.map(f => f.name), ['Herbstferien', 'Weihnachtsferien']);
-  assert.equal((await rufe('feiertage', { lat: '48.14', lon: '11.58', region: 'Bayern' })).body.daten.kuerzel, 'BY');
-  assert.equal((await rufe('feiertage', { lat: '41.9', lon: '12.5', land: 'IT' })).body.fehler.code, 'nicht_unterstuetzt');
+  assert.equal((await rufe('feiertage', { bundesland: 'by' })).body.daten.bundesland, 'Bayern');
+  assert.equal((await rufe('feiertage', {})).body.fehler.code, 'eingabe_fehlt');
+  assert.equal((await rufe('feiertage', { bundesland: 'XX' })).body.fehler.code, 'eingabe_ungueltig');
+  // Browser: Bundesland des gewählten Orts → Kürzel (gleiche Liste wie im Dienst); Ausland → kein Abruf
+  const bl = await esm('src/js/lib/bundesland.js');
+  assert.deepEqual(bl.BUNDESLAENDER, fe.LAENDER);
+  assert.deepEqual([bl.bundeslandVon({ admin: 'Sachsen', land: 'DE' }), bl.bundeslandVon({ region: 'Bayern' }), bl.bundeslandVon({ admin: 'Lazio', land: 'IT' }), bl.bundeslandVon(null)], ['SN', 'BY', null, null]);
   // Rechnung (rein)
   assert.equal(fe.ostern(2026).toISOString().slice(0, 10), '2026-04-05');
   assert.equal(fe.ostern(2027).toISOString().slice(0, 10), '2027-03-28');

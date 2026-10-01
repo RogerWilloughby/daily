@@ -16,8 +16,8 @@ Externe Quellen (Open-Meteo, DWD, OpenLigaDB …) haben jede ihr eigenes Format.
 GET /api/v1/<dienst>?<eingaben>
 GET /api/v1/dienste            → Katalog aller Dienste (mit Eingaben, Klasse, TTL, Quellen, Schema)
 POST /api/v1/<privater dienst>  {JSON}   → private Dienste auch per POST (z. B. termine mit den iCal-Links im Körper; nie in der Adresse)
-GET /api/v1/paket?dienste=wetter,regen,wetterhinweise&lat=…&lon=…  → mehrere Dienste in einer Anfrage (daten.antworten[id] = Rahmen je Dienst)
 ```
+**Grundsatz (02.10.2026):** Jeder Dienst ist einzeln abrufbar und verhält sich im Betrieb wie allein – es gibt **kein Paket** mehr (bis App 0.38.0: `/api/v1/paket`). **Die Adresse ist der Cache-Schlüssel:** Sie enthält nur, wovon die Antwort abhängt (Ortsdienste nur `lat`/`lon` mit höchstens 2 Nachkommastellen, `feiertage` nur `bundesland`, Dienste ohne Eingaben gar nichts); Unbekanntes wird abgelehnt (ab App 0.40.0). Liste je Dienst: `../konzept/entscheidungen.md`, Abschnitt 14.
 Eine einzige Vercel-Funktion (`api/v1/[dienst].js`) bedient alle Dienste (Grenze Hobby-Tarif: 12 Funktionen).
 
 ## Austauschformat daily/1 (Rahmen)
@@ -124,6 +124,7 @@ Daraus entstehen der Katalog `/api/v1/dienste`, die Dateien `docs/dienste/<id>.m
 ## Einen Dienst bauen
 0. **Datenhaltung prüfen (vor dem Plan):** Kommt der Dienst mit festen Dateien im Repo (`services/daten/`), Rechnen oder Live-Abruf + CDN-Zwischenspeicher aus? Wenn nicht (wachsende Daten, Nutzerdaten über Geräte), erst mit Roger klären – keine Datenbank ohne Entscheidung (`../konzept/entscheidungen.md`, Abschnitt 12).
 1. `services/<id>.js` mit `id, version, titel, beschreibung, eingaben, laender, klasse, ttl, quellen, schema, blatt` und `run(eingabe) → { daten, ort?, hinweise?, quellen? }`.
+   **Eingaben = Cache-Schlüssel:** nur aufnehmen, wovon die Antwort wirklich abhängt, in genau einer Schreibweise (z. B. Bundesland statt Ort, wenn nur das Bundesland zählt; keine Anzeigenamen).
    Die Umwandlung der Quelle als eigene, reine Funktion `umwandeln()` exportieren (testbar ohne Netz).
 2. In `services/index.js` eintragen.
 3. Beispieldaten der Quelle in `tools/fixtures.js`, Umleitung in `tools/fetch-stub.js`.
