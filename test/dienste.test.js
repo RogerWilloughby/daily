@@ -1186,3 +1186,40 @@ test('Tagesinhalte: Dienst je Tag (Verlauf, nie Zukunft), Themen-Kachel mit Blä
   assert.deepEqual([top.kleinReiter.at(-1).id, top.kleinReiter.at(-1).liste[0].d], ['top', '1.']);
   assert.equal(a.kachel('unterhaltung', null, {}).state, 'error');
 });
+
+test('An diesem Tag: Dienst je Datum (Wikipedia, neueste zuerst), Kachel „Wissen“ mit Reiter „An diesem Tag“ ohne Aufgabe', async () => {
+  const d = dienste.byId.andiesemtag;
+  const ev = d.umwandeln(require('../tools/fixtures').onthisday().selected);
+  assert.deepEqual(ev.map(e => e.jahr), [1990, 1950, 1871]);
+  assert.equal(ev[2].link, null);
+  assert.deepEqual(d.umwandeln(null), []);
+  const jetzt = Date.parse('2026-10-01T10:00:00Z');
+  const heute = await dienste.ausfuehren('andiesemtag', {}, { jetzt });
+  gueltig(heute, d.schema);
+  assert.deepEqual([heute.daten.datum, heute.daten.tag, heute.daten.ereignisse.length], ['2026-10-01', '10-01', 3]);
+  assert.equal((await dienste.ausfuehren('andiesemtag', { datum: '2026-09-27' }, { jetzt })).daten.tag, '09-27');
+  for (const x of ['2026-10-02', '1999-12-31', 'heute'])
+    await assert.rejects(dienste.ausfuehren('andiesemtag', { datum: x }, { jetzt }), e => e.code === 'eingabe_ungueltig', x);
+  assert.equal((await rufe('andiesemtag', { datum: '2026-09-28' })).code, 200);
+  // Kachel „Wissen“: Wort, Land, An diesem Tag, Favoriten
+  const a = await esm('src/js/adapter/tagesinhalt.js');
+  const t = await dienste.ausfuehren('tagesinhalt', {}, { jetzt });
+  const env = a.mitZusatz(t, 'geschichte', heute);
+  const k = a.kachel('wissen', env, {});
+  assert.deepEqual(k.kleinReiter.map(x => x.id), ['wort', 'land', 'geschichte', 'favoriten']);
+  const g = k.kleinReiter.find(x => x.id === 'geschichte');
+  assert.match(g.html, /<a class="ti-ev kr-z" href="https:\/\/de\.wikipedia\.org\/wiki\/Beispiel_A" target="_blank" rel="noopener noreferrer" title="vor 36 Jahren · [^"]+"><b>1990<\/b> /);
+  assert.match(g.html, /<p class="ti-ev kr-z"[^>]*><b>1871<\/b>/);            // ohne Link: keine Verlinkung
+  assert.doesNotMatch(g.html, /data-ti="aufgabe"/);                          // Geschichte: kein „+ Aufgabe“
+  assert.match(k.kleinReiter[0].html, /data-ti="aufgabe"/);
+  assert.match(g.kopf, /aus Wikipedia/);
+  assert.ok(k.info.some(x => /CC BY-SA/.test(x)));
+  const f = a.favEintrag('geschichte', env);
+  assert.deepEqual([f.art, f.datum, f.kurz], ['geschichte', '2026-10-01', '1990: Beispielereignis A für die Testansicht.']);
+  // Wikipedia nicht erreichbar: übrige Reiter bleiben, Hinweis im Reiter
+  const ohne = a.kachel('wissen', a.mitZusatz(t, 'geschichte', null), {});
+  assert.equal(ohne.state, 'content');
+  assert.match(ohne.kleinReiter.find(x => x.id === 'geschichte').html, /Wikipedia ist gerade nicht erreichbar/);
+  assert.match(ohne.kleinReiter[1].html, /class="ti-inhalt"/);
+  assert.equal(a.jahrText(-44), '44 v. Chr.');
+});

@@ -25,7 +25,7 @@ Status: ✅ fertig in daily/1 · 🔁 läuft, noch alte Schnittstelle · 🆕 ne
 |---|---|---|---|---|---|
 | `feiertage` | Feiertage, Schulferien, Brückentage, Zeitumstellung, Kalenderwoche, Aktions- und Brauchtumstage – Kachel „Kalender“ | Rechnen + Live | Ort (Bundesland aus dem Ort) | eigene Berechnung + OpenHolidays | ✅ |
 | `namenstage` | Namenstage – Kachel „Kalender“ | Daten | Datum, Name | feste Liste von DAILY nach dem kirchlichen Kalender | ✅ |
-| `an-diesem-tag` | Weltereignisse, historische Ereignisse, Wissenschaftler-Geburtstage | Live | Datum | Wikipedia „An diesem Tag“ (Ereignisse, Geburten) | 🔁 (Geburten 🆕) |
+| `an-diesem-tag` | Weltereignisse, historische Ereignisse, Wissenschaftler-Geburtstage | Live | Datum | Wikipedia „An diesem Tag“ (Ereignisse, Geburten) | ✅ 0.35.0 als `andiesemtag` (Ereignisse; Geburten 🆕) |
 | `countdowns` | Countdowns, eigene Geburtstage und Jahrestage, Beziehungskalender | Lokal | – | Browser | 🆕 |
 | `aufgaben` | Aufgaben, Hausaufgaben, Tagesziele, Wochenziele, On-Track | Lokal | – | Browser | 🔁 (Kachel „Mein Daily“) |
 | `notizen` | Notizen, Erinnerungen, Einkaufszettel | Lokal | – | Browser | 🆕 |
@@ -63,7 +63,7 @@ Quellen und Lizenzlage: siehe [Recherche Finanzdaten](../recherche/finanzdaten.m
 | – | TV-Programm, TV-Highlights, Primetime | Live | – | nur lizenzierte Quelle | ⛔ Lizenz |
 
 ## 6. Tagesinhalte „des Tages“ (ein Dienst, viele Rubriken)
-**Seit 0.34.0:** Dienst `tagesinhalt?datum=<JJJJ-MM-TT>` (daily/1) liefert alle Inhalte eines Tags aus `src/content/daily.json` – auch vergangene Tage (Verlauf), nie in die Zukunft; Themen-Kacheln Unterhaltung (✅ 0.34.0), Wissen und Alltag (folgen) mit Blättern, Favoriten, „+ Aufgabe“, Top 11 vorbereitet. Ursprünglicher Plan: Ein Dienst `tagesinhalt?rubrik=<rubrik>&datum=<JJJJ-MM-TT>` liefert alle vorbereiteten Inhalte. Alle Rubriken haben dasselbe Grundgerüst (Titel, Kurztitel, Text, Zusatzfelder je Rubrik), damit Adapter sie einheitlich darstellen können. Heute liegen sie in `src/content/daily.json`.
+**Seit 0.34.0:** Dienst `tagesinhalt?datum=<JJJJ-MM-TT>` (daily/1) liefert alle Inhalte eines Tags aus `src/content/daily.json` – auch vergangene Tage (Verlauf), nie in die Zukunft; Themen-Kacheln Unterhaltung (✅ 0.34.0), Wissen (✅ 0.35.0, mit Dienst `andiesemtag`) und Alltag (folgt) mit Blättern, Favoriten, „+ Aufgabe“, Top 11 vorbereitet. Ursprünglicher Plan: Ein Dienst `tagesinhalt?rubrik=<rubrik>&datum=<JJJJ-MM-TT>` liefert alle vorbereiteten Inhalte. Alle Rubriken haben dasselbe Grundgerüst (Titel, Kurztitel, Text, Zusatzfelder je Rubrik), damit Adapter sie einheitlich darstellen können. Heute liegen sie in `src/content/daily.json`.
 
 | Rubrik | Ideen | Status |
 |---|---|---|
@@ -108,7 +108,7 @@ Kachel „Tools“ (seit App 0.23.0): Werkzeuge als eigene Seiten in `src/tools/
 | Social-Media-Ausspielung (Content Engine) | ⏸ | eigenes Produkt; kann später dieselben Dienste nutzen |
 
 ## Vorschlag Reihenfolge
-1. **Umzug** der laufenden Dienste auf daily/1: ~~`himmel`, `feiertage`, `warnungen`, `namenstage`, `termine` (privat)~~ (erledigt, Kacheln „Wetter“ und „Kalender“), offen: `tanken`, `abfahrten`, `fussball`, `an-diesem-tag`, `tagesinhalt`, `kurse` (privat), `schlagzeilen` (privat). Roger wählt die Reihenfolge; vor jedem Umzug ein Plan.
+1. **Umzug** der laufenden Dienste auf daily/1: ~~`himmel`, `feiertage`, `warnungen`, `namenstage`, `termine` (privat)~~ (erledigt, Kacheln „Wetter“ und „Kalender“), offen: `tanken`, `abfahrten`, `fussball`, ~~`an-diesem-tag`~~ (✅ 0.35.0 `andiesemtag`), ~~`tagesinhalt`~~ (✅ 0.34.0), `kurse` (privat), `schlagzeilen` (privat). Roger wählt die Reihenfolge; vor jedem Umzug ein Plan.
 2. **Neue Live-Dienste mit freier Quelle:** `waehrungen`, `strompreis`, `verkehr`, `weltwetter`, `raumfahrt`, `krypto`, `klima`.
 3. **Neue Tagesinhalte:** weitere Rubriken in `tagesinhalt`, dazu `quiz`.
 4. **Lokale Dienste:** `countdowns`, `notizen`.

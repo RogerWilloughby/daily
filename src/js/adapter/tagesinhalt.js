@@ -5,12 +5,12 @@ import { esc, icon } from '../core/util.js';
 
 export const ART = {
   raetsel: { name: 'Rätsel', icon: 'frage' }, witz: { name: 'Witz', icon: 'lachen' }, film: { name: 'Film', icon: 'film' },
-  wort: { name: 'Wort & Sprichwort', icon: 'book' }, land: { name: 'Land', icon: 'globe' },
+  wort: { name: 'Wort & Sprichwort', icon: 'book' }, land: { name: 'Land', icon: 'globe' }, geschichte: { name: 'An diesem Tag', icon: 'clock' },
   rezept: { name: 'Rezept', icon: 'food' }, gesundheit: { name: 'Gesundheit', icon: 'heart' }, tech: { name: 'Tech', icon: 'chip' }, beziehung: { name: 'Beziehung', icon: 'pair' }
 };
 export const THEMEN = {
   unterhaltung: { name: 'Unterhaltung', arten: ['raetsel', 'witz', 'film'] },
-  wissen: { name: 'Wissen', arten: ['wort', 'land'] },
+  wissen: { name: 'Wissen', arten: ['wort', 'land', 'geschichte'] },
   alltag: { name: 'Alltag', arten: ['rezept', 'gesundheit', 'tech', 'beziehung'] }
 };
 
@@ -21,6 +21,12 @@ export const datumText = (d, kurz = false) => {
 };
 export const tagPlus = (d, n) => new Date(Date.parse(d + 'T12:00:00Z') + n * 864e5).toISOString().slice(0, 10);
 export const favKey = (art, datum) => `${art}|${datum}`;
+// Jahr eines Ereignisses: negativ = vor Christus
+export const jahrText = j => (j < 0 ? `${-j} v. Chr.` : String(j));
+// Antwort eines Zusatz-Dienstes (z. B. „andiesemtag“) als weitere Art in die Inhalte des Tags (null: nicht erreichbar)
+export const mitZusatz = (env, art, z) => (env && env.daten ? { ...env, daten: { ...env.daten, inhalt: { ...env.daten.inhalt, [art]: z && z.daten ? z.daten : null } } } : env);
+// Arten ohne „+ Aufgabe“ (Geschichte ist nichts zum Erledigen)
+const OHNE_AUFGABE = new Set(['geschichte']);
 
 // Inhalt einer Art: html (Reiter), kurz (Favoriten-Zeile, Aufgabe), text (vollständig, beim Überfahren)
 export function artInhalt(art, inhalt, { loesung = false } = {}) {
@@ -45,6 +51,11 @@ export function artInhalt(art, inhalt, { loesung = false } = {}) {
         html: `<p class="ti-text"><b>${esc(r.name)}</b> <small>${esc(info)}</small></p>` + p((r.zutaten || []).join(' · '), 'ti-klein') + (r.zubereitung ? p(r.zubereitung, 'ti-klein') : '') }; }
     case 'gesundheit': case 'beziehung': { const t = i[art]; if (!t) return null;
       return { kurz: t.kurz || t.text, text: t.text, html: p(t.text) + (art === 'gesundheit' ? p('Allgemeine Anregung, keine medizinische Beratung.', 'ti-hinweis') : '') }; }
+    case 'geschichte': { const g = i.geschichte; if (!g || !g.ereignisse || !g.ereignisse.length) return null;
+      const jahr = +String(g.datum || '').slice(0, 4), ev = g.ereignisse, zeile = e => `${jahrText(e.jahr)}: ${e.text}`;
+      return { kurz: zeile(ev[0]), text: ev.map(zeile).join(' · '),
+        html: ev.map(e => { const tip = esc(`${jahr ? `vor ${jahr - e.jahr} Jahren · ` : ''}${e.text}`), inn = `<b>${esc(jahrText(e.jahr))}</b> ${esc(e.text)}`;
+          return e.link ? `<a class="ti-ev kr-z" href="${esc(e.link)}" target="_blank" rel="noopener noreferrer" title="${tip}">${inn}</a>` : `<p class="ti-ev kr-z" title="${tip}">${inn}</p>`; }).join('') }; }
     case 'tech': { const t = i.tech; if (!t) return null;
       return { kurz: t.kategorie ? `${t.kategorie}: ${t.text}` : t.text, text: t.text, html: (t.kategorie ? `<p class="ti-klein"><b>${esc(t.kategorie)}</b></p>` : '') + p(t.text) }; }
     default: return null;
@@ -52,12 +63,12 @@ export function artInhalt(art, inhalt, { loesung = false } = {}) {
 }
 
 // Zeile über dem Inhalt: ‹ Datum ›, Favorit, Aufgabe
-export function navZeile({ datum, erster, heute }, fav) {
+export function navZeile({ datum, erster, heute }, fav, { aufgabe = true } = {}) {
   return `<div class="ti-nav"><button type="button" data-ti="zurueck" aria-label="Tag zurück" title="Tag zurück"${datum <= erster ? ' disabled' : ''}>‹</button>` +
     `<span class="ti-datum">${esc(datumText(datum))}</span>` +
     `<button type="button" data-ti="vor" aria-label="Tag vor" title="Tag vor"${datum >= heute ? ' disabled' : ''}>›</button>` +
     `<button type="button" class="ti-stern" data-ti="fav" aria-pressed="${!!fav}" title="${fav ? 'Aus den Favoriten nehmen' : 'Als Favorit merken'}">${fav ? '★' : '☆'}</button>` +
-    `<button type="button" class="ti-aufgabe" data-ti="aufgabe" title="Als Aufgabe in „Mein Daily“ anlegen" aria-label="Als Aufgabe anlegen">+<span class="ti-lang"> Aufgabe</span></button></div>`;
+    (aufgabe ? `<button type="button" class="ti-aufgabe" data-ti="aufgabe" title="Als Aufgabe in „Mein Daily“ anlegen" aria-label="Als Aufgabe anlegen">+<span class="ti-lang"> Aufgabe</span></button>` : '') + '</div>';
 }
 
 // Favorit als Kopie: { art, datum, kurz, text }
@@ -70,9 +81,11 @@ export function kachel(thema, env, { favoriten = [], loesung = false, opt = {}, 
   const reiter = t.arten.filter(a => opt[a] !== false).map(a => {
     const inh = d ? artInhalt(a, d.inhalt, { loesung }) : null;
     const fav = d && favoriten.some(f => f.art === a && f.datum === d.datum);
-    return { id: a, name: ART[a].name, icon: icon(ART[a].icon), kopf: `<b>${esc(ART[a].name)}</b>${d ? ` <small class="ti-tag">${esc(datumText(d.datum))}</small>` : ''}`,
+    const wiki = a === 'geschichte', leer = wiki && d && d.inhalt.geschichte === null ? 'Wikipedia ist gerade nicht erreichbar.' : 'Für diesen Tag gibt es hier nichts.';
+    return { id: a, name: ART[a].name, icon: icon(ART[a].icon),
+      kopf: `<b>${esc(ART[a].name)}</b>${wiki ? ' <small class="ti-tag" title="Texte: Wikipedia, CC BY-SA 4.0">aus Wikipedia</small>' : d ? ` <small class="ti-tag">${esc(datumText(d.datum))}</small>` : ''}`,
       html: !d ? '<p class="ti-hinweis">Die Tagesinhalte sind gerade nicht erreichbar.</p>'
-        : navZeile(d, fav) + (inh ? `<div class="ti-inhalt" title="${esc(inh.text)}">${inh.html}</div>` : '<p class="ti-hinweis">Für diesen Tag gibt es hier nichts.</p>') };
+        : navZeile(d, fav, { aufgabe: !OHNE_AUFGABE.has(a) }) + (inh ? `<div class="ti-inhalt"${wiki ? '' : ` title="${esc(inh.text)}"`}>${inh.html}</div>` : `<p class="ti-hinweis">${leer}</p>`) };
   });
   if (opt.favoriten !== false) reiter.push({ id: 'favoriten', name: 'Favoriten', icon: icon('stern'), kopf: `<b>Favoriten</b> <small class="ti-tag">${favs.length}</small>`,
     liste: favs.map(f => ({ d: datumText(f.datum, true), t: `${ART[f.art].name}: ${f.kurz}`, tip: f.text, aktion: 'fav:' + favKey(f.art, f.datum), gruppe: 1 })),
@@ -84,6 +97,7 @@ export function kachel(thema, env, { favoriten = [], loesung = false, opt = {}, 
     state: d ? 'content' : 'error', title: t.name, m: '', ms: d ? datumText(d.datum, true) : '–',
     x: d ? t.arten.map(a => (artInhalt(a, d.inhalt) || {}).kurz).filter(Boolean).join(' · ') : 'Die Tagesinhalte sind gerade nicht erreichbar.',
     liste: [], kleinReiter: reiter, startReiter: t.arten[0],
-    info: ['Inhalte von DAILY (mit KI vorbereitet)', d && d.wiederholt ? 'Vorrat wiederholt sich – neue Inhalte folgen' : 'Ältere Tage mit ‹ ›', 'Favoriten bleiben in diesem Browser'].filter(Boolean)
+    info: ['Inhalte von DAILY (mit KI vorbereitet)', t.arten.includes('geschichte') ? '„An diesem Tag“: Wikipedia (CC BY-SA 4.0)' : null,
+      d && d.wiederholt ? 'Vorrat wiederholt sich – neue Inhalte folgen' : 'Ältere Tage mit ‹ ›', 'Favoriten bleiben in diesem Browser'].filter(Boolean)
   };
 }

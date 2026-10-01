@@ -42,14 +42,6 @@ test('Abfahrten: VVO-Datum, Haltestelle und Sortierung', () => {
   for (let i = 1; i < deps.length; i++) assert.ok(deps[i - 1].time <= deps[i].time);
 });
 
-test('An diesem Tag: Ereignisse mit Link, neueste zuerst', () => {
-  const { mapEvents } = require('../api/onthisday');
-  const ev = mapEvents(fx.onthisday().selected);
-  assert.ok(ev.length > 0);
-  for (let i = 1; i < ev.length; i++) assert.ok(ev[i - 1].year >= ev[i].year);
-  assert.equal(mapEvents(null).length, 0);
-});
-
 test('Tagesinhalte: 31 Tage ab 26.09.2026, alle Felder gefüllt', () => {
   const file = JSON.parse(fs.readFileSync(path.join(__dirname, '../src/content/daily.json'), 'utf8'));
   const tage = file.tage;
@@ -115,13 +107,15 @@ test('Layouts: öffentlich ohne private Kacheln, Standard 12 (fertige zuerst), R
   // Standard (keine eigene Belegung): 12 Kacheln, überarbeitete zuerst, dann Vorschau-Kacheln in Standardreihenfolge
   const pub = chooseLayout(false).map(t => t.id);
   assert.equal(pub.length, STANDARD_ANZAHL);
-  assert.deepEqual(pub.slice(0, 9), ['weather', 'kalender', 'links', 'tasks', 'verkehr', 'money', 'unterhaltung', 'tools', 'usage']);
-  assert.deepEqual(pub.slice(9, 11), ['sport', 'food']);
+  assert.deepEqual(pub.slice(0, 10), ['weather', 'kalender', 'links', 'tasks', 'verkehr', 'money', 'unterhaltung', 'wissen', 'tools', 'usage']);
+  assert.deepEqual(pub.slice(10, 12), ['sport', 'food']);
   assert.deepEqual(chooseLayout(false, ['play', 'film', 'saving']).map(t => t.id), ['unterhaltung', 'money']);   // „Rätsel & Witz“ und „Film“ → Unterhaltung, „Sparen“ → Finanzen
+  assert.deepEqual(chooseLayout(false, ['knowledge', 'travel', 'weather']).map(t => t.id), ['wissen', 'weather']);   // „Wissen“ und „Land des Tages“ → Wissen
+  assert.ok(!CATALOG.some(t => t.id === 'knowledge' || t.id === 'travel'));
   assert.ok(!CATALOG.some(t => t.id === 'transit' || t.id === 'fuel'));
   assert.ok(!pub.includes('news') && !pub.includes('alerts'));
   const priv = chooseLayout(true).map(t => t.id);
-  assert.deepEqual(priv.slice(0, 10), ['weather', 'kalender', 'tasks', 'verkehr', 'money', 'unterhaltung', 'links', 'tools', 'usage', 'news']);
+  assert.deepEqual(priv.slice(0, 11), ['weather', 'kalender', 'tasks', 'verkehr', 'money', 'unterhaltung', 'wissen', 'links', 'tools', 'usage', 'news']);
   // Raster: Rechner (quer, Wunschform 1,4) und Handy (hochkant, quadratisch)
   const r = (n, w, h, a, v) => { const x = raster(n, w, h, a, v); return `${x.cols}x${x.rows}`; };
   assert.deepEqual([1, 2, 4, 6, 9, 12, 20].map(n => r(n, 1344, 700)), ['1x1', '2x1', '2x2', '3x2', '3x3', '4x3', '5x4']);

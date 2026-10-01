@@ -35,8 +35,7 @@ export async function load() {
   // Rätsel, Witz, Film: seit 0.34.0 Kachel „Unterhaltung“ (providers/unterhaltung.js, Dienst „tagesinhalt“)
   set('food', { state: 'content', m: t.rezept.name, ms: t.rezept.minuten + ' min',
     x: `${t.rezept.minuten} Minuten · für 2${t.rezept.vegetarisch ? ' · vegetarisch' : ''}`, render: renderFood });
-  set('travel', { state: 'content', m: t.land.name, ms: t.land.name, x: t.land.fakt,
-    rows: [['Hauptstadt', t.land.hauptstadt], ['Sprache', t.land.sprache], ['Währung', t.land.waehrung], ['Typisches Gericht', t.land.gericht], ['Wissenswert', t.land.fakt]] });
+  // Land des Tages: seit 0.35.0 Reiter „Land“ der Kachel „Wissen“ (providers/wissen.js)
   set('tech', { state: 'content', m: t.tech.kategorie, ms: t.tech.kategorie, x: t.tech.text, rows: [[t.tech.kategorie, t.tech.text]] });
   // Spartipp: seit 0.31.0 Reiter „Spartipp“ der Kachel „Finanzen“ (providers/finanzen.js holt ihn über getToday)
   set('relation', { state: 'content', m: t.beziehung.kurz, ms: 'Idee', x: rest(t.beziehung), rows: [['Idee für heute', t.beziehung.text]] });
@@ -45,7 +44,6 @@ export async function load() {
 }
 
 addAnswer(/rezept|koch|essen|abendbrot|mittag/i, () => today ? `Heute: ${today.rezept.name} (${today.rezept.minuten} Minuten${today.rezept.vegetarisch ? ', vegetarisch' : ''}). Zutaten: ${today.rezept.zutaten.join(', ')}.` : null);
-addAnswer(/land|reise|urlaub/i, () => today ? `Land des Tages: ${today.land.name}, Hauptstadt ${today.land.hauptstadt}. ${today.land.fakt}` : null);
 addAnswer(/spar|geld sparen/i, () => today ? `Spartipp: ${today.spartipp.text}` : null);
 addAnswer(/beziehung|partner|date|paar/i, () => today ? `Idee für heute: ${today.beziehung.text}` : null);
 addAnswer(/gesund|fitness|bewegung|sport treiben/i, () => today ? `Für heute: ${today.gesundheit.text}` : null);

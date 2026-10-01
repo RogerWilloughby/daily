@@ -18,7 +18,7 @@ import sport from './providers/sport.js';
 import verkehr from './providers/verkehr.js';
 import content from './providers/content.js';
 import unterhaltung from './providers/unterhaltung.js';
-import knowledge from './providers/knowledge.js';
+import wissen from './providers/wissen.js';
 import local from './providers/local.js';
 import links from './providers/links.js';
 import kalender from './providers/kalender.js';
@@ -33,9 +33,9 @@ if (settings.alleKacheln && !Array.isArray(settings.layout)) saveSettings({ layo
 const sichtbar = new Set(chooseLayout(isPrivate, settings.layout).filter(Boolean).map(t => t.id));
 
 // Welche Kacheln ein Anbieter füllt – Anbieter ausgeblendeter Kacheln starten gar nicht erst (keine Abrufe)
-const KACHELN = { local: ['tasks', 'usage'], content: ['food', 'travel', 'health', 'tech', 'relation'] };   // Spartipp seit 0.31.0 in „Finanzen“
+const KACHELN = { local: ['tasks', 'usage'], content: ['food', 'health', 'tech', 'relation'] };   // Spartipp seit 0.31.0 in „Finanzen“, Land seit 0.35.0 in „Wissen“
 // Reihenfolge = Priorität: was am häufigsten gebraucht wird, lädt zuerst
-const PROVIDERS = [local, links, weather, kalender, news, content, unterhaltung, verkehr, finanzen, sport, knowledge, tools]
+const PROVIDERS = [local, links, weather, kalender, news, content, unterhaltung, verkehr, finanzen, sport, wissen, tools]
   .filter(p => (isPrivate || !p.private) && (KACHELN[p.id] || [p.id]).some(id => sichtbar.has(id)));
 const lastRun = new Map();
 

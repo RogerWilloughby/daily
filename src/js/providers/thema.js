@@ -1,14 +1,15 @@
 // Themen-Kacheln der Tagesinhalte (Unterhaltung, Wissen, Alltag): holt den Dienst „tagesinhalt“ (daily/1) für den gezeigten Tag.
 // Mini-Reiter je Art; in jedem Reiter ‹ › (vergangene Tage), ☆ Favorit (Kopie im Browser), „+ Aufgabe“ (→ Mein Daily); Reiter „Favoriten“.
-// Ein Anbieter je Thema: themenAnbieter('unterhaltung') usw.
+// Ein Anbieter je Thema: themenAnbieter('unterhaltung') usw.; zusatz: { dienst, art } holt für denselben Tag einen weiteren Dienst als eigene Art
+// (Wissen: „andiesemtag“ → Reiter „An diesem Tag“; fällt er aus, bleiben die übrigen Reiter).
 import { set } from '../core/board.js';
 import { kachelOpt, kachelOptSpeichern, favoriten, saveFavoriten, tasks, saveTasks } from '../core/store.js';
 import { kachelEinstellungen } from '../core/einstellungen.js';
 import { dienst } from '../dienste/client.js';
 import { berlinDay } from '../core/util.js';
-import { kachel, THEMEN, ART, artInhalt, favEintrag, tagPlus } from '../adapter/tagesinhalt.js';
+import { kachel, THEMEN, ART, artInhalt, favEintrag, tagPlus, mitZusatz } from '../adapter/tagesinhalt.js';
 
-export function themenAnbieter(id) {
+export function themenAnbieter(id, { zusatz = null } = {}) {
   const thema = THEMEN[id];
   let env = null, heuteEnv = null, datum = null, loesung = false, fehler = null;
   const opt = () => kachelOpt(id, {});
@@ -16,7 +17,8 @@ export function themenAnbieter(id) {
 
   async function zeige(d) {
     try {
-      const r = await dienst('tagesinhalt', { datum: d });
+      const [t, z] = await Promise.all([dienst('tagesinhalt', { datum: d }), zusatz ? dienst(zusatz.dienst, { datum: d }).catch(() => null) : null]);
+      const r = zusatz ? mitZusatz(t, zusatz.art, z) : t;
       env = r; datum = r.daten.datum; loesung = false; fehler = null;
       if (datum === r.daten.heute) heuteEnv = r;
     } catch (e) { fehler = e; if (!env) env = null; }
