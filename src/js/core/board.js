@@ -69,7 +69,8 @@ function fillContent(t, el) {
 }
 
 // ---- Mini-Reiter (Entscheidung 29.09.2026, entscheidungen.md Abschnitt 13: Reiter in der kleinen Kachel statt Aufklappen) ----
-// t.kleinReiter: [{ id, name, icon (SVG aus eigenem Code), kopf? (HTML), liste? ([{ d, t, tip?, gruppe? }]), html? (wenn die Liste leer ist) }]
+// t.kleinReiter: [{ id, name, icon (SVG aus eigenem Code), kopf? (HTML), liste? ([{ d, t, tip?, gruppe? }]), html? (wenn die Liste leer ist),
+//                   unten? (HTML unter der Liste, z. B. ein Diagramm – bekommt zuerst seinen Platz, die Liste zeigt, was darüber passt) }]
 // Links unter der Kopfzeile eine schmale Spalte mit Symbolen (Name beim Überfahren), rechts der Inhalt des gewählten Reiters.
 // Die Wahl bleibt je Kachel gespeichert (Kachel-Einstellung „reiter“); t.startReiter gilt, solange nichts gewählt ist.
 // Hat die Kachel Einstellungen, steht unten ein Zahnrad – es öffnet das Einstellungsfenster (kein Reiter).
@@ -82,16 +83,20 @@ function krHtml(t) {
   const wahl = krWahl(t), r = t.kleinReiter.find(x => x.id === wahl);
   const knopf = x => `<button type="button" role="tab" data-kr="${esc(x.id)}" aria-selected="${x.id === wahl}" title="${esc(x.name)}" aria-label="${esc(x.name)}">${x.icon || esc(x.name.slice(0, 2))}</button>`;
   const einst = hatEinstellungen(t.id) ? `<button type="button" class="kr-einst" data-kr-einst title="Einstellungen" aria-label="Einstellungen">${ZAHNRAD}</button>` : '';
-  const inhalt = r.liste && r.liste.length ? `<div class="kr-liste">${listeHtml(r.liste)}</div>` : (r.html || '');   // leere Liste → html (Hinweistext)
+  const inhalt = (r.liste && r.liste.length ? `<div class="kr-liste">${listeHtml(r.liste)}</div>` : (r.html || '')) +   // leere Liste → html (Hinweistext)
+    (r.unten ? `<div class="kr-unten">${r.unten}</div>` : '');
   return `<div class="kr-leiste" role="tablist" aria-label="Ansichten">${t.kleinReiter.map(knopf).join('')}${einst}</div>` +
     `<div class="kr-feld" role="tabpanel">${inhalt}</div>`;
 }
 // Zeilen ausblenden, die unten über den Rand ragen würden
 function krZeilen(el) {
   const feld = el.querySelector('.kr-feld'); if (!feld) return;
-  const zeilen = [...feld.querySelectorAll('.tl-z')];
+  const zeilen = [...feld.querySelectorAll('.kr-liste .tl-z')];
   zeilen.forEach(z => { z.hidden = false; });
-  const unten = feld.getBoundingClientRect().bottom;
+  // mit Diagramm darunter: Grenze ist das Ende der Liste (sie bekommt den Platz über dem Diagramm), sonst das Feld
+  const rahmen = feld.querySelector('.kr-unten') ? feld.querySelector('.kr-liste') : feld;
+  if (!rahmen) return;
+  const unten = rahmen.getBoundingClientRect().bottom;
   zeilen.forEach(z => { if (z.getBoundingClientRect().bottom > unten + 0.5) z.hidden = true; });
 }
 const krAlle = () => grid.querySelectorAll('.tile.mit-kr').forEach(krZeilen);

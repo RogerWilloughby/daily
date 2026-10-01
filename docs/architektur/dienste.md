@@ -151,7 +151,7 @@ Das allgemeine Kachelraster weiß nichts über einzelne Kacheln. Kachelbesondere
 
 | Datei | Zweck |
 |---|---|
-| `src/js/core/board.js` | allgemeines Kachelraster: Raster, Aktivieren, Reiter, Listen, Einstellungen, **Mini-Reiter** (`kleinReiter`: Symbolspalte, gespeicherte Wahl, nur ganze Zeilen, Einstellungsfenster) – ohne Wetter/Finanzen |
+| `src/js/core/board.js` | allgemeines Kachelraster: Raster, Aktivieren, Reiter, Listen, Einstellungen, **Mini-Reiter** (`kleinReiter`: Symbolspalte, gespeicherte Wahl, nur ganze Zeilen, Einstellungsfenster; Feld `unten` für ein Diagramm unter der Liste) – ohne Wetter/Finanzen |
 | `src/js/core/ansichten.js` | Anmeldung: `ansicht(id, { teaser, spalte, zurueck })` für eine Kachel, `erweiterung({ nachInhalt, nachZeichnen, groesse, zeiger })` für alle |
 | `src/js/ansichten/mini-diagramm.js` | allgemeine Diagramm-Bedienung: Dichte je Platz (`miniDichte`), Hinweise der großen Diagramme, Überfahren der Spalten |
 | `src/js/ansichten/wetter.js` | Wetter-Kachel klein: Regenzeile und Zeitpunkt-Block („Jetzt“ / überfahrene Stunde oder Tag) |

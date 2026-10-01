@@ -1,4 +1,4 @@
-# DAILY – Entscheidungen (Stand 29.09.2026)
+# DAILY – Entscheidungen (Stand 01.10.2026)
 
 Ergebnis der Durchsicht von `daily-konzept.html`, ergänzt um die Nutzungsrecherche (`../recherche/nutzung.md`) und die rechtliche Checkliste (`../recht/checkliste.md`).
 
@@ -34,8 +34,8 @@ Kacheln und Quellen:
 - **Mein Daily** – Aufgaben lokal.
 - **Verkehr** (seit App 0.27.0, ersetzt „Abfahrten“ und „Tanken“) – Umschalter Abfahrten · Arbeitsweg · Tanken. Abfahrten vorerst LIVE VVO (`api/transit.js`), Arbeitsweg Auto über den Dienst `autobahn` (seit 0.28.0), Tanken über den Dienst `tanken` (daily/1). Details unten „Kachel Verkehr“.
 - **Sport** – LIVE OpenLigaDB (`api/sport.js`), Verein in den Einstellungen.
-- **Geld** – LIVE Yahoo (`api/markets.js`), nur privat zulässig; öffentlich: EZB-Kurse/CoinGecko oder lizenzierte Quelle.
-- **Rätsel & Witz, Essen, Land, Filmtipp, Gesundheit, Tech, Sparen, Beziehung** – Tagesinhalte aus `src/content/daily.json`.
+- ~~**Geld**~~ – seit 0.22.0 Kachel **Finanzen** (EZB öffentlich, Yahoo nur privat); seit 0.31.0 mit Mini-Reitern Kurse · Zinsen & Inflation · Märkte · Spartipp.
+- **Rätsel & Witz, Essen, Land, Filmtipp, Gesundheit, Tech, Beziehung** – Tagesinhalte aus `src/content/daily.json`. (Sparen: seit 0.31.0 Reiter „Spartipp“ in Finanzen.)
 - **Wissen** – Wort, Sprichwort, „An diesem Tag“ (Wikipedia, `api/onthisday.js`).
 - **Warnungen** – seit 27.09.2026 keine eigene Kachel mehr, sondern Dienst `wetterhinweise` in der Wetterkachel (siehe unten).
 - ~~**Tanken**~~ – seit App 0.27.0 Ansicht „Tanken“ der Kachel „Verkehr“ (Dienst `tanken`). Braucht Vercel-Variable `TANKERKOENIG_API_KEY` (kostenlos: onboarding.tankerkoenig.de; in Rogers Projekt gesetzt am 30.09.2026); ohne Schlüssel zeigt die Ansicht „Tanken einrichten“.
@@ -52,7 +52,7 @@ Kacheln und Quellen:
   - **Wetter:** Reiter Radar / 15 Tage / 48 Std. / Hinweise / Mehr ein- oder ausblenden („Heute“ immer; bei Unwetter bleibt „Hinweise“ vorn), Reiter beim Aufklappen, Mini-Diagramm 24 Stunden (Standard), 48 Stunden, 7 oder 16 Tage (auch direkt in der kleinen Kachel umschaltbar).
   - **Kalender:** iCal-Links (nur privat), Namenstage / Aktionstage / Himmel anzeigen.
   - **Tools:** welche Tools in der Kachel erscheinen.
-  - **Finanzen:** Hauptwährung, weitere Währungen, Diagramm 30/90 Tage, Reiter Leitzinsen/Inflation/Märkte (privat).
+  - **Finanzen** (seit 0.31.0 im Einstellungsfenster): Hauptwährung, weitere Währungen, Kursdiagramm 30/90 Tage, Reiter Zinsen & Inflation / Märkte (privat) / Spartipp.
   - **Verkehr** (seit 0.30.0 im Einstellungsfenster über das Zahnrad der Reiterspalte): Haltestelle, Arbeitsweg (Autobahnen, Start, Ziel – nur im Browser), Kraftstoff, Umkreis · **Sport:** Verein (die alten Kacheln bekommen dafür einen Reiter „Übersicht“ + Zahnrad).
 - Speicherung nur lokal im Browser (localStorage `daily-settings`, Kachel-Einstellungen unter `kacheln.<id>`), also pro Gerät. Späterer Ausbau: geräteübergreifend synchronisieren.
 
@@ -163,6 +163,7 @@ Der Prototyp zählt lokal, welche Kacheln geöffnet werden (Kachel „Deine Nutz
 - **Umsetzung als allgemeiner Baustein** im Kachelraster (`core/board.js`, Styles `.kr-*` in `app.css`): Eine Kachel liefert `kleinReiter` ([{ id, name, icon, kopf?, liste? | html? }]); das Raster zeichnet die Spalte, wechselt, speichert die Wahl je Kachel (Kachel-Einstellung `reiter`), zeigt so viele Listenzeilen, wie ganz hineinpassen, und öffnet das Einstellungsfenster. Kacheln mit Mini-Reitern klappen nicht mehr auf; die übrigen klappen bis zu ihrer Umstellung weiter auf.
 - **Vorlage:** Eine im Konzept-Chat gebaute und gemessene Umsetzung (auf Stand 0.27.0, nicht eingespielt) liegt in `vorlage-mini-reiter.md` – als Grundlage für den Umsetzungs-Chat.
 - **Reihenfolge:** (1) Baustein + Kachel „Verkehr“ (Abfahrten · Arbeitsweg · Tanken), (2) Wetter, (3) Kalender, Finanzen, Tools und lokale Kacheln, (4) Code fürs Aufklappen entfernen. Je Schritt ein Plan.
+- **Umsetzung Finanzen (01.10.2026, App 0.31.0, Rogers Wahl vor dem Wetter):** Roger: „Alles“ in die Finanzen – Reiter **Kurse** (Kopf „1 € = 1,1423 $ ▼ 0,08 %“, weitere Währungen als Liste, darunter das Kursdiagramm mit Umschalter 30/90 Tage) · **Zinsen & Inflation** (Prozent-Symbol, neu in `util.js`; Kopf „Leitzins 2,00 % · Inflation 2,1 %“, Liste der drei Leitzinsen und Inflation DE/Euroraum, Erklärung beim Überfahren) · **Märkte** (nur privat bis zum Dienst `krypto`; öffentlich ausgeblendet) · **Spartipp** (Tagesinhalt, „keine Anlageempfehlung“) – dazu das Zahnrad. Die Vorschau-Kachel „Sparen“ entfällt (`ERSETZT`: saving → money). Geplant: Reiter **Strom** (Dienst `strompreis`) und Krypto öffentlich (Dienst `krypto`), je eigener Plan. Einstellungen: ein Schalter „Zinsen & Inflation“ statt zwei (wer früher nur Inflation an hatte, sieht den Reiter weiter), neu „Spartipp“. **Baustein-Ergänzung:** Reiter-Feld `unten` (HTML unter der Liste, z. B. ein Diagramm) – bekommt zuerst seinen Platz (mind. 84 px), die Liste zeigt die ganzen Zeilen darüber. Gemessen (Mock-Server, privat und öffentlich): 1920/1400/1100 × 800 alle Zeilen (Kurse 4/4, Zinsen & Inflation 5/5, Märkte 6/6), Kursdiagramm 150/61/52 px hoch und ganz in der Kachel, Spartipp passt ganz, Umschalter 90 Tage wirkt ohne Aufklappen, Einstellungsfenster blendet Reiter sofort aus.
 - **Umsetzung (1) (29.09.2026, App 0.30.0):** Baustein nach der Vorlage in `core/board.js` (`kleinReiter`, `krWahl`, `krZeilen`, Einstellungsfenster `dialog.kachel-einst`) und `app.css` (`.kr-*`). Kachel „Verkehr“ mit Reitern **Abfahrten** (Tram) · **Arbeitsweg** (neues Symbol Auto, `auto` in `util.js`) · **Tanken** (Zapfsäule), unten das Zahnrad. Umschalter, `tabs`, Einstellung „Kleine Kachel zeigt“ entfallen; eine früher gespeicherte Ansicht gilt einmal als Start-Reiter. Inhalte: Abfahrten bis 12 Zeilen; Tanken Kopf „E10 ab 1,68⁹ € Ø 1,71⁴“ und alle geöffneten Tankstellen, günstigste zuerst; Arbeitsweg Kopf „Dresden → Chemnitz A4 · A13“, alle Staus/Meldungen/Sperrungen am Weg, **Baustellen als eine Zeile „3 Baustellen“** (Roger), Einzelheiten beim Überfahren. Die aufgeklappten Ansichten (Tankstellen-Tabelle, Arbeitsweg-Gruppen mit amtlichem Text) entfallen; Korridor, Umkreis und Quellen stehen im (i)-Feld. **Handy:** pausiert (Roger: nur am PC darstellen) – die Kachel „Verkehr“ reagiert dort nicht. Gemessen (Mock-Server): Kopfzeile volle Breite, Spalte 26 px, bei 1920/1400/1100 × 800 alle Zeilen (Tanken 4/4, Abfahrten 6/6, Arbeitsweg 6/6), bei 1100 × 560 nur ganze Zeilen (3 von 6); Reiterwahl bleibt nach Neuladen; Einstellungsfenster: „Diesel“ ändert den Kopf sofort, „Gespeichert ✓“; Kalender klappt weiter auf. Bekannt: der aufgelöste Start/Ziel („→ Dresden“) erscheint im Fenster erst beim nächsten Öffnen.
 
 ## Design

@@ -1,4 +1,4 @@
-/* DAILY – Finanzen-Kachel: Kopf, Veränderung, Kursdiagramm. */
+/* DAILY – Finanzen-Kachel (Mini-Reiter): Kopf, Veränderung, Kursdiagramm, Spartipp. */
 /* Finanzen: Kopf „1 € = 1,1423 $ ▲ 0,21 %“, Kurslinie im Mini-Diagramm, Zahlen der Skala neutral */
 .fi-kopf b{font-weight:700}
 .fi-aend{font-size:.8em;font-weight:600;white-space:nowrap}
@@ -8,3 +8,6 @@
 .tile[data-mode="active"] .fi-minus{color:var(--active-down)}
 .wd .wd-kurs{stroke:var(--accent);fill:none}
 .fi-skala{color:var(--muted);min-width:3.4em}
+.fi-klein{font-weight:500;color:var(--muted);font-size:.85em}
+.fi-text{margin:0;color:var(--muted);font-size:12px;line-height:1.4}
+.fi-tipp{margin:0 0 6px;font-size:13px;line-height:1.45}

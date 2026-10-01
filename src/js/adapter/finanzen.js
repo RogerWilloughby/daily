@@ -1,9 +1,9 @@
 // Adapter „Finanzen“: macht aus den Diensten „finanzen“ (EZB, öffentlich) und „kurse“ (Yahoo, nur privat) die Kachel und Antworten.
 // Reine Kursangaben, keine Anlageempfehlung. Rein, ohne DOM – testbar.
-import { esc } from '../core/util.js';
+import { esc, icon } from '../core/util.js';
 import { miniKurs } from './kursdiagramm.js';
 
-export const FINANZ_STANDARD = { haupt: 'USD', weitere: ['GBP', 'CHF', 'PLN', 'CZK'], tage: 30, zinsen: true, inflation: true, maerkte: true };
+export const FINANZ_STANDARD = { haupt: 'USD', weitere: ['GBP', 'CHF', 'PLN', 'CZK'], tage: 30, zinsen: true, maerkte: true, tipp: true };
 // Zur Wahl in den Einstellungen (Reihenfolge)
 export const AUSWAHL = ['USD', 'GBP', 'CHF', 'PLN', 'CZK', 'JPY', 'CNY', 'SEK', 'NOK', 'DKK', 'HUF', 'TRY', 'CAD', 'AUD'];
 const HINWEIS = 'Reine Kursangaben, keine Anlageempfehlung.';
@@ -29,46 +29,54 @@ const w = (fEnv, code) => fEnv && fEnv.daten ? fEnv.daten.waehrungen.find(x => x
 // „1 € = 1,1423 $“
 export const euroText = x => `1 € = ${kursZahl(x.kurs)} ${x.zeichen}`;
 
-// Kachel (Felder wie core/board.js erwartet). opt siehe FINANZ_STANDARD; kEnv nur im privaten Betrieb
-export function kachel(fEnv, kEnv = null, opt = {}) {
+// Kachel mit Mini-Reitern (core/board.js, entscheidungen.md Abschnitt 13): Kurse · Zinsen & Inflation · Märkte (nur mit kEnv) · Tipp.
+// opt siehe FINANZ_STANDARD (zinsen = Reiter „Zinsen & Inflation“; früher getrennt zinsen/inflation – beide aus = Reiter aus);
+// kEnv nur im privaten Betrieb; tipp = Spartipp des Tages aus den Tagesinhalten ({ kurz, text }) oder null.
+export function kachel(fEnv, kEnv = null, opt = {}, tipp = null) {
   const o = { ...FINANZ_STANDARD, ...opt };
   const d = fEnv && fEnv.daten;
-  if (!d) return { state: 'error', m: '', x: 'Die EZB-Daten sind gerade nicht erreichbar.' };
+  if (!d) {
+    const t = 'Die EZB-Daten sind gerade nicht erreichbar.';
+    return { state: 'error', m: '', x: t, kleinReiter: [{ id: 'kurse', name: 'Kurse', icon: icon('money'), kopf: 'Finanzen', html: `<p class="fi-text">${t}</p>` }] };
+  }
   const h = w(fEnv, o.haupt) || w(fEnv, 'USD') || d.waehrungen[0];
   const weitere = o.weitere.filter(c => c !== h.code).map(c => w(fEnv, c)).filter(Boolean);
   const einlage = (d.leitzinsen || []).find(z => z.art === 'einlagen'), de = (d.inflation || []).find(i => i.gebiet === 'DE');
   const stand = `Stand ${datum(d.stand)}`;
-  // Reiter
-  const kurse = [h, ...weitere].map(x => [x.name, `<b>${esc(euroText(x))}</b> ${aend(x.aenderungProzent, true)}` +
-    `<br><small>Vortag ${esc(kursZahl(x.vortag))} · 90 Tage ${esc(kursZahl(x.tief90))} – ${esc(kursZahl(x.hoch90))}</small>`]);
-  const tabs = [
-    { id: 'kurse', name: 'Kurse', html: zeilen([...kurse, ['Hinweis', `Euro-Referenzkurse der EZB vom ${esc(datum(d.stand))} (werktags gegen 16 Uhr) – nur zur Information. ${HINWEIS}`]]) }
-  ];
-  if (o.zinsen !== false) tabs.push({ id: 'zinsen', name: 'Leitzinsen', html: d.leitzinsen ? zeilen([
-    ...d.leitzinsen.map(z => [z.name, `<b>${esc(prozent(z.satzProzent))}</b>${z.seit ? ` seit ${esc(datum(z.seit))}` : ''}${z.vorherProzent != null ? ` <small>(vorher ${esc(prozent(z.vorherProzent))})</small>` : ''}`]),
-    ['Hinweis', 'Der Einlagesatz ist derzeit der maßgebliche Leitzins: So viel Zinsen bekommen Banken für Geld, das sie bei der Zentralbank parken. Quelle: EZB.']
-  ]) : '<p>Die Leitzinsen sind gerade nicht erreichbar.</p>' });
-  if (o.inflation !== false) tabs.push({ id: 'inflation', name: 'Inflation', html: d.inflation ? zeilen([
-    ...d.inflation.map(i => [i.name, `<b>${esc(prozent(i.rateProzent, 1))}</b> im ${esc(monatName(i.monat))}${i.vormonatProzent != null ? ` <small>(Vormonat ${esc(prozent(i.vormonatProzent, 1))})</small>` : ''}`]),
-    ['Hinweis', 'Anstieg der Verbraucherpreise gegenüber dem Vorjahresmonat (Harmonisierter Verbraucherpreisindex). Quelle: EZB.']
-  ]) : '<p>Die Inflationsdaten sind gerade nicht erreichbar.</p>' });
+  const reiter = [{
+    id: 'kurse', name: 'Kurse', icon: icon('money'),
+    kopf: `<span class="fi-kopf">1 € = <b>${esc(kursZahl(h.kurs))} ${esc(h.zeichen)}</b> ${aend(h.aenderungProzent, true)}</span>`,
+    liste: weitere.map(x => ({ d: x.zeichen, t: `${kursZahl(x.kurs)}  ${aend(x.aenderungProzent)}`,
+      tip: `${x.name}: ${euroText(x)} · Vortag ${kursZahl(x.vortag)} · 90 Tage ${kursZahl(x.tief90)} – ${kursZahl(x.hoch90)}`, gruppe: 1 })),
+    unten: miniKurs({ tage: d.tage, werte: h.verlauf, zeichen: h.zeichen, wahl: +o.tage === 90 ? 90 : 30, titel: `1 € in ${h.zeichen}` })
+  }];
+  // „Zinsen & Inflation“: Schalter „zinsen“; wer früher nur „Leitzinsen“ aus-, „Inflation“ aber angeschaltet hatte, sieht den Reiter weiter
+  if (!(o.zinsen === false && o.inflation !== true)) {
+    const zl = (d.leitzinsen || []).map(z => ({ d: prozent(z.satzProzent), t: z.name + (z.seit ? ` · seit ${datum(z.seit)}` : ''),
+      tip: `${z.name}: ${prozent(z.satzProzent)}${z.vorherProzent != null ? ` (vorher ${prozent(z.vorherProzent)})` : ''}` +
+        (z.art === 'einlagen' ? ' – derzeit der maßgebliche Leitzins: so viel Zinsen bekommen Banken für Geld, das sie bei der Zentralbank parken.' : '') + ' Quelle: EZB.', gruppe: 1 }));
+    const il = (d.inflation || []).map(i => ({ d: prozent(i.rateProzent, 1), t: `${i.name} · ${monatName(i.monat)}`,
+      tip: `Anstieg der Verbraucherpreise gegenüber dem Vorjahresmonat (HVPI)${i.vormonatProzent != null ? `, Vormonat ${prozent(i.vormonatProzent, 1)}` : ''}. Quelle: EZB.`, gruppe: 2 }));
+    reiter.push({ id: 'zinsen', name: 'Zinsen & Inflation', icon: icon('prozent'),
+      kopf: [einlage ? `Leitzins <b>${esc(prozent(einlage.satzProzent))}</b>` : '', de ? `Inflation <b>${esc(prozent(de.rateProzent, 1))}</b>` : ''].filter(Boolean).join(' · ') || 'Zinsen & Inflation',
+      liste: [...zl, ...il], html: '<p class="fi-text">Leitzinsen und Inflation sind gerade nicht erreichbar.</p>' });
+  }
   const kw = kEnv && kEnv.daten ? kEnv.daten.werte : null;
-  if (kw && o.maerkte !== false) tabs.push({ id: 'maerkte', name: 'Märkte', html: zeilen([
-    ...kw.map(x => [x.name, x.kurs == null ? 'gerade nicht verfügbar' : `<b>${esc(marktText(x))}</b> ${aend(x.aenderungProzent, true)}`]),
-    ['Hinweis', `Veränderung zum Vortag · Quelle: Yahoo Finance (nur privat) · ${HINWEIS}`]
-  ]) });
+  if (kw && o.maerkte !== false) reiter.push({ id: 'maerkte', name: 'Märkte', icon: icon('bars'),
+    kopf: '<b>Märkte</b> <small class="fi-klein">zum Vortag</small>',
+    liste: kw.map(x => ({ d: x.name, t: x.kurs == null ? 'gerade nicht verfügbar' : `${marktText(x)}  ${aend(x.aenderungProzent)}`,
+      tip: `${x.name} · Quelle: Yahoo Finance (nur privat) · ${HINWEIS}`, gruppe: 1 })) });
+  if (tipp && tipp.text && o.tipp !== false) reiter.push({ id: 'tipp', name: 'Spartipp', icon: icon('piggy'), kopf: '<b>Spartipp</b> <small class="fi-klein">des Tages</small>',
+    html: `<p class="fi-tipp">${esc(tipp.text)}</p><p class="fi-text">Allgemeiner Tipp, keine Anlageempfehlung.</p>` });
   const zusatz = [einlage ? `Leitzins ${prozent(einlage.satzProzent)}` : '', de ? `Inflation ${prozent(de.rateProzent, 1)} (${monatName(de.monat).split(' ')[0]})` : ''].filter(Boolean).join(', ');
   return {
     state: 'live',
     title: `Finanzen · ${euroText(h)}`,
-    kopf: `<span class="fi-kopf">1 € = <b>${esc(kursZahl(h.kurs))} ${esc(h.zeichen)}</b> ${aend(h.aenderungProzent, true)}</span>`,
     m: '', ms: `${kursZahl(h.kurs)} ${h.zeichen}`,
     trend: h.aenderungProzent > 0 ? 'up' : h.aenderungProzent < 0 ? 'down' : null,
     x: `${euroText(h)}${h.aenderungProzent != null ? ` (${aend(h.aenderungProzent)})` : ''}.${zusatz ? ' ' + zusatz + '.' : ''} ${stand}.`,
-    liste: weitere.slice(0, 4).map(x => ({ d: x.zeichen, t: `${kursZahl(x.kurs)}  ${aend(x.aenderungProzent)}`, gruppe: 1 })),
-    chart: miniKurs({ tage: d.tage, werte: h.verlauf, zeichen: h.zeichen, wahl: +o.tage === 90 ? 90 : 30, titel: `1 € in ${h.zeichen}` }),
-    info: [stand, 'Quelle: EZB'],
-    tabs, startReiter: 'kurse'
+    liste: [], info: [stand, 'Euro-Referenzkurse, Leitzinsen, Inflation: EZB (werktags gegen 16 Uhr, nur zur Information)', ...(kw ? ['Märkte: Yahoo Finance (nur privat)'] : []), HINWEIS],
+    kleinReiter: reiter, startReiter: 'kurse'
   };
 }
 

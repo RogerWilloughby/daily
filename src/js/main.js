@@ -32,7 +32,7 @@ if (settings.alleKacheln && !Array.isArray(settings.layout)) saveSettings({ layo
 const sichtbar = new Set(chooseLayout(isPrivate, settings.layout).filter(Boolean).map(t => t.id));
 
 // Welche Kacheln ein Anbieter füllt – Anbieter ausgeblendeter Kacheln starten gar nicht erst (keine Abrufe)
-const KACHELN = { local: ['tasks', 'usage'], content: ['play', 'food', 'travel', 'film', 'health', 'tech', 'saving', 'relation'] };
+const KACHELN = { local: ['tasks', 'usage'], content: ['play', 'food', 'travel', 'film', 'health', 'tech', 'relation'] };   // Spartipp seit 0.31.0 in „Finanzen“
 // Reihenfolge = Priorität: was am häufigsten gebraucht wird, lädt zuerst
 const PROVIDERS = [local, links, weather, kalender, news, content, verkehr, finanzen, sport, knowledge, tools]
   .filter(p => (isPrivate || !p.private) && (KACHELN[p.id] || [p.id]).some(id => sichtbar.has(id)));

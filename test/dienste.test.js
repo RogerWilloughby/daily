@@ -889,19 +889,30 @@ test('Finanzen: EZB-Kurse, Leitzinsen, Inflation; Kurse (Yahoo) nur privat; Kach
   assert.equal(k.body.daten.werte[0].aenderungProzent, 0.42);
   // Kachel
   const a = await esm('src/js/adapter/finanzen.js');
-  const kk = a.kachel(r.body, null, {});
-  assert.match(kk.kopf, /^<span class="fi-kopf">1 € = <b>1,\d{4} \$<\/b> <small class="fi-aend fi-(plus|minus)">[▲▼] 0,\d\d %<\/small><\/span>$/);
-  assert.deepEqual(kk.liste.map(l => l.d), ['£', 'CHF', 'zł', 'Kč']);
-  assert.deepEqual(kk.tabs.map(t => t.id), ['kurse', 'zinsen', 'inflation']);                       // öffentlich ohne „Märkte“
-  assert.match(kk.chart, /data-mini-wahl="30" aria-pressed="true">30 Tage<.*data-mini-wahl="90"/);
-  assert.match(kk.chart, /class="wd-kurs"/);
+  // Mini-Reiter: Kurse · Zinsen & Inflation · (privat) Märkte · Spartipp
+  const tipp = { kurz: 'Deckel auf den Topf', text: 'Deckel auf den Topf: spart Energie beim Kochen.' };
+  const kk = a.kachel(r.body, null, {}, tipp), R = id => kk.kleinReiter.find(x => x.id === id);
+  assert.deepEqual(kk.kleinReiter.map(x => x.id), ['kurse', 'zinsen', 'tipp']);                    // öffentlich ohne „Märkte“
+  assert.ok(kk.kleinReiter.every(x => /^<svg class="ico"/.test(x.icon)));
+  assert.match(R('kurse').kopf, /^<span class="fi-kopf">1 € = <b>1,\d{4} \$<\/b> <small class="fi-aend fi-(plus|minus)">[▲▼] 0,\d\d %<\/small><\/span>$/);
+  assert.deepEqual(R('kurse').liste.map(l => l.d), ['£', 'CHF', 'zł', 'Kč']);
+  assert.match(R('kurse').liste[0].tip, /^Brit\. Pfund|^Pfund|: 1 € = 0,\d{4} £ · Vortag/);
+  assert.match(R('kurse').unten, /data-mini-wahl="30" aria-pressed="true">30 Tage<.*data-mini-wahl="90"/);
+  assert.match(R('kurse').unten, /class="wd-kurs"/);
   assert.match(kk.x, /^1 € = 1,\d{4} \$ \([▲▼] 0,\d\d %\)\. Leitzins 2,00 %, Inflation 2,1 % \(August\)\. Stand /);
-  assert.match(kk.tabs[1].html, /Einlagesatz<\/dt><dd><b>2,00 %<\/b> seit 11\.6\.2025 <small>\(vorher 2,50 %\)/);
-  const opt = a.kachel(r.body, k.body, { haupt: 'CHF', weitere: ['USD'], zinsen: false, tage: 90 });
-  assert.match(opt.kopf, /1 € = <b>0,\d{4} CHF<\/b>/);
-  assert.deepEqual(opt.tabs.map(t => t.id), ['kurse', 'inflation', 'maerkte']);
-  assert.match(opt.chart, /data-mini-wahl="90" aria-pressed="true"/);
-  assert.match(opt.tabs[2].html, /DAX<\/dt><dd><b>24\.312 Pkt<\/b>/);
+  assert.equal(R('zinsen').kopf, 'Leitzins <b>2,00 %</b> · Inflation <b>2,1 %</b>');
+  assert.equal(R('zinsen').liste[0].d + ' ' + R('zinsen').liste[0].t, '2,00 % Einlagesatz · seit 11.6.2025');
+  assert.match(R('zinsen').liste[0].tip, /\(vorher 2,50 %\) – derzeit der maßgebliche Leitzins/);
+  assert.deepEqual(R('zinsen').liste.map(l => l.gruppe), [1, 1, 1, 2, 2]);                          // 3 Leitzinsen, dann Inflation DE und Euroraum
+  assert.match(R('tipp').html, /spart Energie beim Kochen\.<\/p><p class="fi-text">Allgemeiner Tipp, keine Anlageempfehlung/);
+  assert.equal(kk.tabs, undefined); assert.deepEqual(kk.liste, []);                                // kein Aufklappen mehr
+  const opt = a.kachel(r.body, k.body, { haupt: 'CHF', weitere: ['USD'], zinsen: false, tage: 90, tipp: false }, tipp);
+  assert.match(opt.kleinReiter[0].kopf, /1 € = <b>0,\d{4} CHF<\/b>/);
+  assert.deepEqual(opt.kleinReiter.map(x => x.id), ['kurse', 'maerkte']);                         // Zinsen und Tipp abgewählt
+  assert.match(opt.kleinReiter[0].unten, /data-mini-wahl="90" aria-pressed="true"/);
+  assert.equal(opt.kleinReiter[1].liste[0].d + ' ' + opt.kleinReiter[1].liste[0].t.split('  ')[0], 'DAX 24.312 Pkt');
+  assert.deepEqual(a.kachel(r.body, null, { zinsen: false, inflation: true }).kleinReiter.map(x => x.id), ['kurse', 'zinsen']);   // alte Einstellung: Inflation an
+  assert.deepEqual(a.kachel(r.body, null, {}, null).kleinReiter.map(x => x.id), ['kurse', 'zinsen']);   // ohne Tagesinhalt kein Tipp
   assert.equal(a.kachel(null).state, 'error');
   // Frag DAILY
   assert.match(a.antwort('Wie steht der Dollar?', r.body), /^1 € = 1,\d{4} \$ \(US-Dollar\)/);

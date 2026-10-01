@@ -45,7 +45,7 @@ export async function load() {
   set('film', { state: 'content', m: t.film.titel, ms: String(t.film.jahr), x: `${t.film.genre} · ${t.film.jahr}`,
     rows: [['Film', `${t.film.titel} (${t.film.jahr})`], ['Genre', t.film.genre], ['Worum geht’s', t.film.text], ['Hinweis', 'Empfehlung ohne Programmdaten – wo er gerade läuft, zeigt dein Streamingdienst.']] });
   set('tech', { state: 'content', m: t.tech.kategorie, ms: t.tech.kategorie, x: t.tech.text, rows: [[t.tech.kategorie, t.tech.text]] });
-  set('saving', { state: 'content', m: t.spartipp.kurz, ms: 'Tipp', x: rest(t.spartipp), rows: [['Spartipp', t.spartipp.text]] });
+  // Spartipp: seit 0.31.0 Reiter „Spartipp“ der Kachel „Finanzen“ (providers/finanzen.js holt ihn über getToday)
   set('relation', { state: 'content', m: t.beziehung.kurz, ms: 'Idee', x: rest(t.beziehung), rows: [['Idee für heute', t.beziehung.text]] });
   set('health', { state: 'content', m: t.gesundheit.kurz, ms: 'Tipp', x: rest(t.gesundheit),
     rows: [['Für heute', t.gesundheit.text], ['Später', 'Schritte und Schlaf von der Smartwatch (Stufe 2)'], ['Hinweis', 'Allgemeine Anregung, keine medizinische Beratung.']] });

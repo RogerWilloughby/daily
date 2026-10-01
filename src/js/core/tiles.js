@@ -14,7 +14,7 @@ export const CATALOG = [
   T('tasks', 'Mein Daily', 'Aufgaben', 'list', { state: 'local', fertig: true }),
   T('verkehr', 'Verkehr', 'Verkehr', 'tram', { fertig: true, hover: 'Verkehr' }),   // Abfahrten, Tanken (später Arbeitsweg); ersetzt „Abfahrten“ und „Tanken“
   T('sport', 'Sport', 'Sport', 'ball'),
-  T('money', 'Finanzen', 'Finanzen', 'money', { fertig: true, hover: 'Finanzen' }),   // Wechselkurse, Leitzinsen, Inflation (EZB); privat zusätzlich Märkte
+  T('money', 'Finanzen', 'Finanzen', 'money', { fertig: true, hover: 'Finanzen' }),   // Mini-Reiter: Kurse, Zinsen & Inflation (EZB), privat Märkte, Spartipp (ersetzt „Sparen“)
   T('play', 'Rätsel & Witz', 'Rätsel', 'dice', { state: 'content' }),
   T('food', 'Essen', 'Essen', 'food', { state: 'content' }),
   T('knowledge', 'Wissen', 'Wissen', 'book'),
@@ -22,7 +22,6 @@ export const CATALOG = [
   T('film', 'Filmtipp', 'Film', 'film', { state: 'content' }),
   T('health', 'Gesundheit', 'Fitness', 'heart', { state: 'content' }),
   T('tech', 'Tech', 'Tech', 'chip', { state: 'content' }),
-  T('saving', 'Sparen', 'Sparen', 'piggy', { state: 'content' }),
   T('relation', 'Beziehung', 'Paar', 'pair', { state: 'content' }),
   T('tools', 'Tools', 'Tools', 'tool', { state: 'local', fertig: true, hover: 'Tools' }),   // eigenständige Werkzeuge (src/tools/), öffnen im neuen Tab
   T('usage', 'Deine Nutzung', 'Nutzung', 'bars', { state: 'local', fertig: true }),
@@ -39,13 +38,13 @@ export const LAYOUTS = {
     'weather', 'kalender', 'links', 'tasks', 'verkehr',
     'sport', 'money', 'play', 'food', 'knowledge',
     'travel', 'film',
-    'health', 'tech', 'saving', 'relation', 'tools', 'usage'
+    'health', 'tech', 'relation', 'tools', 'usage'
   ],
   private: [
     'weather', 'kalender', 'news', 'tasks', 'verkehr',
     'sport', 'money', 'play', 'food', 'knowledge',
     'film', 'relation', 'links', 'tech',
-    'saving', 'travel', 'tools', 'usage'
+    'travel', 'tools', 'usage'
   ]
 };
 
@@ -58,7 +57,7 @@ export const byId = Object.fromEntries(CATALOG.map(t => [t.id, t]));
 export const TILES = [];
 export const erlaubt = (id, isPrivate) => !!byId[id] && (isPrivate || byId[id].scope === 'public');
 // Frühere Kacheln, die in einer anderen aufgegangen sind: gespeicherte eigene Belegungen zeigen die neue Kachel
-export const ERSETZT = { transit: 'verkehr', fuel: 'verkehr' };
+export const ERSETZT = { transit: 'verkehr', fuel: 'verkehr', saving: 'money' };   // „Sparen“ seit 0.31.0 als Reiter „Spartipp“ in „Finanzen“
 export function chooseLayout(isPrivate, custom) {
   const eigene = Array.isArray(custom);
   const std = LAYOUTS[isPrivate ? 'private' : 'public'];

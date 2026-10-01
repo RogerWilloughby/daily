@@ -78,7 +78,7 @@ Ein Dienst `tagesinhalt?rubrik=<rubrik>&datum=<JJJJ-MM-TT>` liefert alle vorbere
 | `wissenschaft` | wissenschaftliche Entdeckung, historische Person | 🆕 |
 | `beziehung` | Beziehungstipp, Date-Idee, Paar-Challenge, kleine Überraschung, Geschenkidee | 🔁 (Tipp) / 🆕 |
 | `gesundheit` | Sporttipp, Ernährungstipp | 🔁 |
-| `sparen`, `haushalt`, `oeko` | Spartipp, Haushaltstipp, Öko-Tipp (Energie, Wasser, Müll, nachhaltig einkaufen) | 🔁 (Sparen) / 🆕 |
+| `sparen`, `haushalt`, `oeko` | Spartipp (seit 0.31.0 Reiter „Spartipp“ in Finanzen), Haushaltstipp, Öko-Tipp (Energie, Wasser, Müll, nachhaltig einkaufen) | 🔁 (Sparen) / 🆕 |
 
 | Dienst | Ideen | Art | Status |
 |---|---|---|---|

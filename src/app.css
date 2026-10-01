@@ -421,6 +421,8 @@ a.tl-z.tl-link:hover .tl-d{text-decoration:underline}
 .kr-leiste button:hover{color:var(--ink);border-color:var(--line)}
 .kr-leiste button[aria-selected="true"]{color:var(--accent);background:var(--line)}
 .kr-leiste .kr-einst{margin-top:auto}
-.kr-feld{min-width:0;min-height:0;overflow:hidden;font-size:13px;line-height:1.35}
+.kr-feld{min-width:0;min-height:0;overflow:hidden;font-size:13px;line-height:1.35;display:flex;flex-direction:column;gap:6px}
+.kr-feld>.kr-liste{flex:0 1 auto;min-height:0;overflow:hidden}
+.kr-unten{flex:1 1 0;min-height:84px;display:flex;flex-direction:column}
 .kr-liste{display:flex;flex-direction:column;gap:2px}
 .kr-liste .tl-z[hidden]{display:none}
