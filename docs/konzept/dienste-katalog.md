@@ -50,7 +50,7 @@ Quellen und Lizenzlage: siehe [Recherche Finanzdaten](../recherche/finanzdaten.m
 | Dienst | Ideen | Art | Eingabe | Quelle | Status |
 |---|---|---|---|---|---|
 | `finanzen` | Wechselkurse (90 Tage), Leitzinsen, Inflation DE/Euroraum | Live | – (für alle gleich) | EZB (frei, Quelle nennen) | ✅ (0.22.0) |
-| `krypto` | Crypto-Kurse öffentlich | Live | Liste von Coins | CoinGecko – öffentlich erst mit Bezahl-Plan; privat über `kurse` | ⏸ |
+| `krypto` | Crypto-Kurse öffentlich | Live | Liste von Coins | CoinGecko Demo mit Quellenangabe (öffentlich, nicht kommerziell; ein zentraler Abruf je 5 Min.), mit Einnahmen Bezahl-Plan; privat über `kurse` (Recherche 01.10.2026) | ⏸ |
 | `kurse` | DAX, S&P 500, MSCI World, Bitcoin, Ethereum, Gold | Live | – | Yahoo, **nur privat**; öffentlich lizenzierte Quelle nötig (z. B. Vortagesschluss) | ✅ privat (0.22.0) |
 | – | Kontenübersicht, Portfolio, Versicherungen, Crypto Assets | – | persönliche Konten | – | ⛔ Nutzerdaten |
 | – | Finanz-Tipp, Crypto-Tipp | Inhalt | – | → `tagesinhalt` (nur allgemein, keine Anlageempfehlung) | 🆕 |
