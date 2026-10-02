@@ -1,12 +1,13 @@
 {
   "name": "daily",
   "private": true,
-  "version": "0.45.0",
+  "version": "0.45.1",
   "description": "DAILY – Dein Tag auf einer Seite (PWA)",
   "scripts": {
     "build": "node build.js",
     "test": "node --test test/*.test.js",
-    "doku": "node tools/doku.js"
+    "doku": "node tools/doku.js",
+    "zeitreise": "node tools/zeitreise.js"
   },
   "dependencies": {
     "astronomy-engine": "^2.1.19",

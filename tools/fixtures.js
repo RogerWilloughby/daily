@@ -107,26 +107,29 @@ const ZONE = 'Europe/Berlin';
 const offsetSek = t => { const m = /GMT([+-]\d+)(?::(\d+))?/.exec(new Intl.DateTimeFormat('en-US', { timeZone: ZONE, timeZoneName: 'shortOffset' }).format(t)) || [];
   return ((+m[1] || 0) * 60 + Math.sign(+m[1] || 1) * (+m[2] || 0)) * 60; };
 const berlinTag = t => new Intl.DateTimeFormat('en-CA', { timeZone: ZONE, year: 'numeric', month: '2-digit', day: '2-digit' }).format(t);
-const mitternacht = t => (Date.parse(berlinTag(t) + 'T00:00:00Z') - offsetSek(t) * 1000) / 1000; // Unix-Sekunden
+// Mitternacht deutscher Zeit in Unix-Sekunden – mit dem Versatz, der um Mitternacht galt (am Tag der Zeitumstellung anders als jetzt)
+const mitternacht = t => { const basis = Date.parse(berlinTag(t) + 'T00:00:00Z'); let x = basis - offsetSek(t) * 1000; x = basis - offsetSek(x) * 1000; return x / 1000; };
 function forecast() {
   const m0 = mitternacht(now), off = offsetSek(now), T = 16;
   const hours = Array.from({ length: T * 24 }, (_, k) => m0 + k * 3600);
-  const days = Array.from({ length: T }, (_, k) => m0 + k * 86400);
+  // Tage und Stunden nach Ortszeit (wie Open-Meteo): an Tagen der Zeitumstellung hat ein Tag 23 bzw. 25 Stunden
+  const days = Array.from({ length: T }, (_, k) => mitternacht((m0 + k * 86400 + 12 * 3600) * 1000));
+  const hb = hours.map(h => +new Intl.DateTimeFormat('en-GB', { timeZone: ZONE, hour: '2-digit', hourCycle: 'h23' }).format(h * 1000));
   const je = (werte) => days.map((_, k) => werte[k % werte.length]);
   return {
     latitude: 52.52, longitude: 13.41, timezone: ZONE, utc_offset_seconds: off,
     current: { time: Math.floor(now / 900e3) * 900, temperature_2m: 15.4, apparent_temperature: 13.9, relative_humidity_2m: 71, precipitation: 0,
       weather_code: 2, is_day: 1, wind_speed_10m: 11.2, wind_gusts_10m: 24.8, wind_direction_10m: 250, cloud_cover: 45, uv_index: 2.4,
       pressure_msl: 1016.2, visibility: 24000, dew_point_2m: 10.1, snow_depth: 0 },
-    hourly: { time: hours, temperature_2m: hours.map((_, k) => 10 + 6 * Math.sin((k % 24 - 8) / 24 * 2 * Math.PI)),
-      apparent_temperature: hours.map((_, k) => 9 + 6 * Math.sin((k % 24 - 8) / 24 * 2 * Math.PI)),
-      precipitation_probability: hours.map((_, k) => k % 24 === 17 ? 55 : 8), precipitation: hours.map((_, k) => k % 24 === 17 ? 0.6 : 0),
-      snowfall: hours.map(() => 0), weather_code: hours.map((_, k) => k % 24 === 17 ? 61 : 2),
+    hourly: { time: hours, temperature_2m: hours.map((_, k) => 10 + 6 * Math.sin((hb[k] - 8) / 24 * 2 * Math.PI)),
+      apparent_temperature: hours.map((_, k) => 9 + 6 * Math.sin((hb[k] - 8) / 24 * 2 * Math.PI)),
+      precipitation_probability: hours.map((_, k) => hb[k] === 17 ? 55 : 8), precipitation: hours.map((_, k) => hb[k] === 17 ? 0.6 : 0),
+      snowfall: hours.map(() => 0), weather_code: hours.map((_, k) => hb[k] === 17 ? 61 : 2),
       wind_speed_10m: hours.map(() => 12), wind_gusts_10m: hours.map(() => 25), wind_direction_10m: hours.map(() => 250),
-      cloud_cover: hours.map(() => 45), uv_index: hours.map((_, k) => Math.max(0, 3 * Math.sin((k % 24 - 7) / 12 * Math.PI))),
+      cloud_cover: hours.map(() => 45), uv_index: hours.map((_, k) => Math.max(0, 3 * Math.sin((hb[k] - 7) / 12 * Math.PI))),
       visibility: hours.map(() => 24000), pressure_msl: hours.map((_, k) => 1016.2 - k * 0.5),   // fallend: -1,5 hPa in 3 h
-      freezing_level_height: hours.map((_, k) => 2400 - (k % 24) * 10), snow_depth: hours.map(() => 0),
-      sunshine_duration: hours.map((_, k) => (k % 24 >= 8 && k % 24 <= 16 ? 2400 : 0)) },
+      freezing_level_height: hours.map((_, k) => 2400 - hb[k] * 10), snow_depth: hours.map(() => 0),
+      sunshine_duration: hours.map((_, k) => (hb[k] >= 8 && hb[k] <= 16 ? 2400 : 0)) },
     daily: { time: days, weather_code: je([61, 2, 3, 80, 0, 1, 95, 73]), temperature_2m_max: je([16.2, 18.1, 14, 12.5, 17, 19.2, 21, 2]).map((v, k) => (k === T - 1 ? null : v)),
       temperature_2m_min: je([9.4, 8.7, 7, 6.1, 5, 8, 12, -3.5]).map((v, k) => (k === T - 1 ? null : v)), precipitation_probability_max: je([55, 10, 30, 80, 0, 5, 70, 60]),
       precipitation_sum: je([1.2, 0, 0.3, 6.4, 0, 0, 12, 2]), snowfall_sum: je([0, 0, 0, 0, 0, 0, 0, 3.5]),
@@ -192,7 +195,11 @@ const ezbInflation = () => 'KEY,FREQ,REF_AREA,ADJUSTMENT,ICP_ITEM,STS_INSTITUTIO
 // Zeiten relativ zu jetzt (Ortszeit im Text), damit „läuft gerade“ / „ab heute Abend“ im Testserver stimmt.
 const bt = d => new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: '2-digit' }).format(d);
 const bz = d => new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(d);
-const abendHeute = (() => { const d = new Date(now); d.setUTCHours(19, 0, 0, 0); if (d <= now) d.setUTCDate(d.getUTCDate() + 1); return d; })();
+// nächster Abend 21 Uhr deutscher Zeit (Sommer- und Winterzeit) – heute oder, wenn schon vorbei, morgen
+const abendHeute = (() => {
+  const um21 = t => { const d = new Date(t); d.setUTCHours(19, 0, 0, 0); return new Date(+d + (21 - +bz(d).slice(0, 2)) * 3600e3); };
+  const d = um21(now); return d > now ? d : um21(now + 864e5);
+})();
 const ab = (id, typ, titel, unter, [lat, lon], [lat2, lon2], mehr = {}) => ({
   identifier: id, icon: '101', isBlocked: 'false', future: false, extent: `${lat},${lon},${lat2},${lon2}`, point: `${lat},${lon}`,
   startLcPosition: '5', display_type: typ, subtitle: unter, title: titel, coordinate: { lat, long: lon },

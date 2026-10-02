@@ -1083,7 +1083,9 @@ test('Autobahn: Vertrag, Arten, Zeiten aus dem Text, Eingaben, fehlende Autobahn
   assert.equal(a.korridorKm(start, { lat: 51.0, lon: 13.7 }), 10);
   const env = r.body, v = a.ansicht(env, { start, ziel });
   assert.equal(v.kopf, '<b>Dresden → Chemnitz</b> <small>A4 · A13</small>');
-  assert.deepEqual(v.liste.map(z => z.d + ' ' + z.t), ['+14 min A4 Wilsdruff – Nossen · stockender Verkehr',
+  const zl = v.liste.map(z => z.d + ' ' + z.t);
+  assert.match(zl[2], /^ab (morgen )?21 Uhr A4 Siebenlehn – Nossen · Sperrung$/);   // nach 21 Uhr deutscher Zeit: „ab morgen 21 Uhr“
+  assert.deepEqual([...zl.slice(0, 2), zl[2].replace('ab morgen ', 'ab '), ...zl.slice(3)], ['+14 min A4 Wilsdruff – Nossen · stockender Verkehr',
     'Achtung A4 Hainichen – Chemnitz-Ost · Gegenstände auf der Fahrbahn', 'ab 21 Uhr A4 Siebenlehn – Nossen · Sperrung',
     'gesperrt A4 Dresden-Altstadt · Anschlussstelle gesperrt', 'bis ' + v.liste[4].d.slice(4) + ' A4 Wilsdruff – Dresden-Altstadt · Tagesbaustelle', '1 Baustelle']);   // alle am Weg, Baustellen als eine Zeile
   assert.match(v.liste[5].tip, /^A4 Hainichen – Siebenlehn · bis [\d.]+ · 80 km\/h$/);
@@ -1479,7 +1481,7 @@ test('Schlagzeilen: Dienst nur privat mit Kennwort, RSS und Atom, je Quelle erre
   const [neu, ts] = k.kleinReiter;
   assert.equal(neu.liste.length, x.meldungen.length);
   assert.match(neu.liste[0].href, /^https:\/\//);
-  assert.match(neu.liste[0].d, /^\d{2}:\d{2}$/);
+  assert.match(neu.liste[0].d, /^(\d{2}:\d{2}|\d{1,2}\.\d{1,2}\.)$/);                 // heute Uhrzeit, kurz nach Mitternacht „1.10.“
   assert.match(neu.liste[0].tip, /^(Tagesschau|MDR Sachsen|heise) · /);
   assert.ok(ts.liste.every(z => /Tagesschau/.test(z.t)));
   assert.match(k.x, /^(Tagesschau|MDR Sachsen|heise): /);
