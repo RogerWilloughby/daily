@@ -1,11 +1,10 @@
-/* DAILY – Diagramme allgemein (Mini- und große Diagramme; Wetter, Finanzen). Farben --wd-* nutzt auch der Kalender. */
+/* DAILY – Diagramme allgemein (Mini-Diagramme; Wetter, Finanzen). Farben --wd-* nutzt auch der Kalender. */
 /* Wetter-Diagramme (Farben geprüft: Höchst/Tiefst/Regen/Sonne je Hell und Dunkel) */
 :root{--wd-max:#C0621C;--wd-min:#17457F;--wd-regen:#5AAEE8;--wd-sonne:#C99A06;--wd-max-text:#A8520F;--wd-min-text:#143C70;--wd-regen-text:#2878B5;--wd-sonne-text:#9A6D00}
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){--wd-max:#D9773A;--wd-min:#4777C8;--wd-regen:#7CC4F2;--wd-sonne:#A6841E;--wd-max-text:#F0A06A;--wd-min-text:#7FA6E6;--wd-regen-text:#9AD2F5;--wd-sonne-text:#F2C94C}
 }
 :root[data-theme="dark"]{--wd-max:#D9773A;--wd-min:#4777C8;--wd-regen:#7CC4F2;--wd-sonne:#A6841E;--wd-max-text:#F0A06A;--wd-min-text:#7FA6E6;--wd-regen-text:#9AD2F5;--wd-sonne-text:#F2C94C}
-.tile[data-mode="active"],.sheet{--wd-max:#D9773A;--wd-min:#4777C8;--wd-regen:#7CC4F2;--wd-sonne:#A6841E;--wd-max-text:#F0A06A;--wd-min-text:#7FA6E6;--wd-regen-text:#9AD2F5;--wd-sonne-text:#F2C94C}
 /* farbige Zahlen passend zu den Diagrammlinien */
 .wd-t-max{color:var(--wd-max-text)}
 .wd-t-min{color:var(--wd-min-text)}
@@ -32,34 +31,11 @@ b.wd-t-max,b.wd-t-min,b.wd-t-regen,b.wd-t-sonne{font-weight:700}
 .wd-wahl button:hover{color:var(--ink);border-color:var(--line)}
 .wd-wahl button[aria-pressed="true"]{color:var(--ink);font-weight:700;background:var(--line)}
 .wd-minilegende b{font-weight:600}
-.wd .wd-temp{stroke:currentColor;opacity:.85}
-.wd-l-temp{background:currentColor}
-.wd-gross .wd-fett{font-weight:700;opacity:.9}
 .wd-mini{display:block;flex:1;min-width:0;height:100%;min-height:24px;overflow:visible}
-.tile[data-mode="lane"] .wd-mini{height:22px}
 .wd path{fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
 .wd .wd-max{stroke:var(--wd-max)}
 .wd .wd-min{stroke:var(--wd-min)}
 .wd .wd-regen{fill:var(--wd-regen)}
-.wd .wd-sonne{fill:var(--wd-sonne)}
-.wd .wd-blass{opacity:.55}
-.wd-figur{margin:0 0 14px;position:relative}
-.wd-gross{display:block;width:100%;height:auto;font-family:var(--body)}
-.wd-gross .wd-achse{font-size:9.5px;fill:currentColor;opacity:.7}
-.wd-gross .wd-wert{font-size:11px;font-weight:600;fill:currentColor}
-.wd-gross .wd-gitter{stroke:currentColor;opacity:.15;stroke-width:1}
-.wd-gross .wd-spalte{fill:transparent;cursor:crosshair}
-.wd-gross .wd-spalte.an{fill:currentColor;opacity:.08}
-.wd-legende{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;opacity:.85;margin-top:4px}
-.wd-legende i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:5px;vertical-align:middle}
-.wd-l-max{background:var(--wd-max)}
-.wd-l-min{background:var(--wd-min)}
-.wd-l-regen{background:var(--wd-regen);height:8px!important}
-.wd-l-sonne{background:var(--wd-sonne);height:8px!important}
-.wd-tip{position:absolute;right:0;top:0;font-size:12px;padding:4px 8px;border-radius:8px;background:var(--surface);color:var(--ink);border:1px solid var(--line);pointer-events:none;max-width:90%}
-.tile[data-mode="active"] .wd-figur{display:flex;align-items:flex-start;gap:18px;margin-bottom:4px}
-.tile[data-mode="active"] .wd-gross{height:226px;width:auto;max-width:calc(100% - 150px);flex:none}
-.tile[data-mode="active"] .wd-figur .wd-legende{flex-direction:column;gap:6px;margin-top:18px}
 /* Mini-Diagramm 24 Std.: Zeitmarken unter der Kurve */
 .wd-mini24{position:relative;flex:1;min-width:0;display:flex;flex-direction:column}
 .wd-mini24 .wd-mini{flex:1;min-height:0}

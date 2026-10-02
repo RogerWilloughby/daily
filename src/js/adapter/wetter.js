@@ -2,7 +2,7 @@
 // Heute: kachel() für das Kachelraster und antwort() für „Frag DAILY“. Später z. B. liste(), dashboard().
 // Ohne DOM – daher auch in Node testbar.
 import { glyph, esc, icon } from '../core/util.js';
-import { miniDiagramm, miniHeute, miniTageszeiten, miniWahl, tageDiagramm, stundenDiagramm } from './diagramm.js';
+import { miniDiagramm, miniHeute, miniTageszeiten, miniWahl } from './diagramm.js';
 import { hinweis as regenHinweis, radarKlein, radarKopf, radarInfo } from './regen.js';
 import { abzeichen, kurz as hinweisKurz, zeilen as hinweisZeilen } from './hinweise.js';
 
@@ -73,45 +73,6 @@ export function regen24(env) {
 
 // Zahlen in den Farben der Diagrammlinien (Tiefst blau, Höchst orange)
 const tmin = v => `<b class="wd-t-min">${r0(v)}°</b>`, tmax = v => `<b class="wd-t-max">${r0(v)}°</b>`;
-// Zeilen mit fertigem HTML als Wert (Schlüssel wird maskiert)
-const zeilen = liste => '<dl class="kompakt">' + liste.map(([k, v]) => `<div class="row"><dt>${esc(k)}</dt><dd>${v}</dd></div>`).join('') + '</dl>';
-
-function heuteZeilen(env, z, heute, regenMax, regenUm, wind, sonne) {
-  const a = env.daten.aktuell, d = env.daten;
-  const liste = [
-    ['Heute', `${tmin(heute.minC)} bis ${tmax(heute.maxC)} · ${esc(zustandText(heute.zustand, heute.code))}`],
-    ['Regen', `<b class="wd-t-regen">bis ${regenMax} %</b>${regenUm ? `, am ehesten gegen ${regenUm} Uhr` : ''}${heute.niederschlagMm ? ` · ${String(heute.niederschlagMm).replace('.', ',')} mm` : ''}`],
-    ['Wind', esc(wind)],
-    ['Sonne', esc(sonne)]
-  ];
-  if (a.luftdruckHpa != null) liste.push(['Luftdruck', `${r0(a.luftdruckHpa)} hPa${a.druckTendenz ? ', ' + a.druckTendenz : ''}`]);
-  const warn = warnung(d.tage, z);
-  if (warn) liste.push(['Achtung', esc(warn)]);
-  const m = d.tage[1];
-  if (m) liste.push(['Morgen', `${tmin(m.minC)} bis ${tmax(m.maxC)} · ${esc(zustandText(m.zustand, m.code))}`]);
-  return liste;
-}
-
-function mehrZeilen(env, pollen) {
-  const a = env.daten.aktuell, d = env.daten, h = d.tage[0] || {};
-  const liste = [];
-  if (d.luft) liste.push(['Luftqualität', `${LUFT[d.luft.stufe] || '–'} (EAQI ${r0(d.luft.aqi)})`]);
-  if (pollen) {
-    const werte = d.luft && d.luft.pollen ? Object.entries(d.luft.pollen).filter(([, v]) => v != null && v >= 1).map(([k, v]) => `${POLLEN[k]} ${r0(v)}`) : [];
-    liste.push(['Pollen', esc(pollen) + (werte.length ? ` <small>(je m³: ${esc(werte.join(', '))})</small>` : '')]);
-  }
-  if (a.uvIndex != null || h.uvMax != null) liste.push(['UV', `jetzt ${r0(a.uvIndex)}, heute bis ${r0(h.uvMax)}`]);
-  if (a.feuchteProzent != null) liste.push(['Feuchte', `${r0(a.feuchteProzent)} %${a.taupunktC != null ? `, Taupunkt ${r0(a.taupunktC)}°${a.taupunktC >= 16 ? ' (schwül)' : ''}` : ''}`]);
-  const sicht = a.sichtweiteM == null ? null : a.sichtweiteM >= 10000 ? 'Sicht über 10 km' : `Sicht ${String(Math.round(a.sichtweiteM / 100) / 10).replace('.', ',')} km${a.sichtweiteM < 1000 ? ' (Nebel)' : ''}`;
-  const wolken = [a.wolkenProzent != null ? `${r0(a.wolkenProzent)} % bewölkt` : null, sicht].filter(Boolean).join(' · ');
-  if (wolken) liste.push(['Wolken', wolken]);
-  if (h.nullgradgrenzeM != null) liste.push(['Nullgradgrenze', `${r0(h.nullgradgrenzeM)} m`]);
-  if (a.schneehoeheCm) liste.push(['Schnee', `${r0(a.schneehoeheCm)} cm`]);
-  const z = zeitFmt(env.ort.zeitzone || 'Europe/Berlin');
-  const quellen = [...new Set(env.quellen.map(q => q.name.split(' ')[0]))].join(', ');   // „Open-Meteo“ statt aller Teilnamen
-  liste.push(['Stand', `${z.hm(a.zeit)} Uhr · ${esc(quellen)}`]);
-  return liste;
-}
 
 // Uhrzeit des Tiefst-/Höchstwerts: „6 Uhr“ (leer, wenn unbekannt)
 const uhrVon = (iso, zone) => iso ? `${+new Date(iso).toLocaleTimeString('de-DE', { timeZone: zone, hour: '2-digit' }).slice(0, 2)} Uhr` : '';
@@ -147,44 +108,13 @@ function warnung(tage, z) {
   return t.glaette ? `Glätte möglich ${wann} (bis ${r0(t.minC)}°)` : `Frost ${wann} (bis ${r0(t.minC)}°)`;
 }
 
-// Spätere Tage zusammengefasst: Temperaturspanne und Tendenz (ohne „Trend“/„unsicher“ – das steht im Dienstblatt)
-function spaeterText(tage) {
-  const min = Math.min(...tage.map(t => t.minC ?? Infinity)), max = Math.max(...tage.map(t => t.maxC ?? -Infinity));
-  const nass = tage.filter(t => (t.regenProzent ?? 0) >= 50).length;
-  const art = nass >= tage.length / 2 ? 'eher wechselhaft' : nass === 0 ? 'eher trocken' : 'teils Regen';
-  return `${r0(min)}° bis ${r0(max)}° · ${art}`;
-}
-
 // Darstellung als Kachel (Felder wie in core/board.js erwartet)
 // regenEnv (optional): Antwort des Dienstes „regen“ – liefert „Regen in 20 Min.“ und den Reiter „Radar“
 // hinweisEnv (optional): Antwort des Dienstes „wetterhinweise“ – Abzeichen und kurzer Hinweis nur, wenn es etwas gibt; Reiter „Hinweise“ immer
 export function kachel(env, regenEnv = null, hinweisEnv = null) {
   const d = env.daten, a = d.aktuell, { z, heute, regenMax, regenUm, pollen } = auswerten(env);
-  const wind = `${r0(a.windKmh)} km/h${a.windRichtung ? ' aus ' + a.windRichtung : ''}${a.boeenKmh ? `, Böen ${r0(a.boeenKmh)} km/h` : ''}`;
-  const sonne = [`${z.hm(heute.sonnenaufgang)} bis ${z.hm(heute.sonnenuntergang)}`,
-    heute.sonnenstunden != null ? `${String(heute.sonnenstunden).replace('.', ',')} Std. Sonne` : null,
-    heute.uvMax != null ? `UV bis ${Math.round(heute.uvMax)}` : null].filter(Boolean).join(' · ');
-  const rows = [
-    ['Heute', `${r0(heute.minC)}° bis ${r0(heute.maxC)}° · ${zustandText(heute.zustand, heute.code)}`],
-    ['Regenrisiko', `bis ${regenMax} % (restlicher Tag)`],
-    ['Wind', wind],
-    ['Sonne', sonne]
-  ];
-  if (a.luftdruckHpa != null) rows.push(['Luftdruck', `${r0(a.luftdruckHpa)} hPa${a.druckTendenz ? ', ' + a.druckTendenz : ''}`]);
-  if (a.sichtweiteM != null && a.sichtweiteM < 1000) rows.push(['Sicht', `nur ${r0(a.sichtweiteM)} m (Nebel)`]);
-  const warn = warnung(d.tage, z);
-  if (warn) rows.push(['Achtung', warn]);
-  if (d.luft) rows.push(['Luftqualität', `${LUFT[d.luft.stufe] || '–'} (EAQI ${r0(d.luft.aqi)})`]);
-  if (pollen) rows.push(['Pollen', pollen]);
-  d.tage.slice(1, 7).forEach((t, i) => rows.push([i === 0 ? 'Morgen' : z.wtag(t.datum),
-    `${r0(t.minC)}° bis ${r0(t.maxC)}° · ${zustandText(t.zustand, t.code)} · Regen bis ${t.regenProzent ?? 0} %`]));
-  const spaeter = d.tage.slice(7);
-  if (spaeter.length) rows.push([`Bis ${z.wtag(spaeter[spaeter.length - 1].datum)}`, spaeterText(spaeter)]);
-  rows.push(['Stand', `${z.hm(a.zeit)} Uhr · ${env.quellen.map(q => q.name).join(', ')}`]);
-  // Aufgeklappt: Reiter statt langer Liste – alles ohne Scrollen sichtbar
   const zone = env.ort.zeitzone || 'Europe/Berlin', hTop = (hinweisEnv && hinweisEnv.daten && hinweisEnv.daten.hinweise[0]) || null;
   const hKurz = hinweisKurz(hinweisEnv, zone);
-  if (hKurz) rows.unshift(['Hinweis', hKurz]);
   // Mini-Reiter (entscheidungen.md Abschnitt 13, Variante 1a): Jetzt · Radar · Hinweise (nur bei Warnung) · Mehr – kein Aufklappen.
   // Das Diagramm („unten“ im Reiter Jetzt) setzt mitOptionen() nach dem gewählten Zeitraum.
   const hz = hinweisZeilen(hinweisEnv, zone);
@@ -209,8 +139,7 @@ export function kachel(env, regenEnv = null, hinweisEnv = null) {
     // Unwetter zuerst, sonst Wetter · Hinweis; der Regen steht darunter in einer eigenen Zeile (Schirm-Symbol)
     x: (hTop && hTop.stufe >= 3 ? [hKurz, wetterText] : [wetterText, hKurz]).filter(Boolean).join(' '),
     zeile2: { glyph: glyph('schirm'), text: regenZeile },
-    chart: miniDiagramm(d.tage, zpTag),
-    rows
+    chart: miniDiagramm(d.tage, zpTag)
   };
 }
 

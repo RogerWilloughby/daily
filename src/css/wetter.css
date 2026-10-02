@@ -1,7 +1,6 @@
 /* DAILY – Wetterkachel: Zeitpunkt-Block, Sonnenzahlen, Radar, Wetterhinweise, Textzeilen der kleinen Kachel. */
-/* Regenradar: Stufen des Regen-Hellblaus (hell → kräftig, wie --wd-regen) für Verlauf und Legende; die Karte hat eigene Blautöne (siehe unten) */
+/* Regenradar: Stufen des Regen-Hellblaus (hell → kräftig, wie --wd-regen) für die Radarbilder; mit Landkarte eigene Blautöne (siehe unten) */
 :root{--rs1:#CFE8FA;--rs2:#8CC8F0;--rs3:#5AAEE8;--rs4:#2878B5}
-.tile[data-mode="active"],.sheet{--rs1:#1F4E73;--rs2:#2F7FBF;--rs3:#5AAEE8;--rs4:#BFE3FA}
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){--rs1:#1F4E73;--rs2:#2F7FBF;--rs3:#5AAEE8;--rs4:#BFE3FA}
 }
@@ -9,14 +8,11 @@
 .rs2{fill:var(--rs2);background:var(--rs2)}
 .rs3{fill:var(--rs3);background:var(--rs3)}
 .rs4{fill:var(--rs4);background:var(--rs4)}
-/* Reiter „Radar“: Werte · Karte (volle Höhe) · Verlauf. Karte = basemap.de grau (über /api/karte), darüber das Radar in festen Blautönen */
-.rk-feld{display:grid;grid-template-columns:minmax(0,1fr);gap:10px 18px;align-items:start}
-.rk-rechts{min-width:0}
+/* Reiter „Radar“: Werte und Karte. Karte = basemap.de grau (über /api/karte), darüber das Radar in festen Blautönen */
 .rk-werte{margin:0;display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;font-size:13px;line-height:1.3}
 .rk-werte div{border-top:1px solid var(--active-line);padding-top:4px}
 .rk-werte dt{color:var(--active-muted);font-size:11px}
 .rk-werte dd{margin:0}
-.rk-feld{--rk1:#9DD1F5;--rk2:#4FA6E8;--rk3:#1F6FC6;--rk4:#0B3F8F}
 .rk-karte{order:-1;min-width:0;display:flex;flex-direction:column;gap:5px}
 .rk{display:block;width:100%;height:auto;aspect-ratio:1;border-radius:8px;overflow:hidden}
 .rk .rk-grund{fill:currentColor;opacity:.06}
@@ -32,11 +28,6 @@
 .rk-mit-land .rs3{fill:var(--rk3)}
 .rk-mit-land .rs4{fill:var(--rk4)}
 /* Legende mit Landkarte: in den Farben der Karte, auf hellem Grund wie die Karte */
-.rk-feld-land .rk-legende{display:inline-flex;padding:2px 8px;border-radius:6px;background:#E4E6E3;color:#23303B}
-.rk-feld-land .rk-legende .rs1{background:var(--rk1)}
-.rk-feld-land .rk-legende .rs2{background:var(--rk2)}
-.rk-feld-land .rk-legende .rs3{background:var(--rk3)}
-.rk-feld-land .rk-legende .rs4{background:var(--rk4)}
 .rk-mit-land .rk-ring{stroke:#23303B;opacity:.7}
 .rk-mit-land .rk-ort{fill:#D2462A;stroke:#fff}
 .rk-mit-land .rk-n{fill:#23303B;paint-order:stroke;stroke:#fff;stroke-width:.6px;opacity:.85}
@@ -62,18 +53,7 @@
 .rk-felder button[aria-pressed="true"] i{background:var(--active-ink);opacity:1}
 .rk-felder span{font-size:10px;line-height:12px;height:12px;white-space:nowrap}
 .rk-uhr{flex:none;white-space:nowrap;padding-top:3px}
-.rk-quelle,.content .rk-quelle{margin:6px 0 0;font-size:11px;line-height:1.35;color:var(--active-muted)}
-.wd-legende.rk-legende{font-size:11px;gap:4px 10px}
-.rk-legende i{height:8px!important;width:10px!important}
-.rk-verlauf{margin-bottom:6px}
 .wd-tm[title]{cursor:help}
-/* aufgeklappte Kachel am Rechner: drei Spalten, Karte so hoch wie der Reiter (Größe über Container-Einheiten des Reiterfelds) */
-.tile[data-mode="active"] .content:has(> .reiterfeld[data-feld="radar"]:not([hidden])){flex:1 1 auto}
-.tile[data-mode="active"] .reiterfeld[data-feld="radar"]:not([hidden]){flex:1 1 auto;min-height:0;container-type:size}
-.tile[data-mode="active"] .rk-feld{height:100%;grid-template-columns:minmax(0,1fr) auto minmax(0,1.25fr);grid-template-rows:minmax(0,1fr)}
-.tile[data-mode="active"] .rk-karte{order:0;width:min(calc(100cqh - 34px),56cqw);min-width:140px}
-.tile[data-mode="active"] .rk-werte{grid-template-columns:1fr;align-self:start}
-.tile[data-mode="active"] .rk-verlauf .wd-gross{height:92px;max-width:100%}
 /* Wetterhinweise (DWD-Farben: 1 gelb, 2 orange, 3 rot, 4 violett) – in beiden Farbschemen gleich, Text kontraststark */
 .wh-s1{--wh:#F2D02E;--wh-text:#3A2E00}
 .wh-s2{--wh:#F08A24;--wh-text:#2A1400}
@@ -96,28 +76,26 @@
 .wd-wind{font-weight:500;opacity:.85;white-space:nowrap}
 @media (min-width:761px) and (min-height:521px){
 /* mit Hinweis-Abzeichen wird der Kopf zweizeilig – dann die Unterzeile einzeilig, damit das Diagramm Platz hat */
-    .tile[data-mode="rest"] .head:has(.kopf .wh-badge):has(.mini:not(:empty)) .teaser{-webkit-line-clamp:1}
+    .tile .head:has(.kopf .wh-badge):has(.mini:not(:empty)) .teaser{-webkit-line-clamp:1}
 }
-/* Wetter klein: Regen in einer eigenen Zeile (Schirm-Symbol). Aufgeklappt und am Handy läuft er im Text weiter. */
+/* Wetter klein: Regen in einer eigenen Zeile (Schirm-Symbol). Am Handy läuft er im Text weiter. */
 .teaser .t-zeile2::before{content:' '}
 @media (min-width:761px) and (min-height:521px){
-  .tile:is([data-mode="rest"],[data-mode="lane"]) .teaser.mit-zeile2,.tile[data-mode="rest"] .head:has(.kopf .wh-badge):has(.mini:not(:empty)) .teaser.mit-zeile2{display:block;-webkit-line-clamp:unset;overflow:hidden;flex:0 0 auto}
-  .tile:is([data-mode="rest"],[data-mode="lane"]) .teaser.mit-zeile2 .t-text{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
-  .tile:is([data-mode="rest"],[data-mode="lane"]) .head:has(.mini:not(:empty)) .teaser.mit-zeile2 .t-text{-webkit-line-clamp:1}
-  .tile:is([data-mode="rest"],[data-mode="lane"]) .teaser .t-zeile2{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
-  .tile:is([data-mode="rest"],[data-mode="lane"]) .teaser .t-zeile2::before{content:none}
+  .tile .teaser.mit-zeile2,.tile .head:has(.kopf .wh-badge):has(.mini:not(:empty)) .teaser.mit-zeile2{display:block;-webkit-line-clamp:unset;overflow:hidden;flex:0 0 auto}
+  .tile .teaser.mit-zeile2 .t-text{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+  .tile .head:has(.mini:not(:empty)) .teaser.mit-zeile2 .t-text{-webkit-line-clamp:1}
+  .tile .teaser .t-zeile2{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+  .tile .teaser .t-zeile2::before{content:none}
 }
 /* Wetter-Mini: Sonnenstunden als Zahl oben, Mouseover-Spalten */
 .wd-sonnen{position:absolute;top:0;left:0;right:0;height:11px;font-size:9px;line-height:11px;font-weight:700;pointer-events:none}
 .wd-sonnen span{position:absolute;transform:translateX(-50%)}
 .wd-seng .wd-sonnen .wd-s2{display:none}
-.tile[data-mode="active"] 
 /* Wetter klein: Zeitpunkt-Block mit festen Spalten – beim Überfahren wechseln nur die Werte (Jetzt / Stunde / Tag) */
-.teaser .t-zp{display:none}
 @media (min-width:761px) and (min-height:521px){
-  .tile:is([data-mode="rest"],[data-mode="lane"]) .teaser.mit-zp{display:block;-webkit-line-clamp:unset;overflow:hidden;flex:0 0 auto}
-  .tile:is([data-mode="rest"],[data-mode="lane"]) .teaser.mit-zp :is(.t-text,.t-zeile2){display:none}
-  .tile:is([data-mode="rest"],[data-mode="lane"]) .teaser.mit-zp .t-zp{display:grid;grid-template-columns:9.5ch 5.5ch 7.5ch minmax(0,1fr);column-gap:.5em;
+  .tile .teaser.mit-zp{display:block;-webkit-line-clamp:unset;overflow:hidden;flex:0 0 auto}
+  .tile .teaser.mit-zp :is(.t-text,.t-zeile2){display:none}
+  .tile .teaser.mit-zp .t-zp{display:grid;grid-template-columns:9.5ch 5.5ch 7.5ch minmax(0,1fr);column-gap:.5em;
     align-items:center;row-gap:1px;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--ink)}
 }
 .zp-z{font-weight:600}

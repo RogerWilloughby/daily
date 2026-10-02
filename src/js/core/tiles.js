@@ -5,7 +5,7 @@
 // fertig: true = überarbeitet (Dienst daily/1 oder rein lokal). Nicht fertige Kacheln sind ausgeblendet,
 // bis sie umgezogen sind – sichtbar nur mit „Alle Kacheln zeigen (Vorschau)“ in den Einstellungen.
 
-const T = (id, title, short, icon, extra = {}) => ({ id, title, name: title, short, icon, scope: 'public', state: 'loading', m: '…', ms: '…', x: 'Wird geladen …', rows: [], ...extra });
+const T = (id, title, short, icon, extra = {}) => ({ id, title, name: title, short, icon, scope: 'public', state: 'loading', m: '…', ms: '…', x: 'Wird geladen …', ...extra });
 
 export const CATALOG = [
   T('weather', 'Wetter', 'Wetter', null, { fertig: true }),   // kein festes Symbol: das Wettersymbol neben dem Wert zeigt das aktuelle Wetter

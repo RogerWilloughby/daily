@@ -24,7 +24,6 @@ const aend = (v, html = false) => {
 };
 const datum = t => t ? new Date(t + 'T12:00:00Z').toLocaleDateString('de-DE', { day: 'numeric', month: 'numeric', year: 'numeric', timeZone: 'UTC' }) : '';
 const monatName = m => m ? new Date(m + '-15T12:00:00Z').toLocaleDateString('de-DE', { month: 'long', year: 'numeric', timeZone: 'UTC' }) : '';
-const zeilen = liste => '<dl class="kompakt">' + liste.map(([k, v]) => `<div class="row"><dt>${esc(k)}</dt><dd>${v}</dd></div>`).join('') + '</dl>';
 const w = (fEnv, code) => fEnv && fEnv.daten ? fEnv.daten.waehrungen.find(x => x.code === code) || null : null;
 
 // „1 € = 1,1423 $“

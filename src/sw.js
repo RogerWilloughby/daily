@@ -2,7 +2,7 @@
 const CACHE = 'daily-dev';   // build.js ersetzt das je Upload durch daily-<version>-<commit>
 const SHELL = [
   '/', '/app.css', '/css/diagramm.css', '/css/wetter.css', '/css/finanzen.css', '/css/verkehr.css', '/css/seiten.css', '/css/tagesinhalt.css', '/css/lokal.css', '/manifest.webmanifest', '/content/seiten.json',
-  '/js/main.js', '/js/core/util.js', '/js/core/store.js', '/js/core/tiles.js', '/js/core/board.js',
+  '/js/main.js', '/js/core/util.js', '/js/core/store.js', '/js/core/tiles.js', '/js/core/board.js', '/js/core/mini-reiter.js', '/js/core/einstellungsfenster.js',
   '/js/core/ask.js', '/js/core/status.js', '/js/core/version.js', '/js/ui/dialogs.js', '/js/ui/ort.js',
   '/js/providers/weather.js', '/js/providers/news.js', '/js/adapter/schlagzeilen.js', '/js/providers/finanzen.js', '/js/providers/verkehr.js', '/js/adapter/tanken.js', '/js/adapter/autobahn.js',
   '/js/providers/sport.js', '/js/adapter/fussball.js', '/js/providers/wissen.js', '/js/providers/local.js', '/js/adapter/lokal.js',

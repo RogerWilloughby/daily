@@ -88,11 +88,10 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .answer .q{color:var(--active-muted);display:block;font-size:13px;margin-bottom:2px}
 /* 5 Raster & Kacheln */
 .grid{flex:1;min-height:0;display:grid;gap:10px;
-  grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:repeat(4,minmax(0,1fr));
-  transition:grid-template-columns .5s var(--ease),grid-template-rows .5s var(--ease)}
+  grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:repeat(4,minmax(0,1fr))}
 .tile{position:relative;min-width:0;min-height:0;overflow:hidden;border-radius:var(--radius);background:var(--surface);border:1px solid var(--line);
   display:grid;grid-template-columns:minmax(0,1fr);transition:background .35s,border-color .35s,color .35s}
-.tile:hover:not([data-mode="active"]){border-color:var(--accent)}
+.tile:hover{border-color:var(--accent)}
 .head{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;padding:18px 20px;min-width:0;min-height:0;overflow:hidden;transition:padding .35s var(--ease)}
 .label{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;max-width:100%}
 .label span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -103,23 +102,12 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .metric .m-short{display:none}
 .metric[data-len="long"]{font-size:23px;line-height:1.12}
 .metric[data-len="long"] .m-long{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.tile[data-mode="lane"] .metric[data-len="long"] .m-long,.tile[data-mode="small"] .metric[data-len="long"] .m-long{white-space:nowrap;display:block}
-/* Reiter in aufgeklappten Kacheln */
-.reiter{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--active-line);padding-bottom:6px}
-.reiter button{padding:5px 11px;border-radius:999px;font-size:13px;font-weight:600;color:var(--active-muted);border:1px solid transparent}
-.reiter button:hover{color:var(--active-ink);border-color:var(--active-line)}
-.reiter button[aria-selected="true"]{color:var(--active-bg);background:var(--active-ink)}
-.reiterfeld[hidden]{display:none}
-dl.kompakt .row{padding:4px 0;font-size:14px}
-dl.kompakt dd{margin:0}
 .mini{display:block;align-self:stretch;flex:1 1 auto;min-height:32px;padding-top:6px}
 .mini:empty{display:none}
-.tile[data-mode="small"] .mini,.tile[data-mode="active"] .mini{display:none}
-.tile[data-mode="rest"] .head:has(.mini:not(:empty)) .teaser{-webkit-line-clamp:2}
+.tile .head:has(.mini:not(:empty)) .teaser{-webkit-line-clamp:2}
 .lglyph{flex:none;width:18px;height:18px;color:var(--accent);display:inline-flex}
 .lglyph[hidden]{display:none}
 .lglyph svg{width:100%;height:100%}
-.tile[data-mode="active"] .lglyph{width:22px;height:22px;color:var(--active-muted)}
 .metric[data-leer]{display:none}
 .glyph{flex:none;width:1.05em;height:1.05em;color:var(--accent)}
 .glyph:empty{display:none}
@@ -127,67 +115,16 @@ dl.kompakt dd{margin:0}
 .teaser{color:var(--muted);font-size:14px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .trend-up{color:var(--up)}
 .trend-down{color:var(--down)}
-.body{display:none}
 .tag{flex:none;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
 /* Zustände: lädt · nicht verbunden · frei */
 .tile[data-state="loading"] .metric,.tile[data-state="loading"] .teaser{opacity:.45}
 .tile[data-state="off"]{background:transparent;border-style:dashed}
-.tile[data-state="off"]:not([data-mode="active"]) .metric{color:var(--muted);font-weight:600}
+.tile[data-state="off"] .metric{color:var(--muted);font-weight:600}
 .tile.free{background:transparent;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px}
 .tile.free:hover{border-color:var(--line)}
-.tile.free[data-mode="small"] span{display:none}
-/* Kleine und mitwachsende Kacheln */
-.tile[data-mode="small"] .head,.tile[data-mode="lane"] .head{padding:10px 12px;gap:3px}
-.tile[data-mode="small"] .label,.tile[data-mode="lane"] .label{font-size:13px}
-.tile[data-mode="small"] .metric{font-size:16px}
-.tile[data-mode="lane"] .metric{font-size:19px}
-.tile[data-mode="small"] .teaser{display:none}
-.tile[data-mode="small"] .tag{display:none}
-.tile[data-mode="lane"] .teaser{font-size:13px;-webkit-line-clamp:2}
-/* 6 Aktive Kachel: oben eine Kopfzeile (Überschrift, Wert, Unterzeile), darunter die ganze Breite für Reiter und Inhalt */
-.tile[data-mode="active"]{background:var(--active-bg);border-color:var(--active-bg);border-style:solid;color:var(--active-ink);
-  grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}
-.tile[data-mode="active"] .head{flex-direction:row;flex-wrap:wrap;align-items:baseline;padding:18px 150px 10px 26px;gap:4px 18px;cursor:default}
-.tile[data-mode="active"] .head .label{flex:none;max-width:100%}
-.tile[data-mode="active"] .head .teaser{flex:1 1 260px;font-size:15px!important;-webkit-line-clamp:2!important}
-.tile[data-mode="active"] .ico,.tile[data-mode="active"] .glyph{color:var(--active-muted)}
-.tile[data-mode="active"] .label{font-size:14px;letter-spacing:.06em;text-transform:uppercase}
-.tile[data-mode="active"] .tag{border-color:var(--active-line);color:var(--active-muted)}
-.tile[data-mode="active"] .metric{font-size:clamp(20px,1.8vw,28px)}
-.tile[data-mode="active"] .metric .m-long{white-space:normal;overflow:visible;overflow-wrap:anywhere;hyphens:auto}
-.tile[data-mode="active"] .metric[data-len="long"]{font-size:clamp(18px,1.6vw,24px);line-height:1.1}
-.tile[data-mode="active"] .metric[data-len="long"] .m-long{display:block;-webkit-line-clamp:unset}
-.tile[data-mode="active"] .teaser{color:var(--active-muted);font-size:17px;-webkit-line-clamp:6}
-.tile[data-mode="active"] .trend-up{color:var(--active-up)}
-.tile[data-mode="active"] .trend-down{color:var(--active-down)}
-.tile[data-mode="active"] .body{display:flex;flex-direction:column;min-height:0;padding:0 26px 14px;gap:10px;animation:fadein .4s var(--ease)}
-.tile[data-mode="active"] .body .close{position:absolute;top:14px;right:18px}
+/* 6 Schließen-Knopf (Antwort von Frag DAILY) und Definitionslisten */
 .close{align-self:flex-end;min-height:40px;padding:0 14px;border-radius:10px;border:1px solid var(--active-line);color:var(--active-ink);font-size:14px}
-.content{min-height:0;overflow:auto;display:flex;flex-direction:column;gap:10px;padding-bottom:18px;scrollbar-width:thin;scrollbar-color:var(--active-line) transparent;
-  -webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 22px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 22px),transparent)}
-@keyframes fadein{from{opacity:.4}to{opacity:1}}
-/* Inhalte im aufgeklappten Zustand (Kachel und Handy-Vollbild) */
 dl{margin:0}
-.row{display:grid;grid-template-columns:minmax(110px,34%) minmax(0,1fr);gap:14px;padding:8px 0;border-bottom:1px solid var(--active-line);font-size:15px;line-height:1.35}
-.row dt{color:var(--active-muted)}
-.row dd{margin:0}
-.content a{color:inherit;text-decoration:underline;text-underline-offset:3px}
-.content h4{margin:6px 0 0;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--active-muted)}
-.content p{margin:0;font-size:15px;line-height:1.5}
-.blist{margin:0;padding-left:18px;font-size:15px;line-height:1.55}
-.reveal summary{cursor:pointer;min-height:40px;display:inline-flex;align-items:center;padding:0 14px;border-radius:10px;border:1px solid var(--active-line);font-size:14px;list-style:none}
-.reveal summary::-webkit-details-marker{display:none}
-.reveal[open] summary{margin-bottom:8px}
-.note{font-size:13px;color:var(--active-muted);line-height:1.45}
-.link-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
-.link-list li{display:flex;align-items:center;gap:10px}
-.link-list a{flex:1;min-width:0;display:flex;align-items:baseline;gap:10px;min-height:44px;padding:0 14px;border-radius:10px;border:1px solid var(--active-line);color:inherit;text-decoration:none}
-.link-list a:hover{background:color-mix(in srgb,var(--active-ink) 8%,transparent)}
-.link-list a:focus-visible{outline:2px solid var(--active-ink);outline-offset:2px}
-.link-name{font-weight:600;font-size:15px;line-height:44px;white-space:nowrap}
-.link-host{color:var(--active-muted);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.links-form{flex-wrap:wrap}
-.links-form input{flex:1 1 140px}
 /* 7 Dialoge (Impressum, Datenschutz, Einstellungen) */
 dialog.doc{width:min(640px,calc(100vw - 32px));max-height:calc(100vh - 48px);box-sizing:border-box;padding:0;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);overflow:hidden}
 dialog.doc::backdrop{background:rgba(10,20,16,.45)}
@@ -223,8 +160,7 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
 .set-results label{display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:8px;cursor:pointer}
 .set-results label:hover{background:var(--ground)}
 .set-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
-/* 8 Mobil: Kompaktraster (Spalten × Zeilen nach Kachelzahl, siehe tiles.js → raster), Vollbild pro Kachel */
-.sheet{display:none}
+/* 8 Mobil: Kompaktraster (Spalten × Zeilen nach Kachelzahl, siehe tiles.js → raster) – Handy-Darstellung pausiert, kein Vollbild mehr (0.45.0) */
 @media (max-width:760px),(max-height:520px){
   .bar{gap:10px 12px;min-height:0}
   .brand{font-size:24px}
@@ -252,28 +188,10 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
   .tile .teaser{display:none}
   .tile .metric .m-long{display:none}
   .tile .metric .m-short{display:inline}
-  .sheet{position:fixed;inset:0;z-index:5;background:var(--active-bg);color:var(--active-ink);
-    box-sizing:border-box;padding:calc(16px + env(safe-area-inset-top,0px)) 18px calc(18px + env(safe-area-inset-bottom,0px));
-    flex-direction:column;gap:16px}
-  .sheet.open{display:flex}
-  .sheet .content{flex:1}
-  .sheet .row{grid-template-columns:1fr;gap:2px}
-  .sheet .row dt{font-size:12px}
 }
-.s-top{display:flex;align-items:center;gap:10px}
-.s-btn{min-height:44px;padding:0 14px;border-radius:10px;border:1px solid var(--active-line);color:var(--active-ink);font-size:14px}
-.s-pos{margin-left:auto;color:var(--active-muted);font-size:13px;font-variant-numeric:tabular-nums}
-.s-label{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--active-muted)}
-.s-label .ico{color:var(--active-muted)}
-.s-metric{font-family:var(--display);font-weight:700;font-size:38px;line-height:1.08}
-.s-teaser{color:var(--active-muted);font-size:17px;line-height:1.45}
-.s-nav{display:flex;gap:10px}
-.s-nav .s-btn{flex:1;min-height:48px}
-.s-hint{text-align:center;font-size:12px;color:var(--active-muted)}
 /* 9 Bewegung reduzieren */
 @media (prefers-reduced-motion:reduce){
   .grid,.tile,.head{transition:none}
-  .tile[data-mode="active"] .body{animation:none}
 }
 .set-check{display:flex;align-items:center;gap:8px;font-size:15px;cursor:pointer}
 .set-check input{width:18px;height:18px;accent-color:var(--accent)}
@@ -281,8 +199,6 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
 .kl-leer{margin:4px 0;color:var(--muted)}
 .kl-kw{font-weight:500;color:var(--muted);margin-right:4px}   /* Kalenderwoche vorn im Kopf der Kachel „Kalender“ */
 /* Einstellungen je Kachel (Zahnrad-Reiter) – kompakt, ohne Scrollen */
-.reiter .reiter-icon{padding-left:8px;padding-right:8px;display:inline-flex;align-items:center}
-.reiter .reiter-icon .ico{width:16px;height:16px}
 .ke{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:6px 16px;font-size:13px;line-height:1.35;align-items:start}
 .ke-breit{grid-column:1/-1}
 .ke-titel{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--active-muted);margin-top:2px}
@@ -320,14 +236,13 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
 /* Kleine Kacheln: Name nur beim Überfahren (Hinweistext), im Kopf nur Inhalt (Wetter: Ort/Temperaturen, Kalender: KW).
    Am Handy (siehe unten) bleibt der Kurzname. Aufgeklappt bleibt die Überschrift mit Namen. */
 .label .kopf:empty{display:none}
-.tile[data-mode="active"] .label .kopf{display:none}
 .teaser .t-liste{display:none}
 @media (min-width:761px) and (min-height:521px){
-  .tile:not([data-mode="active"]) .label > .ico,.tile:not([data-mode="active"]) .label .long{display:none}
-  .tile:not([data-mode="active"]) .label:not(:has(.kopf:not(:empty),.tag:not([hidden]),.lglyph:not([hidden]))){display:none}
-  .tile:not([data-mode="active"]) .teaser.mit-liste .t-text{display:none}
-  .tile:not([data-mode="active"]) .teaser.mit-liste{display:block;-webkit-line-clamp:unset;overflow:hidden;min-width:0;max-width:100%}
-  .tile:not([data-mode="active"]) .teaser.mit-liste .t-liste{display:flex;flex-direction:column;gap:1px}
+  .tile .label > .ico,.tile .label .long{display:none}
+  .tile .label:not(:has(.kopf:not(:empty),.tag:not([hidden]),.lglyph:not([hidden]))){display:none}
+  .tile .teaser.mit-liste .t-text{display:none}
+  .tile .teaser.mit-liste{display:block;-webkit-line-clamp:unset;overflow:hidden;min-width:0;max-width:100%}
+  .tile .teaser.mit-liste .t-liste{display:flex;flex-direction:column;gap:1px}
 }
 .tl-z{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tl-z.tl-neu{margin-top:6px}
@@ -336,26 +251,26 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
   .label .kopf{display:none}
 }
 @media (min-width:761px) and (min-height:521px){
-  .tile:not([data-mode="active"]) .head:has(.teaser.mit-liste) .metric{font-size:13px;font-family:inherit;font-weight:700;line-height:1.35;letter-spacing:0}
-  .tile:not([data-mode="active"]) .head:has(.teaser.mit-liste) .metric .m-long{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+  .tile .head:has(.teaser.mit-liste) .metric{font-size:13px;font-family:inherit;font-weight:700;line-height:1.35;letter-spacing:0}
+  .tile .head:has(.teaser.mit-liste) .metric .m-long{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 }
 .teaser .t-liste{font-size:13px;line-height:1.35}
 /* Wetter klein: Symbol der Wetterlage vor dem Text (zweite Zeile) statt im Kopf; Uhrzeit von Tiefst/Höchst klein */
 .teaser .t-icon{display:none}
 @media (min-width:761px) and (min-height:521px){
-  .tile:not([data-mode="active"]) .teaser .t-icon{display:inline-flex;vertical-align:-3px;margin-right:5px;color:var(--ink)}
-  .tile:not([data-mode="active"]) .teaser .t-icon svg{width:17px;height:17px}
-  .tile:not([data-mode="active"]) .head:has(.t-icon) .label .lglyph{display:none}
+  .tile .teaser .t-icon{display:inline-flex;vertical-align:-3px;margin-right:5px;color:var(--ink)}
+  .tile .teaser .t-icon svg{width:17px;height:17px}
+  .tile .head:has(.t-icon) .label .lglyph{display:none}
 }
 @media (min-width:761px) and (min-height:521px){
-  .tile:not([data-mode="active"]) .label .kopf{white-space:normal;overflow:visible;line-height:1.3}
-  .tile:not([data-mode="active"]) .label:has(.kopf:not(:empty)){max-width:100%;flex-wrap:wrap}
+  .tile .label .kopf{white-space:normal;overflow:visible;line-height:1.3}
+  .tile .label:has(.kopf:not(:empty)){max-width:100%;flex-wrap:wrap}
 }
 /* Kalender klein: KW unten */
 @media (min-width:761px) and (min-height:521px){
-  .tile:not([data-mode="active"]) .teaser.mit-liste{flex:1 1 auto;min-height:0}
+  .tile .teaser.mit-liste{flex:1 1 auto;min-height:0}
 }
-/* (i) unten rechts in der kleinen Kachel: Info-Feld mit Name (später mehr) – nicht aufgeklappt, nicht am Handy */
+/* (i) unten rechts in der kleinen Kachel: Info-Feld mit Name (später mehr) – nicht am Handy */
 .info-knopf{position:absolute;right:8px;bottom:8px;width:16px;height:16px;border-radius:50%;border:1px solid var(--line);background:var(--surface);
   color:var(--muted);font:600 10px/14px Georgia,serif;font-style:italic;text-align:center;padding:0;cursor:pointer;z-index:2;opacity:.7}
 .info-knopf:hover,.info-knopf:focus-visible,.info-knopf.fest{opacity:1;color:var(--ink);border-color:var(--muted)}
@@ -363,11 +278,10 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
   background:var(--ink);color:var(--surface);font-size:12px;line-height:1.35;box-shadow:0 4px 14px rgba(0,0,0,.18);display:flex;flex-direction:column}
 .info-feld[hidden]{display:none}
 .info-feld span:first-child{font-weight:600}
-.tile[data-mode="active"] .info-knopf,.tile[data-mode="active"] .info-feld,.tile[data-mode="small"] .info-knopf{display:none}
 @media (max-width:760px),(max-height:520px){
   .info-knopf,.info-feld{display:none!important}
 }
-/* Tools: Zeilen der kleinen Kachel als Links, aufgeklappt eine Liste mit Beschreibung */
+/* Zeilen der kleinen Kachel als Links (z. B. Tools, Schlagzeilen) */
 a.tl-z.tl-link{color:inherit;text-decoration:none;border-radius:6px;padding:2px 4px;margin:0 -4px}
 a.tl-z.tl-link:hover{background:var(--line)}
 a.tl-z.tl-link:hover .tl-d{text-decoration:underline}

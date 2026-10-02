@@ -59,10 +59,6 @@ const GLYPHS = {
 };
 export const glyph = k => GLYPHS[k] ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${GLYPHS[k]}</svg>` : '';
 
-// Zeilen „Bezeichnung – Wert“; Wert kann Text oder {text, href} sein
-export const rows = d => '<dl>' + (d || []).map(([k, v]) => `<div class="row"><dt>${esc(k)}</dt><dd>${
-  v && typeof v === 'object' ? `<a href="${esc(v.href)}" target="_blank" rel="noopener">${esc(v.text)}</a>` : esc(v)
-}</dd></div>`).join('') + '</dl>';
 
 export const berlinDay = (d = new Date()) => new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
 export const hm = iso => new Date(iso).toLocaleTimeString('de-DE', { timeZone: TZ, hour: '2-digit', minute: '2-digit' });

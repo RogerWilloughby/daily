@@ -1,5 +1,5 @@
 // DAILY – Einstieg: Raster aufbauen, Anbieter starten und regelmäßig aktualisieren.
-import { initBoard, closeAll } from './core/board.js';
+import { initBoard } from './core/board.js';
 import { initAsk, answerOpen, closeAnswer } from './core/ask.js';
 import { report, demo, zeit } from './core/status.js';
 import { aufMessung } from './dienste/client.js';
@@ -11,7 +11,7 @@ import { initOrt } from './ui/ort.js';
 import { initKacheln } from './ui/kacheln.js';
 import { initPrivat } from './ui/privat.js';
 import { betrieb } from './core/betrieb.js';
-import './ansichten/mini-diagramm.js'; // Mini-Diagramme: Dichte, Hinweise, Zeiger (allgemein)
+import './ansichten/mini-diagramm.js'; // Mini-Diagramme: Dichte, Zeiger (allgemein)
 import weather from './providers/weather.js';
 import news from './providers/news.js';
 import finanzen from './providers/finanzen.js';
@@ -77,7 +77,7 @@ tick(); setInterval(tick, 15e3);
 
 document.addEventListener('keydown', e => {
   if (e.key !== 'Escape' || document.querySelector('dialog[open]')) return;
-  if (answerOpen()) closeAnswer(); else closeAll();
+  if (answerOpen()) closeAnswer();
 });
 
 if (ONLINE) { PROVIDERS.forEach(run); schedule(); }

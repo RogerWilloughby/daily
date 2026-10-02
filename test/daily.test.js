@@ -150,7 +150,7 @@ test('Syntax: alle Browser-Module lassen sich parsen', () => {
 
 // Trennung: Das allgemeine Kachelraster (core/board.js) und die allgemeinen Styles (app.css) enthalten nichts Wetter- oder
 // Finanz-Spezifisches. Diagramme → ansichten/*.js, adapter/*diagramm.js, css/diagramm.css, css/wetter.css, css/finanzen.css.
-test('Aufbau: board.js und app.css ohne Wetter-/Finanz-Teile, Ansichts-CSS eingebunden', () => {
+test('Aufbau: board.js und app.css ohne Wetter-/Finanz-Teile, ohne Aufklappen, Ansichts-CSS eingebunden', () => {
   const lies = p => fs.readFileSync(path.join(__dirname, '..', p), 'utf8');
   const board = lies('src/js/core/board.js').replace(/\/\/.*$/gm, '');
   for (const muster of [/\bwd-/, /\bzp-|\bt-zp\b|data-zp|zpHtml/, /\bfi-/, /\bwh-/, /\brk-|\brs[1-4]\b/, /miniDichte|miniKurs|zeile2/])
@@ -159,6 +159,13 @@ test('Aufbau: board.js und app.css ohne Wetter-/Finanz-Teile, Ansichts-CSS einge
   for (const muster of [/\.wd-|--wd-/, /\.zp-|\.t-zp|\.mit-zp/, /\.fi-/, /\.wh-/, /\.rk-|--rs\d/])
     assert.doesNotMatch(css, muster, 'app.css enthält ' + muster);
   const html = lies('src/index.html'), sw = lies('src/sw.js');
+  // Seit 0.45.0 nur Mini-Reiter: kein Aufklappen, kein Handy-Vollbild, keine alten Reiter/Zeilenlisten (Review M4 Schritt 3)
+  for (const muster of [/activate|closeAll|fillContent|reiterVon|showSheet|data-mode|t\.rows|t\.tabs/])
+    assert.doesNotMatch(board, muster, 'board.js enthält noch ' + muster);
+  assert.ok(!html.includes('id="sheet"'), 'index.html enthält noch das Handy-Vollbild');
+  for (const f of ['src/app.css', 'src/css/diagramm.css', 'src/css/wetter.css', 'src/css/finanzen.css'])
+    assert.doesNotMatch(lies(f), /data-mode|\.sheet\b|\.reiterfeld|\.wd-gross/, f + ': Regeln fürs Aufklappen');
+  for (const f of ['/js/core/mini-reiter.js', '/js/core/einstellungsfenster.js']) assert.ok(sw.includes(`'${f}'`), 'nicht im Service Worker: ' + f);
   for (const f of ['/css/diagramm.css', '/css/wetter.css', '/css/finanzen.css']) {
     assert.ok(fs.existsSync(path.join(__dirname, '../src', f)), 'fehlt: ' + f);
     assert.ok(html.includes(`href="${f}"`), 'nicht in index.html: ' + f);

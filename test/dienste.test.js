@@ -268,13 +268,12 @@ test('Adapter Wetter: Kachel und Antwort aus dem Vertrag', async () => {
   assert.match(k.chart, /<b class="wd-t-sonne"[^>]*>Sonne<\/b>/);
   assert.match(k.chart, /wd-max.*wd-min/);
   assert.doesNotMatch(k.chart + JSON.stringify(k.kleinReiter), /wd-trend|Trend|unsicher/);   // keine Trend-Kennzeichnung mehr in der Oberfläche
-  assert.ok(!k.rows.some(([l, v]) => /Trend|unsicher/.test(l + v)));
   // Kopfzeile mit farbigen Zahlen
   assert.match(k.titleHtml, /^Berlin 15° · <span class="wd-tm" title="Tiefstwert heute: 9° um \d{1,2} Uhr"><b class="wd-t-min">9°<\/b> <small class="wd-um">\d{1,2} Uhr<\/small><\/span> \/ <span class="wd-tm" title="Höchstwert heute: 16° um \d{1,2} Uhr"><b class="wd-t-max">16°<\/b> <small class="wd-um">\d{1,2} Uhr<\/small><\/span>$/);
   assert.equal(k.zeileIcon, true);
   assert.match(k.kopf, /9°<\/b> <small class="wd-um">\(\d{1,2} Uhr\)<\/small><\/span> \/ <span class="wd-tm" title="Höchstwert[^"]*"><b class="wd-t-max">16°<\/b> <small class="wd-um">\(\d{1,2} Uhr\)<\/small>/);   // kleine Kachel: Uhrzeit in Klammern
   // Mini-Reiter (kein Aufklappen): Jetzt · Mehr – Radar nur mit Radar-Antwort, Hinweise nur bei Warnung
-  assert.equal(k.tabs, undefined);
+  assert.equal(k.tabs, undefined); assert.equal(k.rows, undefined);         // nichts mehr fürs Aufklappen (seit 0.45.0)
   assert.deepEqual(k.kleinReiter.map(r => r.id), ['jetzt', 'mehr']);
   assert.ok(k.kleinReiter.every(r => /^<svg class="ico"/.test(r.icon)));
   assert.match(k.kleinReiter[0].html, /^<div class="wz-jetzt"><span class="t-zp" data-jetzt="[^"]+"><span class="zp-z">Jetzt<\/span><span class="zp-t">15°<\/span>/);
@@ -285,9 +284,9 @@ test('Adapter Wetter: Kachel und Antwort aus dem Vertrag', async () => {
   assert.ok(k.info.some(x => /^Stand \d\d:\d\d Uhr$/.test(x)));
   assert.ok(!/<path[^>]*d=""/.test(JSON.stringify(k.kleinReiter) + k.chart), 'leerer Pfad');
   // Sonne unbekannt ≠ 0 Stunden
-  const { tageDiagramm } = await esm('src/js/adapter/diagramm.js');
-  const ohneSonne = env.daten.tage.map((t, i) => (i === 2 ? { ...t, sonnenstunden: null } : t));
-  assert.match(tageDiagramm(ohneSonne, d => d), /Sonne: keine Angabe/);
+  const { zpTag } = await esm('src/js/adapter/wetter.js');
+  assert.equal(zpTag({ ...env.daten.tage[2], sonnenstunden: null }).s, '☀ –');
+  assert.equal(zpTag({ ...env.daten.tage[2], sonnenstunden: 0 }).s, '☀ 0 h');
   assert.equal(k.x, 'Teilweise bewölkt, gefühlt 14°.');                    // Regen steht in einer eigenen Zeile
   assert.match(k.zeile2.text, /^(Regen möglich (morgen )?gegen \d{1,2} Uhr\.|Kein Regen in den nächsten 24 Std\.)$/);
   assert.match(k.zeile2.glyph, /^<svg/);
@@ -299,14 +298,12 @@ test('Adapter Wetter: Kachel und Antwort aus dem Vertrag', async () => {
   assert.equal(r([0, 30, 60, 10]), 'Regen möglich gegen 22 Uhr.');                        // 20 Uhr UTC = 22 Uhr
   assert.equal(r([...Array(11).fill(0), 70]), 'Regen möglich morgen gegen 7 Uhr.');      // 5 Uhr UTC = 7 Uhr
   assert.equal(r([...Array(24).fill(0), 90]), 'Kein Regen in den nächsten 24 Std.');     // Stunde 25 zählt nicht
-  assert.ok(k.rows.some(([l]) => l === 'Luftqualität'));
-  assert.ok(k.rows.some(([l]) => l === 'Morgen'));
-  const zeile = l => (k.rows.find(([x]) => x.startsWith(l)) || [])[1];
-  assert.equal(zeile('Wind'), '11 km/h aus W, Böen 25 km/h');
-  assert.match(zeile('Sonne'), /4 Std\. Sonne · UV bis 3$/);
-  assert.equal(zeile('Luftdruck'), '1016 hPa, fallend');
-  assert.match(zeile('Bis '), /° bis .*° · (eher wechselhaft|eher trocken|teils Regen)$/);
-  assert.ok(!k.rows.some(([l]) => l === 'Achtung'));        // heute/morgen kein Frost
+  const zeile = l => (mehr.find(z => z.d === l) || {}).t;            // Reiter „Mehr“ (früher die aufgeklappten Zeilen)
+  assert.equal(zeile('Wind'), '11 km/h aus W, Böen 25');
+  assert.match(zeile('Sonne'), /4 Std\. · UV bis 3$/);
+  assert.equal(zeile('Druck'), '1016 hPa, fallend');
+  assert.ok(zeile('Luft'));
+  assert.ok(!mehr.some(z => z.d === 'Achtung'));           // heute/morgen kein Frost
   assert.match(text(env), /^Berlin: jetzt 15°/);
 });
 
@@ -422,12 +419,17 @@ test('Regen: Radar über Bright Sky – jetzt, Beginn, letzte Stunde, Nähe, Kar
 });
 
 test('Adapter Regen: Hinweis in der Wetterkachel und Reiter „Radar“', async () => {
-  const { hinweis, radarReiter } = await esm('src/js/adapter/regen.js');
+  const { hinweis, radarKlein } = await esm('src/js/adapter/regen.js');
   const { kachel, antwort: text } = await esm('src/js/adapter/wetter.js');
   const regen = (await rufe('regen', { lat: '52.52', lon: '13.41' })).body;
   assert.equal(hinweis(regen), 'Regen in 20 Min. (leicht).');
   assert.equal(hinweis(null), null);
-  const html = radarReiter(regen, iso => iso.slice(11, 16));
+  const wetter = await mitName((await rufe('wetter', BERLIN)).body);
+  const k = kachel(wetter, regen);
+  assert.deepEqual(k.kleinReiter.map(r => r.id), ['jetzt', 'radar', 'mehr']);
+  const rk = k.kleinReiter[1], html = rk.html;
+  assert.equal(rk.kopf, 'Regen in 20 Min. (leicht).');
+  assert.match(html, /^<div class="rk-klein"><div class="rk-karte"><svg class="rk rk-mit-land".*<div class="rk-leiste".*<dl class="rk-werte">.*4 km westlich/s);
   assert.match(html, /<svg class="rk rk-mit-land" viewBox="0 0 (\S+) \1"/);   // quadratische Karte mit Landkarte
   const kacheln = html.match(/<image href="\/api\/karte\?z=9&amp;x=\d+&amp;y=\d+"/g) || [];
   assert.ok(kacheln.length >= 4 && kacheln.length <= 16, 'Kacheln: ' + kacheln.length);
@@ -437,20 +439,11 @@ test('Adapter Regen: Hinweis in der Wetterkachel und Reiter „Radar“', async 
   assert.equal((html.match(/data-rk-bild="/g) || []).length, 13);
   assert.match(html, /aria-pressed="true" title="[\d:]+ Uhr · gemessen"><i><\/i><span>jetzt<\/span>/);
   assert.match(html, /<span>−1 Std\.<\/span>.*<span>\+1 Std\.<\/span>.*<span>\+2 Std\.<\/span>/s);
-  assert.match(html, /© GeoBasis-DE \/ BKG \(20\d\d\), basemap\.de/);
-  assert.match(html, /<dl class="rk-werte">.*<div class="rk-karte">.*<div class="rk-rechts">/s);   // Werte · Karte · Verlauf
-  const ohneLand = radarReiter({ ...regen, daten: { ...regen.daten, karte: { ...regen.daten.karte, ecken: undefined } } }, iso => iso.slice(11, 16));
+  assert.match(html, /Letzte Std\.<\/dt><dd>0,4 mm/);
+  const ohneLand = radarKlein({ ...regen, daten: { ...regen.daten, karte: { ...regen.daten.karte, ecken: undefined } } }, iso => iso.slice(11, 16));
   assert.doesNotMatch(ohneLand, /<image|BKG/);               // ältere Antwort ohne Ecken: Radar ohne Landkarte
   assert.match(ohneLand, /<svg class="rk" viewBox="0 0 52 52"/);
-  assert.match(html, /4 km westlich/);
-  assert.match(html, /0,4 mm, aufgehört vor 30 Min\./);
-  const wetter = await mitName((await rufe('wetter', BERLIN)).body);
-  const k = kachel(wetter, regen);
-  assert.deepEqual(k.kleinReiter.map(r => r.id), ['jetzt', 'radar', 'mehr']);
-  const rk = k.kleinReiter[1];
-  assert.equal(rk.kopf, 'Regen in 20 Min. (leicht).');
-  assert.match(rk.html, /^<div class="rk-klein"><div class="rk-karte"><svg class="rk rk-mit-land".*<div class="rk-leiste".*<dl class="rk-werte">.*4 km westlich/s);
-  assert.ok(k.info.some(x => /^Radar: Deutscher Wetterdienst/.test(x)) && k.info.some(x => /GeoBasis-DE/.test(x)));
+  assert.ok(k.info.some(x => /^Radar: Deutscher Wetterdienst/.test(x)) && k.info.some(x => /GeoBasis-DE \/ BKG \(20\d\d\), basemap\.de/.test(x)));
   assert.equal(k.zeile2.text, "Regen in 20 Min. (leicht)."); assert.doesNotMatch(k.x, /Regen in/);   // Radar geht vor, eigene Zeile
   assert.deepEqual(kachel(wetter, null).kleinReiter.map(r => r.id), ['jetzt', 'mehr']);   // ohne Radar
   assert.match(text(wetter, regen), /Radar: Regen in 20 Min\./);

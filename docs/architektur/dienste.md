@@ -155,19 +155,21 @@ Das allgemeine Kachelraster weiß nichts über einzelne Kacheln. Kachelbesondere
 
 | Datei | Zweck |
 |---|---|
-| `src/js/core/board.js` | allgemeines Kachelraster: Raster, Aktivieren, Reiter, Listen, Einstellungen, **Mini-Reiter** (`kleinReiter`: Symbolspalte, gespeicherte Wahl, nur ganze Zeilen, Einstellungsfenster; Feld `unten` für ein Diagramm unter der Liste; Listenzeile mit `aktion` → `data-aktion`) – ohne Wetter/Finanzen |
-| `src/js/core/ansichten.js` | Anmeldung: `ansicht(id, { teaser, spalte, zurueck })` für eine Kachel, `erweiterung({ nachInhalt, nachZeichnen, groesse, zeiger })` für alle |
-| `src/js/ansichten/mini-diagramm.js` | allgemeine Diagramm-Bedienung: Dichte je Platz (`miniDichte`), Hinweise der großen Diagramme, Überfahren der Spalten |
+| `src/js/core/board.js` | allgemeines Kachelraster (seit 0.45.0 ohne Aufklappen und Handy-Vollbild): Kachelgerüst, `paint`/`set`, Raster nach Kachelzahl, Info-Knopf, Klicks auf Reiter und Zahnrad – ohne Wetter/Finanzen |
+| `src/js/core/mini-reiter.js` | **Mini-Reiter** (`kleinReiter`): Symbolspalte, gespeicherte Wahl (`krWahl`), Listen (`listeHtml`, Zeile mit `href` oder `aktion` → `data-aktion`), Feld `unten` für ein Diagramm unter der Liste, nur ganze Zeilen (`krZeilen`) |
+| `src/js/core/einstellungsfenster.js` | Einstellungsfenster hinter dem Zahnrad (`dialog.kachel-einst`), Formular aus `core/einstellungen.js`, Bestätigung „Gespeichert ✓“ |
+| `src/js/core/ansichten.js` | Anmeldung: `ansicht(id, { teaser, spalte, zurueck })` für eine Kachel, `erweiterung({ nachZeichnen, groesse, zeiger })` für alle |
+| `src/js/ansichten/mini-diagramm.js` | allgemeine Diagramm-Bedienung: Dichte je Platz (`miniDichte`), Überfahren der Spalten |
 | `src/js/ansichten/wetter.js` | Wetter-Kachel: Zeitpunkt-Block im Mini-Reiter „Jetzt“ („Jetzt“ / überfahrene Stunde oder Tag); HTML aus `adapter/wetter.js` (`zpHtml`, `jetztHtml`) |
 | `src/js/providers/thema.js` | Anbieter der Themen-Kacheln (Unterhaltung, Wissen, Alltag): Dienst `tagesinhalt` je Tag (Wissen zusätzlich `andiesemtag`), Blättern, Favoriten, „+ Aufgabe“; Helfer `favUmschalten`/`alsAufgabe` auch für den Spartipp in Finanzen |
-| `src/js/ansichten/radar.js` | Radarkarte (Mini-Reiter „Radar“, bis zur Umstellung auch aufgeklappt): Bilder laufen lassen, Zeitleiste (Start/Pause, Sprung) |
+| `src/js/ansichten/radar.js` | Radarkarte (Mini-Reiter „Radar“): Bilder laufen lassen, Zeitleiste (Start/Pause, Sprung) |
 | `src/js/adapter/diagramm.js` | Wetter-Diagramme als HTML/SVG-Text und gemeinsame Bausteine (`skala`, `pfad`, `pfadRund`, `umschalter`) |
 | `src/js/adapter/kursdiagramm.js` | Mini-Kursdiagramm der Finanzen-Kachel (`miniKurs`, `kursSkala`) |
 | `src/app.css` | allgemeine Styles, Design-Tokens, Hell/Dunkel |
 | `src/css/diagramm.css` | gemeinsame Diagramm-Styles `.wd-*` und Farben `--wd-*` (Wetter, Finanzen, Kalender) |
 | `src/css/wetter.css` | nur Wetter: Zeitpunkt-Block, Regenzeile, Radar, Sonnenzahlen |
 | `src/css/finanzen.css` | nur Finanzen: `fi-*`, Kurslinie |
-| `src/css/verkehr.css` | nur Verkehr: `vk-*` (Umschalter unten, Listen aufgeklappt) |
+| `src/css/verkehr.css` | nur Verkehr: `vk-*` |
 
 Neue Kachel mit eigener Darstellung: Datei unter `src/js/ansichten/`, vom Provider importiert; eigene Styles unter `src/css/`, in `index.html` und `sw.js` eingetragen.
 
