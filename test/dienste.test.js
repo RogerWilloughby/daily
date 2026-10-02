@@ -1397,3 +1397,52 @@ test('Schutz der Quellen (H2): letzte gute Antwort bei Ausfall, Quellenfehler 60
     assert.match(r.body.fehler.meldung, /ausgelastet/);
   } finally { t.BREMSE.zuruecksetzen(); dienste.FEHLER.clear(); if (alt === undefined) delete process.env.TANKERKOENIG_API_KEY; else process.env.TANKERKOENIG_API_KEY = alt; }
 });
+
+test('Fußball: Dienst je Liga (Tabelle, drei Spieltage), nur liga=bl1|bl2|bl3; Kachel „Sport“ mit Mini-Reitern und Frag DAILY', async () => {
+  const d = dienste.byId.fussball;
+  assert.equal(d.saison(Date.parse('2026-06-30T12:00:00Z')), 2025);
+  assert.equal(d.saison(Date.parse('2026-07-01T12:00:00Z')), 2026);
+  const env = await dienste.ausfuehren('fussball', { liga: 'bl2' });
+  gueltig(env, d.schema);
+  const x = env.daten;
+  assert.deepEqual([x.liga.id, x.aktuell, x.tabelle.length, x.spieltage.map(t => t.nr)], ['bl2', 9, 18, [8, 9, 10]]);
+  assert.deepEqual(x.tabelle[3].kurz, 'Dynamo Dresden');
+  assert.equal(x.spieltage[1].spiele[0].tore, null);                    // noch nicht gespielt: keine Tore
+  gueltig(await dienste.ausfuehren('fussball', { liga: 'bl3' }), d.schema);   // leere Liga ist gültig
+  for (const q of [{}, { liga: 'bl4' }, { liga: 'bl1', team: 'Dynamo' }])
+    assert.equal((await rufe('fussball', q)).code, 400, JSON.stringify(q));
+  assert.equal((await rufe('fussball', { liga: 'bl1' })).code, 200);
+  // Adapter: Verein suchen (Umlaute, Teilwörter), Kachel mit Verein · Tabelle · Spieltag
+  const a = await esm('src/js/adapter/fussball.js');
+  assert.equal(a.findeVerein(env, 'Dynamo Dresden').platz, 4);
+  assert.equal(a.findeVerein(env, 'dynamo').platz, 4);
+  assert.equal(a.findeVerein(env, 'Preussen Münster').kurz, 'Preußen Münster');
+  assert.equal(a.findeVerein(env, 'Bayern'), null);
+  const bl1 = await dienste.ausfuehren('fussball', { liga: 'bl1' });
+  assert.equal(a.findeVerein(bl1, 'Bayern Muenchen').platz, 1);
+  assert.equal(a.findeVerein(bl1, 'bayern munchen').platz, 1);
+  assert.equal(a.findeVerein(bl1, 'Gladbach').kurz, 'Borussia Mönchengladbach');
+  const k = a.kachel(env, 'Dynamo Dresden');
+  assert.deepEqual([k.state, k.title, k.m, k.startReiter], ['live', 'Dynamo Dresden', 'Platz 4', 'verein']);
+  assert.deepEqual(k.kleinReiter.map(r => r.id), ['verein', 'tabelle', 'spieltag']);
+  const [v, t, s] = k.kleinReiter;
+  assert.match(v.kopf, /<b>Dynamo Dresden<\/b> <small>Platz 4 · 2\. Bundesliga<\/small>/);
+  assert.deepEqual(v.liste.map(z => z.d), ['Zuletzt', 'Nächstes', 'Punkte', 'Bilanz', 'Tore']);
+  assert.equal(v.liste[0].t, '2:1 gegen Darmstadt 98 (A)');
+  assert.match(v.liste[0].tip, /Niederlage/);
+  assert.match(v.liste[1].t, /^Kaiserslautern \(H\) · \S+ \d+\.\d+\. \d{2}:\d{2}$/);
+  assert.deepEqual(t.liste.slice(0, 3).map(z => z.d), ['2.', '3.', '4.']);   // ab zwei Plätzen über dem eigenen Verein
+  assert.match(t.liste[2].t, /◀$/);
+  assert.match(t.kopf, /\d{4}\/\d{2}/);
+  assert.match(s.kopf, /9\. Spieltag/);
+  assert.equal(s.liste[0].t, 'Dynamo Dresden – Kaiserslautern ◀');           // eigenes Spiel zuerst
+  assert.match(s.liste[0].d, /^\S+ \d{2}:\d{2}$/);                             // noch offen: Wochentag und Anstoß
+  assert.match(k.x, /^Zuletzt 2:1 gegen Darmstadt 98 · Nächstes: /);
+  // nicht gefunden: Hinweis aufs Zahnrad; Frag DAILY
+  const n = a.kachel(null, 'Gibtsnicht <United>');
+  assert.equal(n.state, 'off');
+  assert.match(n.kleinReiter[0].html, /„Gibtsnicht &lt;United&gt;“ spielt nicht .* Zahnrad/);
+  assert.match(a.antwort(env, 'Dynamo Dresden'), /^SG Dynamo Dresden: Platz 4 in der 2\. Bundesliga mit 17 Punkten\. Zuletzt Darmstadt 98 – Dynamo Dresden 2:1\. Nächstes Spiel: /);
+  assert.match(a.antwort(null, 'X'), /nicht verfügbar/);
+  assert.match(a.antwort(env, 'Gibtsnicht'), /nicht gefunden/);
+});

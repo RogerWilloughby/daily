@@ -58,7 +58,7 @@ Quellen und Lizenzlage: siehe [Recherche Finanzdaten](../recherche/finanzdaten.m
 ## 5. Sport und Freizeit
 | Dienst | Ideen | Art | Eingabe | Quelle | Status |
 |---|---|---|---|---|---|
-| `fussball` | Sport: Verein, Ergebnisse, Tabelle | Live | Verein | OpenLigaDB | 🔁 |
+| `fussball` | Sport: Verein, Ergebnisse, Tabelle | Live | Liga (Verein sucht der Browser) | OpenLigaDB | ✅ 0.43.0 (je Liga bl1–bl3, ersetzt `api/sport.js`) |
 | `raumfahrt` | Raumfahrt: nächste Raketenstarts, ISS-Überflüge | Live | (Ort für Überflüge) | The Space Devs (Launch Library 2) | 🆕 |
 | – | TV-Programm, TV-Highlights, Primetime | Live | – | nur lizenzierte Quelle | ⛔ Lizenz |
 
@@ -108,7 +108,7 @@ Kachel „Tools“ (seit App 0.23.0): Werkzeuge als eigene Seiten in `src/tools/
 | Social-Media-Ausspielung (Content Engine) | ⏸ | eigenes Produkt; kann später dieselben Dienste nutzen |
 
 ## Vorschlag Reihenfolge
-1. **Umzug** der laufenden Dienste auf daily/1: ~~`himmel`, `feiertage`, `warnungen`, `namenstage`, `termine` (privat)~~ (erledigt, Kacheln „Wetter“ und „Kalender“), offen: `tanken`, `abfahrten`, `fussball`, ~~`an-diesem-tag`~~ (✅ 0.35.0 `andiesemtag`), ~~`tagesinhalt`~~ (✅ 0.34.0), `kurse` (privat), `schlagzeilen` (privat). Roger wählt die Reihenfolge; vor jedem Umzug ein Plan.
+1. **Umzug** der laufenden Dienste auf daily/1: ~~`himmel`, `feiertage`, `warnungen`, `namenstage`, `termine` (privat)~~ (erledigt, Kacheln „Wetter“ und „Kalender“), offen: `tanken`, `abfahrten`, ~~`fussball`~~ (✅ 0.43.0), ~~`an-diesem-tag`~~ (✅ 0.35.0 `andiesemtag`), ~~`tagesinhalt`~~ (✅ 0.34.0), `kurse` (privat), `schlagzeilen` (privat). Roger wählt die Reihenfolge; vor jedem Umzug ein Plan.
 2. **Neue Live-Dienste mit freier Quelle:** `waehrungen`, `strompreis`, `verkehr`, `weltwetter`, `raumfahrt`, `krypto`, `klima`.
 3. **Neue Tagesinhalte:** weitere Rubriken in `tagesinhalt`, dazu `quiz`.
 4. **Lokale Dienste:** `countdowns`, `notizen`.

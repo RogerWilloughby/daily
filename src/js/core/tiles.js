@@ -13,7 +13,7 @@ export const CATALOG = [
   T('links', 'Meine Seiten', 'Seiten', 'link', { state: 'local', fertig: true }),
   T('tasks', 'Mein Daily', 'Aufgaben', 'list', { state: 'local', fertig: true }),
   T('verkehr', 'Verkehr', 'Verkehr', 'tram', { fertig: true, hover: 'Verkehr' }),   // Abfahrten, Tanken (später Arbeitsweg); ersetzt „Abfahrten“ und „Tanken“
-  T('sport', 'Sport', 'Sport', 'ball'),
+  T('sport', 'Sport', 'Sport', 'ball', { fertig: true, hover: 'Sport' }),   // Fußball (Dienst „fussball“): Verein, Tabelle, Spieltag
   T('money', 'Finanzen', 'Finanzen', 'money', { fertig: true, hover: 'Finanzen' }),   // Mini-Reiter: Kurse, Zinsen & Inflation (EZB), privat Märkte, Spartipp (ersetzt „Sparen“)
   T('unterhaltung', 'Unterhaltung', 'Spaß', 'lachen', { state: 'content', fertig: true, hover: 'Unterhaltung' }),   // Rätsel, Witz, Film mit Verlauf und Favoriten (ersetzt „Rätsel & Witz“ und „Filmtipp“)
   T('wissen', 'Wissen', 'Wissen', 'book', { state: 'content', fertig: true, hover: 'Wissen' }),   // Wort & Sprichwort, Land, An diesem Tag (Wikipedia) mit Verlauf und Favoriten (ersetzt „Wissen“ und „Land des Tages“)

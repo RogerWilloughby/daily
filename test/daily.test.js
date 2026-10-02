@@ -16,21 +16,6 @@ test('Schlagzeilen: RSS und Atom werden gelesen', () => {
   assert.ok(a.length >= 1);
 });
 
-test('Fußball: Saison beginnt im Juli', () => {
-  const { season } = require('../api/sport');
-  assert.equal(season(new Date('2026-06-30T12:00:00Z')), 2025);
-  assert.equal(season(new Date('2026-07-01T12:00:00Z')), 2026);
-});
-
-test('Fußball: eigener Verein wird gefunden und zusammengefasst', () => {
-  const { summarize } = require('../api/sport');
-  const s = summarize({ id: 'bl2', name: '2. Bundesliga' }, 2026, fx.table2(), fx.matches2(), 'Dynamo Dresden');
-  assert.ok(s, 'Dynamo nicht gefunden');
-  const me = s.table.find(r => r.isTeam);
-  assert.equal(me.pos, 4);
-  assert.equal(summarize({ id: 'bl2' }, 2026, fx.table2(), [], 'Gibtsnicht United'), null);
-});
-
 test('Abfahrten: VVO-Datum, Haltestelle und Sortierung', () => {
   const { parseDate, parsePoint, mapDepartures } = require('../api/transit');
   assert.equal(parseDate('/Date(1790424000000+0200)/'), new Date(1790424000000).toISOString());
@@ -107,7 +92,7 @@ test('Layouts: öffentlich ohne private Kacheln, Standard 12 (fertige zuerst), R
   // Standard (keine eigene Belegung): 12 Kacheln, überarbeitete zuerst, dann Vorschau-Kacheln in Standardreihenfolge
   const pub = chooseLayout(false).map(t => t.id);
   assert.equal(pub.length, STANDARD_ANZAHL);
-  assert.deepEqual(pub, ['weather', 'kalender', 'links', 'tasks', 'verkehr', 'money', 'unterhaltung', 'alltag', 'wissen', 'tools', 'usage', 'sport']);
+  assert.deepEqual(pub, ['weather', 'kalender', 'links', 'tasks', 'verkehr', 'sport', 'money', 'unterhaltung', 'alltag', 'wissen', 'tools', 'usage']);
   assert.deepEqual(chooseLayout(false, ['play', 'film', 'saving']).map(t => t.id), ['unterhaltung', 'money']);   // „Rätsel & Witz“ und „Film“ → Unterhaltung, „Sparen“ → Finanzen
   assert.deepEqual(chooseLayout(false, ['knowledge', 'travel', 'weather']).map(t => t.id), ['wissen', 'weather']);   // „Wissen“ und „Land des Tages“ → Wissen
   assert.ok(!CATALOG.some(t => t.id === 'knowledge' || t.id === 'travel'));
@@ -116,7 +101,7 @@ test('Layouts: öffentlich ohne private Kacheln, Standard 12 (fertige zuerst), R
   assert.ok(!CATALOG.some(t => t.id === 'transit' || t.id === 'fuel'));
   assert.ok(!pub.includes('news') && !pub.includes('alerts'));
   const priv = chooseLayout(true).map(t => t.id);
-  assert.deepEqual(priv.slice(0, 12), ['weather', 'kalender', 'tasks', 'verkehr', 'money', 'unterhaltung', 'alltag', 'wissen', 'links', 'tools', 'usage', 'news']);
+  assert.deepEqual(priv.slice(0, 12), ['weather', 'kalender', 'tasks', 'verkehr', 'sport', 'money', 'unterhaltung', 'alltag', 'wissen', 'links', 'tools', 'usage']);
   // Raster: Rechner (quer, Wunschform 1,4) und Handy (hochkant, quadratisch)
   const r = (n, w, h, a, v) => { const x = raster(n, w, h, a, v); return `${x.cols}x${x.rows}`; };
   assert.deepEqual([1, 2, 4, 6, 9, 12, 20].map(n => r(n, 1344, 700)), ['1x1', '2x1', '2x2', '3x2', '3x3', '4x3', '5x4']);

@@ -1,57 +1,46 @@
-// Fußball über /api/sport (OpenLigaDB): Tabellenplatz, letztes und nächstes Spiel des eigenen Vereins.
+// Kachel „Sport“: Fußball über den Dienst „fussball“ (eine Antwort je Liga, seit 0.43.0 statt api/sport.js).
+// Den eigenen Verein sucht der Browser in der Liga-Antwort – zuerst in der gemerkten Liga, sonst 1., 2., 3. Liga nacheinander.
+// Die gefundene Liga bleibt je Verein gespeichert (Kachel-Einstellung { liga, ligaFuer }). Mini-Reiter: Verein · Tabelle · Spieltag.
 import { set } from '../core/board.js';
-import { settings, saveSettings } from '../core/store.js';
+import { settings, saveSettings, kachelOpt, kachelOptSpeichern } from '../core/store.js';
 import { kachelEinstellungen } from '../core/einstellungen.js';
 import { addAnswer } from '../core/ask.js';
-import { getJson } from '../core/util.js';
+import { gespeichert, dienst } from '../dienste/client.js';
+import { LIGEN, findeVerein, kachel, antwort } from '../adapter/fussball.js';
 
-let data = null;
-const when = iso => new Date(iso).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
-const RES = { S: 'Sieg', U: 'Unentschieden', N: 'Niederlage' };
+const STANDARD = 'Dynamo Dresden';
+let env = null;
+const suche = () => (settings.team || STANDARD).trim() || STANDARD;
 
 export async function load() {
-  const j = await getJson('/api/sport?team=' + encodeURIComponent(settings.team || 'Dynamo Dresden'));
-  if (!j.found) {
-    data = null;
-    set('sport', { state: 'off', title: 'Sport', m: 'Verein wählen', ms: '–', x: `„${settings.team}“ wurde in der 1. bis 3. Liga nicht gefunden. Verein in den Einstellungen der Kachel (Zahnrad) anpassen.`,
-      rows: [['Gesucht', settings.team], ['Ligen', '1., 2. und 3. Bundesliga (OpenLigaDB)']] });
-    return;
+  const q = suche(), o = kachelOpt('sport');
+  const gemerkt = o.ligaFuer === q && LIGEN.includes(o.liga) ? o.liga : null;
+  // beim Öffnen sofort der gespeicherte Stand der gemerkten Liga
+  if (!env && gemerkt) {
+    const alt = gespeichert('fussball', { liga: gemerkt });
+    if (findeVerein(alt, q)) set('sport', kachel(alt, q));
   }
-  data = j;
-  const me = j.table.find(r => r.isTeam);
-  const around = j.table.filter(r => Math.abs(r.pos - me.pos) <= 2);
-  const rows = [
-    ['Liga', `${j.league.name} ${j.season}/${String(j.season + 1).slice(2)}`],
-    ['Platz', `${me.pos}. mit ${me.points} Punkten · ${me.games} Spiele · Tore ${me.goals}:${me.against}`]
-  ];
-  if (j.last) rows.push(['Letztes Spiel', `${j.last.home} – ${j.last.away} ${j.last.score} (${RES[j.last.result] || ''})`]);
-  if (j.next) rows.push(['Nächstes Spiel', `${when(j.next.date)}: ${j.next.home} – ${j.next.away}`]);
-  around.forEach(r => rows.push([`${r.pos}.`, `${r.team} · ${r.points} Pkt${r.isTeam ? ' ◀' : ''}`]));
-  if (j.matchday && j.matchday.matches.length) {
-    rows.push([j.matchday.name, j.matchday.matches.map(m => `${m.home} ${m.score || '–:–'} ${m.away}`).join(' · ')]);
+  let fehler = null, erreicht = 0, gefunden = null;
+  for (const liga of gemerkt ? [gemerkt, ...LIGEN.filter(l => l !== gemerkt)] : LIGEN) {
+    let e;
+    try { e = await dienst('fussball', { liga }); erreicht++; } catch (err) { fehler = err; continue; }
+    if (findeVerein(e, q)) {
+      gefunden = e;
+      if (liga !== gemerkt) kachelOptSpeichern('sport', { liga, ligaFuer: q });
+      break;
+    }
   }
-  rows.push(['Quelle', 'OpenLigaDB']);
-  const shortName = j.team.short || j.team.name;
-  set('sport', {
-    state: 'live', title: shortName,
-    m: `Platz ${me.pos}`, ms: `Platz ${me.pos}`,
-    x: [j.last ? `Zuletzt ${j.last.score} gegen ${j.last.opponent}` : null, j.next ? `Nächstes: ${when(j.next.date)} gegen ${j.next.opponent}` : null].filter(Boolean).join(' · ') || j.league.name,
-    rows
-  });
+  if (!gefunden && !erreicht) throw fehler || new Error('Fußball nicht erreichbar');
+  env = gefunden;
+  set('sport', kachel(env, q));
 }
 
-addAnswer(/sport|fußball|fussball|bundesliga|dynamo|spiel|tabelle|verein/i, () => {
-  if (!data) return 'Die Fußballdaten sind gerade nicht verfügbar – oder der Verein ist in den Einstellungen noch nicht gefunden.';
-  const me = data.table.find(r => r.isTeam);
-  return `${data.team.name}: Platz ${me.pos} in der ${data.league.name} mit ${me.points} Punkten.` +
-    (data.last ? ` Zuletzt ${data.last.home} – ${data.last.away} ${data.last.score}.` : '') +
-    (data.next ? ` Nächstes Spiel: ${when(data.next.date)}, ${data.next.home} – ${data.next.away}.` : '');
-});
+addAnswer(/sport|fußball|fussball|bundesliga|dynamo|spiel|tabelle|verein/i, () => antwort(env, suche()));
 
-// Einstellungen der Kachel (Zahnrad-Reiter)
+// Einstellungen der Kachel (Zahnrad)
 kachelEinstellungen('sport', {
   felder: () => [{ typ: 'text', key: 'team', label: 'Verein', wert: settings.team || '', platzhalter: 'z. B. Dynamo Dresden', hilfe: '1., 2. oder 3. Fußball-Bundesliga der Männer.' }],
-  speichern: w => saveSettings({ team: w.team.trim() || 'Dynamo Dresden' })
+  speichern: w => { env = null; saveSettings({ team: w.team.trim() || STANDARD }); }
 });
 
 export default { id: 'sport', name: 'Fußball', every: 15 * 60e3, load };

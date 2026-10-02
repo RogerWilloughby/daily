@@ -19,7 +19,8 @@ const DIENSTE = [
   require('./tanken'),
   require('./autobahn'),
   require('./tagesinhalt'),
-  require('./andiesemtag')
+  require('./andiesemtag'),
+  require('./fussball')
 ];
 const byId = Object.fromEntries(DIENSTE.map(d => [d.id, d]));
 

@@ -19,5 +19,6 @@
 | [`autobahn`](autobahn.md) | Autobahn | 1.1.0 | Die Autobahn GmbH des Bundes (Autobahn-API) | DE | B |
 | [`tagesinhalt`](tagesinhalt.md) | Tagesinhalte | 1.1.0 | DAILY (eigene Tagesinhalte, mit KI vorbereitet) | weltweit | B |
 | [`andiesemtag`](andiesemtag.md) | An diesem Tag | 1.1.0 | Wikipedia – „An diesem Tag“ (Wikimedia-Feed) | weltweit | B |
+| [`fussball`](fussball.md) | Fußball | 1.0.0 | OpenLigaDB (Community-Datenbank für Sportergebnisse) | weltweit | B |
 
 Skalierungsklassen: **A** berechnet – ohne Quelle, beliebig oft · **B** für alle gleich – ein Abruf je Zeitraum reicht für alle Nutzer · **C** je Ort, rasterbar – Anfragen je gerundetem Ort bündelbar · **D** je Eingabe – jede Eingabe ist eigen (Suche, Liste)

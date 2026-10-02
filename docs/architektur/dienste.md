@@ -187,7 +187,8 @@ Neue Kachel mit eigener Darstellung: Datei unter `src/js/ansichten/`, vom Provid
 | `andiesemtag` | ✅ daily/1 – Wikipedia „An diesem Tag“ je Datum (Verlauf), ersetzt `api/onthisday.js`; Kachel „Wissen“, Reiter „An diesem Tag“ |
 | `autobahn` | ✅ daily/1 – Autobahn-API: Staus, Sperrungen, Baustellen je Autobahn (bis 5); Kachel „Verkehr“, Ansicht „Arbeitsweg“ – Start/Ziel nur im Browser, Filter auf den Weg im Adapter |
 | `kurse` | ✅ daily/1, **nur privat** – Yahoo (DAX, S&P 500, MSCI World, Bitcoin, Ethereum, Gold); Kachel „Finanzen“, Reiter „Märkte“ |
-| Abfahrten, Sport | ⏳ noch alte Einzelfunktionen bzw. im Browser berechnet |
+| `fussball` | ✅ daily/1 – OpenLigaDB je Liga (Tabelle, drei Spieltage), ersetzt `api/sport.js`; Kachel „Sport“ (Verein · Tabelle · Spieltag), Verein sucht der Browser |
+| Abfahrten | ⏳ noch alte Einzelfunktion (`api/transit.js`) |
 | Schlagzeilen (privat) | ⏳ |
 
 Nach der Umstellung aller Dienste entfallen die alten `api/*.js`-Funktionen.
