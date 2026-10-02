@@ -1,4 +1,4 @@
-# DAILY – Entscheidungen (Stand 01.10.2026)
+# DAILY – Entscheidungen (Stand 02.10.2026)
 
 Ergebnis der Durchsicht von `daily-konzept.html`, ergänzt um die Nutzungsrecherche (`../recherche/nutzung.md`) und die rechtliche Checkliste (`../recht/checkliste.md`).
 
@@ -9,6 +9,19 @@ DAILY verarbeitet für die öffentliche Version **außer dem Ort keine Nutzerdat
 - **Neu, nur mit dem Ort:** Feiertage & Ferien, Warnungen (DWD), Tanken, Himmel; dazu „Meine Seiten“ (nur Links, lokal gespeichert).
 - Folgen: kein Konto, keine Datenbank, keine OAuth-Prüfung, kurze Datenschutzerklärung, keine Medienpflichten. Stufen 2 und 3 des Stufenplans (3b) sind damit für die öffentliche Version nicht nötig.
 - Nächster Schritt: Dienste aus der Ideenliste umsetzen – Übersicht und Reihenfolge in `dienste-katalog.md`. Danach entscheiden, welche Dienste zu Kacheln/Oberflächen zusammengefasst werden (Technik für eigene Kachelauswahl vorbereitet: `settings.layout`).
+
+## 0a. Ausrichtung (entschieden 02.10.2026): Unterhaltung, Mitmachen, Sammeln
+Ausführlich: **`ausrichtung.md`** (inkl. sortierter Ideenliste A–E und Mitbewerbern). Ergänzt Abschnitt 0 (bleibt gültig: keine Nutzerdaten außer dem Ort, keine Nachrichten), präzisiert Abschnitt 1 und ersetzt das gestrichene Punktesystem (Abschnitt 8) durch eine Sammlung.
+- **DAILY ist Unterhaltung und regt zur Kreativität an, die Sorgen bleiben draußen** – kein Info-/Nachrichtenportal. Untertitel: **„dein digitaler Abreißkalender“**; Arbeitsname bleibt DAILY, endgültiger Name erst nach Markenrecherche und Test.
+- Die **Tagesinhalte sind das Herz**; Wetter und Kalender sind der ruhige Rahmen und der Anlass zum Öffnen.
+- **Mitmachen statt nur Lesen:** Stufe 1 allein im Browser, Stufe 2 Teilen ohne Konto (wie Wordle). Keine Inhalte oder Abstimmungen anderer Nutzer auf DAILY.
+- **Sammlung statt Serie:** ein Sammelstück pro Tag für einen beliebigen Mitmach-Moment, verpasste Tage nachholbar, Alben in Staffeln mit Thema, Album als Datei/QR-Code sichern und übertragen (ohne Server).
+- **Inhalte als Jahrgang:** zeitlos, einmal im Jahr erstellt und geprüft; Qualität vor Menge; Gesundheit/Beziehung als Impulse statt Ratschläge.
+- **Handy zuerst** für Mitmach-Formate (PWA reicht zum Start), Rechner gleichwertig als Startseite. Erinnerungen nur auf Wunsch.
+- **Zielgruppe:** Erwachsene, familienfreundlich (alles jugendfrei, kein eigenes Kinderprodukt).
+- **Info-Kacheln:** Standard Wetter, Kalender, Meine Seiten, Mein Daily; wählbar Tanken, Fußball, Autobahn, Abfahrten, Finanzen; privat Kurse, Schlagzeilen, Termine, Tools. **Keine neuen Info-Dienste bis nach dem Test** (Weltwetter, Klima, Strompreis, Verbindung, Krypto, Wetterkarte); gebaute nur pflegen. Arbeitszeit fließt in Herzstück und Staunen (Rätsel, Bilderrätsel, Quiz, Album).
+- **Finanzierung:** keine Werbebanner; während des Tests nicht kommerziell; danach Spenden und sparsame, gekennzeichnete Affiliate-Links; mittelfristig DAILY Plus oder gedrucktes Produkt. Immer kostenlos: Tagesinhalte, Mitmachen, Nachholen, Album.
+- **Nächste Schritte:** Markenrecherche „DAILY“, Test mit 5–10 Leuten (Erfolgskriterium vorher festlegen), erste 2–3 Mitmach-Formate und erstes Album auswählen, Jahrgang planen. Vor der Umsetzung je Format ein Plan.
 
 ## 1. Zielgruppe
 Erst für Roger selbst bauen und testen, aber so planen, dass DAILY später öffentlich werden kann.
