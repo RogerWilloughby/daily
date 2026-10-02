@@ -1446,3 +1446,57 @@ test('Fußball: Dienst je Liga (Tabelle, drei Spieltage), nur liga=bl1|bl2|bl3; 
   assert.match(a.antwort(null, 'X'), /nicht verfügbar/);
   assert.match(a.antwort(env, 'Gibtsnicht'), /nicht gefunden/);
 });
+
+test('Schlagzeilen: Dienst nur privat mit Kennwort, RSS und Atom, je Quelle erreichbar; Kachel mit Mini-Reitern und Frag DAILY', async () => {
+  const d = dienste.byId.schlagzeilen;
+  // Lesen (rein): RSS und Atom, nur Einträge mit Titel und http(s)-Link, Text ohne HTML
+  const r = d.lesen(fx.rss('Tagesschau'), 'tagesschau');
+  assert.equal(r.length, 3);
+  assert.match(r[0].link, /^https:\/\//);
+  assert.match(r[0].zeit, /Z$/);
+  assert.ok(d.lesen(fx.atom('heise'), 'heise').length >= 1);
+  assert.deepEqual(d.lesen('<rss><item><title>A &amp; <b>B</b></title><link>https://x.test/1</link></item><item><title>ohne Link</title></item>'
+    + '<item><title>böser Link</title><link>javascript:alert(1)</link></item></rss>', 'q'), [{ quelle: 'q', titel: 'A & B', link: 'https://x.test/1', zeit: null }]);
+  // Router: öffentlich gesperrt, privat ohne Kennwort 401, mit Kennwort gültig
+  delete process.env.DAILY_PRIVATE;
+  assert.equal((await rufe('schlagzeilen', {}, 'GET', KENNWORT)).code, 404);
+  process.env.DAILY_PRIVATE = '1';
+  assert.equal((await rufe('schlagzeilen')).code, 401);
+  assert.equal((await rufe('schlagzeilen', { x: '1' }, 'GET', KENNWORT)).code, 400);
+  const res = await rufe('schlagzeilen', {}, 'GET', KENNWORT);
+  delete process.env.DAILY_PRIVATE;
+  assert.equal(res.code, 200);
+  assert.match(res.headers['cache-control'], /no-store/);                              // privat: nie im CDN
+  gueltig(res.body, d.schema);
+  const env = res.body, x = env.daten;
+  assert.deepEqual(x.quellen.map(q => [q.id, q.erreichbar]), [['tagesschau', true], ['mdr', true], ['heise', true]]);
+  assert.ok(x.meldungen.every((m, i) => !i || (x.meldungen[i - 1].zeit || '') >= (m.zeit || '')), 'neueste zuerst');
+  // eine Quelle gestört: die anderen kommen, alle gestört: quelle_fehler
+  const teil = d.umwandeln([{ id: 'a', name: 'A', seite: null, erreichbar: true, fehler: null, meldungen: [{ quelle: 'a', titel: 'T', link: 'https://a.test', zeit: null }] },
+    { id: 'b', name: 'B', seite: null, erreichbar: false, fehler: 'HTTP 503', meldungen: [] }]);
+  assert.deepEqual(teil.quellen.map(q => q.anzahl), [1, 0]);
+  const echt = global.fetch;
+  global.fetch = async () => new Response('kaputt', { status: 503 });
+  try { await assert.rejects(d.run(), e => e.code === 'quelle_fehler'); } finally { global.fetch = echt; }
+  // Adapter: Neueste · Tagesschau · MDR Sachsen · heise, Zeilen als Links
+  const a = await esm('src/js/adapter/schlagzeilen.js');
+  const k = a.kachel(env);
+  assert.deepEqual([k.state, k.m, k.startReiter], ['live', '8 neu', 'neueste']);
+  assert.deepEqual(k.kleinReiter.map(z => z.id), ['neueste', 'tagesschau', 'mdr', 'heise']);
+  const [neu, ts] = k.kleinReiter;
+  assert.equal(neu.liste.length, x.meldungen.length);
+  assert.match(neu.liste[0].href, /^https:\/\//);
+  assert.match(neu.liste[0].d, /^\d{2}:\d{2}$/);
+  assert.match(neu.liste[0].tip, /^(Tagesschau|MDR Sachsen|heise) · /);
+  assert.ok(ts.liste.every(z => /Tagesschau/.test(z.t)));
+  assert.match(k.x, /^(Tagesschau|MDR Sachsen|heise): /);
+  const kaputt = a.kachel({ daten: { ...x, quellen: x.quellen.map(q => q.id === 'mdr' ? { ...q, erreichbar: false } : q), meldungen: x.meldungen.filter(m => m.quelle !== 'mdr') } });
+  assert.match(kaputt.kleinReiter[0].kopf, /ohne MDR Sachsen/);
+  assert.match(kaputt.kleinReiter[2].html, /MDR Sachsen ist gerade nicht erreichbar/);
+  // ohne Kennwort: Hinweis statt Fehler; Frag DAILY
+  const ohne = a.kachel(null, Date.now(), 'Europe/Berlin', true);
+  assert.deepEqual([ohne.state, ohne.kleinReiter.length], ['off', 1]);
+  assert.match(ohne.kleinReiter[0].html, /Kennwort .* „Privater Betrieb“/);
+  assert.match(a.antwort(env), /^Neueste Schlagzeilen: (Tagesschau|MDR Sachsen|heise): .* · .* · /);
+  assert.match(a.antwort(null, true), /Kennwort/);
+});

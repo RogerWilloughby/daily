@@ -6,16 +6,6 @@ const fs = require('node:fs');
 const path = require('node:path');
 const fx = require('../tools/fixtures');
 
-test('Schlagzeilen: RSS und Atom werden gelesen', () => {
-  const { parse } = require('../api/headlines');
-  const r = parse(fx.rss('Tagesschau'), 'Tagesschau');
-  assert.equal(r.length, 3);
-  assert.match(r[0].link, /^https:\/\//);
-  assert.ok(r[0].date);
-  const a = parse(fx.atom('heise'), 'heise');
-  assert.ok(a.length >= 1);
-});
-
 test('Abfahrten: VVO-Datum, Haltestelle und Sortierung', () => {
   const { parseDate, parsePoint, mapDepartures } = require('../api/transit');
   assert.equal(parseDate('/Date(1790424000000+0200)/'), new Date(1790424000000).toISOString());
@@ -60,13 +50,9 @@ test('Datenschutz: Koordinaten werden auf ~1 km gerundet', () => {
   assert.equal(coord('200', 180), null);
 });
 
-test('Betriebsart: Schlagzeilen nur privat', async () => {
+test('Betriebsart: Schalter DAILY_PRIVATE in api/config', async () => {
   const res = () => { const r = { headers: {}, setHeader(k, v) { r.headers[k] = v; }, status(c) { r.code = c; return r; }, json(o) { r.body = o; } }; return r; };
   delete process.env.DAILY_PRIVATE;
-  for (const f of ['headlines']) {
-    const r = res(); await require('../api/' + f)({ method: 'GET', query: {} }, r);
-    assert.equal(r.code, 404, f + ' müsste öffentlich gesperrt sein');
-  }
   const r = res(); require('../api/config')({}, r); assert.equal(r.body.private, false);
   process.env.DAILY_PRIVATE = '1';
   const r2 = res(); require('../api/config')({}, r2); assert.equal(r2.body.private, true);
@@ -101,7 +87,7 @@ test('Layouts: öffentlich ohne private Kacheln, Standard 12 (fertige zuerst), R
   assert.ok(!CATALOG.some(t => t.id === 'transit' || t.id === 'fuel'));
   assert.ok(!pub.includes('news') && !pub.includes('alerts'));
   const priv = chooseLayout(true).map(t => t.id);
-  assert.deepEqual(priv.slice(0, 12), ['weather', 'kalender', 'tasks', 'verkehr', 'sport', 'money', 'unterhaltung', 'alltag', 'wissen', 'links', 'tools', 'usage']);
+  assert.deepEqual(priv.slice(0, 12), ['weather', 'kalender', 'news', 'tasks', 'verkehr', 'sport', 'money', 'unterhaltung', 'alltag', 'wissen', 'links', 'tools']);
   // Raster: Rechner (quer, Wunschform 1,4) und Handy (hochkant, quadratisch)
   const r = (n, w, h, a, v) => { const x = raster(n, w, h, a, v); return `${x.cols}x${x.rows}`; };
   assert.deepEqual([1, 2, 4, 6, 9, 12, 20].map(n => r(n, 1344, 700)), ['1x1', '2x1', '2x2', '3x2', '3x3', '4x3', '5x4']);

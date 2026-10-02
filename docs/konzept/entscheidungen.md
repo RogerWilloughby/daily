@@ -5,7 +5,7 @@ Ergebnis der Durchsicht von `daily-konzept.html`, ergänzt um die Nutzungsrecher
 ## 0. Strategie (Stand 26.09.2026): ohne Nutzerdaten, ohne Nachrichten
 DAILY verarbeitet für die öffentliche Version **außer dem Ort keine Nutzerdaten** und zeigt **keine Nachrichten**. Mail, Nachrichten und Kalender holen sich Nutzer bei ihren eigenen Portalen – DAILY verlinkt sie nur („Meine Seiten“).
 - **Gestrichen:** Mail, Pakete (brauchen Postfach/Konten).
-- **Nur privat** (Vercel-Variable `DAILY_PRIVATE=1`, sonst sind der Dienst `termine` und `api/headlines` gesperrt; in Rogers Vercel-Projekt gesetzt am 28.09.2026 und die Kacheln fehlen): Kalender (iCal-Link = Nutzerdatum), Schlagzeilen (Nachrichten, Grauzone MStV).
+- **Nur privat** (Vercel-Variable `DAILY_PRIVATE=1`, sonst sind die Dienste `termine`, `kurse` und `schlagzeilen` gesperrt; in Rogers Vercel-Projekt gesetzt am 28.09.2026 und die Kacheln fehlen): Kalender (iCal-Link = Nutzerdatum), Schlagzeilen (Nachrichten, Grauzone MStV).
 - **Neu, nur mit dem Ort:** Feiertage & Ferien, Warnungen (DWD), Tanken, Himmel; dazu „Meine Seiten“ (nur Links, lokal gespeichert).
 - Folgen: kein Konto, keine Datenbank, keine OAuth-Prüfung, kurze Datenschutzerklärung, keine Medienpflichten. Stufen 2 und 3 des Stufenplans (3b) sind damit für die öffentliche Version nicht nötig.
 - Nächster Schritt: Dienste aus der Ideenliste umsetzen – Übersicht und Reihenfolge in `dienste-katalog.md`. Danach entscheiden, welche Dienste zu Kacheln/Oberflächen zusammengefasst werden (Technik für eigene Kachelauswahl vorbereitet: `settings.layout`).
@@ -41,7 +41,7 @@ Kacheln und Quellen:
 - ~~**Tanken**~~ – seit App 0.27.0 Ansicht „Tanken“ der Kachel „Verkehr“ (Dienst `tanken`). Braucht Vercel-Variable `TANKERKOENIG_API_KEY` (kostenlos: onboarding.tankerkoenig.de; in Rogers Projekt gesetzt am 30.09.2026); ohne Schlüssel zeigt die Ansicht „Tanken einrichten“.
 - ~~**Himmel**~~ – Tageslänge, Sonne, Mondphase, nächster Voll-/Neumond, Sternschnuppen; ohne Netz berechnet (`src/js/lib/astro.js`).
 - **Deine Nutzung** – lokaler Klickzähler.
-- Nur privat: **Termine** (iCal, in der Kachel „Kalender“), **Schlagzeilen** (RSS).
+- Nur privat: **Termine** (iCal, in der Kachel „Kalender“), **Schlagzeilen** (RSS, seit 0.44.0 Dienst `schlagzeilen` mit Mini-Reitern Neueste · Tagesschau · MDR Sachsen · heise).
 
 ## 3a. Einstellungen (seit 28.09.2026, App 0.16.0: global + je Kachel)
 **Grundsatz (Roger):** Unter „Einstellungen“ stehen nur **globale** Einstellungen. Was eine Kachel oder ihr Dienst zeigt, stellt man **in der Kachel** ein – über einen Reiter mit Zahnrad (nur Symbol, kein Text), immer der letzte Reiter.
@@ -195,6 +195,12 @@ Anlass: Architektur-Review vom 02.10.2026, Befund H1 (`../architektur/review-202
   - **Verein sucht der Browser** (`src/js/adapter/fussball.js`): Freitext im Zahnrad, Wörter ab 3 Zeichen, Umlaute als ae/oe/ue oder a/o/u („Bayern Munchen“, „Gladbach“, „Preussen Münster“). Zuerst die gemerkte Liga, sonst 1., 2., 3. Liga nacheinander; die gefundene Liga bleibt je Verein gespeichert (Kachel-Einstellung `liga`, `ligaFuer`). Nicht gefunden → Hinweis aufs Zahnrad.
   - **Kachel:** Kennzahl „Platz 4“; Reiter **Verein** (Zuletzt, Nächstes mit Gegner zuerst, Punkte, Bilanz, Tore), **Tabelle** (ab zwei Plätzen über dem eigenen Verein, ◀ markiert), **Spieltag** (eigenes Spiel zuerst, Ergebnis oder Wochentag + Anstoß). `fertig: true`.
   - `api/sport.js` gelöscht (Rogers OK) – 6 von 12 Server-Funktionen belegt. Gemessen (Mock-Server, 1920/1400/1100 px): alle Reiter ohne Seitenfehler, Zeilen passen bzw. werden ganz ausgeblendet, lange Zeilen enden mit „…“; Bayern → nur `fussball?liga=bl1`, unbekannter Verein → drei Abfragen und Hinweis.
+- **Schlagzeilen auf daily/1 (Review M4 Schritt 2, 02.10.2026, App 0.44.0; Plan „ja“):**
+  - **Dienst `schlagzeilen`** (nur privat, mit Kennwort, keine Angaben) ersetzt `api/headlines.js`: Originalüberschriften von Tagesschau, MDR Sachsen, heise mit Link und Zeit, gemischt, neueste zuerst (höchstens 30), dazu je Quelle „erreichbar“. Fällt eine Quelle aus, kommen die anderen; ohne jede Quelle `quelle_fehler`. Links nur http(s).
+  - **Kachel:** Kennzahl „X neu“ (12 Std.); Reiter **Neueste** (alle Quellen, Quelle beim Überfahren) und je Quelle ein Reiter (Symbole Welt, Haus, Chip). Jede Zeile = Uhrzeit (ältere: Datum) + Überschrift, Link in neuem Tab; Überschriften dürfen **zwei Zeilen** haben, dann „…“. Ohne/mit falschem Kennwort Hinweis statt Fehler. `fertig: true`. Kein Zahnrad (Quellenauswahl wäre ein eigener Schritt).
+  - `api/headlines.js` gelöscht (Rogers OK) – 5 von 12 Server-Funktionen belegt. Damit nutzt keine Kachel mehr das Aufklappen (Voraussetzung für Schritt 3).
+  - Folge: Privat sind jetzt 13 fertige Kacheln in der Standardbelegung vorgesehen, gezeigt werden 12 – „Deine Nutzung“ fällt dort ohne eigene Auswahl heraus (über Einstellungen → Kacheln wählbar).
+  - Gemessen (Mock-Server privat, 1920/1400/1100 px): alle Reiter ohne Seitenfehler, nichts ragt heraus, Zeilen ganz oder gar nicht; ohne und mit falschem Kennwort Hinweis; Link `target=_blank`, `rel=noopener`.
 - **Neu auf der Liste:** Tanken und Radar mit genauer Position (Gerätestandort, Adresse oder Kartenpunkt – nur gerundet aus dem Browser) statt Ortsmitte; Firmen-Einträge im Ortsbestand (z. B. „Berliner Feuerwehr“, „DaimlerChrysler Corporate Audit“ als Orte); Idee: Koordinaten fürs Wetter gröber runden (≈ 5 km); im Ausland nur deutsche Dienste (`wetterhinweise`, `tanken`, `regen`) gar nicht erst abfragen.
 
 ## Design

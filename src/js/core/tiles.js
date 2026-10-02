@@ -21,7 +21,7 @@ export const CATALOG = [
   T('tools', 'Tools', 'Tools', 'tool', { state: 'local', fertig: true, hover: 'Tools' }),   // eigenständige Werkzeuge (src/tools/), öffnen im neuen Tab
   T('usage', 'Deine Nutzung', 'Nutzung', 'bars', { state: 'local', fertig: true }),
   // nur privat
-  T('news', 'Schlagzeilen', 'News', 'news', { scope: 'private' })
+  T('news', 'Schlagzeilen', 'News', 'news', { scope: 'private', fertig: true, hover: 'Schlagzeilen' })   // Dienst „schlagzeilen“: Neueste · je Quelle (seit 0.44.0)
 ];
 
 // Höchstens 20 Kacheln; ohne eigene Auswahl 12 (Testeinstellung: fertige zuerst, dann Vorschau-Kacheln).

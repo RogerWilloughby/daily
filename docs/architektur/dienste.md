@@ -189,6 +189,6 @@ Neue Kachel mit eigener Darstellung: Datei unter `src/js/ansichten/`, vom Provid
 | `kurse` | ✅ daily/1, **nur privat** – Yahoo (DAX, S&P 500, MSCI World, Bitcoin, Ethereum, Gold); Kachel „Finanzen“, Reiter „Märkte“ |
 | `fussball` | ✅ daily/1 – OpenLigaDB je Liga (Tabelle, drei Spieltage), ersetzt `api/sport.js`; Kachel „Sport“ (Verein · Tabelle · Spieltag), Verein sucht der Browser |
 | Abfahrten | ⏳ noch alte Einzelfunktion (`api/transit.js`) |
-| Schlagzeilen (privat) | ⏳ |
+| `schlagzeilen` | ✅ daily/1, **nur privat** – Tagesschau, MDR Sachsen, heise (RSS/Atom), ersetzt `api/headlines.js`; Kachel „Schlagzeilen“ (Neueste · je Quelle) |
 
 Nach der Umstellung aller Dienste entfallen die alten `api/*.js`-Funktionen.

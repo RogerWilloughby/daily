@@ -391,6 +391,8 @@ a.tl-z.tl-link:hover .tl-d{text-decoration:underline}
 .kr-liste{display:flex;flex-direction:column;gap:2px}
 .kr-liste .tl-z{flex:none}   /* Zeilen nie stauchen – was nicht passt, blendet krZeilen aus */
 .kr-liste .tl-z[hidden]{display:none}
+/* Schlagzeilen: Überschriften dürfen zwei Zeilen haben (dann „…“) – was nicht passt, blendet krZeilen ganz aus */
+#tile-news .kr-liste .tl-z:not([hidden]){white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2}
 .kr-feld .kr-z[hidden]{display:none}
 .tl-aktion{cursor:pointer;border-radius:4px}
 .tl-aktion:hover{background:var(--line)}
