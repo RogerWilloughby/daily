@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const path = require('node:path');
 const { pathToFileURL } = require('node:url');
 const fx = require('../tools/fixtures');
-const { pruefe, RAHMEN } = require('../services/_lib/schema');
+const { pruefe, pruefeStreng, RAHMEN } = require('../services/_lib/schema');
 const { antwort, fehlerAntwort, DienstFehler } = require('../services/_lib/rahmen');
 const dienste = require('../services');
 const router = require('../api/v1/[dienst].js');
@@ -29,8 +29,8 @@ async function rufe(dienst, query = {}, method = 'GET', kopf = {}) {
   return r;
 }
 const gueltig = (env, datenSchema) => {
-  assert.deepEqual(pruefe(env, RAHMEN), [], 'Rahmen ungültig');
-  if (datenSchema) assert.deepEqual(pruefe(env.daten, datenSchema), [], 'Daten ungültig');
+  assert.deepEqual(pruefeStreng(env, RAHMEN), [], 'Rahmen ungültig');                    // streng: auch unbekannte Felder (Review M6)
+  if (datenSchema) assert.deepEqual(pruefeStreng(env.daten, datenSchema), [], 'Daten ungültig');
 };
 
 test('Schema-Prüfer erkennt Typ-, Format-, Pflicht- und Bereichsfehler', () => {
@@ -39,6 +39,8 @@ test('Schema-Prüfer erkennt Typ-, Format-, Pflicht- und Bereichsfehler', () => 
   const f = pruefe({ a: -1.5, z: '2026-09-27 08:00', e: 'y' }, s);
   assert.equal(f.length, 3, f.join('\n'));
   assert.equal(pruefe({}, s).length, 2);
+  assert.deepEqual(pruefe({ a: 1, z: '2026-09-27T08:00:00Z', neu: 1 }, s), []);                                  // normal: unbekannte Felder egal
+  assert.deepEqual(pruefeStreng({ a: 1, z: '2026-09-27T08:00:00Z', neu: 1 }, s), ['$.neu: nicht im Schema']);    // streng: gemeldet
 });
 
 test('Rahmen daily/1: Erfolg und Fehler haben dieselbe Form', () => {
@@ -56,7 +58,7 @@ test('Rahmen daily/1: Erfolg und Fehler haben dieselbe Form', () => {
 test('Wetter: Umwandlung erfüllt den Vertrag, auch ohne Luftdaten', () => {
   const w = dienste.byId.wetter;
   const r = w.umwandeln(fx.forecast(), fx.airQuality());
-  assert.deepEqual(pruefe(r.daten, w.schema), []);
+  assert.deepEqual(pruefeStreng(r.daten, w.schema), []);
   assert.equal(r.daten.stunden.length, 48);
   // heute: alle Stunden des Kalendertags ab 0 Uhr Ortszeit (auch vergangene); Tageszeiten: 3 Tage × Morgen/Mittag/Abend/Nacht
   assert.ok(r.daten.heute.length >= 23 && r.daten.heute.length <= 25);
@@ -87,7 +89,7 @@ test('Wetter: Umwandlung erfüllt den Vertrag, auch ohne Luftdaten', () => {
   assert.equal(r.daten.tage[0].datum, heute);
   const ohne = w.umwandeln(fx.forecast(), null);
   assert.equal(ohne.daten.luft, null);
-  assert.deepEqual(pruefe(ohne.daten, w.schema), []);
+  assert.deepEqual(pruefeStreng(ohne.daten, w.schema), []);
 });
 
 test('Router: /api/v1/wetter?lat=…&lon=… liefert daily/1 – Koordinaten, Zeitzone aus der Quelle, kein Ortsname', async () => {
@@ -996,7 +998,7 @@ test('Finanzen: EZB-Kurse, Leitzinsen, Inflation; Kurse (Yahoo) nur privat; Kach
 test('Tanken: Vertrag, alle Sorten mit einem Abruf, Günstigste/Durchschnitt, Schlüssel und Land; Ansicht und Frag DAILY', async () => {
   const w = dienste.byId.tanken;
   const d = w.umwandeln(fx.tanken(), 5);
-  assert.deepEqual(pruefe(d, w.schema), []);
+  assert.deepEqual(pruefeStreng(d, w.schema), []);
   assert.deepEqual([d.anzahl, d.anzahlOffen], [5, 4]);
   assert.deepEqual(d.stationen.map(s => s.id), ['s2', 's4', 's3', 's1', 's5']);                  // nach Entfernung
   assert.deepEqual(d.guenstigste.e10, { id: 's2', preis: 1.689, entfernungKm: 0.9 });            // Gleichstand mit s5 → die nähere
@@ -1051,7 +1053,7 @@ test('Autobahn: Vertrag, Arten, Zeiten aus dem Text, Eingaben, fehlende Autobahn
   // Umwandlung einer Autobahn
   const q = { warning: fx.autobahn('x/autobahn/A4/services/warning'), closure: fx.autobahn('x/autobahn/A4/services/closure'), roadworks: fx.autobahn('x/autobahn/A4/services/roadworks') };
   const ms = w.umwandeln(q, 'A4');
-  assert.deepEqual(pruefe({ strassen: ['A4'], fehlend: [], meldungen: ms }, w.schema), []);
+  assert.deepEqual(pruefeStreng({ strassen: ['A4'], fehlend: [], meldungen: ms }, w.schema), []);
   assert.deepEqual(ms.map(m => m.typ), ['stau', 'stau', 'meldung', 'anschlusssperrung', 'sperrung', 'tagesbaustelle', 'baustelle', 'baustelle']);
   const stau = ms[0];
   assert.deepEqual([stau.von, stau.bis, stau.richtung.nach, stau.lage, stau.verzoegerungMin, stau.tempoKmh, stau.anbieter], ['Wilsdruff', 'Nossen', 'Chemnitz', 'stockend', 14, 25, 'inrix']);
@@ -1202,7 +1204,7 @@ test('Meine Seiten: feste Seiten-Auswahl, Mini-Reiter mit Symbolraster, Einstell
 
 test('Tagesinhalte: Dienst je Tag (Verlauf, nie Zukunft), Themen-Kachel mit Blättern, Favoriten, Aufgabe, Top 11 vorbereitet', async () => {
   const d = dienste.byId.tagesinhalt;
-  for (const tag of d.VORRAT.tage) assert.deepEqual(pruefe(d.umwandeln(tag, tag.datum, { heute: tag.datum, erster: d.VORRAT.von, wiederholt: false }), d.schema), [], tag.datum);   // ganzer Vorrat erfüllt den Vertrag
+  for (const tag of d.VORRAT.tage) assert.deepEqual(pruefeStreng(d.umwandeln(tag, tag.datum, { heute: tag.datum, erster: d.VORRAT.von, wiederholt: false }), d.schema), [], tag.datum);   // ganzer Vorrat erfüllt den Vertrag
   const jetzt = Date.parse('2026-10-01T10:00:00Z');
   const heute = await dienste.ausfuehren('tagesinhalt', {}, { jetzt });
   gueltig(heute, d.schema);
@@ -1494,4 +1496,39 @@ test('Schlagzeilen: Dienst nur privat mit Kennwort, RSS und Atom, je Quelle erre
   assert.match(ohne.kleinReiter[0].html, /Kennwort .* „Privater Betrieb“/);
   assert.match(a.antwort(env), /^Neueste Schlagzeilen: (Tagesschau|MDR Sachsen|heise): .* · .* · /);
   assert.match(a.antwort(null, true), /Kennwort/);
+});
+
+test('Vertragsversion (Review M6): Oberfläche kennt jeden Dienst in seiner Version, prüft jede Antwort, nutzt nur passende gespeicherte Stände', async () => {
+  const v = await esm('src/js/dienste/vertraege.js');
+  assert.deepEqual(Object.keys(v.VERTRAG).sort(), dienste.DIENSTE.map(d => d.id).sort(), 'vertraege.js: Liste der Dienste');
+  for (const d of dienste.DIENSTE) assert.equal(v.VERTRAG[d.id], d.version, `${d.id}: Vertrag ${d.version} auf dem Server – Oberfläche anpassen und vertraege.js erhöhen`);
+  const env = { format: 'daily/1', dienst: 'wetter', version: 1 };
+  assert.equal(v.vertragFehler('wetter', env), null);
+  assert.equal(v.vertragFehler('wetter', { ...env, version: 2 }), 'Vertrag 2, Oberfläche kennt 1');
+  assert.equal(v.vertragFehler('regen', env), 'Antwort von „wetter“ statt „regen“');
+  assert.equal(v.vertragFehler('gibtsnicht', { ...env, dienst: 'gibtsnicht' }), 'Dienst „gibtsnicht“ ist der Oberfläche unbekannt');
+  // Client: Antwort mit neuer Vertragsversion → antwort_ungueltig; vorhandener passender Stand wird weiter gezeigt (als veraltet)
+  const echt = global.fetch, lager = {};
+  global.localStorage = { getItem: k => (k in lager ? lager[k] : null), setItem: (k, x) => { lager[k] = String(x); }, removeItem: k => { delete lager[k]; }, key: i => Object.keys(lager)[i], get length() { return Object.keys(lager).length; } };
+  Object.defineProperty(global.localStorage, 'keys', { value: () => Object.keys(lager) });
+  let version = 1;
+  global.fetch = async (url, o) => {
+    if (!String(url).startsWith('/api/v1/')) return echt(url, o);   // Abrufe der Dienste bei ihren Quellen: Beispieldaten (fetch-stub)
+    const u = new URL(url, 'http://x'), r = await rufe(u.pathname.split('/').pop(), Object.fromEntries(u.searchParams));
+    return { ok: r.code < 400, status: r.code, json: async () => ({ ...r.body, version }) };
+  };
+  try {
+    const c = await import(pathToFileURL(path.join(__dirname, '..', 'src/js/dienste/client.js')).href + '?t=vertrag');
+    const p = { lat: 52.52, lon: 13.41 };
+    assert.equal((await c.dienst('wetter', p)).version, 1);
+    version = 2;
+    await assert.rejects(c.dienst('regen', p), e => e.code === 'antwort_ungueltig' && /Vertrag 2, Oberfläche kennt 1/.test(e.message));   // nichts gespeichert → Fehler
+    const w = await c.dienst('wetter', p, { frisch: true });
+    assert.deepEqual([w.version, w.veraltet], [1, true]);                       // letzter passender Stand
+    // gespeicherte Antwort in einem fremden Vertrag wird nicht angezeigt
+    const k = Object.keys(lager).find(x => x.includes('/api/v1/wetter'));
+    lager[k] = JSON.stringify({ ...JSON.parse(lager[k]), version: 2 });
+    const c2 = await import(pathToFileURL(path.join(__dirname, '..', 'src/js/dienste/client.js')).href + '?t=vertrag2');
+    assert.equal(c2.gespeichert('wetter', p), null);
+  } finally { global.fetch = echt; delete global.localStorage; }
 });

@@ -1,6 +1,7 @@
 // Kennwort für den privaten Betrieb (Review M2): steht nur in den Einstellungen dieses Browsers; geht nur an private Dienste,
 // in der Kopfzeile X-Daily-Kennwort – nie in einer Adresse.
 import { settings } from '../core/store.js';
+import { vertragFehler } from './vertraege.js';
 export const kennwortKopf = () => (settings.kennwort ? { 'x-daily-kennwort': settings.kennwort } : {});
 // Zugriff auf die DAILY-Dienste (GET /api/v1/<id>) im Format daily/1.
 // Oberflächen holen hierüber Daten und geben sie an einen Adapter (src/js/adapter/) weiter.
@@ -34,8 +35,9 @@ function merke(url, r) {
       .sort((x, y) => (x[1] < y[1] ? -1 : 1)).slice(0, alle.length - DMAX).forEach(([k]) => localStorage.removeItem(k));
   } catch (e) { /* Speicher voll oder gesperrt: dann eben ohne */ }
 }
-function erinnere(url) {
-  try { const r = JSON.parse(localStorage.getItem(DKEY + url)); return r && r.format === 'daily/1' ? r : null; } catch (e) { return null; }
+// nur Antworten, deren Vertrag die Oberfläche versteht (eine alte Antwort im Speicher kann ein älteres Format haben)
+function erinnere(url, id) {
+  try { const r = JSON.parse(localStorage.getItem(DKEY + url)); return r && !vertragFehler(id, r) ? r : null; } catch (e) { return null; }
 }
 const urlVon = (id, params) => {
   const qs = Object.entries(params).filter(([, v]) => v != null && v !== '')
@@ -43,7 +45,7 @@ const urlVon = (id, params) => {
   return `/api/v1/${id}${qs ? '?' + qs : ''}`;
 };
 // Letzter gespeicherter Stand (auch abgelaufen) – zum sofortigen Anzeigen beim Öffnen
-export const gespeichert = (id, params = {}) => speicher.get(urlVon(id, params)) || erinnere(urlVon(id, params));
+export const gespeichert = (id, params = {}) => speicher.get(urlVon(id, params)) || erinnere(urlVon(id, params), id);
 // Bei diesen Fehlern lieber den letzten Stand zeigen als eine leere Kachel
 const RUECKFALL = new Set(['nicht_erreichbar', 'quelle_fehler', 'intern', 'antwort_ungueltig']);
 const alsVeraltet = r => Object.assign(Object.create(Object.getPrototypeOf(r)), r, { veraltet: true });
@@ -54,7 +56,16 @@ export const aufMessung = fn => hoerer.push(fn);
 const melde = (name, ms, quelle) => hoerer.forEach(fn => { try { fn(name, Math.round(ms), quelle); } catch (e) { /* egal */ } });
 const uhr = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
 
-async function hole(url, kopf = {}) {
+// Antwort prüfen: Fehler im Rahmen, HTTP-Status, Format und Vertragsversion (Review M6) – sonst antwort_ungueltig (→ letzter Stand)
+function pruefeAntwort(id, res, r) {
+  if (r && r.fehler) throw new DienstFehler(r.fehler);
+  if (!res.ok || !r || r.format !== 'daily/1') throw new DienstFehler({ code: 'antwort_ungueltig', meldung: 'HTTP ' + res.status });
+  const v = vertragFehler(id, r);
+  if (v) throw new DienstFehler({ code: 'antwort_ungueltig', meldung: v });
+  return r;
+}
+
+async function hole(id, url, kopf = {}) {
   let res, r = null;
   try {
     res = await fetch(url, { headers: kopf, signal: AbortSignal.timeout ? AbortSignal.timeout(12000) : undefined });
@@ -62,9 +73,7 @@ async function hole(url, kopf = {}) {
   } catch (e) {
     throw new DienstFehler({ code: 'nicht_erreichbar', meldung: e.message });
   }
-  if (r && r.fehler) throw new DienstFehler(r.fehler);
-  if (!res.ok || !r || r.format !== 'daily/1') throw new DienstFehler({ code: 'antwort_ungueltig', meldung: 'HTTP ' + res.status });
-  return r;
+  return pruefeAntwort(id, res, r);
 }
 
 // privat: true → mit Kennwort (private Dienste wie „kurse“)
@@ -74,11 +83,11 @@ export async function dienst(id, params = {}, { frisch = false, privat = false }
   if (!frisch && alt && Date.parse(alt.gueltigBis) > Date.now()) { melde(id, 0, 'speicher'); return alt; }
   const t0 = uhr();
   try {
-    const r = await hole(url, privat ? kennwortKopf() : {});
+    const r = await hole(id, url, privat ? kennwortKopf() : {});
     speicher.set(url, r); merke(url, r); melde(id, uhr() - t0, 'netz');
     return r;
   } catch (e) {
-    const letzt = alt || erinnere(url);
+    const letzt = alt || erinnere(url, id);
     if (letzt && RUECKFALL.has(e.code)) { melde(id, uhr() - t0, 'rueckfall'); return alsVeraltet(letzt); }
     throw e;
   }
@@ -93,8 +102,7 @@ export async function privatDienst(id, koerper = {}) {
       cache: 'no-store', signal: AbortSignal.timeout ? AbortSignal.timeout(20000) : undefined });
     r = await res.json().catch(() => null);
   } catch (e) { throw new DienstFehler({ code: 'nicht_erreichbar', meldung: e.message }); }
-  if (r && r.fehler) throw new DienstFehler(r.fehler);
-  if (!res.ok || !r || r.format !== 'daily/1') throw new DienstFehler({ code: 'antwort_ungueltig', meldung: 'HTTP ' + res.status });
+  pruefeAntwort(id, res, r);
   melde(id, uhr() - t0, 'netz');
   return r;
 }

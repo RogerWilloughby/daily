@@ -1,5 +1,6 @@
 // Kleiner Schema-Prüfer für die Dienst-Verträge (Teilmenge von JSON Schema, ohne Zusatzpaket).
 // Unterstützt: type (auch als Liste), properties, required, items, enum, minimum, maximum, format.
+// Streng (pruefeStreng): meldet zusätzlich Felder, die das Schema nicht kennt (nur bei Objekten mit properties) – Tests und Testserver.
 
 const FORMATE = {
   zeit: /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/,  // ISO-Zeitpunkt in UTC
@@ -15,7 +16,7 @@ function typVon(v) {
 const passt = (ist, soll) => ist === soll || (soll === 'number' && ist === 'integer');
 
 // Liefert eine Liste von Fehlern („pfad: Grund“); leer = gültig
-function pruefe(wert, schema, pfad = '$') {
+function pruefe(wert, schema, pfad = '$', streng = false) {
   const fehler = [];
   if (!schema) return fehler;
   const ist = typVon(wert);
@@ -33,9 +34,10 @@ function pruefe(wert, schema, pfad = '$') {
   }
   if (ist === 'object') {
     for (const k of schema.required || []) if (!(k in wert)) fehler.push(`${pfad}.${k}: fehlt`);
-    for (const [k, s] of Object.entries(schema.properties || {})) if (k in wert) fehler.push(...pruefe(wert[k], s, `${pfad}.${k}`));
+    for (const [k, s] of Object.entries(schema.properties || {})) if (k in wert) fehler.push(...pruefe(wert[k], s, `${pfad}.${k}`, streng));
+    if (streng && schema.properties) for (const k of Object.keys(wert)) if (!(k in schema.properties)) fehler.push(`${pfad}.${k}: nicht im Schema`);
   }
-  if (ist === 'array' && schema.items) wert.forEach((v, i) => fehler.push(...pruefe(v, schema.items, `${pfad}[${i}]`)));
+  if (ist === 'array' && schema.items) wert.forEach((v, i) => fehler.push(...pruefe(v, schema.items, `${pfad}[${i}]`, streng)));
   return fehler;
 }
 
@@ -71,4 +73,6 @@ const RAHMEN = S.obj({
   fehler: S.obj({ code: { type: 'string' }, meldung: S.text() }, ['code'], true)
 });
 
-module.exports = { pruefe, S, ORT, ORT_VOLL, RAHMEN };
+const pruefeStreng = (wert, schema) => pruefe(wert, schema, '$', true);
+
+module.exports = { pruefe, pruefeStreng, S, ORT, ORT_VOLL, RAHMEN };

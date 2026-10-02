@@ -8,7 +8,7 @@ const SHELL = [
   '/js/providers/sport.js', '/js/adapter/fussball.js', '/js/providers/wissen.js', '/js/providers/local.js', '/js/adapter/lokal.js',
   '/js/providers/links.js', '/js/adapter/seiten.js', '/js/adapter/tagesinhalt.js', '/js/providers/thema.js', '/js/providers/unterhaltung.js', '/js/providers/alltag.js', '/js/providers/tools.js', '/js/tools/verzeichnis.js', '/tools/arbeitszeit.html', '/tools/setzkasten.html', '/js/providers/kalender.js',
   '/js/lib/url.js',
-  '/js/dienste/client.js', '/js/ui/privat.js', '/js/lib/bundesland.js', '/js/core/betrieb.js', '/js/core/einstellungen.js', '/js/ui/kacheln.js', '/js/adapter/wetter.js', '/js/adapter/diagramm.js', '/js/adapter/kursdiagramm.js', '/js/core/ansichten.js', '/js/ansichten/mini-diagramm.js', '/js/ansichten/wetter.js', '/js/ansichten/radar.js', '/js/adapter/regen.js', '/js/adapter/hinweise.js', '/js/adapter/kalender.js', '/js/adapter/finanzen.js', '/js/adapter/katalog.js',
+  '/js/dienste/client.js', '/js/dienste/vertraege.js', '/js/ui/privat.js', '/js/lib/bundesland.js', '/js/core/betrieb.js', '/js/core/einstellungen.js', '/js/ui/kacheln.js', '/js/adapter/wetter.js', '/js/adapter/diagramm.js', '/js/adapter/kursdiagramm.js', '/js/core/ansichten.js', '/js/ansichten/mini-diagramm.js', '/js/ansichten/wetter.js', '/js/ansichten/radar.js', '/js/adapter/regen.js', '/js/adapter/hinweise.js', '/js/adapter/kalender.js', '/js/adapter/finanzen.js', '/js/adapter/katalog.js',
   '/fonts/bricolage-grotesque.woff2', '/fonts/figtree-400.woff2', '/fonts/figtree-500.woff2', '/fonts/figtree-600.woff2',
   '/icons/icon-192.png', '/icons/icon-512.png'
 ];

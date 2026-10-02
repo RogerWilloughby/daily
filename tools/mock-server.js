@@ -23,12 +23,24 @@ global.fetch = require('./fetch-stub');
 // Kalender-Testadressen (calendar.test) gibt es im DNS nicht: Auflösung vortäuschen (öffentliche Adresse)
 require('../services/termine').aufloesen = async () => [{ address: '93.184.216.34', family: 4 }];
 
+// Jede Antwort im Format daily/1 gegen Rahmen und Schema des Diensts prüfen – streng, auch unbekannte Felder (Review M6).
+// Verstöße stehen im Log („SCHEMA-FEHLER …“) und in der Kopfzeile X-Daily-Schema (ok | fehler: Anzahl), damit Messungen sie sehen.
+const { pruefeStreng, RAHMEN } = require('../services/_lib/schema');
+const DIENSTE = require('../services');
+function schemaPruefen(id, o, res) {
+  if (!id || !o || o.format !== 'daily/1') return;
+  const d = DIENSTE.byId[id];
+  const f = [...pruefeStreng(o, RAHMEN), ...(d && o.daten != null ? pruefeStreng(o.daten, d.schema) : [])];
+  res.setHeader('X-Daily-Schema', f.length ? 'fehler: ' + f.length : 'ok');
+  if (f.length) console.error(`SCHEMA-FEHLER ${id}: ${f.slice(0, 5).join(' · ')}${f.length > 5 ? ' …' : ''}`);
+}
+
 function shim(req, res, body) {
   const u = new URL(req.url, 'http://x');
   req.query = Object.fromEntries(u.searchParams);
   req.body = body ? JSON.parse(body) : undefined;
   res.status = c => { res.statusCode = c; return res; };
-  res.json = o => { res.setHeader('content-type', 'application/json'); res.end(JSON.stringify(o)); };
+  res.json = o => { schemaPruefen(req.query.dienst, o, res); res.setHeader('content-type', 'application/json'); res.end(JSON.stringify(o)); };
 }
 
 http.createServer((req, res) => {

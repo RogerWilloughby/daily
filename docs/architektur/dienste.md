@@ -114,6 +114,8 @@ Jeder Dienst gibt im Katalog an, wo er funktioniert: `laender: "alle"` oder eine
 ## Versionen
 - **App-Version** (Oberfläche und Server, ein Upload): Nummer `x.y.z` in `package.json` und `src/js/core/version.js` (gleich, Test prüft das). Kleine Korrektur → `z+1`, neue Funktion → `y+1`. `build.js` ergänzt Zeitpunkt und Commit (Vercel) und benennt den Service-Worker-Cache je Upload neu. Anzeige: Fußzeile („v0.6.0“, öffnet „Datenquellen“), unten in den Einstellungen, oben auf der Datenquellen-Seite; der Katalog liefert `daten.app` (Server).
 - **Dienst:** `version` = Vertrag (Datenformat, nur bei inkompatibler Änderung), `programmversion` = Stand des Dienstes (`x.y.z`, steigt bei jeder Änderung) mit Liste `aenderungen` (neueste zuerst). Jede Antwort trägt `programm`; Katalog, Dienstblatt und Datenquellen-Seite zeigen beides.
+- **Vertragsversion im Browser (seit 0.46.0, Review M6):** `src/js/dienste/vertraege.js` nennt je Dienst die Vertragsversion, die die Oberfläche versteht. `client.js` prüft jede Antwort (Dienstname und `version`); passt sie nicht → `antwort_ungueltig` mit Grund, die Kachel zeigt den letzten passenden Stand („Stand …“) oder einen Fehler; gespeicherte Antworten in fremdem Vertrag werden nicht angezeigt. **Steigt der Vertrag eines Dienstes:** Adapter anpassen und die Zahl in `vertraege.js` erhöhen – sonst ist ein Test rot (und Vercel baut nicht). Neuer Dienst: Eintrag in `vertraege.js`.
+- **Schema streng (seit 0.46.0):** Tests (`gueltig`) und Testserver prüfen jede Antwort mit `pruefeStreng` – auch Felder, die im Schema fehlen. Der Testserver meldet Verstöße im Log („SCHEMA-FEHLER …“) und in der Kopfzeile `X-Daily-Schema`.
 - Regel für Claude: Bei jeder Änderung App-Nummer und betroffene Dienst-Programmversionen erhöhen und `aenderungen` ergänzen.
 
 ## Dienstblatt (Transparenz)
@@ -126,7 +128,7 @@ Daraus entstehen der Katalog `/api/v1/dienste`, die Dateien `docs/dienste/<id>.m
    `parameter` = erlaubte Angaben mit Prüfung (`services/_lib/parameter.js`: `P.lat`, `P.lon`, `P.datum`, `P.wahl([...])`, `P.text(...)`); dieselben Namen wie in `eingaben` (ein Test prüft das). `ausfuehren` lehnt alles andere ab (400) und bildet den Instanz-Schlüssel nur aus diesen Angaben.
    **Eingaben = Cache-Schlüssel:** nur aufnehmen, wovon die Antwort wirklich abhängt, in genau einer Schreibweise (z. B. Bundesland statt Ort, wenn nur das Bundesland zählt; keine Anzeigenamen).
    Die Umwandlung der Quelle als eigene, reine Funktion `umwandeln()` exportieren (testbar ohne Netz).
-2. In `services/index.js` eintragen.
+2. In `services/index.js` eintragen, dazu die Vertragsversion in `src/js/dienste/vertraege.js`.
 3. Beispieldaten der Quelle in `tools/fixtures.js`, Umleitung in `tools/fetch-stub.js`.
 4. Tests in `test/dienste.test.js`: Vertrag (Schema), Router, Fehlerfälle. Danach `npm run doku`.
 5. Adapter `src/js/adapter/<id>.js` mit mindestens `kachel(env)`; Kachel-Anbindung in `src/js/providers/`.
@@ -135,7 +137,7 @@ Daraus entstehen der Katalog `/api/v1/dienste`, die Dateien `docs/dienste/<id>.m
 | Datei | Zweck |
 |---|---|
 | `services/_lib/rahmen.js` | Rahmen daily/1, Fehlerklasse, Zeit- und Rundungshilfen |
-| `services/_lib/schema.js` | Schema-Prüfer (Teilmenge von JSON Schema) und Bausteine `S.*`, Rahmen-Schema |
+| `services/_lib/schema.js` | Schema-Prüfer (Teilmenge von JSON Schema; `pruefeStreng` meldet auch unbekannte Felder) und Bausteine `S.*`, Rahmen-Schema |
 | `services/_lib/ort.js` | Ort-Eingabe (nur Koordinaten) und grober Deutschland-Rahmen |
 | `services/_lib/parameter.js` | erlaubte Angaben je Dienst prüfen (Adresse = Cache-Schlüssel), Bausteine `P.*` |
 | `services/_lib/orte.js` | eigener Ortsbestand: Name, Postleitzahl, Umkehrsuche |
