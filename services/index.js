@@ -1,29 +1,47 @@
 // Dienst-Verzeichnis: jeder Dienst ist ein Modul mit id, version, titel, beschreibung, eingaben, laender ('alle' oder Liste wie ['DE']), klasse,
 // ttl (Sekunden), quellen, schema (Vertrag für „daten“), blatt (Dienstblatt, siehe _lib/blatt.js) und run(eingabe) → { daten, ort?, hinweise?, quellen? }.
-// Neuer Dienst = Modul in services/ + Eintrag hier. Aufruf: GET /api/v1/<id>
+// Neuer Dienst = Modul in services/ + Eintrag in LADER (unten). Aufruf: GET /api/v1/<id>
 const { DienstFehler, antwort } = require('./_lib/rahmen');
 const { isPrivate } = require('./_lib/http');
 const { pruefeEingaben } = require('./_lib/parameter');
 
-const DIENSTE = [
-  require('./ort'),
-  require('./wetter'),
-  require('./regen'),
-  require('./wetterhinweise'),
-  require('./feiertage'),
-  require('./himmel'),
-  require('./namenstage'),
-  require('./termine'),
-  require('./finanzen'),
-  require('./kurse'),
-  require('./tanken'),
-  require('./autobahn'),
-  require('./tagesinhalt'),
-  require('./andiesemtag'),
-  require('./fussball'),
-  require('./schlagzeilen')
-];
-const byId = Object.fromEntries(DIENSTE.map(d => [d.id, d]));
+// Dienste erst beim ersten Aufruf laden (seit App 0.46.1): Ein Kaltstart der Funktion lädt nur den angefragten Dienst statt aller
+// (gemessen auf lokaler Platte: Router mit allen Diensten ≈ 40 ms, jetzt ≈ 3 ms plus der eine Dienst – wächst nicht mehr mit jedem neuen Dienst). Jedes require steht wörtlich da, damit Vercel beim
+// Bauen alle Dateien in die Funktion packt (zusammengesetzte Pfade erkennt es nicht sicher). Neuer Dienst = Eintrag hier (Test prüft das).
+const LADER = {
+  ort: () => require('./ort'),
+  wetter: () => require('./wetter'),
+  regen: () => require('./regen'),
+  wetterhinweise: () => require('./wetterhinweise'),
+  feiertage: () => require('./feiertage'),
+  himmel: () => require('./himmel'),
+  namenstage: () => require('./namenstage'),
+  termine: () => require('./termine'),
+  finanzen: () => require('./finanzen'),
+  kurse: () => require('./kurse'),
+  tanken: () => require('./tanken'),
+  autobahn: () => require('./autobahn'),
+  tagesinhalt: () => require('./tagesinhalt'),
+  andiesemtag: () => require('./andiesemtag'),
+  fussball: () => require('./fussball'),
+  schlagzeilen: () => require('./schlagzeilen')
+};
+const IDS = Object.keys(LADER);
+const gibt = id => Object.prototype.hasOwnProperty.call(LADER, id);
+function lade(id) {
+  if (!gibt(id)) return undefined;
+  const d = LADER[id]();
+  if (d.id !== id) throw new Error(`services/index.js: Eintrag „${id}“ lädt Dienst „${d.id}“`);
+  return d;
+}
+// byId: wie ein Objekt Dienst-ID → Dienst, lädt aber erst beim Zugriff; DIENSTE (unten): alle, in fester Reihenfolge (Katalog, Doku, Tests)
+const byId = new Proxy({}, {
+  get: (_, id) => (typeof id === 'string' ? lade(id) : undefined),
+  has: (_, id) => gibt(id),
+  ownKeys: () => IDS,
+  getOwnPropertyDescriptor: (_, id) => (gibt(id) ? { enumerable: true, configurable: true, value: lade(id) } : undefined)
+});
+const alle = () => IDS.map(lade);
 
 function finde(id, ctx = {}) {
   const d = byId[id];
@@ -76,10 +94,12 @@ async function ausfuehren(id, eingabe = {}, ctx = {}) {
 
 // Katalog: was es gibt, was es braucht, wie die Daten aussehen
 function katalog() {
-  return DIENSTE.filter(d => d.klasse !== 'privat' || isPrivate()).map(d => ({
+  return alle().filter(d => d.klasse !== 'privat' || isPrivate()).map(d => ({
     id: d.id, version: d.version, programmversion: d.programmversion || null, aenderungen: d.aenderungen || [], titel: d.titel, beschreibung: d.beschreibung, eingaben: d.eingaben,
     laender: d.laender || 'alle', klasse: d.klasse, ttl: d.ttl, takt: d.takt || null, quellen: d.quellen, schema: d.schema, blatt: d.blatt || null
   }));
 }
 
-module.exports = { DIENSTE, byId, finde, ausfuehren, katalog, INSTANZ, FEHLER, FEHLER_MS };
+module.exports = { byId, IDS, finde, ausfuehren, katalog, INSTANZ, FEHLER, FEHLER_MS };
+// DIENSTE erst beim Zugriff: lädt dann alle Dienste (Katalog, npm run doku, Tests, Testserver)
+Object.defineProperty(module.exports, 'DIENSTE', { enumerable: true, get: alle });

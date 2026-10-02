@@ -1532,3 +1532,27 @@ test('Vertragsversion (Review M6): Oberfläche kennt jeden Dienst in seiner Vers
     assert.equal(c2.gespeichert('wetter', p), null);
   } finally { global.fetch = echt; delete global.localStorage; }
 });
+
+test('Dienste erst beim ersten Aufruf laden: Kaltstart lädt keinen Dienst, ein Aufruf nur seinen; jede Dienst-Datei steht in der Ladeliste', async () => {
+  const fs = require('node:fs');
+  const dateien = fs.readdirSync(path.join(__dirname, '../services')).filter(f => f.endsWith('.js') && f !== 'index.js').map(f => f.slice(0, -3)).sort();
+  assert.deepEqual([...dienste.IDS].sort(), dateien, 'services/index.js → LADER: jede Dienst-Datei eintragen');
+  assert.ok('wetter' in dienste.byId && !('gibtsnicht' in dienste.byId));
+  assert.equal(dienste.byId.gibtsnicht, undefined);
+  // frischer Prozess wie ein Kaltstart der Funktion
+  const { execFileSync } = require('node:child_process');
+  const skript = `
+    global.fetch = require('./tools/fetch-stub');
+    const geladen = () => Object.keys(require.cache).map(f => require('path').relative(process.cwd(), f).replace(/\\\\/g, '/'))
+      .filter(f => /^services\\/[a-z]+\\.js$/.test(f) && f !== 'services/index.js').map(f => f.slice(9, -3)).sort();
+    const router = require('./api/v1/[dienst].js');
+    const vorher = geladen();
+    const res = { headers: {}, setHeader() {}, status(c) { this.code = c; return this; }, json(o) { this.body = o; } };
+    router({ method: 'GET', query: { dienst: 'wetter', lat: '52.52', lon: '13.41' }, headers: {} }, res).then(() =>
+      router({ method: 'GET', query: { dienst: 'gibtsnicht' }, headers: {} }, res)).then(() =>
+      console.log(JSON.stringify({ vorher, nachher: geladen() })));`;
+  const aus = JSON.parse(execFileSync(process.execPath, ['-e', skript], { cwd: path.join(__dirname, '..'), env: { ...process.env, NODE_OPTIONS: '' } }).toString().trim().split('\n').pop());
+  assert.deepEqual(aus.vorher, [], 'beim Start geladen: ' + aus.vorher.join(', '));
+  assert.ok(aus.nachher.includes('wetter'), 'wetter fehlt');
+  assert.ok(!aus.nachher.includes('termine') && !aus.nachher.includes('himmel'), 'zu viel geladen: ' + aus.nachher.join(', '));
+});

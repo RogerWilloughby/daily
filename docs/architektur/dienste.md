@@ -128,7 +128,7 @@ Daraus entstehen der Katalog `/api/v1/dienste`, die Dateien `docs/dienste/<id>.m
    `parameter` = erlaubte Angaben mit Prüfung (`services/_lib/parameter.js`: `P.lat`, `P.lon`, `P.datum`, `P.wahl([...])`, `P.text(...)`); dieselben Namen wie in `eingaben` (ein Test prüft das). `ausfuehren` lehnt alles andere ab (400) und bildet den Instanz-Schlüssel nur aus diesen Angaben.
    **Eingaben = Cache-Schlüssel:** nur aufnehmen, wovon die Antwort wirklich abhängt, in genau einer Schreibweise (z. B. Bundesland statt Ort, wenn nur das Bundesland zählt; keine Anzeigenamen).
    Die Umwandlung der Quelle als eigene, reine Funktion `umwandeln()` exportieren (testbar ohne Netz).
-2. In `services/index.js` eintragen, dazu die Vertragsversion in `src/js/dienste/vertraege.js`.
+2. In `services/index.js` → `LADER` eintragen (`id: () => require('./id')`, wörtlich – Dienste werden erst beim ersten Aufruf geladen, seit 0.46.1; ein Test prüft, dass jede Datei eingetragen ist), dazu die Vertragsversion in `src/js/dienste/vertraege.js`.
 3. Beispieldaten der Quelle in `tools/fixtures.js`, Umleitung in `tools/fetch-stub.js`.
 4. Tests in `test/dienste.test.js`: Vertrag (Schema), Router, Fehlerfälle. Danach `npm run doku`.
 5. Adapter `src/js/adapter/<id>.js` mit mindestens `kachel(env)`; Kachel-Anbindung in `src/js/providers/`.
