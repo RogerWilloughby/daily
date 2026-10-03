@@ -9,6 +9,7 @@
 | `konzept/` | [plan-neuausrichtung.md](konzept/plan-neuausrichtung.md) | **Strategischer Plan zur Neuausrichtung** (Stand 03.10.2026): neue Oberfläche, Mitmach-Formate, Album, Kosten, Test, Phasen, Entscheidungen aus Phase 0 |
 | `konzept/` | [themen.md](konzept/themen.md) | **Themen und Gliederung** (03.10.2026): drei Ebenen Bereich → Rubrik → Thema, sechs Bereiche, Baum aller Themen, Liste „nach dem Test“ |
 | `konzept/` | [dienste-katalog.md](konzept/dienste-katalog.md) | Ideenliste → Dienste, Reihenfolge |
+| `logo/` | [README.md](logo/README.md) | **Logo und App-Symbol** (seit 0.53.1): Abreißblatt mit Liste, SVG und PNG |
 | `architektur/` | [dienste.md](architektur/dienste.md) | Headless-Architektur, Austauschformat daily/1, Ort-Objekt |
 | `architektur/` | [skalierung.md](architektur/skalierung.md) | Cache-Stufen, Klassen A–D, Ausbaustufen, Bewertung je Dienst |
 | `dienste/` | [README.md](dienste/README.md) | Dienstblätter (erzeugt mit `npm run doku`) |
