@@ -1,10 +1,9 @@
-// Adapter „wetter“: macht aus dem Vertrag wetter v1 (reine Daten) die Darstellung für eine Oberfläche.
-// Heute: kachel() für das Kachelraster und antwort() für „Frag DAILY“. Später z. B. liste(), dashboard().
+// Adapter „wetter“: macht aus dem Vertrag wetter v1 (reine Daten) den Bereich „Wetter“ (Kopfzeile, Untertabs Jetzt · Radar · Hinweise · Mehr).
 // Ohne DOM – daher auch in Node testbar.
 import { glyph, esc, icon } from '../core/util.js';
 import { miniDiagramm, miniHeute, miniTageszeiten, miniWahl } from './diagramm.js';
 import { hinweis as regenHinweis, radarKlein, radarKopf, radarInfo } from './regen.js';
-import { abzeichen, kurz as hinweisKurz, zeilen as hinweisZeilen } from './hinweise.js';
+import { abzeichen, zeilen as hinweisZeilen } from './hinweise.js';
 
 export const TEXT = {
   klar: 'Klar', ueberwiegend_klar: 'Überwiegend klar', teilweise_bewoelkt: 'Teilweise bewölkt', bedeckt: 'Bedeckt',
@@ -14,12 +13,6 @@ export const TEXT = {
 };
 // Stärke aus dem WMO-Code (leicht/stark) für genauere Texte
 const STAERKE = { 51: 'Leichter ', 55: 'Starker ', 61: 'Leichter ', 65: 'Starker ', 71: 'Leichter ', 75: 'Starker ', 80: 'Leichte ', 82: 'Heftige ', 86: 'Starke ' };
-// Kurzform für die große Zeile der Kachel
-export const KURZ = {
-  klar: 'Klar', ueberwiegend_klar: 'Heiter', teilweise_bewoelkt: 'Wolkig', bedeckt: 'Bedeckt', nebel: 'Nebel', niesel: 'Niesel',
-  gefrierender_niesel: 'Glatteis', regen: 'Regen', gefrierender_regen: 'Glatteis', schnee: 'Schnee', schneegriesel: 'Schnee',
-  regenschauer: 'Schauer', schneeschauer: 'Schnee', gewitter: 'Gewitter', gewitter_hagel: 'Gewitter', unbekannt: '–'
-};
 export const zustandText = (zustand, code) => {
   const t = TEXT[zustand] || '–';
   return STAERKE[code] ? STAERKE[code] + t : t;
@@ -60,23 +53,12 @@ export function auswerten(env) {
   return { z, heute, morgen, regenMax, regenUm: regenMax >= 25 ? regenUm : null, pollen };
 }
 
-// Regen in den nächsten 24 Stunden (wie das kleine Diagramm) – für die Regenzeile der kleinen Kachel (rein, testbar)
-// „Regen möglich gegen 17 Uhr.“ / „Regen möglich morgen gegen 7 Uhr.“ / „Kein Regen in den nächsten 24 Std.“
-export function regen24(env) {
-  const z = zeitFmt(env.ort.zeitzone || 'Europe/Berlin'), heute = (env.daten.tage[0] || {}).datum;
-  let max = 0, bei = null;
-  for (const s of env.daten.stunden.slice(0, 24)) if (s.regenProzent != null && s.regenProzent > max) { max = s.regenProzent; bei = s; }
-  if (max < 25 || !bei) return { max, text: 'Kein Regen in den nächsten 24 Std.' };
-  const morgen = heute && z.tag(bei.zeit) !== heute ? 'morgen ' : '';
-  return { max, text: `Regen möglich ${morgen}gegen ${+z.h(bei.zeit)} Uhr.` };
-}
-
 // Zahlen in den Farben der Diagrammlinien (Tiefst blau, Höchst orange)
 const tmin = v => `<b class="wd-t-min">${r0(v)}°</b>`, tmax = v => `<b class="wd-t-max">${r0(v)}°</b>`;
 
 // Uhrzeit des Tiefst-/Höchstwerts: „6 Uhr“ (leer, wenn unbekannt)
 const uhrVon = (iso, zone) => iso ? `${+new Date(iso).toLocaleTimeString('de-DE', { timeZone: zone, hour: '2-digit' }).slice(0, 2)} Uhr` : '';
-// klammern: kleine Kachel „9° (2 Uhr)“, aufgeklappt „9° 2 Uhr“
+// klammern: „9° (2 Uhr)“ statt „9° 2 Uhr“; mitJetzt: aktuelle Temperatur nach dem Ort (ohne: „heute“ und Wind)
 export function kopfzeileHtml(env, klammern = false, mitJetzt = true) {
   const a = env.daten.aktuell, h = env.daten.tage[0] || {}, zone = env.ort.zeitzone || 'Europe/Berlin';
   const um = iso => (uhrVon(iso, zone) ? ` <small class="wd-um">${klammern ? '(' : ''}${uhrVon(iso, zone)}${klammern ? ')' : ''}</small>` : '');
@@ -86,18 +68,11 @@ export function kopfzeileHtml(env, klammern = false, mitJetzt = true) {
   return `${esc(env.ort.name || 'Wetter')}${mitJetzt ? ` ${r0(a.tempC)}°` : ''} · ${mitJetzt ? '' : 'heute '}${wert(tmin(h.minC), 'Tiefstwert', h.minC, h.minZeit)} / ${wert(tmax(h.maxC), 'Höchstwert', h.maxC, h.maxZeit)}` +
     (mitJetzt ? '' : windHeute(h));
 }
-// Wind heute in der Kopfzeile der kleinen Kachel: „ · Wind 25/50 km/h“ (Höchstwert/stärkste Böe des Tages, kurz, damit die Zeile passt; ausführlich im Mouseover)
+// Wind heute in der Kopfzeile: „ · Wind 25/50 km/h“ (Höchstwert/stärkste Böe des Tages, kurz, damit die Zeile passt; ausführlich im Mouseover)
 export function windHeute(h) {
   if (!h || h.windMaxKmh == null) return '';
   const tip = `Wind heute: bis ${r0(h.windMaxKmh)} km/h${h.windRichtung ? ' aus ' + h.windRichtung : ''}${h.boeenMaxKmh != null ? `, Böen bis ${r0(h.boeenMaxKmh)} km/h` : ''}`;
   return ` <span class="wd-wind" title="${esc(tip)}">· Wind ${r0(h.windMaxKmh)}${h.boeenMaxKmh != null ? `/${r0(h.boeenMaxKmh)}` : ''} km/h</span>`;
-}
-
-// „Dresden 15° · 9°/16°“
-export function kopfzeile(env) {
-  const a = env.daten.aktuell, h = env.daten.tage[0] || {}, zone = env.ort.zeitzone || 'Europe/Berlin';
-  const um = iso => (uhrVon(iso, zone) ? ` (${uhrVon(iso, zone)})` : '');
-  return `${env.ort.name || 'Wetter'} ${r0(a.tempC)}° · ${r0(h.minC)}°${um(h.minZeit)} / ${r0(h.maxC)}°${um(h.maxZeit)}`;
 }
 
 // Frost und Glätte heute oder morgen
@@ -108,15 +83,13 @@ function warnung(tage, z) {
   return t.glaette ? `Glätte möglich ${wann} (bis ${r0(t.minC)}°)` : `Frost ${wann} (bis ${r0(t.minC)}°)`;
 }
 
-// Darstellung als Kachel (Felder wie in core/board.js erwartet)
-// regenEnv (optional): Antwort des Dienstes „regen“ – liefert „Regen in 20 Min.“ und den Reiter „Radar“
-// hinweisEnv (optional): Antwort des Dienstes „wetterhinweise“ – Abzeichen und kurzer Hinweis nur, wenn es etwas gibt; Reiter „Hinweise“ immer
+// Bereich „Wetter“ (Felder wie core/oberflaeche.js erwartet): Kopfzeile, Untertabs, Infozeile
+// regenEnv (optional): Antwort des Dienstes „regen“ – Abzeichen „☂ in 20 Min.“ und Untertab „Radar“
+// hinweisEnv (optional): Antwort des Dienstes „wetterhinweise“ – Abzeichen und Untertab „Hinweise“ nur, wenn es etwas gibt
+// chart: 15-Tage-Diagramm für den Untertab „Jetzt“ – mitOptionen() setzt das Diagramm des gewählten Zeitraums ein
 export function kachel(env, regenEnv = null, hinweisEnv = null) {
   const d = env.daten, a = d.aktuell, { z, heute, regenMax, regenUm, pollen } = auswerten(env);
   const zone = env.ort.zeitzone || 'Europe/Berlin', hTop = (hinweisEnv && hinweisEnv.daten && hinweisEnv.daten.hinweise[0]) || null;
-  const hKurz = hinweisKurz(hinweisEnv, zone);
-  // Mini-Reiter (entscheidungen.md Abschnitt 13, Variante 1a): Jetzt · Radar · Hinweise (nur bei Warnung) · Mehr – kein Aufklappen.
-  // Das Diagramm („unten“ im Reiter Jetzt) setzt mitOptionen() nach dem gewählten Zeitraum.
   const hz = hinweisZeilen(hinweisEnv, zone);
   const kleinReiter = [
     { id: 'jetzt', name: 'Jetzt', icon: icon('sun'), html: jetztHtml(zpJetzt(env)) },
@@ -124,21 +97,11 @@ export function kachel(env, regenEnv = null, hinweisEnv = null) {
     ...(hz.length ? [{ id: 'hinweise', name: 'Hinweise', icon: icon('warn'), kopf: abzeichen(hinweisEnv) + ' <small class="wh-dwd">Deutscher Wetterdienst</small>', liste: hz }] : []),
     { id: 'mehr', name: 'Mehr', icon: icon('list'), liste: mehrListe(env, { z, heute, regenMax, regenUm, pollen }) }
   ];
-  const wetterText = `${zustandText(a.zustand, a.code)}, gefühlt ${r0(a.gefuehltC)}°.`;
-  // Regen: eigene Zeile in der kleinen Kachel (Radar geht vor der 24-Stunden-Vorhersage)
-  const regenZeile = regenHinweis(regenEnv) || regen24(env).text;
-  // Kopfzeile: Ort, jetzt, Tiefst/Höchst von heute – alles in einer Zeile
   return {
-    state: 'live', title: kopfzeile(env) + (hTop ? ` · ${hKurz}` : ''), titleHtml: kopfzeileHtml(env) + abzeichen(hinweisEnv), kopf: kopfzeileHtml(env, true, false) + abzeichen(hinweisEnv) + radarAbzeichen(regenEnv), zeileIcon: true,
+    state: 'live', kopf: kopfzeileHtml(env, true, false) + abzeichen(hinweisEnv) + radarAbzeichen(regenEnv),
     kleinReiter, unwetter: hTop && hTop.stufe >= 3 ? `${hTop.ereignis}|${hTop.beginn || ''}` : null,
     info: [`Stand ${z.hm(a.zeit)} Uhr`, 'Wetter: ' + [...new Set(env.quellen.map(q => q.name.split(' ')[0]))].join(', ') + ' – Vorhersagen ohne Gewähr', ...radarInfo(regenEnv),
       ...(hz.length ? ['Amtliche Warnungen: Deutscher Wetterdienst · Tipps: DAILY'] : [])],
-    zp: zpJetzt(env),   // Zeitpunkt-Block der kleinen Kachel (Jetzt; beim Überfahren des Diagramms Stunde/Tag)
-    lglyph: glyph(bild(a.zustand, a.tag)), lglyphTip: zustandText(a.zustand, a.code),   // Symbol in der Kopfzeile, Erklärung beim Überfahren
-    glyph: '', m: '', ms: r0(a.tempC) + '°',                                               // keine große Zeile – Platz fürs Diagramm
-    // Unwetter zuerst, sonst Wetter · Hinweis; der Regen steht darunter in einer eigenen Zeile (Schirm-Symbol)
-    x: (hTop && hTop.stufe >= 3 ? [hKurz, wetterText] : [wetterText, hKurz]).filter(Boolean).join(' '),
-    zeile2: { glyph: glyph('schirm'), text: regenZeile },
     chart: miniDiagramm(d.tage, zpTag)
   };
 }
@@ -150,10 +113,10 @@ export function zpHtml(z) {
   return f('z', z.z) + f('t', z.t) + f('g', z.g) + `<span class="zp-l">${glyph(z.i)}<span>${esc(z.l)}</span></span>` +
     `<span class="zp-r">${schirm('mm', z.mm)}${schirm('p', z.p)}${f('w', z.w)}${f('s', z.s)}</span>`;
 }
-// Inhalt des Mini-Reiters „Jetzt“: Zeitpunkt-Block (wechselt beim Überfahren des Diagramms, ansichten/wetter.js)
+// Inhalt des Untertabs „Jetzt“: Zeitpunkt-Block (wechselt beim Überfahren des Diagramms, ansichten/wetter.js)
 export const jetztHtml = zp => `<div class="wz-jetzt"><span class="t-zp" data-jetzt="${esc(JSON.stringify(zp))}">${zpHtml(zp)}</span></div>`;
 
-// Mini-Reiter „Mehr“: Details von heute und Zusatzwerte als Zeilen (wichtigste zuerst, das Raster zeigt so viele, wie ganz passen)
+// Untertab „Mehr“: Details von heute und Zusatzwerte als Zeilen (wichtigste zuerst, die Oberfläche zeigt so viele, wie ganz passen)
 export function mehrListe(env, { z, heute, regenMax, regenUm, pollen }) {
   const a = env.daten.aktuell, d = env.daten, m = d.tage[1], l = [];
   const zeile = (dd, t, tip) => l.push({ d: dd, t, tip: tip || `${dd}: ${t}`, gruppe: 1 });
@@ -182,8 +145,8 @@ export function mehrListe(env, { z, heute, regenMax, regenUm, pollen }) {
 // Mouseover-Texte der Mini-Diagramme (rein, testbar)
 const fest = t => t.replace(/ /g, '\u00a0');   // Teile nicht mitten drin umbrechen
 const mmText = v => `${String(Math.round((v || 0) * 10) / 10).replace('.', ',')} mm`;
-// Zeitpunkt-Block der kleinen Kachel (rein, testbar): immer dieselben Felder in derselben Reihenfolge – für „Jetzt“, eine Stunde
-// oder einen Tag. Beim Überfahren des Diagramms wechseln nur die Werte (core/board.js), nicht Anordnung oder Zeilenzahl.
+// Zeitpunkt-Block unter „Jetzt“ (rein, testbar): immer dieselben Felder in derselben Reihenfolge – für „Jetzt“, eine Stunde
+// oder einen Tag. Beim Überfahren des Diagramms wechseln nur die Werte (ansichten/wetter.js), nicht Anordnung oder Zeilenzahl.
 // { z: Zeitpunkt, t: Temperatur, g: gefühlt, i: Symbol, l: Wetterlage, mm: Regenmenge, p: Regenwahrscheinlichkeit, w: Wind, s: Sonnenstunden des Tages }
 const komma1 = v => String(Math.round(v * 10) / 10).replace('.', ',');
 const sonneText = t => (t && t.sonnenstunden != null ? `☀ ${Math.round(t.sonnenstunden)} h` : '☀ –');
@@ -216,10 +179,6 @@ export function zpTageszeit(t) {
     t: `${r0(t.tempC)}°`, g: gef(t.gefuehltC, t.tempC), i: bild(t.zustand, t.abschnitt === 'morgen' || t.abschnitt === 'mittag'), l: zustandText(t.zustand, t.code),
     mm: mmText(t.niederschlagMm), p: t.regenProzent != null ? `${t.regenProzent} %` : '', w: t.windMaxKmh != null ? `Wind ${r0(t.windMaxKmh)} km/h` : '', s: sonneText(t) };
 }
-// Text-Fassung (Frag DAILY, Tests): „So 11.10. · 5–17° · Klar · 0 mm (0 %) · ☀ 10 h“
-export const zpText = z => [z.z, z.t, z.g, z.l, `${z.mm}${z.p ? ` (${z.p})` : ''}`, z.w, z.s].filter(Boolean).join(' · ');
-export const tagTip = t => zpText(zpTag(t));
-export const stundeTip = (s, zone) => zpText(zpStunde(s, [], zone));
 // Radar-Meldung als Abzeichen in der Kopfzeile („☂ in 20 Min. (leicht)“) – bleibt beim Überfahren stehen
 export function radarAbzeichen(regenEnv) {
   const t = regenHinweis(regenEnv); if (!t) return '';
@@ -227,18 +186,7 @@ export function radarAbzeichen(regenEnv) {
   return ` <span class="wh-badge wd-radar" title="${esc('Regenradar: ' + t)}">☂ ${esc(kurz)}</span>`;
 }
 
-// Antwort für „Frag DAILY“
-export function antwort(env, regenEnv = null) {
-  const a = env.daten.aktuell, { heute, regenMax: p, regenUm } = auswerten(env);
-  const radar = regenHinweis(regenEnv);
-  const wann = regenUm ? ` (am ehesten gegen ${regenUm} Uhr)` : '';
-  const schirm = p >= 50 ? `Ja, nimm einen Schirm mit: Regenrisiko bis ${p} %${wann}.`
-    : p >= 25 ? `Vielleicht. Das Regenrisiko liegt bei bis zu ${p} %${wann}.`
-    : `Nein, eher nicht. Das Regenrisiko bleibt heute bei höchstens ${p} %.`;
-  return `${env.ort.name || 'Hier'}: jetzt ${r0(a.tempC)}°, ${zustandText(a.zustand, a.code)}. Heute ${r0(heute.minC)}° bis ${r0(heute.maxC)}°. ${schirm}${radar ? ' Radar: ' + radar : ''}`;
-}
-
-// Einstellungen der Kachel anwenden (rein, testbar): Reiter Radar/Mehr aus- oder einblenden, Diagramm im Reiter „Jetzt“:
+// Einstellungen anwenden (rein, testbar): Untertabs Radar/Mehr aus- oder einblenden, Diagramm unter „Jetzt“:
 // Heute (1, Standard), 3, 7 oder 15 Tage (gespeichert von früher: 24 Std. → Heute, 48 Std. → 3 Tage, 16 → 15 Tage; siehe miniWahl).
 // „Jetzt“ ist immer da; „Hinweise“ erscheint nur bei einer Warnung (nicht abwählbar).
 export const WETTER_STANDARD = { radar: true, mehr: true, mini: 1 };

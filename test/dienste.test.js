@@ -234,16 +234,13 @@ test('Katalog: jeder Dienst vollständig beschrieben, mit Ländern', async () =>
   }
 });
 
-test('Adapter Wetter: Kachel und Antwort aus dem Vertrag', async () => {
-  const { kachel, antwort: text } = await esm('src/js/adapter/wetter.js');
+test('Adapter Wetter: Bereich aus dem Vertrag', async () => {
+  const { kachel, kopfzeileHtml } = await esm('src/js/adapter/wetter.js');
   const env = await mitName((await rufe('wetter', BERLIN)).body);
   const k = kachel(env);
-  assert.match(k.title, /^Berlin 15° · 9° \(\d{1,2} Uhr\) \/ 16° \(\d{1,2} Uhr\)$/);   // Ort, jetzt, Tiefst/Höchst mit Uhrzeit in einer Zeile
   assert.ok(env.daten.tage[0].minZeit && env.daten.tage[0].maxZeit);
-  assert.equal(k.m, '');                                        // keine große Zeile mehr
-  assert.equal(k.ms, '15°');                                    // Handy: Kurzform
-  assert.equal(k.lglyphTip, 'Teilweise bewölkt');               // Symbol in der Kopfzeile mit Erklärung
-  assert.match(k.lglyph, /^<svg/);
+  // seit 0.47.3 nur noch, was die Oberfläche braucht: keine Felder der früheren kleinen Kachel
+  for (const weg of ['title', 'titleHtml', 'm', 'ms', 'x', 'zeile2', 'lglyph', 'zp', 'zeileIcon']) assert.equal(k[weg], undefined, weg);
   // Mini-Diagramm: Temperaturskala in 5er-Schritten, Regenskala rechts in mm, Legende
   assert.match(k.chart, /wd-miniskala wd-t-max"><div class="wd-sk"><span class="wd-g5"[^>]*>-5°<\/span>.*>25°<\/span><\/div>/);   // Temperatur orange
   // gemeinsame graue Linien: 7 Linien (-5 … 25), jede mit Temperatur links und Regen rechts (Mock bis 12 mm → 2 mm je Linie)
@@ -270,12 +267,10 @@ test('Adapter Wetter: Kachel und Antwort aus dem Vertrag', async () => {
   assert.match(k.chart, /<b class="wd-t-sonne"[^>]*>Sonne<\/b>/);
   assert.match(k.chart, /wd-max.*wd-min/);
   assert.doesNotMatch(k.chart + JSON.stringify(k.kleinReiter), /wd-trend|Trend|unsicher/);   // keine Trend-Kennzeichnung mehr in der Oberfläche
-  // Kopfzeile mit farbigen Zahlen
-  assert.match(k.titleHtml, /^Berlin 15° · <span class="wd-tm" title="Tiefstwert heute: 9° um \d{1,2} Uhr"><b class="wd-t-min">9°<\/b> <small class="wd-um">\d{1,2} Uhr<\/small><\/span> \/ <span class="wd-tm" title="Höchstwert heute: 16° um \d{1,2} Uhr"><b class="wd-t-max">16°<\/b> <small class="wd-um">\d{1,2} Uhr<\/small><\/span>$/);
-  assert.equal(k.zeileIcon, true);
-  assert.match(k.kopf, /9°<\/b> <small class="wd-um">\(\d{1,2} Uhr\)<\/small><\/span> \/ <span class="wd-tm" title="Höchstwert[^"]*"><b class="wd-t-max">16°<\/b> <small class="wd-um">\(\d{1,2} Uhr\)<\/small>/);   // kleine Kachel: Uhrzeit in Klammern
-  // Mini-Reiter (kein Aufklappen): Jetzt · Mehr – Radar nur mit Radar-Antwort, Hinweise nur bei Warnung
-  assert.equal(k.tabs, undefined); assert.equal(k.rows, undefined);         // nichts mehr fürs Aufklappen (seit 0.45.0)
+  // Kopfzeile mit farbigen Zahlen (mit aktueller Temperatur)
+  assert.match(kopfzeileHtml(env), /^Berlin 15° · <span class="wd-tm" title="Tiefstwert heute: 9° um \d{1,2} Uhr"><b class="wd-t-min">9°<\/b> <small class="wd-um">\d{1,2} Uhr<\/small><\/span> \/ <span class="wd-tm" title="Höchstwert heute: 16° um \d{1,2} Uhr"><b class="wd-t-max">16°<\/b> <small class="wd-um">\d{1,2} Uhr<\/small><\/span>$/);
+  assert.match(k.kopf, /9°<\/b> <small class="wd-um">\(\d{1,2} Uhr\)<\/small><\/span> \/ <span class="wd-tm" title="Höchstwert[^"]*"><b class="wd-t-max">16°<\/b> <small class="wd-um">\(\d{1,2} Uhr\)<\/small>/);   // Kopf des Bereichs: Uhrzeit in Klammern
+  // Untertabs: Jetzt · Mehr – Radar nur mit Radar-Antwort, Hinweise nur bei Warnung
   assert.deepEqual(k.kleinReiter.map(r => r.id), ['jetzt', 'mehr']);
   assert.ok(k.kleinReiter.every(r => /^<svg class="ico"/.test(r.icon)));
   assert.match(k.kleinReiter[0].html, /^<div class="wz-jetzt"><span class="t-zp" data-jetzt="[^"]+"><span class="zp-z">Jetzt<\/span><span class="zp-t">15°<\/span>/);
@@ -289,24 +284,14 @@ test('Adapter Wetter: Kachel und Antwort aus dem Vertrag', async () => {
   const { zpTag } = await esm('src/js/adapter/wetter.js');
   assert.equal(zpTag({ ...env.daten.tage[2], sonnenstunden: null }).s, '☀ –');
   assert.equal(zpTag({ ...env.daten.tage[2], sonnenstunden: 0 }).s, '☀ 0 h');
-  assert.equal(k.x, 'Teilweise bewölkt, gefühlt 14°.');                    // Regen steht in einer eigenen Zeile
-  assert.match(k.zeile2.text, /^(Regen möglich (morgen )?gegen \d{1,2} Uhr\.|Kein Regen in den nächsten 24 Std\.)$/);
-  assert.match(k.zeile2.glyph, /^<svg/);
-  // Regenzeile: nächste 24 Stunden, „morgen“ nach Mitternacht, Stunde ohne führende Null
-  const { regen24 } = await esm('src/js/adapter/wetter.js');
-  const std = (start, werte) => werte.map((p, i) => ({ zeit: new Date(Date.parse(start) + i * 3600e3).toISOString(), regenProzent: p }));
-  const r = (werte, start = '2026-09-28T18:00:00Z') => regen24({ ort: { zeitzone: 'Europe/Berlin' }, daten: { tage: [{ datum: '2026-09-28' }], stunden: std(start, werte) } }).text;
-  assert.equal(r(Array(30).fill(10)), 'Kein Regen in den nächsten 24 Std.');
-  assert.equal(r([0, 30, 60, 10]), 'Regen möglich gegen 22 Uhr.');                        // 20 Uhr UTC = 22 Uhr
-  assert.equal(r([...Array(11).fill(0), 70]), 'Regen möglich morgen gegen 7 Uhr.');      // 5 Uhr UTC = 7 Uhr
-  assert.equal(r([...Array(24).fill(0), 90]), 'Kein Regen in den nächsten 24 Std.');     // Stunde 25 zählt nicht
-  const zeile = l => (mehr.find(z => z.d === l) || {}).t;            // Reiter „Mehr“ (früher die aufgeklappten Zeilen)
+  const zeile = l => (mehr.find(z => z.d === l) || {}).t;            // Untertab „Mehr“
   assert.equal(zeile('Wind'), '11 km/h aus W, Böen 25');
   assert.match(zeile('Sonne'), /4 Std\. · UV bis 3$/);
   assert.equal(zeile('Druck'), '1016 hPa, fallend');
   assert.ok(zeile('Luft'));
   assert.ok(!mehr.some(z => z.d === 'Achtung'));           // heute/morgen kein Frost
-  assert.match(text(env), /^Berlin: jetzt 15°/);
+  const w = await esm('src/js/adapter/wetter.js');
+  for (const weg of ['antwort', 'regen24', 'kopfzeile', 'KURZ', 'zpText']) assert.equal(w[weg], undefined, 'noch da: ' + weg);   // Frag DAILY und kleine Kachel entfernt
 });
 
 test('Dienstblätter: vollständig, jedes Ausgabefeld beschrieben, docs/dienste aktuell', async () => {
@@ -322,10 +307,16 @@ test('Dienstblätter: vollständig, jedes Ausgabefeld beschrieben, docs/dienste 
   }
 });
 
-test('Adapter Katalog: Seite „Woher kommen die Daten?“ nennt jeden Dienst mit Quellen', async () => {
+test('Adapter Katalog: Seite „Woher kommen die Daten?“ nennt jeden Dienst der Oberfläche mit Quellen', async () => {
   const { seite } = await esm('src/js/adapter/katalog.js');
+  const { GENUTZTE_DIENSTE } = await esm('src/js/core/betrieb.js');
   const html = seite((await rufe('dienste')).body);
-  for (const d of dienste.DIENSTE.filter(x => x.klasse !== 'privat')) assert.ok(html.includes(`<h3>${d.titel} <small class="dversion">${d.id} ${d.programmversion}</small></h3>`), d.id);
+  for (const d of dienste.DIENSTE) {
+    const kopf = `<h3>${d.titel} <small class="dversion">${d.id} ${d.programmversion}</small></h3>`;
+    if (GENUTZTE_DIENSTE.includes(d.id)) assert.ok(html.includes(kopf), 'fehlt: ' + d.id);
+    else assert.ok(!html.includes(kopf), 'nur auf dem Server, trotzdem genannt: ' + d.id);   // seit 0.47.3
+  }
+  assert.ok(GENUTZTE_DIENSTE.filter(id => id !== 'dienste').every(id => dienste.IDS.includes(id)), 'unbekannter Dienst in GENUTZTE_DIENSTE');
   assert.match(html, /GeoNames/);
   assert.match(html, /<details>/);
   assert.equal(seite(null), '<p>Keine Angaben verfügbar.</p>');
@@ -420,9 +411,9 @@ test('Regen: Radar über Bright Sky – jetzt, Beginn, letzte Stunde, Nähe, Kar
   assert.deepEqual(r.body.quellen.map(q => q.name), ['Deutscher Wetterdienst (Radar RV)', 'Bright Sky']);
 });
 
-test('Adapter Regen: Hinweis in der Wetterkachel und Reiter „Radar“', async () => {
+test('Adapter Regen: Abzeichen im Bereich Wetter und Untertab „Radar“', async () => {
   const { hinweis, radarKlein } = await esm('src/js/adapter/regen.js');
-  const { kachel, antwort: text } = await esm('src/js/adapter/wetter.js');
+  const { kachel } = await esm('src/js/adapter/wetter.js');
   const regen = (await rufe('regen', { lat: '52.52', lon: '13.41' })).body;
   assert.equal(hinweis(regen), 'Regen in 20 Min. (leicht).');
   assert.equal(hinweis(null), null);
@@ -446,9 +437,8 @@ test('Adapter Regen: Hinweis in der Wetterkachel und Reiter „Radar“', async 
   assert.doesNotMatch(ohneLand, /<image|BKG/);               // ältere Antwort ohne Ecken: Radar ohne Landkarte
   assert.match(ohneLand, /<svg class="rk" viewBox="0 0 52 52"/);
   assert.ok(k.info.some(x => /^Radar: Deutscher Wetterdienst/.test(x)) && k.info.some(x => /GeoBasis-DE \/ BKG \(20\d\d\), basemap\.de/.test(x)));
-  assert.equal(k.zeile2.text, "Regen in 20 Min. (leicht)."); assert.doesNotMatch(k.x, /Regen in/);   // Radar geht vor, eigene Zeile
+  assert.match(k.kopf, /wh-badge wd-radar[^>]*>☂ in 20 Min\. \(leicht\)</);   // Radar-Meldung als Abzeichen im Kopf
   assert.deepEqual(kachel(wetter, null).kleinReiter.map(r => r.id), ['jetzt', 'mehr']);   // ohne Radar
-  assert.match(text(wetter, regen), /Radar: Regen in 20 Min\./);
 });
 
 test('Mehrere Orte: Auswahlbox, hinzufügen, wechseln, entfernen', async () => {
@@ -530,23 +520,16 @@ test('Wetterhinweise: DWD-Warnungen über Bright Sky – ohne Testmeldungen, hö
   assert.match(unwetter.hinweise[0].tipp, /Aufenthalt im Freien vermeiden/);          // ab Stufe 3 ernster Tipp
 });
 
-test('Adapter Wetterhinweise: Abzeichen, kurzer Hinweis und Reiter in der Wetterkachel, Unwetter zuerst', async () => {
+test('Adapter Wetterhinweise: Abzeichen und Untertab im Bereich Wetter, Unwetter zuerst', async () => {
   const h = await esm('src/js/adapter/hinweise.js');
   const { kachel } = await esm('src/js/adapter/wetter.js');
   const env = (await rufe('wetterhinweise', { lat: '51.05', lon: '13.74' })).body;
   const wetter = await mitName((await rufe('wetter', BERLIN)).body);
   assert.match(h.abzeichen(env), /class="wh-badge wh-s2"[^>]*>Sturmböen \+1</);
-  assert.match(h.kurz(env), /^Sturmböen ab (morgen )?\d{1,2}(:\d\d)? Uhr\.$/);
-  const html = h.reiter(env);
-  assert.match(html, /Markantes Wetter.*Amtliche WARNUNG vor STURMBÖEN.*Uhr.*Empfehlung:<\/b> Achten Sie.*Tipp:/s);
-  assert.equal((html.match(/Tipp:/g) || []).length, 1);                              // gleicher Tipp nur einmal
-  assert.match(html, /Deutscher Wetterdienst · Dresden/);
-  assert.match(h.antwort(env), /^Sturmböen \(Markantes Wetter\).*Quelle: Deutscher Wetterdienst\.$/);
-  assert.match(h.antwort({ daten: { gebiet: 'Dresden', hoechsteStufe: 0, hinweise: [] } }), /kein amtlicher Wetterhinweis/);
-  // in der Kachel: Abzeichen in der Kopfzeile, Hinweis in der Zeile, Reiter vor „Mehr“
+  for (const weg of ['kurz', 'reiter', 'antwort']) assert.equal(h[weg], undefined, 'noch da: ' + weg);   // kleine Kachel, Aufklappen, Frag DAILY entfernt
+  // im Bereich: Abzeichen in der Kopfzeile, Untertab vor „Mehr“
   const k = kachel(wetter, null, env);
-  assert.match(k.titleHtml, /wh-badge/);
-  assert.match(k.x, /gefühlt .*°\. Sturmböen ab/);
+  assert.match(k.kopf, /wh-badge/);
   assert.deepEqual(k.kleinReiter.map(r => r.id), ['jetzt', 'hinweise', 'mehr']);              // Mini-Reiter „Hinweise“ nur bei Warnung
   const hr = k.kleinReiter[1];
   assert.match(hr.kopf, /wh-badge wh-s2/);
@@ -554,19 +537,16 @@ test('Adapter Wetterhinweise: Abzeichen, kurzer Hinweis und Reiter in der Wetter
   assert.match(hr.liste[0].d, /^ab /);
   assert.match(hr.liste[0].ico, /wh-punkt wh-s2/);
   assert.match(hr.liste[0].tip, /^Markantes Wetter: Amtliche WARNUNG vor STURMBÖEN \(.*\)\nEs treten Sturmböen um 70 km\/h auf\.\nEmpfehlung: Achten Sie.*\nTipp \(DAILY\): /);
-  // ohne Hinweis: kein Abzeichen, kein Hinweis im Text – der Reiter sagt ruhig „keine“
+  // ohne Hinweis: kein Abzeichen, kein Untertab
   const leer = kachel(wetter, null, { erstellt: new Date().toISOString(), daten: { gebiet: 'Berlin', hoechsteStufe: 0, hinweise: [] } });
-  assert.doesNotMatch(leer.titleHtml, /wh-badge/);
-  assert.doesNotMatch(leer.x, /Sturm/);
+  assert.doesNotMatch(leer.kopf, /wh-badge/);
   assert.deepEqual(leer.kleinReiter.map(r => r.id), ['jetzt', 'mehr']);                        // ohne Warnung kein Reiter
   assert.deepEqual(kachel(wetter, null, null).kleinReiter.map(r => r.id), ['jetzt', 'mehr']);
-  assert.match(h.reiter(null, 'Europe/Rome', Date.now(), { name: 'Rom', land: 'IT' }), /nur für Orte in Deutschland/);
   // Unwetter (Stufe 3–4): deutlich, zuerst, nicht verharmlost
   const u = { daten: { gebiet: 'Dresden', hoechsteStufe: 4, hinweise: [{ art: 'wind', stufe: 4, stufeName: 'extrem', ereignis: 'ORKANBÖEN', titel: 'Amtliche WARNUNG vor ORKANBÖEN',
     beginn: new Date().toISOString(), ende: new Date(Date.now() + 36e5).toISOString(), aktiv: true, beschreibung: 'Orkanböen bis 130 km/h.', empfehlung: 'Aufenthalt im Freien vermeiden!', tipp: 'x' }] } };
   const ku = kachel(wetter, null, u);
-  assert.match(ku.titleHtml, /wh-s4[^>]*>! Unwetter: Orkanböen</);
-  assert.match(ku.x, /^Extreme Unwetterwarnung: Orkanböen bis/);
+  assert.match(ku.kopf, /wh-s4[^>]*>! Unwetter: Orkanböen</);
   assert.equal(ku.unwetter, 'ORKANBÖEN|' + u.daten.hinweise[0].beginn);                       // Kennung: einmal automatisch auf „Hinweise“
   const ur = ku.kleinReiter.find(r => r.id === 'hinweise');
   assert.equal(ur.liste[0].t, 'Extreme Unwetterwarnung: Orkanböen');
@@ -633,8 +613,8 @@ test('Himmel: Mond, Mondphasen, Sternschnuppen, Finsternisse am Ort, Jahreszeite
     ['neumond', 'zunehmende_sichel', 'erstes_viertel', 'zunehmender_mond', 'vollmond', 'abnehmender_mond', 'letztes_viertel', 'abnehmende_sichel']);
 });
 
-test('Adapter Kalender: Kachel aus Feiertagen und Himmel, Reiter, Antworten', async () => {
-  const { kachel, antwort, termine } = await esm('src/js/adapter/kalender.js');
+test('Adapter Kalender: Bereich aus Feiertagen und Himmel, Untertabs', async () => {
+  const kal = await esm('src/js/adapter/kalender.js'), { kachel, termine } = kal;
   const jetzt = Date.parse('2026-09-27T10:00:00Z');
   const fe = { daten: { ...dienste.byId.feiertage.berechne('SN', '2026-09-27'), bundesland: 'Sachsen', kuerzel: 'SN',
     ferien: [{ name: 'Herbstferien', von: '2026-10-12', bis: '2026-10-24' }] } };
@@ -667,18 +647,10 @@ test('Adapter Kalender: Kachel aus Feiertagen und Himmel, Reiter, Antworten', as
   assert.deepEqual(k3.kleinReiter.map(t => t.id), ['naechste', 'himmel']);
   assert.equal(k3.title, 'Kalender');
   assert.ok(termine(fe, hi, '2026-09-27').every((t, i, a) => !i || a[i - 1].datum <= t.datum));
-  // Frag DAILY
-  assert.match(antwort('Wann sind Ferien?', fe, hi, 'Dresden', jetzt), /Nächste Ferien in Sachsen: Herbstferien vom Mo\., 12\.10\./);
-  assert.match(antwort('Wann ist Muttertag?', fe, hi, 'Dresden', jetzt), /^Muttertag: So\., 9\.5\./);
-  assert.match(antwort('Wann ist der 1. Advent?', fe, hi, 'Dresden', jetzt), /^1\. Advent: So\., 29\.11\./);
-  assert.match(antwort('Welche KW haben wir?', fe, hi, 'Dresden', jetzt), /Kalenderwoche 39/);
-  assert.match(antwort('Wann ist die nächste Sonnenfinsternis?', fe, hi, 'Dresden', jetzt), /^Partielle Sonnenfinsternis am Mo\., 2\.8\./);
-  assert.match(antwort('Mond heute?', fe, hi, 'Dresden', jetzt), /^Vollmond, \d+ % beleuchtet/);
-  assert.match(antwort('Zeitumstellung?', fe, hi, 'Dresden', jetzt), /Winterzeit: Uhr zurück .* am So\., 25\.10\./);
-  assert.equal(antwort('Ferien?', null, hi, 'Rom', jetzt), 'Feiertage und Ferien gibt es für Orte in Deutschland.');
+  for (const weg of ['antwort', 'namenAntwort', 'termineAntwort']) assert.equal(kal[weg], undefined, 'noch da: ' + weg);   // Frag DAILY und Termine entfernt (0.47.3)
 });
 
-test('Namenstage: feste Liste plausibel, Dienst, Kachel und Antwort', async () => {
+test('Namenstage: feste Liste plausibel, Dienst und Bereich Kalender', async () => {
   const liste = require('../services/daten/namenstage.json');
   assert.equal(liste.format, 2);
   const alle = Object.entries(liste.tage);
@@ -703,8 +675,8 @@ test('Namenstage: feste Liste plausibel, Dienst, Kachel und Antwort', async () =
   gueltig(r.body, na.schema);
   assert.deepEqual(r.body.hinweise, []);
   assert.ok(r.body.daten.gesucht.tage.includes('03-19') && r.body.daten.gesucht.tage.includes('05-01'));
-  // Kachel und Antwort
-  const { kachel, namenAntwort } = await esm('src/js/adapter/kalender.js');
+  // Bereich Kalender
+  const { kachel } = await esm('src/js/adapter/kalender.js');
   const jetzt = Date.parse('2026-09-28T10:00:00Z');
   const nEnv = { daten: na.auswerten({ stand: '2026-09-01', tage }, '2026-09-28') };
   const k = kachel(null, { daten: dienste.byId.himmel.berechne(51.05, 13.74, jetzt) }, jetzt, 'Europe/Berlin', nEnv);
@@ -713,9 +685,6 @@ test('Namenstage: feste Liste plausibel, Dienst, Kachel und Antwort', async () =
   assert.equal(k.kleinReiter.at(-1).id, 'namen');
   assert.equal(k.kleinReiter.at(-1).kopf, '<b>Namenstage</b> <small>heute Wenzel, Lioba</small>');
   assert.deepEqual(k.kleinReiter.at(-1).liste.slice(0, 2).map(z => z.d), ['heute', 'morgen']);
-  assert.equal(namenAntwort(nEnv, jetzt), 'Heute haben Namenstag: Wenzel, Lioba.');
-  assert.equal(namenAntwort({ daten: d }, jetzt), 'Josef hat Namenstag am Fr., 19.3. (in 172 Tagen).');
-  assert.equal(namenAntwort({ daten: { ...d, stand: null } }, jetzt), 'Die Namenstage werden gerade erst aufgebaut.');
 });
 
 
@@ -775,57 +744,13 @@ test('Termine (privat): nur privat, Links nur per POST, Serien, ganztägig, abge
   assert.throws(() => dienste.byId.termine.auswerten('<html>', rahmen), /keine Kalenderdatei/);
 });
 
-test('Adapter Kalender: eigene Termine – Kennzahl, Reiter, Antwort', async () => {
-  const { kachel, termineAntwort } = await esm('src/js/adapter/kalender.js');
-  const jetzt = Date.parse('2026-09-28T08:00:00Z');   // 10:00 in Berlin
-  const tEnv = { daten: { verbunden: true, heute: '2026-09-28', fehler: [{ kalender: 2, meldung: 'Server nicht erreichbar' }], termine: [
-    { titel: 'Geburtstag Anna', tag: '2026-09-28', beginn: '2026-09-27T22:00:00Z', ende: '2026-09-28T22:00:00Z', ganztag: true, kalender: 1 },
-    { titel: 'Frühstück', tag: '2026-09-28', beginn: '2026-09-28T06:00:00Z', ende: '2026-09-28T07:00:00Z', ganztag: false, kalender: 1 },
-    { titel: 'Zahnarzt', tag: '2026-09-28', beginn: '2026-09-28T12:00:00Z', ende: '2026-09-28T13:00:00Z', ganztag: false, kalender: 1 },
-    { titel: 'Sport', tag: '2026-09-28', beginn: '2026-09-28T16:00:00Z', ende: '2026-09-28T17:00:00Z', ganztag: false, kalender: 1 },
-    { titel: 'Elternabend', tag: '2026-09-30', beginn: '2026-09-30T17:00:00Z', ende: null, ganztag: false, kalender: 1 }
-  ] } };
-  const fe = { daten: { ...dienste.byId.feiertage.berechne('SN', '2026-09-28'), bundesland: 'Sachsen', kuerzel: 'SN', ferien: [] } };
-  const k = kachel(fe, null, jetzt, 'Europe/Berlin', null, tEnv);
-  assert.deepEqual([k.m, k.ms], ['14:00 Zahnarzt', '14:00']);                      // Frühstück ist vorbei
-  assert.match(k.x, /^Danach 18:00 Sport · Tag der Deutschen Einheit Sa\., 3\.10\./);
-  assert.deepEqual(k.kleinReiter.map(t => t.id), ['naechste', 'termine', 'frei']);
-  const te = k.kleinReiter[1];
-  assert.equal(te.kopf, '<b>Termine</b> <small>5 in 14 Tagen</small>');
-  assert.deepEqual(te.liste.map(z => [z.d, z.t]), [['heute', 'Geburtstag Anna'], ['heute', '08:00 Frühstück'], ['heute', '14:00 Zahnarzt'], ['heute', '18:00 Sport'],
-    ['Mi., 30.9.', '19:00 Elternabend'], ['Kalender 2', 'Server nicht erreichbar']]);
-  assert.deepEqual([...new Set(te.liste.map(z => z.gruppe))], ['2026-09-28', '2026-09-30', 'fehler']);   // je Tag eine Gruppe
-  // Nächste: KW und große Zeile im Kopf, darunter erst Termine, dann Freies
-  const nl = k.kleinReiter[0];
-  assert.equal(nl.kopf, '<small class="kl-kw">KW 40</small> <b>14:00 Zahnarzt</b>');
-  assert.deepEqual(nl.liste.map(z => [z.d, z.t, z.gruppe]).slice(0, 4), [['heute', 'Geburtstag Anna', 1], ['18:00', 'Sport', 1], ['Mi., 30.9. 19:00', 'Elternabend', 1], ['Sa., 3.10.', 'Tag der Deutschen Einheit', 2]]);
-  assert.ok(!nl.liste.some(z => z.t === 'Frühstück' || z.t === 'Zahnarzt'));        // vorbei bzw. schon im Kopf
-  // keine Termine heute → der nächste Termin steht trotzdem vorn
-  const k2 = kachel(fe, null, jetzt, 'Europe/Berlin', null, { daten: { ...tEnv.daten, termine: tEnv.daten.termine.slice(4) } });
-  assert.deepEqual([k2.m, k2.ms], ['Mi., 30.9. 19:00 Elternabend', 'Mi., 30.9.']);
-  assert.equal(k2.kleinReiter[0].liste[0].t, 'Tag der Deutschen Einheit');
-  // öffentlich (ohne Termine): große Zeile = Feiertag, Liste ohne ihn
-  const k3 = kachel(fe, null, jetzt);
-  assert.equal(k3.m, 'Tag der Deutschen Einheit');
-  assert.ok(!k3.kleinReiter[0].liste.some(z => z.t === 'Tag der Deutschen Einheit'));
-  // nicht verbunden / öffentlich
-  const nv = kachel(fe, null, jetzt, 'Europe/Berlin', null, { daten: { verbunden: false, heute: '2026-09-28', termine: [], fehler: [] } }).kleinReiter[1];
-  assert.deepEqual([nv.liste.length, /Noch kein Kalender verbunden/.test(nv.html)], [0, true]);
-  assert.match(kachel(fe, null, jetzt, 'Europe/Berlin', null, { daten: null }).kleinReiter[1].html, /gerade nicht erreichbar/);
-  assert.ok(!kachel(fe, null, jetzt).kleinReiter.some(t => t.id === 'termine'));
-  // Frag DAILY
-  assert.equal(termineAntwort('Was steht heute an?', tEnv, jetzt), 'Heute: Geburtstag Anna, 08:00 Frühstück, 14:00 Zahnarzt, 18:00 Sport.');
-  assert.equal(termineAntwort('Was habe ich morgen?', tEnv, jetzt), 'Morgen stehen keine Termine an.');
-  assert.equal(termineAntwort('Termine?', null, jetzt), null);
-});
-
 test('Einstellungen: Formular, Wetter-Optionen', async () => {
-  // Formular je Kachel (rein)
+  // Formular je Bereich (rein)
   const ke = await esm('src/js/core/einstellungen.js');
   ke.kachelEinstellungen('probe', { felder: () => [{ typ: 'titel', label: 'Anzeigen' }, { typ: 'check', key: 'a', label: 'A <b>', wert: true },
     { typ: 'select', key: 's', label: 'S', wert: '7', optionen: [['16', '16 Tage'], ['7', '7 Tage']] }, { typ: 'text', key: 't', label: 'T', wert: 'x"y' }], speichern() {} });
   const html = ke.formular('probe');
-  assert.ok(ke.hatEinstellungen('probe') && !ke.hatEinstellungen('gibtsnicht'));
+  assert.equal(ke.formular('gibtsnicht'), '');
   assert.match(html, /<form class="ke" data-ke="probe">.*type="checkbox" name="a" checked> A &lt;b&gt;.*<option value="7" selected>.*value="x&quot;y"/s);
   assert.doesNotMatch(html, /Speichern|type="submit"/);                              // kein Knopf – Änderungen gelten sofort
   // Wetter: Reiter aus, Start-Reiter, Mini-Diagramm 7 Tage; Unwetter bleibt vorn
@@ -853,8 +778,7 @@ test('Einstellungen: Formular, Wetter-Optionen', async () => {
   // Kopfzeile klein: ohne aktuelle Temperatur, „heute“ vor Tiefst/Höchst; Zeitpunkt-Block „Jetzt“ mit denselben Feldern
   const kk = mitOptionen(kachel(w, r, null), w, {});
   assert.match(kk.kopf, /^Berlin · heute <span class="wd-tm"/);
-  assert.deepEqual(Object.keys(kk.zp), ['z', 't', 'g', 'i', 'l', 'mm', 'p', 'w', 's']);
-  assert.equal(kk.zp.z, 'Jetzt');
+  assert.match(kk.kleinReiter[0].html, /data-jetzt="\{&quot;z&quot;:&quot;Jetzt&quot;/);   // Zeitpunkt-Block „Jetzt“ unter „Jetzt“
   assert.match(kk.kopf, /class="wh-badge wd-radar" title="Regenradar: Regen in 20 Min\. \(leicht\)\.">☂ in 20 Min\. \(leicht\)<\/span>/);
   assert.doesNotMatch(C(k24), /wd-sonnen/);                                        // Sonne nur bei Tagen
   // 3 Tage: 12 Tageszeiten, Wochentag mittig je Tag, jeder zweite Tag hinterlegt, Sonne je Tageszeit; früher „48 Std.“ → 3 Tage
@@ -1095,7 +1019,7 @@ test('Meine Seiten: feste Seiten-Auswahl, Mini-Reiter mit Symbolraster, Einstell
     ['https://cdn.x.de/a.png', 'https://www.x.de/a152.png', 'https://www.x.de/f.ico']);
 });
 
-test('Tagesinhalte: Dienst je Tag (Verlauf, nie Zukunft), Themen-Kachel mit Blättern, Favoriten, Aufgabe, Top 11 vorbereitet', async () => {
+test('Tagesinhalte: Dienst je Tag (Verlauf, nie Zukunft), Bereich „Heute“ mit Blättern, Lösung, Merken', async () => {
   const d = dienste.byId.tagesinhalt;
   for (const tag of d.VORRAT.tage) assert.deepEqual(pruefeStreng(d.umwandeln(tag, tag.datum, { heute: tag.datum, erster: d.VORRAT.von, wiederholt: false }), d.schema), [], tag.datum);   // ganzer Vorrat erfüllt den Vertrag
   const jetzt = Date.parse('2026-10-01T10:00:00Z');
@@ -1110,37 +1034,30 @@ test('Tagesinhalte: Dienst je Tag (Verlauf, nie Zukunft), Themen-Kachel mit Blä
   assert.equal(spaet.daten.wiederholt, true);                                                 // nach dem Vorrat im Kreis
   const r = await rufe('tagesinhalt', { datum: '2026-09-28' });
   assert.equal(r.code, 200);
-  // Adapter: Themen-Kachel „Unterhaltung“
+  // Adapter: Bereich „Heute“
   const a = await esm('src/js/adapter/tagesinhalt.js');
   assert.deepEqual([a.datumText('2026-10-01'), a.datumText('2026-10-01', true), a.tagPlus('2026-10-01', -1), a.tagPlus('2026-09-30', 1)], ['Do 1.10.', '1.10.', '2026-09-30', '2026-10-01']);
-  const k = a.kachel('unterhaltung', heute, {});
-  assert.deepEqual(k.kleinReiter.map(x => x.id), ['raetsel', 'witz', 'film', 'favoriten']);   // Top 11 erst mit Liste
-  assert.ok(k.kleinReiter.every(x => /^<svg class="ico"/.test(x.icon)));
-  const rae = k.kleinReiter[0].html;
-  assert.match(rae, /<button type="button" data-ti="zurueck"[^>]*>‹<\/button><span class="ti-datum">Do 1\.10\.<\/span><button type="button" data-ti="vor"[^>]* disabled>›/);   // heute: nicht weiter vor
-  assert.match(rae, /data-ti="fav" aria-pressed="false"[^>]*>☆<.*data-ti="aufgabe"[^>]*>\+<span class="ti-lang"> Aufgabe</s);
+  const h = a.heuteBereich(heute, {});
+  assert.match(h.bereichKopf, /data-ti="zurueck"[^>]*>‹<\/button><button type="button" data-ti="vor"[^>]* disabled>›/);   // heute: nicht weiter vor
+  const rae = h.kleinReiter[0].html;
+  assert.match(rae, /data-ti="fav" data-art="raetsel" aria-pressed="false">☆ Merken</);
   assert.match(rae, /data-ti="loesung">Lösung zeigen</);
-  assert.doesNotMatch(rae, /ti-antwort/);
-  assert.match(a.kachel('unterhaltung', heute, { loesung: true }).kleinReiter[0].html, /class="ti-antwort">Lösung: /);
+  assert.doesNotMatch(rae, /ab-loesung/);
+  assert.match(a.heuteBereich(heute, { loesung: true }).kleinReiter[0].html, /class="ab-loesung">Lösung: /);
   const erster = await dienste.ausfuehren('tagesinhalt', { datum: '2026-09-26' }, { jetzt });
-  assert.match(a.kachel('unterhaltung', erster, {}).kleinReiter[0].html, /data-ti="zurueck"[^>]* disabled>‹/);   // erster Tag: nicht weiter zurück
-  // Favoriten: Kopie, im Reiter neueste zuerst, Zeile öffnet den Tag; Stern gefüllt
+  assert.match(a.heuteBereich(erster, {}).bereichKopf, /data-ti="zurueck"[^>]* disabled>‹/);   // erster Tag: nicht weiter zurück
+  // Gemerkt: Kopie, neueste zuerst, Zeile öffnet den Tag; Knopf zeigt „★ Gemerkt“
   const fav = [a.favEintrag('witz', erster), a.favEintrag('film', heute), { art: 'rezept', datum: '2026-09-30', kurz: 'x', text: 'x' }];
   assert.deepEqual(Object.keys(fav[0]), ['art', 'datum', 'kurz', 'text']);
-  const kf = a.kachel('unterhaltung', heute, { favoriten: fav });
-  const fl = kf.kleinReiter.find(x => x.id === 'favoriten').liste;
-  assert.deepEqual(fl.map(z => z.aktion), ['fav:film|2026-10-01', 'fav:witz|2026-09-26']);     // nur Arten dieses Themas, neueste zuerst
+  const fl = a.gemerktReiter(fav).liste;
+  assert.deepEqual(fl.map(z => z.aktion), ['fav:film|2026-10-01', 'fav:rezept|2026-09-30', 'fav:witz|2026-09-26']);
   assert.match(fl[0].t, /^Film: /);
-  assert.match(kf.kleinReiter.find(x => x.id === 'film').html, /aria-pressed="true"[^>]*>★</);
-  assert.match(a.kachel('unterhaltung', heute, {}).kleinReiter.find(x => x.id === 'favoriten').html, /Noch keine Favoriten/);
-  // Einstellungen: Reiter aus; Top 11 vorbereitet (erscheint mit Liste)
-  assert.deepEqual(a.kachel('unterhaltung', heute, { opt: { witz: false, favoriten: false } }).kleinReiter.map(x => x.id), ['raetsel', 'film']);
-  const top = a.kachel('unterhaltung', heute, { top: [{ art: 'witz', datum: '2026-09-26', kurz: 'K', text: 'T' }] });
-  assert.deepEqual([top.kleinReiter.at(-1).id, top.kleinReiter.at(-1).liste[0].d], ['top', '1.']);
-  assert.equal(a.kachel('unterhaltung', null, {}).state, 'error');
+  assert.match(a.heuteBereich(heute, { favoriten: fav }).kleinReiter.find(x => x.id === 'kultur').html, /aria-pressed="true">★ Gemerkt</);
+  assert.match(a.gemerktReiter([]).html, /Noch nichts gemerkt/);
+  for (const weg of ['kachel', 'navZeile', 'THEMEN']) assert.equal(a[weg], undefined, 'noch da: ' + weg);   // alte Themen-Kachel entfernt (0.47.3)
 });
 
-test('An diesem Tag: Dienst je Datum (Wikipedia, neueste zuerst), Kachel „Wissen“ mit Reiter „An diesem Tag“ ohne Aufgabe', async () => {
+test('An diesem Tag: Dienst je Datum (Wikipedia, neueste zuerst), unter „Heute“ → Wissen', async () => {
   const d = dienste.byId.andiesemtag;
   const ev = d.umwandeln(require('../tools/fixtures').onthisday().selected);
   assert.deepEqual(ev.map(e => e.jahr), [1990, 1950, 1871]);
@@ -1154,45 +1071,40 @@ test('An diesem Tag: Dienst je Datum (Wikipedia, neueste zuerst), Kachel „Wiss
   for (const x of ['2026-10-02', '1999-12-31', 'heute'])
     await assert.rejects(dienste.ausfuehren('andiesemtag', { datum: x }, { jetzt }), e => e.code === 'eingabe_ungueltig', x);
   assert.equal((await rufe('andiesemtag', { datum: '2026-09-28' })).code, 200);
-  // Kachel „Wissen“: Wort, Land, An diesem Tag, Favoriten
+  // „Heute“ → Wissen: Wort · Land · An diesem Tag
   const a = await esm('src/js/adapter/tagesinhalt.js');
   const t = await dienste.ausfuehren('tagesinhalt', {}, { jetzt });
   const env = a.mitZusatz(t, 'geschichte', heute);
-  const k = a.kachel('wissen', env, {});
-  assert.deepEqual(k.kleinReiter.map(x => x.id), ['wort', 'land', 'geschichte', 'favoriten']);
-  const g = k.kleinReiter.find(x => x.id === 'geschichte');
-  assert.match(g.html, /<a class="ti-ev kr-z" href="https:\/\/de\.wikipedia\.org\/wiki\/Beispiel_A" target="_blank" rel="noopener noreferrer" title="vor 36 Jahren · [^"]+"><b>1990<\/b> /);
-  assert.match(g.html, /<p class="ti-ev kr-z"[^>]*><b>1871<\/b>/);            // ohne Link: keine Verlinkung
-  assert.doesNotMatch(g.html, /data-ti="aufgabe"/);                          // Geschichte: kein „+ Aufgabe“
-  assert.match(k.kleinReiter[0].html, /data-ti="aufgabe"/);
-  assert.match(g.kopf, /aus Wikipedia/);
-  assert.ok(k.info.some(x => /CC BY-SA/.test(x)));
+  const w = a.heuteBereich(env, {}).kleinReiter.find(x => x.id === 'wissen');
+  assert.deepEqual(w.teile.map(x => x.id), ['wort', 'land', 'geschichte']);
+  const g = w.teile[2].html;
+  assert.match(g, /<a class="ab-ev kr-z" href="https:\/\/de\.wikipedia\.org\/wiki\/Beispiel_A" target="_blank" rel="noopener noreferrer" title="vor 36 Jahren · [^"]+"><b>1990<\/b> /);
+  assert.match(g, /<p class="ab-ev kr-z"[^>]*><b>1871<\/b>/);            // ohne Link: keine Verlinkung
+  assert.match(g, /aus Wikipedia/);
+  assert.ok(a.heuteBereich(env, {}).info.some(x => /CC BY-SA/.test(x)));
   const f = a.favEintrag('geschichte', env);
   assert.deepEqual([f.art, f.datum, f.kurz], ['geschichte', '2026-10-01', '1990: Beispielereignis A für die Testansicht.']);
-  // Wikipedia nicht erreichbar: übrige Reiter bleiben, Hinweis im Reiter
-  const ohne = a.kachel('wissen', a.mitZusatz(t, 'geschichte', null), {});
+  // Wikipedia nicht erreichbar: übrige Teile bleiben, Hinweis im Teil
+  const ohne = a.heuteBereich(a.mitZusatz(t, 'geschichte', null), {});
   assert.equal(ohne.state, 'content');
-  assert.match(ohne.kleinReiter.find(x => x.id === 'geschichte').html, /Wikipedia ist gerade nicht erreichbar/);
-  assert.match(ohne.kleinReiter[1].html, /class="ti-inhalt"/);
+  const wo = ohne.kleinReiter.find(x => x.id === 'wissen');
+  assert.match(wo.teile[2].html, /Wikipedia ist gerade nicht erreichbar/);
+  assert.match(wo.teile[1].html, /class="ab-inhalt"/);
   assert.equal(a.jahrText(-44), '44 v. Chr.');
 });
 
-test('Kachel „Alltag“: Rezept, Gesundheit, Tech, Beziehung, Favoriten auch mit Spartipp (öffnet in Finanzen)', async () => {
+test('„Heute“ → Alltag: Rezept, Gesundheit, Tech, Beziehung, Spartipp', async () => {
   const a = await esm('src/js/adapter/tagesinhalt.js');
   const t = await dienste.ausfuehren('tagesinhalt', {}, { jetzt: Date.parse('2026-10-01T10:00:00Z') });
-  const k = a.kachel('alltag', t, {});
-  assert.deepEqual(k.kleinReiter.map(x => x.id), ['rezept', 'gesundheit', 'tech', 'beziehung', 'favoriten']);
-  assert.ok(k.kleinReiter.every(x => /^<svg class="ico"/.test(x.icon)));
-  const rez = k.kleinReiter[0].html;
-  assert.match(rez, /data-ti="aufgabe"/);
-  assert.match(rez, /<div class="ti-inhalt" title="[^"]+ Zutaten: [^"]+"><p class="ti-text"><b>[^<]+<\/b> <small>\d+ Min\. · für 2/);
-  assert.match(k.kleinReiter[1].html, /keine medizinische Beratung/);
+  const al = a.heuteBereich(t, {}).kleinReiter.find(x => x.id === 'alltag');
+  assert.deepEqual(al.teile.map(x => x.id), ['rezept', 'gesundheit', 'tech', 'beziehung', 'spartipp']);
+  assert.match(al.teile[0].html, /<p class="ab-titel">[^<]+<\/p><p class="ab-meta">\d+ Minuten · für 2/);
+  assert.match(al.teile[1].html, /keine medizinische Beratung/);
+  assert.match(al.teile[4].html, /keine Anlageempfehlung/);
   const sp = a.favEintrag('spartipp', t);
   assert.deepEqual([sp.art, sp.datum], ['spartipp', '2026-10-01']);
-  assert.match(a.artInhalt('spartipp', t.daten.inhalt).html, /keine Anlageempfehlung/);
-  const fl = a.kachel('alltag', t, { favoriten: [sp, a.favEintrag('rezept', t), a.favEintrag('witz', t)] }).kleinReiter.at(-1).liste;
-  assert.deepEqual(fl.map(z => z.aktion).sort(), ['fav:rezept|2026-10-01', 'fav:spartipp|2026-10-01']);   // Spartipp ja, Witz (Unterhaltung) nein
-  assert.ok(fl.some(z => /^Spartipp: /.test(z.t)));
+  assert.deepEqual(Object.keys(a.artInhalt('spartipp', t.daten.inhalt)), ['kurz', 'text']);
+  assert.ok(a.gemerktReiter([sp]).liste.some(z => /^Spartipp: /.test(z.t)));
 });
 
 test('Eingaben: die Adresse ist der Cache-Schlüssel – nur erlaubte Angaben in einer Schreibweise, sonst 400', async () => {

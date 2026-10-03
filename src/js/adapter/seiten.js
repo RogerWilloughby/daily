@@ -31,7 +31,7 @@ export function kategorien(katalog, opt = {}) {
   return katalog.kategorien.filter(k => wahl.includes(k.id)).slice(0, MAX_KATEGORIEN);
 }
 
-// Kachel (Felder wie core/board.js erwartet)
+// Mehr → „Meine Seiten“ (Felder wie core/oberflaeche.js erwartet): je Kategorie ein Teil im Umschalter
 export function kachel(links, katalog, opt = {}) {
   const meine = links.length ? raster(links, katalog)
     : '<p class="ms-text">Noch keine eigenen Seiten. Im Zahnrad Seiten aus den Kategorien anhaken oder eigene eintragen.</p>';

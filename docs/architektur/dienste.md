@@ -162,6 +162,8 @@ Info-Dienste ohne Bereich (Tanken, Fußball, Autobahn, Finanzen, Kurse, Schlagze
 |---|---|
 | `src/js/core/oberflaeche.js` | Gerüst: Bereiche, Untertabs (`untertabsVon`), Umschalter im Feld (`teile`), Adresse `#bereich/untertab/teil` (`adresseLesen`), `set(id, patch)` für die Anbieter, nur ganze Zeilen |
 | `src/js/core/mini-reiter.js` | Listen (`listeHtml`, Zeile mit `href` oder `aktion` → `data-aktion`), Zeilen ausblenden, die nicht passen (`krZeilen`) |
+| `src/js/core/betrieb.js` | Betriebsart (öffentlich/privat) und `GENUTZTE_DIENSTE` – die Dienste der Oberfläche (für „Woher kommen die Daten?“ und den Speicher im Browser) |
+| `src/js/core/store.js` | Speicher im Browser: Einstellungen, Orte, Meine Seiten, Gemerktes; einmaliges Aufräumen der Kachel-Daten (`aufraeumen`, 0.47.3) |
 | `src/js/core/einstellungen.js` | Formular je Bereich (`kachelEinstellungen`, `formular`, `binden`) – erscheint im Einstellungsfenster (`ui/dialogs.js`) |
 | `src/js/core/ansichten.js` | Anmeldung: `ansicht(id, { spalte, zurueck })` für einen Bereich, `erweiterung({ nachZeichnen, groesse, zeiger })` für alle |
 | `src/js/ansichten/mini-diagramm.js` | allgemeine Diagramm-Bedienung: Dichte je Platz (`miniDichte`), Überfahren der Spalten |
@@ -174,7 +176,7 @@ Info-Dienste ohne Bereich (Tanken, Fußball, Autobahn, Finanzen, Kurse, Schlagze
 | `src/css/abreissblock.css` | Gestaltung Variante A: Farben hell/dunkel, Gerüst Handy/Rechner, Blatt, Untertabs, Inhalte |
 | `src/css/diagramm.css` | gemeinsame Diagramm-Styles `.wd-*` und Farben `--wd-*` (Wetter, Kalender) |
 | `src/css/wetter.css` | nur Wetter: Zeitpunkt-Block, Radar, Hinweise, Sonnenzahlen |
-| `src/css/seiten.css`, `lokal.css` | Meine Seiten (Symbolraster), Tools |
+| `src/css/seiten.css`, `lokal.css` | Meine Seiten (Symbolraster), Tools (Beschreibung, Knopf) |
 
 Neuer Bereich oder Untertab mit eigener Darstellung: Datei unter `src/js/ansichten/`, vom Anbieter importiert; eigene Styles unter `src/css/`, in `index.html` und `sw.js` eingetragen.
 

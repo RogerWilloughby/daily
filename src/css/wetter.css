@@ -1,4 +1,4 @@
-/* DAILY – Wetterkachel: Zeitpunkt-Block, Sonnenzahlen, Radar, Wetterhinweise, Textzeilen der kleinen Kachel. */
+/* DAILY – Bereich „Wetter“: Zeitpunkt-Block, Sonnenzahlen, Radar, Wetterhinweise (Abzeichen, Zeilen). */
 /* Regenradar: Stufen des Regen-Hellblaus (hell → kräftig, wie --wd-regen) für die Radarbilder; mit Landkarte eigene Blautöne (siehe unten) */
 :root{--rs1:#CFE8FA;--rs2:#8CC8F0;--rs3:#5AAEE8;--rs4:#2878B5}
 @media (prefers-color-scheme: dark){
@@ -60,44 +60,14 @@
 .wh-s3{--wh:#D12A2A;--wh-text:#fff}
 .wh-s4{--wh:#8E1F8E;--wh-text:#fff}
 .wh-badge{display:inline-block;margin-left:6px;padding:0 6px;border-radius:9px;background:var(--wh);color:var(--wh-text);font-size:11px;font-weight:700;line-height:17px;vertical-align:1px;white-space:nowrap}
-.wh-feld{display:grid;gap:6px;font-size:13px;line-height:1.3}
-.wh-karte{border-left:5px solid var(--wh);padding:2px 0 2px 10px}
-.wh-karte header{margin-bottom:2px}
-.wh-stufe{display:inline-block;padding:0 6px;border-radius:9px;background:var(--wh);color:var(--wh-text);font-size:11px;font-weight:700}
-.wh-karte p{margin:2px 0}
-.wh-titel{font-weight:700}
-.wh-tipp{color:var(--active-muted)}
-.wh-s3 .wh-titel,.wh-s4 .wh-titel{font-size:14px}
-.wh-quelle,.wh-mehr{margin:0;font-size:11px;color:var(--active-muted)}
-.wh-ruhig{align-content:start}
-.wh-keine{font-size:15px;margin:4px 0}
 .wd-um{font-size:.78em;font-weight:500;opacity:.8}
-/* Wind heute in der Kopfzeile der kleinen Kachel */
+/* Wind heute in der Kopfzeile */
 .wd-wind{font-weight:500;opacity:.85;white-space:nowrap}
-@media (min-width:761px) and (min-height:521px){
-/* mit Hinweis-Abzeichen wird der Kopf zweizeilig – dann die Unterzeile einzeilig, damit das Diagramm Platz hat */
-    .tile .head:has(.kopf .wh-badge):has(.mini:not(:empty)) .teaser{-webkit-line-clamp:1}
-}
-/* Wetter klein: Regen in einer eigenen Zeile (Schirm-Symbol). Am Handy läuft er im Text weiter. */
-.teaser .t-zeile2::before{content:' '}
-@media (min-width:761px) and (min-height:521px){
-  .tile .teaser.mit-zeile2,.tile .head:has(.kopf .wh-badge):has(.mini:not(:empty)) .teaser.mit-zeile2{display:block;-webkit-line-clamp:unset;overflow:hidden;flex:0 0 auto}
-  .tile .teaser.mit-zeile2 .t-text{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
-  .tile .head:has(.mini:not(:empty)) .teaser.mit-zeile2 .t-text{-webkit-line-clamp:1}
-  .tile .teaser .t-zeile2{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
-  .tile .teaser .t-zeile2::before{content:none}
-}
 /* Wetter-Mini: Sonnenstunden als Zahl oben, Mouseover-Spalten */
 .wd-sonnen{position:absolute;top:0;left:0;right:0;height:11px;font-size:9px;line-height:11px;font-weight:700;pointer-events:none}
 .wd-sonnen span{position:absolute;transform:translateX(-50%)}
 .wd-seng .wd-sonnen .wd-s2{display:none}
-/* Wetter klein: Zeitpunkt-Block mit festen Spalten – beim Überfahren wechseln nur die Werte (Jetzt / Stunde / Tag) */
-@media (min-width:761px) and (min-height:521px){
-  .tile .teaser.mit-zp{display:block;-webkit-line-clamp:unset;overflow:hidden;flex:0 0 auto}
-  .tile .teaser.mit-zp :is(.t-text,.t-zeile2){display:none}
-  .tile .teaser.mit-zp .t-zp{display:grid;grid-template-columns:9.5ch 5.5ch 7.5ch minmax(0,1fr);column-gap:.5em;
-    align-items:center;row-gap:1px;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--ink)}
-}
+/* Zeitpunkt-Block mit festen Spalten – beim Überfahren wechseln nur die Werte (Jetzt / Stunde / Tag) */
 .zp-z{font-weight:600}
 .t-zp.zp-an .zp-z{color:var(--accent)}
 .zp-g{color:var(--muted);font-size:.92em}
@@ -111,7 +81,7 @@
 .zp-schirm{font-style:normal}
 .zp-s{color:var(--wd-sonne-text)}
 .wh-badge.wd-radar{background:var(--wd-regen);color:#fff}
-/* ---- Mini-Reiter der Wetterkachel (entscheidungen.md Abschnitt 13, Variante 1a) ---- */
+/* ---- Untertabs des Bereichs „Wetter“ ---- */
 /* Jetzt: Zeitpunkt-Block mit festen Spalten (beim Überfahren des Diagramms wechseln nur die Werte), darunter das Diagramm (.kr-unten) */
 .wz-jetzt{flex:0 0 auto;min-width:0}
 .wz-jetzt .t-zp{display:grid;grid-template-columns:9.5ch 5.5ch 7.5ch minmax(0,1fr);column-gap:.5em;align-items:center;row-gap:1px;
@@ -120,7 +90,7 @@
 /* Hinweise: farbiger Punkt der Warnstufe vor jeder Zeile */
 .wh-punkt{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--wh);margin-right:6px;vertical-align:1px}
 .wh-dwd{font-weight:500;color:var(--muted);font-size:.85em;margin-left:4px}
-/* Radar klein: links die Karte (so hoch wie das Feld, Zeitleiste darunter), rechts die Werte; Farben der kleinen Kachel */
+/* Radar: links die Karte (so hoch wie das Feld, Zeitleiste darunter), rechts die Werte */
 .kr-feld:has(.rk-klein){container-type:size}
 .rk-klein{display:flex;gap:10px;height:100%;min-height:0}
 .rk-klein .rk-karte{order:0;flex:none;width:min(calc(100cqh - 30px),62cqw);gap:4px}
@@ -133,7 +103,7 @@
 .rk-klein .rk-felder i{background:var(--line)}
 .rk-klein .rk-felder button:hover i{background:var(--muted)}
 .rk-klein .rk-felder button[aria-pressed="true"] i{background:var(--ink)}
-/* schmale Kachel: Zeitpunkt-Block ohne „gefühlt“ und Wind, Radar ohne Werte (die stehen im Kopf), Legende des Diagramms endet mit „…“ */
+/* sehr schmales Feld: Zeitpunkt-Block ohne „gefühlt“ und Wind, Radar ohne Werte (die stehen im Kopf), Legende des Diagramms endet mit „…“ */
 .kr-feld:has(.wz-jetzt){container-type:inline-size}
 @container (max-width:240px){
   .wz-jetzt .t-zp{grid-template-columns:8.5ch 4.5ch minmax(0,1fr)}

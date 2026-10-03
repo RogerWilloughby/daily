@@ -1,7 +1,7 @@
-// Einstellungen je Kachel: Jede Kachel (bzw. ihr Anbieter) meldet hier ihre Felder an. Das Raster zeigt dann in der
-// aufgeklappten Kachel einen Reiter mit Zahnrad (nur Symbol) – Formular und „Speichern“ entstehen von selbst.
+// Einstellungen je Bereich: Jeder Anbieter meldet hier seine Felder an; das Einstellungsfenster (ui/dialogs.js) zeigt je Anbieter
+// einen Abschnitt – das Formular entsteht von selbst.
 // Kein „Speichern“-Knopf: Häkchen und Auswahl gelten sofort, Textfelder nach 1 s Tipp-Pause oder beim Verlassen des Felds.
-// Nach dem Speichern: Ereignis „daily:einstellungen“ (detail = Kachel-ID) → main.js lädt den passenden Anbieter neu.
+// Nach dem Speichern: Ereignis „daily:einstellungen“ (detail = Anbieter-ID) → main.js lädt den passenden Anbieter neu.
 import { esc } from './util.js';
 
 const REG = {};
@@ -9,11 +9,6 @@ const REG = {};
 // def = { felder(): Feld[], speichern(werte) }
 // Feld: { typ: 'text'|'textarea'|'select'|'check'|'titel'|'hinweis', key, label, hilfe?, wert?, optionen?: [[wert, text]], platzhalter? }
 export function kachelEinstellungen(id, def) { REG[id] = def; }
-export const hatEinstellungen = id => !!REG[id] && REG[id].felder().some(f => f.key);
-
-export const ZAHNRAD = '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-  '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>';
-
 // Formular als HTML (rein, testbar)
 export function formular(id) {
   const def = REG[id]; if (!def) return '';
@@ -47,18 +42,18 @@ export function werte(form) {
   return out;
 }
 
-// Formular in einer Kachel verbinden: jede Änderung sofort speichern
+// Formular verbinden: jede Änderung sofort speichern
 export const TIPP_PAUSE_MS = 1000;
-const offen = new Map();                       // Kachel-ID → { timer, form } für noch nicht gespeicherte Texteingaben
+const offen = new Map();                       // Anbieter-ID → { timer, form } für noch nicht gespeicherte Texteingaben
 function speichere(id, form) {
   const o = offen.get(id); if (o) { clearTimeout(o.timer); offen.delete(id); }
   const w = werte(form), stand = JSON.stringify(w);
   if (form.dataset.stand === stand) return;    // nichts geändert (z. B. Feld nach der Tipp-Pause verlassen)
   form.dataset.stand = stand;
   REG[id].speichern(w);
-  document.dispatchEvent(new CustomEvent('daily:einstellungen', { detail: id }));   // Raster zeichnet neu, main.js lädt den Anbieter neu
+  document.dispatchEvent(new CustomEvent('daily:einstellungen', { detail: id }));   // main.js lädt den Anbieter neu
 }
-// Noch ausstehende Texteingaben sofort speichern (z. B. beim Schließen der Kachel)
+// Noch ausstehende Texteingaben sofort speichern (z. B. beim Schließen des Einstellungsfensters)
 export function offeneSpeichern() { for (const [id, o] of [...offen]) speichere(id, o.form); }
 export function binden(id, el) {
   const form = el.querySelector(`form[data-ke="${id}"]`); if (!form) return;

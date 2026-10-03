@@ -22,7 +22,7 @@ fs.writeFileSync(swDatei, fs.readFileSync(swDatei, 'utf8').replace(/const CACHE 
 
 const nm = p => require.resolve(p);
 const fonts = {
-  'bricolage-grotesque.woff2': '@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2',
+  'bricolage-grotesque.woff2': '@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2',   // nur noch Tool „Setzkasten“
   'figtree-400.woff2': '@fontsource/figtree/files/figtree-latin-400-normal.woff2',
   'figtree-500.woff2': '@fontsource/figtree/files/figtree-latin-500-normal.woff2',
   'figtree-600.woff2': '@fontsource/figtree/files/figtree-latin-600-normal.woff2',

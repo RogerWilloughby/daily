@@ -1,5 +1,6 @@
 // Lokale Speicherung (nur dieser Browser). Jeder Zugriff ist abgesichert,
 // damit DAILY auch ohne Speicher (privates Fenster, blockiert) funktioniert.
+import { GENUTZTE_DIENSTE } from './betrieb.js';
 
 function read(key, fallback) {
   try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; } catch (e) { return fallback; }
@@ -8,15 +9,38 @@ function write(key, value) {
   try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch (e) { return false; }
 }
 
+// ---- Einmal aufräumen (0.47.3, Entscheidung 03.10.2026): Daten der alten Kachel-Oberfläche entfernen ----
+// Aufgaben („Mein Daily“), Klickzähler („Deine Nutzung“), alte Einstellungen (Haltestelle, Verein, Kraftstoff, Kachelbelegung,
+// iCal-Links der Termine, Einstellungen weggefallener Kacheln, gemerkte Reiterwahl) und gespeicherte Antworten von Diensten,
+// die die Oberfläche nicht mehr abruft. Läuft nur einmal (Merker in den Einstellungen). Rein bis auf den übergebenen Speicher – testbar.
+export const AUFGERAEUMT = 1;
+const BEREICHE_MIT_EINSTELLUNGEN = ['weather', 'kalender', 'links', 'tools'];
+const ALTE_EINSTELLUNGEN = ['icsUrls', 'stop', 'team', 'fuel', 'layout', 'alleKacheln'];
+export function aufraeumen(sp) {
+  let s; try { s = JSON.parse(sp.getItem('daily-settings')) || {}; } catch (e) { s = {}; }
+  if (s.aufgeraeumt >= AUFGERAEUMT) return false;
+  ['daily-clicks', 'daily-tasks'].forEach(k => sp.removeItem(k));
+  for (const k of sp.keys()) {
+    const m = /^daily-dienst:\/api\/v1\/([a-z]+)/.exec(k);
+    if (k.startsWith('daily-dienst:') && !(m && GENUTZTE_DIENSTE.includes(m[1]))) sp.removeItem(k);
+  }
+  ALTE_EINSTELLUNGEN.forEach(k => delete s[k]);
+  const kacheln = {};
+  for (const id of BEREICHE_MIT_EINSTELLUNGEN) if (s.kacheln && s.kacheln[id]) { const { reiter, ...rest } = s.kacheln[id]; kacheln[id] = rest; }
+  s.kacheln = kacheln;
+  s.aufgeraeumt = AUFGERAEUMT;
+  sp.setItem('daily-settings', JSON.stringify(s));
+  return true;
+}
+try {
+  if (typeof localStorage !== 'undefined') aufraeumen({ getItem: k => localStorage.getItem(k), setItem: (k, v) => localStorage.setItem(k, v),
+    removeItem: k => localStorage.removeItem(k), keys: () => Object.keys(localStorage) });
+} catch (e) { /* ohne Speicher: nichts zu tun */ }
+
 // ---- Einstellungen ----
 export const DEFAULTS = {
   place: { name: 'Dresden', admin: 'Sachsen', land: 'DE', lat: 51.05, lon: 13.74, zeitzone: 'Europe/Berlin' },
-  icsUrls: [],
-  stop: 'Postplatz',
-  team: 'Dynamo Dresden',
-  fuel: 'e10',
-  kacheln: {},        // Einstellungen je Kachel, z. B. { wetter: { mini: 7 }, kalender: { namen: false } }
-  layout: null // eigene Kachelbelegung (Liste von IDs), kommt später über die Einstellungen
+  kacheln: {}        // Einstellungen je Bereich (Name aus der Kachel-Zeit), z. B. { weather: { mini: 7 }, kalender: { namen: false } }
 };
 const SKEY = 'daily-settings';
 export const settings = Object.assign({}, DEFAULTS, read(SKEY, {}));
@@ -25,11 +49,11 @@ if (!settings.place || typeof settings.place.lat !== 'number') settings.place = 
 else if (settings.place.gewaehlt == null && read(SKEY, {}).place && !(settings.place.name === 'Dresden' && settings.place.lat === 51.05))
   settings.place = { ...settings.place, gewaehlt: true };
 export function saveSettings(patch) { Object.assign(settings, patch); return write(SKEY, settings); }
-// Einstellungen einer Kachel lesen (mit Standardwerten) und speichern
+// Einstellungen eines Bereichs lesen (mit Standardwerten) und speichern
 export const kachelOpt = (id, standard = {}) => ({ ...standard, ...((settings.kacheln || {})[id] || {}) });
 export const kachelOptSpeichern = (id, werte) => saveSettings({ kacheln: { ...(settings.kacheln || {}), [id]: { ...((settings.kacheln || {})[id] || {}), ...werte } } });
 
-// ---- Mehrere Orte: settings.orte (Liste), settings.place = aktiver Ort (alle Kacheln lesen nur place) ----
+// ---- Mehrere Orte: settings.orte (Liste), settings.place = aktiver Ort (alle Bereiche lesen nur place) ----
 export const MAX_ORTE = 10;
 const gleicherOrt = (a, b) => a && b && a.name === b.name && Math.abs(a.lat - b.lat) < 0.02 && Math.abs(a.lon - b.lon) < 0.02;
 if (!Array.isArray(settings.orte)) settings.orte = settings.place && settings.place.gewaehlt ? [settings.place] : [];
@@ -52,38 +76,7 @@ export function ortEntfernen(i) {
 }
 export const aktiverOrt = () => settings.orte.findIndex(o => gleicherOrt(o, settings.place));
 
-// ---- Klickzähler „Deine Nutzung“ (Schlüssel: Kachel-ID) ----
-const CKEY = 'daily-clicks';
-const LEGACY = { 'Heute & Wetter': 'weather', 'Kalender': 'calendar', 'Mail': 'mail', 'Nachrichten': 'news', 'Schlagzeilen': 'news',
-  'Mein Daily': 'tasks', 'Sport': 'sport', 'Geld': 'money', 'Spielen': 'play', 'Essen': 'food', 'Wissen': 'knowledge',
-  'Mobilität': 'verkehr', 'Gesundheit': 'health', 'Reisen & Länder': 'travel', 'Entertainment': 'film', 'Tech': 'tech',
-  'Shopping': 'saving', 'Beziehung': 'relation', 'Pakete': 'parcels' };
-export const stats = (() => {
-  const s = read(CKEY, null) || { start: new Date().toISOString(), counts: {} };
-  if (!s.counts) s.counts = {};
-  if (!s.v) { // alte Zählung nach Titeln einmalig auf IDs umstellen
-    const c = {};
-    for (const [k, n] of Object.entries(s.counts)) { const id = LEGACY[k] || k; c[id] = (c[id] || 0) + n; }
-    s.counts = c; s.v = 2; write(CKEY, s);
-  }
-  if (s.v < 3) { // „Abfahrten“ und „Tanken“ sind in „Verkehr“ aufgegangen (App 0.27.0)
-    for (const alt of ['transit', 'fuel']) if (s.counts[alt]) { s.counts.verkehr = (s.counts.verkehr || 0) + s.counts[alt]; delete s.counts[alt]; }
-    s.v = 3; write(CKEY, s);
-  }
-  return s;
-})();
-export function countClick(id) { stats.counts[id] = (stats.counts[id] || 0) + 1; write(CKEY, stats); }
-export function resetStats() { stats.start = new Date().toISOString(); stats.counts = {}; write(CKEY, stats); }
-
-// ---- Aufgaben „Mein Daily“ ----
-const TKEY = 'daily-tasks';
-export const tasks = read(TKEY, null) || [
-  { id: 't1', text: 'DAILY ausprobieren und Einstellungen prüfen', done: false },
-  { id: 't2', text: 'Eigene Aufgabe hinzufügen', done: false }
-];
-export function saveTasks() { return write(TKEY, tasks); }
-
-// ---- Favoriten der Tagesinhalte (Kopie des Inhalts: { art, datum, kurz, text }) – nur auf diesem Gerät ----
+// ---- Gemerkte Tagesinhalte (Kopie des Inhalts: { art, datum, kurz, text }) – nur auf diesem Gerät ----
 const FKEY = 'daily-favoriten';
 export const favoriten = read(FKEY, null) || [];
 export function saveFavoriten() { return write(FKEY, favoriten); }

@@ -40,7 +40,7 @@ function linie(xs, ys, klasse, rund = false) {
   return `<path class="${klasse}" d="${(rund ? pfadRund : pfad)(a)}"/>`;
 }
 
-// ── Mini-Diagramme der kleinen Kachel (24/48 Std., 7 Tage, 15 Tage) – gemeinsamer Aufbau ──
+// ── Diagramme unter „Jetzt“ (Heute, 3 Tage, 7 Tage, 15 Tage) – gemeinsamer Aufbau ──
 // Links Temperaturskala in 5er-Schritten mit dünnen Strichen alle 5°, rechts Regenskala in mm (untere Hälfte).
 // Regenbalken: Höhe = Menge (mm), Füllstärke = Wahrscheinlichkeit (stufenlos). Jede zweite Stunde/jeder zweite Tag leicht getönt.
 // Zeitachse: Stunden alle 3 Std. bzw. Wochentage (15 Tage: jeder zweite).
@@ -99,7 +99,7 @@ function mini(d) {
     `<div class="wd-minilegende">${umschalter(d.wahl)}<span class="wd-leg">` +
     `<b class="wd-t-regen" title="Balkenhöhe = Regenmenge in mm · kräftigere Farbe = Regen wahrscheinlicher">Regen mm</b> · ${d.legende}${d.sonne ? ` · <b class="wd-t-sonne" title="Zahlen oben im Diagramm = Sonnenstunden ${d.gruppe ? 'der Tageszeit' : 'des Tages'} (gerundet)">Sonne</b>` : ''}</span></div>`;
 }
-// Umschalter der kleinen Kachel: Heute (1) · 3 Tage · 7 Tage · 15 Tage (Klick → providers/weather.js speichert und zeichnet neu)
+// Umschalter unter dem Diagramm: Heute (1) · 3 Tage · 7 Tage · 15 Tage (Klick → providers/weather.js speichert und zeichnet neu)
 export const MINI_WAHL = [[1, 'Heute'], [3, '3 Tage'], [7, '7 Tage'], [15, '15 Tage']];
 // Gespeicherte Werte von früher: 24 Std. → Heute, 48 Std. → 3 Tage, 16 Tage → 15 Tage
 export const miniWahl = v => ({ 1: 1, 24: 1, 3: 3, 48: 3, 7: 7, 15: 15, 16: 15 })[+v] || 1;

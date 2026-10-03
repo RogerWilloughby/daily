@@ -192,3 +192,30 @@ test('Oberfläche: Heute in Gruppen, Untertabs je Bereich, Adresse, Gemerkt', as
   for (const weg of ['id="grid"', 'id="ask"', 'id="answer"', 'id="k-aktiv"']) assert.ok(!html.includes(weg), 'noch in index.html: ' + weg);
   assert.ok(html.includes('href="/css/abreissblock.css"') && sw.includes("'/css/abreissblock.css'") && sw.includes("'/fonts/big-shoulders-900.woff2'"));
 });
+
+// 1b-2b (0.47.3): alte Daten der Kachel-Oberfläche einmal aus dem Browser räumen; Rechtstexte nennen nur genutzte Dienste
+test('Aufräumen: alte Browser-Daten einmal entfernen, Rechtstexte nur mit genutzten Diensten', async () => {
+  const { aufraeumen, AUFGERAEUMT } = await esm('src/js/core/store.js');
+  const speicher = start => { const m = new Map(Object.entries(start)); return { m, getItem: k => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), removeItem: k => m.delete(k), keys: () => [...m.keys()] }; };
+  const alt = { place: { name: 'Leipzig', lat: 51.34, lon: 12.37 }, orte: [{ name: 'Leipzig' }], kennwort: 'k', icsUrls: ['https://x.test/a.ics'], stop: 'Postplatz', team: 'Dynamo Dresden', fuel: 'e10', layout: ['weather'],
+    kacheln: { weather: { mini: 7, reiter: 'radar', unwetterGesehen: 'X|' }, kalender: { namen: false }, links: { kategorien: ['news'] }, verkehr: { start: 'A' }, money: { haupt: 'CHF' }, sport: { liga: 'bl2' } } };
+  const sp = speicher({ 'daily-settings': JSON.stringify(alt), 'daily-tasks': '[]', 'daily-clicks': '{}', 'daily-favoriten': '[1]', 'daily-links': '[2]',
+    'daily-dienst:/api/v1/wetter?lat=51.34&lon=12.37': '{}', 'daily-dienst:/api/v1/kurse': '{}', 'daily-dienst:/api/v1/tanken?lat=1&lon=2': '{}', 'fremd': 'x' });
+  assert.equal(aufraeumen(sp), true);
+  assert.deepEqual(sp.keys().sort(), ['daily-dienst:/api/v1/wetter?lat=51.34&lon=12.37', 'daily-favoriten', 'daily-links', 'daily-settings', 'fremd']);
+  const s = JSON.parse(sp.getItem('daily-settings'));
+  assert.deepEqual(Object.keys(s).sort(), ['aufgeraeumt', 'kacheln', 'kennwort', 'orte', 'place']);   // Ort(e), Kennwort bleiben; Haltestelle, Verein, iCal-Links … weg
+  assert.deepEqual(s.kacheln, { weather: { mini: 7, unwetterGesehen: 'X|' }, kalender: { namen: false }, links: { kategorien: ['news'] } });
+  assert.equal(s.aufgeraeumt, AUFGERAEUMT);
+  sp.setItem('daily-tasks', '[]');
+  assert.equal(aufraeumen(sp), false);                                            // nur einmal
+  assert.ok(sp.keys().includes('daily-tasks'));
+  const leer = speicher({});
+  assert.equal(aufraeumen(leer), true);                                           // neuer Besucher: nur der Merker
+  assert.deepEqual(JSON.parse(leer.getItem('daily-settings')), { kacheln: {}, aufgeraeumt: AUFGERAEUMT });
+  // Datenschutz und Impressum: keine Dienste, die nur noch auf dem Server laufen
+  const html = fs.readFileSync(path.join(__dirname, '../src/index.html'), 'utf8');
+  for (const weg of [/Tank/, /Fußball|OpenLigaDB/, /Abfahrt|VVO/, /Autobahn/, /Wechselkurs|EZB|Leitzins/, /Börse|Yahoo/, /Haltestelle|Kraftstoff|Klickzähler|Aufgaben|Arbeitsweg/])
+    assert.doesNotMatch(html, weg, 'index.html nennt noch ' + weg);
+  for (const da of [/Open-Meteo/, /Bright Sky/, /GeoNames/, /OpenHolidays/, /Astronomy Engine/, /Wikipedia/, /gemerkt/]) assert.match(html, da);
+});

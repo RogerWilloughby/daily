@@ -144,7 +144,7 @@ a.ab-ev:hover{text-decoration:underline}
 .ab-feld .kr-unten{min-height:150px}
 .ab-feld .wd-minilegende,.ab-feld .wd-marken,.ab-feld .wd-miniskala{font-size:12px}
 .ab-feld .wd-wahl button{font-size:13px;padding:4px 9px}
-.ab-feld .wh-feld,.ab-feld .rk-werte{font-size:15px}
+.ab-feld .rk-werte{font-size:15px}
 .ab-feld .rk-klein .rk-werte{font-size:14px}
 .ab-feld .ms-raster{grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:12px 6px}
 .ab-feld .ms-sym{width:44px;height:44px;font-size:19px;border-radius:10px}

@@ -17,7 +17,7 @@ const opt = () => kachelOpt('kalender', STANDARD);
 function zeige(f, h, n) {
   const o = opt();
   const f2 = f && o.aktion === false ? { ...f, daten: { ...f.daten, aktionstage: [] } } : f;
-  return kachel(f2, o.himmel === false ? null : h, Date.now(), zone(), o.namen === false ? null : n, null);
+  return kachel(f2, o.himmel === false ? null : h, Date.now(), zone(), o.namen === false ? null : n);
 }
 const stand = e => (e && (e.veraltet || Date.parse(e.gueltigBis) < Date.now()) ? `Stand ${hm(e.erstellt)}` : '');
 const zeichne = () => set('kalender', { ...zeige(fe, hi, na), tag: stand(hi || fe) });

@@ -89,7 +89,7 @@ function leiste(k, uhr, j) {
     `<span class="rk-uhr" aria-live="off">${esc(titel(k.bilder[j]))}</span></div>`;
 }
 
-// Mini-Reiter „Radar“ (kleine Kachel): links die Karte mit Zeitleiste, so hoch wie das Feld; rechts die Werte (was nicht passt, wird abgeschnitten).
+// Untertab „Radar“: links die Karte mit Zeitleiste, so hoch wie das Feld; rechts die Werte (was nicht passt, wird abgeschnitten).
 // Legende und Quellen stehen im (i)-Feld der Kachel (radarInfo).
 export function radarKlein(env, uhr) {
   if (!env || !env.daten || !env.daten.karte) return '';

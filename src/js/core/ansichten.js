@@ -1,7 +1,7 @@
-// Kachel-Ansichten: Kacheln (bzw. ihre Anbieter) bringen eigene Darstellung mit, ohne dass das Raster (core/board.js) sie kennt.
-// ansicht(id, def)   – nur für eine Kachel: def.teaser(t) → { html, klassen[] } (zusätzlicher Inhalt der Unterzeile),
-//                      def.spalte(spalte, kachel) (Diagrammspalte überfahren), def.zurueck(kachel) (Diagramm verlassen)
-// erweiterung(def)   – für alle Kacheln: def.nachZeichnen(el), def.zeiger(event, raster), def.groesse(raster)
+// Ansichten: Bereiche (bzw. ihre Anbieter) bringen eigene Darstellung mit, ohne dass die Oberfläche (core/oberflaeche.js) sie kennt.
+// ansicht(id, def)   – nur für einen Bereich (id = Abschnitt tile-<id>): def.spalte(spalte, abschnitt) (Diagrammspalte überfahren),
+//                      def.zurueck(abschnitt) (Diagramm verlassen)
+// erweiterung(def)   – für alle: def.nachZeichnen(el), def.zeiger(event, blatt), def.groesse(blatt)
 const KACHEL = {}, ALLE = [];
 export const ansicht = (id, def) => { KACHEL[id] = def; };
 export const ansichtVon = id => KACHEL[id] || null;

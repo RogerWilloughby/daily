@@ -2,7 +2,6 @@
    Aufbau: 1 Schriften · 2 Farben/Tokens · 3 Grundlagen · 4 Ort, Zustand, Zahnrad · 5 Symbole, Abzeichen · 6 Dialoge und Einstellungen · Listen im Feld */
 
 /* 1 Schriften (selbst gehostet) */
-@font-face{font-family:"Bricolage Grotesque";src:url(/fonts/bricolage-grotesque.woff2) format("woff2");font-weight:200 800;font-display:swap}
 @font-face{font-family:"Figtree";src:url(/fonts/figtree-400.woff2) format("woff2");font-weight:400;font-display:swap}
 @font-face{font-family:"Figtree";src:url(/fonts/figtree-500.woff2) format("woff2");font-weight:500;font-display:swap}
 @font-face{font-family:"Figtree";src:url(/fonts/figtree-600.woff2) format("woff2");font-weight:600;font-display:swap}
@@ -12,7 +11,7 @@
   --accent:#2C5A8A; --active-bg:#1D3553; --active-ink:#F2F6FA; --active-muted:#B8C8DA; --active-line:#34507A;
   --up:#2F7A4B; --down:#B3452F; --ok:#2F7A4B; --warn:#B7791F;
   --active-up:#9FD8B2; --active-down:#F2A99A;
-  --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --display:"Figtree","Segoe UI",system-ui,sans-serif;   /* Überschriften: css/abreissblock.css setzt Big Shoulders Display */
   --body:"Figtree","Segoe UI",system-ui,sans-serif;
   --ease:cubic-bezier(.2,.8,.2,1);
   --radius:12px}
