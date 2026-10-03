@@ -21,7 +21,14 @@ Ausführlich: **`ausrichtung.md`** (inkl. sortierter Ideenliste A–E und Mitbew
 - **Zielgruppe:** Erwachsene, familienfreundlich (alles jugendfrei, kein eigenes Kinderprodukt).
 - **Info-Kacheln:** Standard Wetter, Kalender, Meine Seiten, Mein Daily; wählbar Tanken, Fußball, Autobahn, Abfahrten, Finanzen; privat Kurse, Schlagzeilen, Termine, Tools. **Keine neuen Info-Dienste bis nach dem Test** (Weltwetter, Klima, Strompreis, Verbindung, Krypto, Wetterkarte); gebaute nur pflegen. Arbeitszeit fließt in Herzstück und Staunen (Rätsel, Bilderrätsel, Quiz, Album).
 - **Finanzierung:** keine Werbebanner; während des Tests nicht kommerziell; danach Spenden und sparsame, gekennzeichnete Affiliate-Links; mittelfristig DAILY Plus oder gedrucktes Produkt. Immer kostenlos: Tagesinhalte, Mitmachen, Nachholen, Album.
-- **Oberfläche (Roger, 02.10.2026):** **eine Oberfläche für Handy und Rechner** – oben Tabs, jeder Tab hat Untertabs, jeder Untertab hat die ganze Fläche; das Kachelraster wird abgelöst. Strategischer Plan mit offenen Fragen: **`plan-neuausrichtung.md`** (Entwurf, Fragen werden einzeln geklärt).
+- **Oberfläche (Roger, 02.10.2026):** **eine Oberfläche für Handy und Rechner** – oben Tabs, jeder Tab hat Untertabs, jeder Untertab hat die ganze Fläche; das Kachelraster wird abgelöst. Strategischer Plan: **`plan-neuausrichtung.md`** (Phasen 0–6).
+- **Phase 0 geklärt (Roger, 02./03.10.2026, einzeln; Einzelheiten `plan-neuausrichtung.md` Abschnitt 10):**
+  - **Oberfläche:** Tabs **Heute · Album · Wetter · Kalender · Mehr**; DAILY öffnet immer mit „Heute“; Haupttabs am **Handy unten, am Rechner oben**; **nie scrollen** (lange Inhalte teilen/blättern).
+  - **Info-/News-Dienste nicht mehr in der Oberfläche** (Tanken, Fußball, Autobahn, Abfahrten, Finanzen, Kurse, Schlagzeilen); **Termine, Mein Daily, Deine Nutzung** ebenfalls weg. Unter „Mehr“ nur **Meine Seiten** und **Tools (privat)**. Die Dienste bleiben **headless auf dem Server**. (Ersetzt die Info-Kachel-Regel oben.)
+  - **Mitmachen:** Rätsel → Quiz (5 Fragen, Name später) → Bilderrätsel (4 Antworten). Sammelstück für irgendein gelöstes Format = Bild des Bilderrätsels; erstes Album **„Vögel“, Start mit dem Test**. Teilen mit Ergebnis + Link; Lösungen offen in der Antwort.
+  - **Inhalte:** 31 Tage je Format, Rätsel/Quiz prüft Roger vollständig; Lese-Rubriken bleiben, schrittweise Mitmachen; Vorrat ab 27.10. im Kreis bis Phase 4.
+  - **Technik/Kosten:** Wetter-Werte reduzieren in Phase 4; doppelte Anfragen vermeiden und nur Sichtbares laden in Phase 1; Tankerkönig-Bremse 1/min (Phase 4).
+  - **Test:** Erfolg = Hälfte der Tester öffnet an 4 von 7 Tagen + Fragebogen; Adresse `daily.craibotics.org`.
 - **Nächste Schritte:** Markenrecherche „DAILY“, Test mit 5–10 Leuten (Erfolgskriterium vorher festlegen), erste 2–3 Mitmach-Formate und erstes Album auswählen, Jahrgang planen. Vor der Umsetzung je Format ein Plan.
 
 ## 1. Zielgruppe
