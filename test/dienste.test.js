@@ -1061,9 +1061,8 @@ test('Tagesinhalte: Dienst je Tag (Verlauf, nie Zukunft), Bereich „Heute“ mi
   assert.match(h.bereichKopf, /data-ti="zurueck"[^>]*>‹<\/button><button type="button" data-ti="vor"[^>]* disabled>›/);   // heute: nicht weiter vor
   const rae = h.kleinReiter[0].html;
   assert.match(rae, /data-ti="fav" data-art="raetsel" aria-pressed="false">☆ Merken</);
-  assert.match(rae, /data-ti="loesung">Lösung zeigen</);
-  assert.doesNotMatch(rae, /ab-loesung/);
-  assert.match(a.heuteBereich(heute, { loesung: true }).kleinReiter[0].html, /class="ab-loesung">Lösung: /);
+  assert.equal((rae.match(/data-ti="antwort"/g) || []).length, 4);                                    // Rätsel zum Mitmachen (Details: daily.test.js)
+  assert.doesNotMatch(rae, /ab-loesung|data-ti="loesung"/);
   const erster = await dienste.ausfuehren('tagesinhalt', { datum: '2026-09-26' }, { jetzt });
   assert.match(a.heuteBereich(erster, {}).bereichKopf, /data-ti="zurueck"[^>]* disabled>‹/);   // erster Tag: nicht weiter zurück
   // Gemerkt: Kopie, neueste zuerst, Zeile öffnet den Tag; Knopf zeigt „★ Gemerkt“

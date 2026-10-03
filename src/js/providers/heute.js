@@ -1,12 +1,14 @@
 // Tagesinhalte (Dienste „tagesinhalt“ und „andiesemtag“) für drei Bereiche (seit 0.49.0, docs/konzept/themen.md):
-// „Heute“ (Rätsel, Lachen – mit ‹ ›, ältere Tage „nachgeholt“), „Entdecken“ (Sprache, Zeitreise, Welt, Kultur) und „Mehr → Alltag“
+// „Heute“ (Rätsel zum Mitmachen, Lachen – mit ‹ ›, ältere Tage „nachgeholt“), „Entdecken“ (Sprache, Zeitreise, Welt, Kultur) und „Mehr → Alltag“
 // (Rezept, Gesundheit, Tech, Beziehung, Spartipp). Entdecken und Alltag zeigen immer heute; ein gemerkter Inhalt eines anderen Tags
 // öffnet dort mit „vom 1.10.“ und „zu heute“ (Entscheidung 03.10.2026). Fällt „andiesemtag“ aus, bleiben die übrigen Inhalte.
 import { set, zeige as zeigeBereich } from '../core/oberflaeche.js';
 import { favoriten, saveFavoriten } from '../core/store.js';
 import { dienst } from '../dienste/client.js';
 import { berlinDay } from '../core/util.js';
-import { heuteBereich, entdeckenBereich, alltagRubrik, gemerktReiter, favEintrag, tagPlus, mitZusatz, ortVon } from '../adapter/tagesinhalt.js';
+import { heuteBereich, entdeckenBereich, alltagRubrik, gemerktReiter, favEintrag, tagPlus, mitZusatz, ortVon, datumText, mitmachRaetsel } from '../adapter/tagesinhalt.js';
+import { spiel, spielSetzen } from '../core/spielstand.js';
+import { kaestchen, teilenText, teilen } from '../core/teilen.js';
 
 const tage = new Map();                    // Datum → Antwort (mit „An diesem Tag“)
 let heute = null, fehler = null;           // heute: heutiges Datum laut Dienst
@@ -17,7 +19,8 @@ const envVon = b => tage.get(tag[b] || heute) || null;
 function zeichne() {
   if (!heute && fehler) { set('heute', { state: 'error', kleinReiter: [], bereichKopf: '' }); set('entdecken', { state: 'error', kleinReiter: [] }); }
   else {
-    set('heute', heuteBereich(envVon('heute'), { favoriten, loesung }));
+    const h = envVon('heute');
+    set('heute', heuteBereich(h, { favoriten, loesung, spiel: h ? spiel(h.daten.datum, 'raetsel') : undefined }));
     set('entdecken', entdeckenBereich(envVon('entdecken'), { favoriten, vom: !!tag.entdecken }));
     set('alltag', alltagRubrik(envVon('mehr'), { favoriten, rezeptSeite, vom: !!tag.mehr }));
   }
@@ -71,8 +74,29 @@ document.addEventListener('click', e => {
   else if (ti === 'zurueck') stelle('heute', tagPlus(env.daten.datum, -1));
   else if (ti === 'vor') stelle('heute', tagPlus(env.daten.datum, 1));
   else if (ti === 'loesung') { loesung = true; zeichne(); }
+  else if (ti === 'antwort' || ti === 'tipp' || ti === 'teilen') raetsel(ti, env, b);
   else if (ti === 'rezeptseite') { rezeptSeite = rezeptSeite === 2 ? 1 : 2; zeichne(); }
 });
+
+// Rätsel zum Mitmachen: Antwort wählen, Tipp zeigen, Ergebnis teilen – Spielstand nur im Browser (core/spielstand.js)
+async function raetsel(ti, env, knopf) {
+  const r = env.daten.inhalt.raetsel, d = env.daten.datum;
+  if (!mitmachRaetsel(r)) return;
+  const s = spiel(d, 'raetsel');
+  if (ti === 'antwort' && !s.geloest && !s.versuche.includes(knopf.dataset.antwort)) {
+    s.versuche.push(knopf.dataset.antwort);
+    if (knopf.dataset.antwort === r.antwort) { s.geloest = true; s.nachgeholt = d < env.daten.heute; }   // wie der Datumsblock: älter als heute laut Dienst
+  } else if (ti === 'tipp' && !s.geloest) s.tipps = Math.min(s.tipps + 1, (r.tipps || []).length);
+  else if (ti === 'teilen' && s.geloest) {
+    const text = teilenText({ tag: datumText(d), format: 'Rätsel', ergebnis: kaestchen(s.versuche, r.antwort), tipps: s.tipps, adresse: location.origin + '/' });
+    const was = await teilen(text);
+    const meldung = { geteilt: '✓ Geteilt', kopiert: '✓ Kopiert', fehler: 'Teilen geht hier nicht' }[was];
+    if (meldung && knopf.isConnected) { knopf.textContent = meldung; setTimeout(() => { if (knopf.isConnected) knopf.textContent = 'Teilen'; }, 2500); }
+    return;
+  } else return;
+  spielSetzen(d, 'raetsel', s);
+  zeichne();
+}
 
 // Beim Laden: heute holen (nach Mitternacht wird so der neue Tag „heute“); zurückgeblätterte oder geöffnete Tage bleiben
 export async function load() {

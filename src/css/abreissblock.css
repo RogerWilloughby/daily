@@ -13,7 +13,7 @@
 :root{
   --ab-grund:#2F3A35; --ab-papier:#F7F2E8; --ab-tinte:#1F2522; --ab-rot:#B8322A; --ab-rot-tief:#8E241E; --ab-grau:#5E625B;
   --ab-linie:#DDD5C4; --ab-balken:#C9BFAB; --ab-blau:#2D5DA8; --ab-knopf:#FFFDF8; --ab-feld:#EFE8DA;
-  --ab-hell:#E9E2D3; --ab-marke:#F7F2E8;
+  --ab-hell:#E9E2D3; --ab-marke:#F7F2E8; --ab-gruen:#2E7D4F;
   --display:"Big Shoulders Display","Figtree",system-ui,sans-serif;
   /* die bisherigen Farben der App (app.css, Diagramme, Dialoge) auf das Papier umstellen */
   --ground:var(--ab-feld); --surface:var(--ab-papier); --line:var(--ab-linie); --ink:var(--ab-tinte); --muted:var(--ab-grau);
@@ -21,11 +21,11 @@
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --ab-grund:#161C19; --ab-papier:#2A2824; --ab-tinte:#ECE6DA; --ab-rot:#E26E62; --ab-rot-tief:#F09488; --ab-grau:#ABA597;
-    --ab-linie:#45403A; --ab-balken:#5E574D; --ab-blau:#8AAEE8; --ab-knopf:#33302B; --ab-feld:#211F1C; --ab-hell:#D9D2C3; --ab-marke:#EFE8DA}
+    --ab-linie:#45403A; --ab-balken:#5E574D; --ab-blau:#8AAEE8; --ab-knopf:#33302B; --ab-feld:#211F1C; --ab-hell:#D9D2C3; --ab-marke:#EFE8DA; --ab-gruen:#7CC594}
 }
 :root[data-theme="dark"]{
   --ab-grund:#161C19; --ab-papier:#2A2824; --ab-tinte:#ECE6DA; --ab-rot:#E26E62; --ab-rot-tief:#F09488; --ab-grau:#ABA597;
-  --ab-linie:#45403A; --ab-balken:#5E574D; --ab-blau:#8AAEE8; --ab-knopf:#33302B; --ab-feld:#211F1C; --ab-hell:#D9D2C3; --ab-marke:#EFE8DA}
+  --ab-linie:#45403A; --ab-balken:#5E574D; --ab-blau:#8AAEE8; --ab-knopf:#33302B; --ab-feld:#211F1C; --ab-hell:#D9D2C3; --ab-marke:#EFE8DA; --ab-gruen:#7CC594}
 
 /* 3 Gerüst am Rechner: Marke · Bereiche · Leiste oben, darunter das Blatt */
 body{background:var(--ab-grund);color:var(--ab-tinte)}
@@ -115,6 +115,18 @@ body{background:var(--ab-grund);color:var(--ab-tinte)}
 .ab-meta{margin:0;font-size:15px;color:var(--ab-grau)}
 .ab-sprichwort{margin:6px 0 0;padding-top:14px;border-top:1px solid var(--ab-linie);font-size:17px}
 .ab-loesung{margin:0;font-size:22px;font-weight:700;color:var(--ab-rot)}
+/* Rätsel zum Mitmachen (0.51.0): vier Antworten als große Tippflächen, falsche rot und durchgestrichen, die richtige grün */
+.ab-antworten{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.ab-antwort{min-height:52px;padding:6px 12px;border:1.5px solid var(--ab-tinte);border-radius:10px;background:var(--ab-knopf);color:var(--ab-tinte);font-weight:600;font-size:17px;line-height:1.25;overflow-wrap:anywhere}
+.ab-antwort:not(:disabled):hover{background:var(--ab-feld)}
+.ab-antwort:disabled{cursor:default}
+.ab-antwort.ab-falsch{border-color:var(--ab-rot);color:var(--ab-rot);text-decoration:line-through;background:transparent}
+.ab-antwort.ab-richtig{border-color:var(--ab-gruen);background:var(--ab-gruen);color:var(--ab-papier)}
+.ab-antwort:disabled:not(.ab-falsch):not(.ab-richtig){opacity:.55}
+.ab-hinweis{margin:0;font-size:17px;line-height:1.4}
+.ab-ergebnis{margin:0;font-size:20px;font-weight:700}
+.ab-knopf:disabled{opacity:.45;cursor:default}
+.ab-tipp-knopf,.ab-teilen{margin-left:auto}
 .ab-knopf{flex:none;align-self:flex-start;min-height:44px;padding:0 16px;border:1.5px solid var(--ab-tinte);border-radius:10px;background:var(--ab-knopf);color:var(--ab-tinte);font-weight:600;font-size:15px}
 .ab-knopf:hover{background:var(--ab-feld)}
 .ab-weiter{margin-left:auto}
@@ -211,6 +223,10 @@ a.ab-ev:hover{text-decoration:underline}
   .ab-meta{font-size:14px}
   .ab-sprichwort{font-size:15px;padding-top:10px}
   .ab-loesung{font-size:18px}
+  .ab-antworten{gap:8px}
+  .ab-antwort{min-height:48px;font-size:16px;padding:4px 8px}
+  .ab-hinweis{font-size:15px}
+  .ab-ergebnis{font-size:17px}
   .ab-zutaten{font-size:16px;line-height:1.6}
   .ab-fakten dd{font-size:16px}
   .ab-ev{font-size:15px}

@@ -1,7 +1,8 @@
-// Adapter „tagesinhalt“: macht aus dem Vertrag tagesinhalt v1 (und „andiesemtag“) den Bereich „Heute“ – Datumsblock mit Blättern ‹ ›,
-// Gruppen als Untertabs (Rätsel · Lachen · Wissen · Kultur · Alltag), je Art eine Fläche mit „☆ Merken“, dazu „Gemerkt“ unter Mehr.
+// Adapter „tagesinhalt“: macht aus dem Vertrag tagesinhalt v1 (und „andiesemtag“) die Bereiche „Heute“ (Datumsblock mit Blättern ‹ ›,
+// Rätsel zum Mitmachen, Lachen), „Entdecken“ und „Mehr → Alltag“ – je Art eine Fläche mit „☆ Merken“, dazu „Gemerkt“ unter Mehr.
 // Gemerktes speichert eine Kopie des Inhalts (bleibt erhalten, auch wenn der Vorrat wechselt). Rein, ohne DOM – testbar.
 import { esc } from '../core/util.js';
+import { kaestchen } from '../core/teilen.js';
 
 export const ART = {
   raetsel: { name: 'Rätsel' }, witz: { name: 'Witz' }, film: { name: 'Film' }, wort: { name: 'Wort' }, sprichwort: { name: 'Sprichwort' }, land: { name: 'Land' },
@@ -96,11 +97,41 @@ export function datumsKopf({ datum, erster, heute }) {
     `<button type="button" data-ti="vor" aria-label="Tag vor" title="Tag vor"${datum >= heute ? ' disabled' : ''}>›</button></span></div>`;
 }
 
+// Antworten je Tag fest gemischt – für alle gleich (das Datum ist der Startwert), damit man über dasselbe Rätsel reden kann
+export function mischen(liste, datum) {
+  let h = 2166136261; for (const c of String(datum)) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0;
+  const zufall = () => { h = (h + 0x6D2B79F5) >>> 0; let t = h; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  const a = [...liste];
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(zufall() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+// Rätsel zum Mitmachen (seit 0.51.0): gibt es kurze Antwort und falsche Antworten?
+export const mitmachRaetsel = r => !!(r && r.antwort && Array.isArray(r.falsch) && r.falsch.length);
+const LEER_SPIEL = { versuche: [], tipps: 0, geloest: false, nachgeholt: false };
+// Ergebnis-Zeile nach dem Lösen
+export const raetselErgebnis = (r, s) => `${kaestchen(s.versuche, r.antwort)} ${s.versuche.length === 1 ? 'Auf Anhieb gelöst!' : `Gelöst im ${s.versuche.length}. Versuch`}` +
+  `${s.tipps ? ` · 💡 ${s.tipps}` : ''}${s.nachgeholt ? ' · nachgeholt' : ''}`;
+// Frage, vier Antworten (falsch gewählte rot und gesperrt), gezeigte Tipps; gelöst: Ergebnis und – wenn sie mehr sagt – die ganze Lösung
+function raetselHtml(r, datum, s, p) {
+  const fertig = s.geloest;
+  const knoepfe = mischen([r.antwort, ...r.falsch], datum).map(a => {
+    const gewaehlt = s.versuche.includes(a), richtig = a === r.antwort, zeig = gewaehlt || (fertig && richtig);
+    return `<button type="button" class="ab-antwort${zeig ? (richtig ? ' ab-richtig' : ' ab-falsch') : ''}" data-ti="antwort" data-antwort="${esc(a)}"` +
+      `${gewaehlt || fertig ? ' disabled' : ''}${zeig ? ` aria-label="${esc(a)} – ${richtig ? 'richtig' : 'falsch'}"` : ''}>${esc(a)}</button>`;
+  }).join('');
+  const mehr = r.loesung && r.loesung.replace(/\.$/, '') !== r.antwort;
+  return p(r.frage, 'ab-gross ab-frage') + `<div class="ab-antworten">${knoepfe}</div>` +
+    (fertig ? p(raetselErgebnis(r, s), 'ab-ergebnis') + (mehr ? p(r.loesung, 'ab-meta ab-erklaerung') : '')
+      : (r.tipps || []).slice(0, s.tipps).map((t, i) => p('💡 ' + t, 'ab-hinweis' + (i ? ' ab-hinweis2' : ''))).join(''));
+}
+
 // Inhalt einer Art für die ganze Fläche (größer als in der Kachel). rezeptSeite: 1 = Zutaten, 2 = Zubereitung
-export function flaecheHtml(art, inhalt, { loesung = false, rezeptSeite = 1 } = {}) {
+// spiel: Spielstand des Rätsels an diesem Tag (core/spielstand.js), datum: der Tag (fürs Mischen)
+export function flaecheHtml(art, inhalt, { loesung = false, rezeptSeite = 1, spiel = LEER_SPIEL, datum = '' } = {}) {
   const i = inhalt || {}, p = (t, k = 'ab-text') => `<p class="${k}">${esc(t)}</p>`;
   switch (art) {
     case 'raetsel': { const r = i.raetsel; if (!r) return null;
+      if (mitmachRaetsel(r)) return raetselHtml(r, datum, spiel, p);
       return p(r.frage, 'ab-gross') + (loesung ? p('Lösung: ' + r.loesung, 'ab-loesung') : '<button type="button" class="ab-knopf" data-ti="loesung">Lösung zeigen</button>'); }
     case 'witz': return i.witz ? p(i.witz, 'ab-gross ab-witz') : null;
     case 'film': { const f = i.film; if (!f) return null;
@@ -132,15 +163,20 @@ export function flaecheHtml(art, inhalt, { loesung = false, rezeptSeite = 1 } = 
 
 // Fläche einer Art: Überschrift, Inhalt, „☆ Merken“ (Kopie im Browser, erscheint unter Mehr → Gemerkt).
 // vom: true = Inhalt eines anderen Tags in einem Bereich ohne ‹ › (aus „Gemerkt“ geöffnet) – Hinweis „vom 1.10.“ mit „zu heute“
-export function artFlaeche(art, d, { favoriten = [], loesung = false, rezeptSeite = 1, vom = false } = {}) {
-  const inh = d ? flaecheHtml(art, d.inhalt, { loesung, rezeptSeite }) : null, wiki = art === 'geschichte';
+// Rätsel zum Mitmachen: neben „Merken“ der Tipp-Knopf (bis zu 2 Tipps), nach dem Lösen „Teilen“
+export function artFlaeche(art, d, { favoriten = [], loesung = false, rezeptSeite = 1, vom = false, spiel = LEER_SPIEL } = {}) {
+  const inh = d ? flaecheHtml(art, d.inhalt, { loesung, rezeptSeite, spiel, datum: d.datum }) : null, wiki = art === 'geschichte';
+  const rae = art === 'raetsel' && d && mitmachRaetsel(d.inhalt.raetsel) ? d.inhalt.raetsel : null, tippsGesamt = rae ? (rae.tipps || []).length : 0;
   const fav = !!d && favoriten.some(f => f.art === art && f.datum === d.datum);
   const leer = !d ? 'Die Tagesinhalte sind gerade nicht erreichbar.' : wiki && d.inhalt.geschichte === null ? 'Wikipedia ist gerade nicht erreichbar.' : 'Für diesen Tag gibt es hier nichts.';
   return `<div class="ab-art" data-art="${art}"><span class="ab-rubrik">${esc(RUBRIK[art])}${wiki ? ' <small title="Texte: Wikipedia, CC BY-SA 4.0">aus Wikipedia</small>' : ''}</span>` +
     (vom && d ? `<p class="ab-meta ab-vom">vom ${esc(datumText(d.datum))} · <button type="button" class="ab-link" data-ti="heute">zu heute</button></p>` : '') +
     (inh ? `<div class="ab-inhalt">${inh}</div>` : `<p class="ab-meta">${leer}</p>`) +
     (inh ? `<div class="ab-aktionen"><button type="button" class="ab-merken" data-ti="fav" data-art="${art}" aria-pressed="${fav}">${fav ? '★ Gemerkt' : '☆ Merken'}</button>` +
-      (art === 'rezept' && d.inhalt.rezept.zubereitung ? `<button type="button" class="ab-knopf ab-weiter" data-ti="rezeptseite">${rezeptSeite === 2 ? '‹ Zutaten' : 'Zubereitung ›'}</button>` : '') + '</div>' : '') + '</div>';
+      (art === 'rezept' && d.inhalt.rezept.zubereitung ? `<button type="button" class="ab-knopf ab-weiter" data-ti="rezeptseite">${rezeptSeite === 2 ? '‹ Zutaten' : 'Zubereitung ›'}</button>` : '') +
+      (rae && spiel.geloest ? '<button type="button" class="ab-knopf ab-teilen" data-ti="teilen">Teilen</button>' : '') +
+      (rae && !spiel.geloest && tippsGesamt ? `<button type="button" class="ab-knopf ab-tipp-knopf" data-ti="tipp"${spiel.tipps >= tippsGesamt ? ' disabled' : ''}>💡 ${spiel.tipps ? 'Noch ein Tipp' : 'Tipp'}</button>` : '') +
+      '</div>' : '') + '</div>';
 }
 
 // Rubriken aus einer Liste (rein): eine Art → Inhalt direkt, mehrere Arten → Themen (Ebene 3)
@@ -150,10 +186,10 @@ const rubriken = (liste, d, o) => liste.map(g => g.arten.length === 1
 const INFO = d => ['Inhalte von DAILY (mit KI vorbereitet)', d && d.wiederholt ? 'Vorrat wiederholt sich – neue Inhalte folgen' : null];
 
 // Bereich „Heute“ (rein, testbar): Datumsblock mit ‹ ›, Rubriken zum Mitmachen
-export function heuteBereich(env, { favoriten = [], loesung = false, rezeptSeite = 1 } = {}) {
+export function heuteBereich(env, { favoriten = [], loesung = false, rezeptSeite = 1, spiel = LEER_SPIEL } = {}) {
   const d = env && env.daten;
   return {
-    state: d ? 'content' : 'error', bereichKopf: d ? datumsKopf(d) : '', kleinReiter: rubriken(HEUTE_RUBRIKEN, d, { favoriten, loesung }), startReiter: 'raetsel',
+    state: d ? 'content' : 'error', bereichKopf: d ? datumsKopf(d) : '', kleinReiter: rubriken(HEUTE_RUBRIKEN, d, { favoriten, loesung, spiel }), startReiter: 'raetsel',
     info: [...INFO(d), 'Verpasst? Mit ‹ blätterst du zurück'].filter(Boolean)
   };
 }

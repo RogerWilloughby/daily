@@ -7,7 +7,7 @@ const SHELL = [
   '/', '/app.css', '/css/abreissblock.css', '/css/diagramm.css', '/css/wetter.css', '/css/seiten.css', '/css/lokal.css', '/manifest.webmanifest', '/content/seiten.json',
   '/js/adapter/diagramm.js', '/js/adapter/hinweise.js', '/js/adapter/kalender.js', '/js/adapter/katalog.js', '/js/adapter/regen.js', '/js/adapter/seiten.js',
   '/js/adapter/tagesinhalt.js', '/js/adapter/wetter.js', '/js/ansichten/mini-diagramm.js', '/js/ansichten/radar.js', '/js/ansichten/wetter.js', '/js/core/ansichten.js',
-  '/js/core/betrieb.js', '/js/core/einstellungen.js', '/js/core/mini-reiter.js', '/js/core/oberflaeche.js', '/js/core/status.js', '/js/core/store.js',
+  '/js/core/betrieb.js', '/js/core/einstellungen.js', '/js/core/mini-reiter.js', '/js/core/oberflaeche.js', '/js/core/spielstand.js', '/js/core/status.js', '/js/core/store.js', '/js/core/teilen.js',
   '/js/core/util.js', '/js/core/version.js', '/js/dienste/client.js', '/js/dienste/vertraege.js', '/js/lib/bundesland.js', '/js/lib/url.js',
   '/js/main.js', '/js/providers/heute.js', '/js/providers/kalender.js', '/js/providers/links.js', '/js/providers/tools.js', '/js/providers/weather.js',
   '/js/tools/verzeichnis.js', '/js/ui/dialogs.js', '/js/ui/ort.js', '/js/ui/privat.js',
