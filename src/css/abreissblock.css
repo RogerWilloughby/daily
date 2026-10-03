@@ -162,6 +162,7 @@ a.ab-ev:hover{text-decoration:underline}
   .ab-datum-kurz .lang{display:none}
   .ab-datum-kurz .kurz{display:inline}
   .ab-leiste{gap:2px}
+  .ab-leiste .status{order:1}   /* Punkt ganz rechts, nach dem Zahnrad */
   .ab-leiste .ort-wahl select{max-width:13ch}
   .ab-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;padding:4px 0 calc(4px + env(safe-area-inset-bottom,0px))}
   .ab-tabs button{flex-direction:column;justify-content:center;gap:3px;height:58px;padding:0;border-radius:0;font-size:12px}

@@ -819,7 +819,7 @@ test('Adapter Kalender: eigene Termine – Kennzahl, Reiter, Antwort', async () 
   assert.equal(termineAntwort('Termine?', null, jetzt), null);
 });
 
-test('Einstellungen: Kachel-Formular, Wetter-Optionen, Kachel-Listen', async () => {
+test('Einstellungen: Formular, Wetter-Optionen', async () => {
   // Formular je Kachel (rein)
   const ke = await esm('src/js/core/einstellungen.js');
   ke.kachelEinstellungen('probe', { felder: () => [{ typ: 'titel', label: 'Anzeigen' }, { typ: 'check', key: 'a', label: 'A <b>', wert: true },
@@ -899,19 +899,9 @@ test('Einstellungen: Kachel-Formular, Wetter-Optionen, Kachel-Listen', async () 
   const ku = mitOptionen(kachel(w, r, u), w, { hinweise: false, mehr: false });
   assert.deepEqual(ku.kleinReiter.map(x => x.id), ['jetzt', 'radar', 'hinweise']);        // Hinweise bei Warnung nicht abwählbar
   assert.equal(ku.unwetter, 'ORKANBÖEN|');
-  // Kachel-Listen (rein)
-  const kl = await esm('src/js/ui/kacheln.js');
-  assert.deepEqual(kl.verschieben(['weather'], 'kalender').aktiv, ['weather', 'kalender']);
-  assert.deepEqual(kl.verschieben(['weather', 'kalender'], 'weather').aktiv, ['kalender']);
-  assert.match(kl.verschieben(['a', 'b'], 'c', 2).meldung, /Höchstens 2/);
-  assert.deepEqual(kl.umsortieren(['a', 'b', 'c'], 'c', 0), ['c', 'a', 'b']);
-  assert.deepEqual(kl.umsortieren(['a', 'b', 'c'], 'a', 5), ['b', 'c', 'a']);
-  const frei = kl.verfuegbar(['weather'], false);
-  assert.ok(!frei.includes('weather') && !frei.includes('news'));                   // aktive und private fehlen
-  assert.equal(frei[0], 'kalender');                                                 // fertige zuerst
 });
 
-test('Finanzen: EZB-Kurse, Leitzinsen, Inflation; Kurse (Yahoo) nur privat; Kachel und Frag DAILY', async () => {
+test('Finanzen: EZB-Kurse, Leitzinsen, Inflation; Kurse (Yahoo) nur privat; runde Diagrammlinie', async () => {
   const f = require('../services/finanzen');
   // Kursdatei: neuester Tag zuerst → aufsteigend, fehlende Kurse null
   const roh = f.kurseAus('<Cube><Cube time="2026-09-28"><Cube currency="USD" rate="1.14"/><Cube currency="XYZ" rate="2"/></Cube><Cube time="2026-09-25"><Cube currency="USD" rate="1.12"/></Cube></Cube>');
@@ -946,56 +936,14 @@ test('Finanzen: EZB-Kurse, Leitzinsen, Inflation; Kurse (Yahoo) nur privat; Kach
   gueltig(k.body, require('../services/kurse').schema);
   assert.deepEqual(k.body.daten.werte.map(x => x.id), ['dax', 'sp500', 'world', 'btc', 'eth', 'gold']);
   assert.equal(k.body.daten.werte[0].aenderungProzent, 0.42);
-  // Kachel
-  const a = await esm('src/js/adapter/finanzen.js');
-  // Mini-Reiter: Kurse · Zinsen & Inflation · (privat) Märkte · Spartipp
-  const tEnv = { daten: { datum: '2026-09-30', heute: '2026-10-01', erster: '2026-09-26', wiederholt: false, inhalt: { spartipp: { kurz: 'Deckel auf den Topf', text: 'Deckel auf den Topf: spart Energie beim Kochen.' } } } };
-  const tipp = { env: tEnv, fav: true };
-  const kk = a.kachel(r.body, null, {}, tipp), R = id => kk.kleinReiter.find(x => x.id === id);
-  assert.deepEqual(kk.kleinReiter.map(x => x.id), ['kurse', 'zinsen', 'tipp']);                    // öffentlich ohne „Märkte“
-  assert.ok(kk.kleinReiter.every(x => /^<svg class="ico"/.test(x.icon)));
-  assert.match(R('kurse').kopf, /^<span class="fi-kopf">1 € = <b>1,\d{4} \$<\/b> <small class="fi-aend fi-(plus|minus)">[▲▼] 0,\d\d %<\/small><\/span>$/);
-  assert.deepEqual(R('kurse').liste.map(l => l.d), ['£', 'CHF', 'zł', 'Kč']);
-  assert.match(R('kurse').liste[0].tip, /^Brit\. Pfund|^Pfund|: 1 € = 0,\d{4} £ · Vortag/);
-  assert.match(R('kurse').unten, /data-mini-wahl="30" aria-pressed="true">30 Tage<.*data-mini-wahl="90"/);
-  assert.match(R('kurse').unten, /class="wd-kurs"/);
-  assert.match(kk.x, /^1 € = 1,\d{4} \$ \([▲▼] 0,\d\d %\)\. Leitzins 2,00 %, Inflation 2,1 % \(August\)\. Stand /);
-  assert.equal(R('zinsen').kopf, 'Leitzins <b>2,00 %</b> · Inflation <b>2,1 %</b>');
-  assert.equal(R('zinsen').liste[0].d + ' ' + R('zinsen').liste[0].t, '2,00 % Einlagesatz · seit 11.6.2025');
-  assert.match(R('zinsen').liste[0].tip, /\(vorher 2,50 %\) – derzeit der maßgebliche Leitzins/);
-  assert.deepEqual(R('zinsen').liste.map(l => l.gruppe), [1, 1, 1, 2, 2]);                          // 3 Leitzinsen, dann Inflation DE und Euroraum
-  assert.match(R('tipp').html, /spart Energie beim Kochen\.<\/p><p class="ti-hinweis">Allgemeiner Tipp, keine Anlageempfehlung/);
-  assert.match(R('tipp').html, /data-ti="zurueck"[^>]*>‹<\/button><span class="ti-datum">Mi 30\.9\.<\/span><button type="button" data-ti="vor"[^>]*>›<\/button><button[^>]*aria-pressed="true"[^>]*>★<.*data-ti="aufgabe"/);   // Spartipp mit ‹ › ☆ + Aufgabe
-  assert.match(R('tipp').kopf, /Spartipp<\/b> <small class="fi-klein">Mi 30\.9\./);
-  assert.equal(kk.tabs, undefined); assert.deepEqual(kk.liste, []);                                // kein Aufklappen mehr
-  const opt = a.kachel(r.body, k.body, { haupt: 'CHF', weitere: ['USD'], zinsen: false, tage: 90, tipp: false }, tipp);
-  assert.match(opt.kleinReiter[0].kopf, /1 € = <b>0,\d{4} CHF<\/b>/);
-  assert.deepEqual(opt.kleinReiter.map(x => x.id), ['kurse', 'maerkte']);                         // Zinsen und Tipp abgewählt
-  assert.match(opt.kleinReiter[0].unten, /data-mini-wahl="90" aria-pressed="true"/);
-  assert.equal(opt.kleinReiter[1].liste[0].d + ' ' + opt.kleinReiter[1].liste[0].t.split('  ')[0], 'DAX 24.312 Pkt');
-  assert.deepEqual(a.kachel(r.body, null, { zinsen: false, inflation: true }).kleinReiter.map(x => x.id), ['kurse', 'zinsen']);   // alte Einstellung: Inflation an
-  assert.deepEqual(a.kachel(r.body, null, {}, null).kleinReiter.map(x => x.id), ['kurse', 'zinsen']);   // ohne Tagesinhalt kein Tipp
-  assert.equal(a.kachel(null).state, 'error');
-  // Frag DAILY
-  assert.match(a.antwort('Wie steht der Dollar?', r.body), /^1 € = 1,\d{4} \$ \(US-Dollar\)/);
-  assert.match(a.antwort('Was kosten 100 Franken?', r.body), /^100,00 CHF sind 10\d,\d\d € \(Referenzkurs der EZB/);
-  assert.match(a.antwort('50 Euro in Pfund', r.body), /^50,00 € sind 4\d,\d\d £/);
-  assert.match(a.antwort('Wie hoch ist der Leitzins?', r.body), /Einlagesatz\) liegt bei 2,00 %, seit 11\.6\.2025/);
-  assert.match(a.antwort('Wie hoch ist die Inflation?', r.body), /^Deutschland: 2,1 % im August 2026, Euroraum: 2,2 %/);
-  assert.match(a.antwort('Wie steht der DAX?', r.body, k.body), /^DAX: 24\.312 Pkt \(▲ 0,42 % zum Vortag\)/);
-  assert.match(a.antwort('Wie steht der DAX?', r.body, null), /nur im privaten Betrieb/);
-  assert.equal(a.antwort('Wie wird das Wetter?', r.body), null);
   const { pfadRund } = await esm('src/js/adapter/diagramm.js');
-  const { kursSkala } = await esm('src/js/adapter/kursdiagramm.js');
   // runde Linie: Kurvensegmente, Endpunkte exakt, kein Überschwingen über den Höchstwert
   const rund = pfadRund([[0, 10], [10, 0], [20, 10], [30, 5]]);
   assert.match(rund, /^M0\.0,10\.0C.*20\.0,10\.0C.*30\.0,5\.0$/);
   assert.ok(rund.match(/-?[\d.]+/g).map(Number).filter((v, i) => i % 2 === 1).every(v => v >= 0 && v <= 10));
-  assert.deepEqual(kursSkala(1.117, 1.163), { lo: 1.1, hi: 1.18, stufe: 0.02, stellen: 2 });
-  assert.deepEqual(kursSkala(170, 181), { lo: 170, hi: 185, stufe: 5, stellen: 0 });
 });
 
-test('Tanken: Vertrag, alle Sorten mit einem Abruf, Günstigste/Durchschnitt, Schlüssel und Land; Ansicht und Frag DAILY', async () => {
+test('Tanken: Vertrag, alle Sorten mit einem Abruf, Günstigste/Durchschnitt, Schlüssel und Land', async () => {
   const w = dienste.byId.tanken;
   const d = w.umwandeln(fx.tanken(), 5);
   assert.deepEqual(pruefeStreng(d, w.schema), []);
@@ -1020,25 +968,9 @@ test('Tanken: Vertrag, alle Sorten mit einem Abruf, Günstigste/Durchschnitt, Sc
   assert.equal((await rufe('tanken', { lat: '51.05', lon: '13.74' })).body.daten.umkreisKm, 5);
   assert.equal((await rufe('tanken', { lat: '48.2', lon: '16.37' })).body.fehler.code, 'nicht_unterstuetzt');   // Wien: außerhalb Deutschlands
   if (alt === undefined) delete process.env.TANKERKOENIG_API_KEY; else process.env.TANKERKOENIG_API_KEY = alt;
-  // Ansicht „Tanken“ der Kachel „Verkehr“ und Frag DAILY
-  const a = await esm('src/js/adapter/tanken.js');
-  assert.deepEqual([a.preis(1.749), a.preis(1.7), a.preis(null)], ['1,74⁹ €', '1,70⁰ €', '–']);
-  const env = { ...r.body, daten: d };
-  const v = a.ansicht(env, 'e10');
-  assert.equal(v.kopf, 'E10 ab <b>1,68⁹ €</b><small class="vk-schnitt">Ø 1,71⁴</small>');         // Mini-Reiter: Kopf mit Durchschnitt
-  assert.deepEqual(v.liste.map(z => z.d + ' ' + z.t), ['1,68⁹ Freie Tankstelle · 0,9 km', '1,68⁹ STAR · 3,8 km', '1,72⁹ Shell · 1,1 km', '1,74⁹ ARAL · 2,4 km']);   // alle geöffneten, günstigste zuerst
-  assert.match(v.liste[0].tip, /Budapester Str\. 1, Dresden · E10 1,68⁹ · E5 1,74⁹ · Diesel 1,59⁹$/);
-  assert.equal(v.html, undefined);                                                                 // kein Aufklappen mehr
-  assert.doesNotMatch(v.liste.map(z => z.t).join(), /JET/);                                         // geschlossene fehlen
-  assert.equal(a.ansicht(env, 'unsinn').kopf, v.kopf);                                            // unbekannte Sorte → E10
-  const leer = a.ansicht({ ...env, daten: { ...d, guenstigste: { e5: null, e10: null, diesel: null } } }, 'diesel');
-  assert.match(leer.x, /keine Tankstelle mit Diesel geöffnet/);
-  assert.match(a.antwort('Wo ist Diesel gerade günstig?', env), /^Am günstigsten für Diesel: STAR, Karlsruher Str\. 85, Dresden \(3,8 km\) mit 1,58⁹ €/);
-  assert.equal(a.antwort('Wie wird das Wetter?', env), null);
-  assert.equal(a.antwort('Was kostet Sprit?', null), 'Die Spritpreise sind gerade nicht erreichbar.');
 });
 
-test('Autobahn: Vertrag, Arten, Zeiten aus dem Text, Eingaben, fehlende Autobahn; Arbeitsweg-Ansicht und Frag DAILY', async () => {
+test('Autobahn: Vertrag, Arten, Zeiten aus dem Text, Eingaben, fehlende Autobahn', async () => {
   const w = dienste.byId.autobahn;
   // Eingabe: Schreibweise egal, sortiert, ohne Doppelte; Bundesstraßen ungültig
   assert.deepEqual(w.strassenAus('a13, A 4;a4'), ['A4', 'A13']);
@@ -1077,45 +1009,6 @@ test('Autobahn: Vertrag, Arten, Zeiten aus dem Text, Eingaben, fehlende Autobahn
   assert.deepEqual([(await rufe('autobahn', {})).body.fehler.code, (await rufe('autobahn', { strassen: 'B96' })).body.fehler.code,
     (await rufe('autobahn', { strassen: 'A1,A2,A3,A4,A5,A6' })).body.fehler.code, (await rufe('autobahn', { strassen: 'A999' })).code],
     ['eingabe_fehlt', 'eingabe_ungueltig', 'eingabe_ungueltig', 502]);
-  // Ansicht „Arbeitsweg“: nur Meldungen nahe der Strecke Dresden → Chemnitz (Köln und Aachen fallen weg)
-  const a = await esm('src/js/adapter/autobahn.js');
-  const start = { name: 'Dresden', lat: 51.05, lon: 13.74 }, ziel = { name: 'Chemnitz', lat: 50.83, lon: 12.92 };
-  assert.ok(Math.abs(a.luftlinieKm(start, ziel) - 62.6) < 1);
-  assert.equal(Math.round(a.korridorKm(start, ziel)), 16);                                             // ¼ der Luftlinie > 10 km
-  assert.equal(a.korridorKm(start, { lat: 51.0, lon: 13.7 }), 10);
-  const env = r.body, v = a.ansicht(env, { start, ziel });
-  assert.equal(v.kopf, '<b>Dresden → Chemnitz</b> <small>A4 · A13</small>');
-  const zl = v.liste.map(z => z.d + ' ' + z.t);
-  assert.match(zl[2], /^ab (morgen )?21 Uhr A4 Siebenlehn – Nossen · Sperrung$/);   // nach 21 Uhr deutscher Zeit: „ab morgen 21 Uhr“
-  assert.deepEqual([...zl.slice(0, 2), zl[2].replace('ab morgen ', 'ab '), ...zl.slice(3)], ['+14 min A4 Wilsdruff – Nossen · stockender Verkehr',
-    'Achtung A4 Hainichen – Chemnitz-Ost · Gegenstände auf der Fahrbahn', 'ab 21 Uhr A4 Siebenlehn – Nossen · Sperrung',
-    'gesperrt A4 Dresden-Altstadt · Anschlussstelle gesperrt', 'bis ' + v.liste[4].d.slice(4) + ' A4 Wilsdruff – Dresden-Altstadt · Tagesbaustelle', '1 Baustelle']);   // alle am Weg, Baustellen als eine Zeile
-  assert.match(v.liste[5].tip, /^A4 Hainichen – Siebenlehn · bis [\d.]+ · 80 km\/h$/);
-  assert.match(v.liste[0].tip, /Richtung Chemnitz\nstockender Verkehr · 25 km\/h · seit /);
-  assert.equal(v.x, '1 Stau (bis +14 min), 1 Sperrung, 1 Baustelle.');
-  assert.doesNotMatch(JSON.stringify(v.liste), /Köln|Aachen|Ruhland/);
-  assert.equal(v.html, undefined);                                                                 // kein Aufklappen mehr
-  assert.equal(v.bereich, 'Meldungen bis 16 km neben der Luftlinie Dresden → Chemnitz, beide Richtungen');
-  // Ohne Start/Ziel alle Meldungen; ohne Meldungen „frei“; ohne Daten
-  const alle = a.ansicht(env, {});
-  assert.equal(alle.liste[0].t, 'A4 Frechen-Nord – Köln-Eifeltor · stockender Verkehr');
-  const ruhig = a.ansicht({ ...env, daten: { ...env.daten, meldungen: env.daten.meldungen.filter(m => m.typ === 'baustelle') } }, { start, ziel });
-  assert.deepEqual([ruhig.ms, ruhig.x, ruhig.liste.map(z => z.d + ' ' + z.t)], ['frei', 'Keine Staus oder Sperrungen · 1 Baustelle.', ['✓ Keine Staus oder Sperrungen', '1 Baustelle']]);
-  assert.match(a.ansicht(null).x, /nicht erreichbar/);
-  // Zeiten: nächtliche Sperrung läuft nur in ihrem Zeitraum
-  const z = { typ: 'sperrung', kuenftig: true, beginn: '2026-10-12T19:00:00Z', ende: '2026-10-27T04:00:00Z', zeitraeume: t.zeitraeume };
-  assert.deepEqual([a.aktiv(z, Date.parse('2026-10-12T20:00:00Z')), a.aktiv(z, Date.parse('2026-10-13T12:00:00Z'))], [true, false]);
-  assert.equal(a.status(z, Date.parse('2026-10-13T12:00:00Z')), 'ab 26.10.');
-  assert.equal(a.status(z, Date.parse('2026-10-12T20:00:00Z')), 'bis morgen 5 Uhr');
-  assert.equal(a.wann(Date.parse('2026-10-15T19:00:00Z'), Date.parse('2026-10-13T12:00:00Z')), 'Do 21 Uhr');
-  // Frag DAILY
-  const o = { start, ziel, strassen: ['A4', 'A13'] };
-  assert.match(a.antwort('Wie ist mein Arbeitsweg?', env, o), /^A4, A13 \(Dresden → Chemnitz\): stockender Verkehr A4 Wilsdruff – Nossen Richtung Chemnitz \(\+14 min\)/);
-  assert.match(a.antwort('Stau auf der A4?', env, o), /Frechen-Nord/);                                  // gezielte Frage: ganze Autobahn
-  assert.match(a.antwort('Was ist auf der A7 los?', env, o), /^A7 ist nicht in deinem Arbeitsweg/);
-  assert.match(a.antwort('Stau?', env, { start, ziel, strassen: [] }), /Autobahnen eintragen/);
-  assert.equal(a.antwort('Wann fährt die Bahn?', env, o), null);
-  assert.deepEqual([a.strassenVon('a4, A 13'), a.strassenVon('B96')], [['A4', 'A13'], null]);
 });
 
 test('Radarraster: Umrechnung wie Bright Sky und DWD, Kacheln der Karte nur über Deutschland', async () => {
@@ -1302,31 +1195,6 @@ test('Kachel „Alltag“: Rezept, Gesundheit, Tech, Beziehung, Favoriten auch m
   assert.ok(fl.some(z => /^Spartipp: /.test(z.t)));
 });
 
-test('Lokale Kacheln: „Mein Daily“ und „Deine Nutzung“ mit Mini-Reitern', async () => {
-  const a = await esm('src/js/adapter/lokal.js');
-  const tasks = [{ id: 't1', text: 'Milch <kaufen>', done: false }, { id: 't2', text: 'Rad flicken', done: true }, { id: 't3', text: 'Rezept: Linsen', done: false }];
-  const k = a.aufgabenKachel(tasks);
-  assert.deepEqual(k.kleinReiter.map(r => r.id), ['offen', 'erledigt']);
-  assert.deepEqual([k.m, k.ms, k.kleinReiter[0].kopf], ['2 Aufgaben', '2 offen', '<b>2 offen</b> <small>1 erledigt</small>']);
-  const o = k.kleinReiter[0].html;
-  assert.match(o, /^<form class="kt-neu" data-kt-neu><input type="text" maxlength="140"/);
-  assert.match(o, /data-kt="t1"><label><input type="checkbox" aria-label="Erledigt"><span title="Milch &lt;kaufen&gt;">Milch &lt;kaufen&gt;<\/span>.*data-kt-weg/);
-  assert.doesNotMatch(o, /Rad flicken/);
-  const e = k.kleinReiter[1];
-  assert.match(e.html, /kt-z kt-fertig" data-kt="t2"><label><input type="checkbox" checked/);
-  assert.match(e.unten, /data-kt-leeren>Erledigte löschen/);
-  const leer = a.aufgabenKachel([]);
-  assert.deepEqual([leer.kleinReiter[0].kopf, leer.kleinReiter[1].unten], ['<b>Alles erledigt</b>', '']);
-  assert.match(leer.kleinReiter[0].html, /kt-neu.*Keine offenen Aufgaben/);
-  // Nutzung
-  const n = a.nutzungKachel({ start: '2026-09-27T08:00:00Z', counts: { weather: 5, money: 2, weg: 9 } }, { weather: 'Wetter', money: 'Finanzen' });
-  assert.deepEqual([n.m, n.kleinReiter[0].kopf], ['7 Klicks', '<b>7 Klicks</b> <small>seit 27. September</small>']);
-  assert.deepEqual(n.kleinReiter[0].liste.map(z => [z.d, z.t]), [['5×', 'Wetter'], ['2×', 'Finanzen']]);   // unbekannte Kachel fällt weg
-  assert.match(n.kleinReiter[0].liste[0].tip, /\(71 %\)$/);
-  assert.match(n.kleinReiter[0].unten, /data-nutzung-reset/);
-  assert.equal(a.nutzungKachel({ start: '2026-09-27T08:00:00Z', counts: {} }, {}).kleinReiter[0].unten, '');
-});
-
 test('Eingaben: die Adresse ist der Cache-Schlüssel – nur erlaubte Angaben in einer Schreibweise, sonst 400', async () => {
   const { kurzeZahl } = require('../services/_lib/parameter');
   assert.deepEqual(['51.05', '13.7', '9', '-0.5', '51.050', '51.051', '051.05', '+51', '1e1', '', '91'].map(v => kurzeZahl(v, 90)),
@@ -1395,7 +1263,7 @@ test('Schutz der Quellen (H2): letzte gute Antwort bei Ausfall, Quellenfehler 60
   } finally { t.BREMSE.zuruecksetzen(); dienste.FEHLER.clear(); if (alt === undefined) delete process.env.TANKERKOENIG_API_KEY; else process.env.TANKERKOENIG_API_KEY = alt; }
 });
 
-test('Fußball: Dienst je Liga (Tabelle, drei Spieltage), nur liga=bl1|bl2|bl3; Kachel „Sport“ mit Mini-Reitern und Frag DAILY', async () => {
+test('Fußball: Dienst je Liga (Tabelle, drei Spieltage), nur liga=bl1|bl2|bl3', async () => {
   const d = dienste.byId.fussball;
   assert.equal(d.saison(Date.parse('2026-06-30T12:00:00Z')), 2025);
   assert.equal(d.saison(Date.parse('2026-07-01T12:00:00Z')), 2026);
@@ -1409,42 +1277,9 @@ test('Fußball: Dienst je Liga (Tabelle, drei Spieltage), nur liga=bl1|bl2|bl3; 
   for (const q of [{}, { liga: 'bl4' }, { liga: 'bl1', team: 'Dynamo' }])
     assert.equal((await rufe('fussball', q)).code, 400, JSON.stringify(q));
   assert.equal((await rufe('fussball', { liga: 'bl1' })).code, 200);
-  // Adapter: Verein suchen (Umlaute, Teilwörter), Kachel mit Verein · Tabelle · Spieltag
-  const a = await esm('src/js/adapter/fussball.js');
-  assert.equal(a.findeVerein(env, 'Dynamo Dresden').platz, 4);
-  assert.equal(a.findeVerein(env, 'dynamo').platz, 4);
-  assert.equal(a.findeVerein(env, 'Preussen Münster').kurz, 'Preußen Münster');
-  assert.equal(a.findeVerein(env, 'Bayern'), null);
-  const bl1 = await dienste.ausfuehren('fussball', { liga: 'bl1' });
-  assert.equal(a.findeVerein(bl1, 'Bayern Muenchen').platz, 1);
-  assert.equal(a.findeVerein(bl1, 'bayern munchen').platz, 1);
-  assert.equal(a.findeVerein(bl1, 'Gladbach').kurz, 'Borussia Mönchengladbach');
-  const k = a.kachel(env, 'Dynamo Dresden');
-  assert.deepEqual([k.state, k.title, k.m, k.startReiter], ['live', 'Dynamo Dresden', 'Platz 4', 'verein']);
-  assert.deepEqual(k.kleinReiter.map(r => r.id), ['verein', 'tabelle', 'spieltag']);
-  const [v, t, s] = k.kleinReiter;
-  assert.match(v.kopf, /<b>Dynamo Dresden<\/b> <small>Platz 4 · 2\. Bundesliga<\/small>/);
-  assert.deepEqual(v.liste.map(z => z.d), ['Zuletzt', 'Nächstes', 'Punkte', 'Bilanz', 'Tore']);
-  assert.equal(v.liste[0].t, '2:1 gegen Darmstadt 98 (A)');
-  assert.match(v.liste[0].tip, /Niederlage/);
-  assert.match(v.liste[1].t, /^Kaiserslautern \(H\) · \S+ \d+\.\d+\. \d{2}:\d{2}$/);
-  assert.deepEqual(t.liste.slice(0, 3).map(z => z.d), ['2.', '3.', '4.']);   // ab zwei Plätzen über dem eigenen Verein
-  assert.match(t.liste[2].t, /◀$/);
-  assert.match(t.kopf, /\d{4}\/\d{2}/);
-  assert.match(s.kopf, /9\. Spieltag/);
-  assert.equal(s.liste[0].t, 'Dynamo Dresden – Kaiserslautern ◀');           // eigenes Spiel zuerst
-  assert.match(s.liste[0].d, /^\S+ \d{2}:\d{2}$/);                             // noch offen: Wochentag und Anstoß
-  assert.match(k.x, /^Zuletzt 2:1 gegen Darmstadt 98 · Nächstes: /);
-  // nicht gefunden: Hinweis aufs Zahnrad; Frag DAILY
-  const n = a.kachel(null, 'Gibtsnicht <United>');
-  assert.equal(n.state, 'off');
-  assert.match(n.kleinReiter[0].html, /„Gibtsnicht &lt;United&gt;“ spielt nicht .* Zahnrad/);
-  assert.match(a.antwort(env, 'Dynamo Dresden'), /^SG Dynamo Dresden: Platz 4 in der 2\. Bundesliga mit 17 Punkten\. Zuletzt Darmstadt 98 – Dynamo Dresden 2:1\. Nächstes Spiel: /);
-  assert.match(a.antwort(null, 'X'), /nicht verfügbar/);
-  assert.match(a.antwort(env, 'Gibtsnicht'), /nicht gefunden/);
 });
 
-test('Schlagzeilen: Dienst nur privat mit Kennwort, RSS und Atom, je Quelle erreichbar; Kachel mit Mini-Reitern und Frag DAILY', async () => {
+test('Schlagzeilen: Dienst nur privat mit Kennwort, RSS und Atom, je Quelle erreichbar', async () => {
   const d = dienste.byId.schlagzeilen;
   // Lesen (rein): RSS und Atom, nur Einträge mit Titel und http(s)-Link, Text ohne HTML
   const r = d.lesen(fx.rss('Tagesschau'), 'tagesschau');
@@ -1475,27 +1310,6 @@ test('Schlagzeilen: Dienst nur privat mit Kennwort, RSS und Atom, je Quelle erre
   const echt = global.fetch;
   global.fetch = async () => new Response('kaputt', { status: 503 });
   try { await assert.rejects(d.run(), e => e.code === 'quelle_fehler'); } finally { global.fetch = echt; }
-  // Adapter: Neueste · Tagesschau · MDR Sachsen · heise, Zeilen als Links
-  const a = await esm('src/js/adapter/schlagzeilen.js');
-  const k = a.kachel(env);
-  assert.deepEqual([k.state, k.m, k.startReiter], ['live', '8 neu', 'neueste']);
-  assert.deepEqual(k.kleinReiter.map(z => z.id), ['neueste', 'tagesschau', 'mdr', 'heise']);
-  const [neu, ts] = k.kleinReiter;
-  assert.equal(neu.liste.length, x.meldungen.length);
-  assert.match(neu.liste[0].href, /^https:\/\//);
-  assert.match(neu.liste[0].d, /^(\d{2}:\d{2}|\d{1,2}\.\d{1,2}\.)$/);                 // heute Uhrzeit, kurz nach Mitternacht „1.10.“
-  assert.match(neu.liste[0].tip, /^(Tagesschau|MDR Sachsen|heise) · /);
-  assert.ok(ts.liste.every(z => /Tagesschau/.test(z.t)));
-  assert.match(k.x, /^(Tagesschau|MDR Sachsen|heise): /);
-  const kaputt = a.kachel({ daten: { ...x, quellen: x.quellen.map(q => q.id === 'mdr' ? { ...q, erreichbar: false } : q), meldungen: x.meldungen.filter(m => m.quelle !== 'mdr') } });
-  assert.match(kaputt.kleinReiter[0].kopf, /ohne MDR Sachsen/);
-  assert.match(kaputt.kleinReiter[2].html, /MDR Sachsen ist gerade nicht erreichbar/);
-  // ohne Kennwort: Hinweis statt Fehler; Frag DAILY
-  const ohne = a.kachel(null, Date.now(), 'Europe/Berlin', true);
-  assert.deepEqual([ohne.state, ohne.kleinReiter.length], ['off', 1]);
-  assert.match(ohne.kleinReiter[0].html, /Kennwort .* „Privater Betrieb“/);
-  assert.match(a.antwort(env), /^Neueste Schlagzeilen: (Tagesschau|MDR Sachsen|heise): .* · .* · /);
-  assert.match(a.antwort(null, true), /Kennwort/);
 });
 
 test('Vertragsversion (Review M6): Oberfläche kennt jeden Dienst in seiner Version, prüft jede Antwort, nutzt nur passende gespeicherte Stände', async () => {

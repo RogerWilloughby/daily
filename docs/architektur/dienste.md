@@ -154,27 +154,29 @@ Daraus entstehen der Katalog `/api/v1/dienste`, die Dateien `docs/dienste/<id>.m
 | `src/js/adapter/*.js` | Darstellung je Dienst (ohne DOM, testbar) |
 
 ## Aufbau der Oberfläche: wo liegt was
-Das allgemeine Kachelraster weiß nichts über einzelne Kacheln. Kachelbesondere Darstellung hängt sich über Ansichten ein (seit App 0.25.1; Test „Aufbau“ in `test/daily.test.js` wacht darüber).
+Seit App 0.47.0 die Oberfläche „Abreißblock“ (Phase 1b): Bereiche Heute · Wetter · Kalender · Mehr mit Untertabs; seit 0.47.2 ohne das alte Kachelraster.
+Die Oberfläche weiß nichts über einzelne Bereiche – besondere Darstellung hängt sich über Ansichten ein (Test „Aufbau“ in `test/daily.test.js` wacht darüber).
+Info-Dienste ohne Bereich (Tanken, Fußball, Autobahn, Finanzen, Kurse, Schlagzeilen, Termine, Abfahrten) laufen nur noch auf dem Server (headless, nur pflegen).
 
 | Datei | Zweck |
 |---|---|
-| `src/js/core/board.js` | allgemeines Kachelraster (seit 0.45.0 ohne Aufklappen und Handy-Vollbild): Kachelgerüst, `paint`/`set`, Raster nach Kachelzahl, Info-Knopf, Klicks auf Reiter und Zahnrad – ohne Wetter/Finanzen |
-| `src/js/core/mini-reiter.js` | **Mini-Reiter** (`kleinReiter`): Symbolspalte, gespeicherte Wahl (`krWahl`), Listen (`listeHtml`, Zeile mit `href` oder `aktion` → `data-aktion`), Feld `unten` für ein Diagramm unter der Liste, nur ganze Zeilen (`krZeilen`) |
-| `src/js/core/einstellungsfenster.js` | Einstellungsfenster hinter dem Zahnrad (`dialog.kachel-einst`), Formular aus `core/einstellungen.js`, Bestätigung „Gespeichert ✓“ |
-| `src/js/core/ansichten.js` | Anmeldung: `ansicht(id, { teaser, spalte, zurueck })` für eine Kachel, `erweiterung({ nachZeichnen, groesse, zeiger })` für alle |
+| `src/js/core/oberflaeche.js` | Gerüst: Bereiche, Untertabs (`untertabsVon`), Umschalter im Feld (`teile`), Adresse `#bereich/untertab/teil` (`adresseLesen`), `set(id, patch)` für die Anbieter, nur ganze Zeilen |
+| `src/js/core/mini-reiter.js` | Listen (`listeHtml`, Zeile mit `href` oder `aktion` → `data-aktion`), Zeilen ausblenden, die nicht passen (`krZeilen`) |
+| `src/js/core/einstellungen.js` | Formular je Bereich (`kachelEinstellungen`, `formular`, `binden`) – erscheint im Einstellungsfenster (`ui/dialogs.js`) |
+| `src/js/core/ansichten.js` | Anmeldung: `ansicht(id, { spalte, zurueck })` für einen Bereich, `erweiterung({ nachZeichnen, groesse, zeiger })` für alle |
 | `src/js/ansichten/mini-diagramm.js` | allgemeine Diagramm-Bedienung: Dichte je Platz (`miniDichte`), Überfahren der Spalten |
-| `src/js/ansichten/wetter.js` | Wetter-Kachel: Zeitpunkt-Block im Mini-Reiter „Jetzt“ („Jetzt“ / überfahrene Stunde oder Tag); HTML aus `adapter/wetter.js` (`zpHtml`, `jetztHtml`) |
-| `src/js/providers/thema.js` | Anbieter der Themen-Kacheln (Unterhaltung, Wissen, Alltag): Dienst `tagesinhalt` je Tag (Wissen zusätzlich `andiesemtag`), Blättern, Favoriten, „+ Aufgabe“; Helfer `favUmschalten`/`alsAufgabe` auch für den Spartipp in Finanzen |
-| `src/js/ansichten/radar.js` | Radarkarte (Mini-Reiter „Radar“): Bilder laufen lassen, Zeitleiste (Start/Pause, Sprung) |
+| `src/js/ansichten/wetter.js` | Wetter: Zeitpunkt-Block unter „Jetzt“ („Jetzt“ / überfahrene Stunde oder Tag); HTML aus `adapter/wetter.js` (`zpHtml`, `jetztHtml`) |
+| `src/js/ansichten/radar.js` | Radarkarte (Untertab „Radar“): Bilder laufen lassen, Zeitleiste (Start/Pause, Sprung) |
+| `src/js/providers/heute.js` | Bereich „Heute“: Dienste `tagesinhalt` und `andiesemtag` je Tag, Blättern, Lösung, Rezeptseite, Merken (→ Mehr · Gemerkt) |
+| `src/js/providers/weather.js`, `kalender.js`, `links.js`, `tools.js` | Wetter, Kalender, Meine Seiten, Tools (privat) |
 | `src/js/adapter/diagramm.js` | Wetter-Diagramme als HTML/SVG-Text und gemeinsame Bausteine (`skala`, `pfad`, `pfadRund`, `umschalter`) |
-| `src/js/adapter/kursdiagramm.js` | Mini-Kursdiagramm der Finanzen-Kachel (`miniKurs`, `kursSkala`) |
-| `src/app.css` | allgemeine Styles, Design-Tokens, Hell/Dunkel |
-| `src/css/diagramm.css` | gemeinsame Diagramm-Styles `.wd-*` und Farben `--wd-*` (Wetter, Finanzen, Kalender) |
-| `src/css/wetter.css` | nur Wetter: Zeitpunkt-Block, Regenzeile, Radar, Sonnenzahlen |
-| `src/css/finanzen.css` | nur Finanzen: `fi-*`, Kurslinie |
-| `src/css/verkehr.css` | nur Verkehr: `vk-*` |
+| `src/app.css` | allgemeine Styles, Design-Tokens, Dialoge, Listen im Feld |
+| `src/css/abreissblock.css` | Gestaltung Variante A: Farben hell/dunkel, Gerüst Handy/Rechner, Blatt, Untertabs, Inhalte |
+| `src/css/diagramm.css` | gemeinsame Diagramm-Styles `.wd-*` und Farben `--wd-*` (Wetter, Kalender) |
+| `src/css/wetter.css` | nur Wetter: Zeitpunkt-Block, Radar, Hinweise, Sonnenzahlen |
+| `src/css/seiten.css`, `lokal.css` | Meine Seiten (Symbolraster), Tools |
 
-Neue Kachel mit eigener Darstellung: Datei unter `src/js/ansichten/`, vom Provider importiert; eigene Styles unter `src/css/`, in `index.html` und `sw.js` eingetragen.
+Neuer Bereich oder Untertab mit eigener Darstellung: Datei unter `src/js/ansichten/`, vom Anbieter importiert; eigene Styles unter `src/css/`, in `index.html` und `sw.js` eingetragen.
 
 ## Stand der Umstellung
 | Dienst | Status |

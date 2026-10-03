@@ -1,6 +1,5 @@
-/* DAILY – Stylesheet
-   Aufbau: 1 Schriften · 2 Farben/Tokens · 3 Grundlayout · 4 Leiste · 5 Raster & Kacheln
-           6 Aktive Kachel & Inhalte · 7 Dialoge · 8 Mobil · 9 Bewegung */
+/* DAILY – allgemeine Styles (seit 0.47.2 ohne Kachelraster; Gerüst und Gestaltung der Oberfläche: css/abreissblock.css)
+   Aufbau: 1 Schriften · 2 Farben/Tokens · 3 Grundlagen · 4 Ort, Zustand, Zahnrad · 5 Symbole, Abzeichen · 6 Dialoge und Einstellungen · Listen im Feld */
 
 /* 1 Schriften (selbst gehostet) */
 @font-face{font-family:"Bricolage Grotesque";src:url(/fonts/bricolage-grotesque.woff2) format("woff2");font-weight:200 800;font-display:swap}
@@ -32,7 +31,7 @@
   --accent:#8DB5E6; --active-bg:#1F3552; --active-ink:#EEF3F9; --active-muted:#A9BCD3; --active-line:#34507A;
   --up:#7CCB98; --down:#F08C77; --ok:#7CCB98; --warn:#E7B45A;
   --active-up:#9FD8B2; --active-down:#F2A99A}
-/* 3 Grundlayout: Raster oben, Antwort darüber-liegend, Leiste unten; die Seite scrollt nie */
+/* 3 Grundlagen – die Seite scrollt nie */
 html,body{height:100%}
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box}
 body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);font-size:15px;overflow:hidden}
@@ -40,21 +39,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 [hidden]{display:none !important}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-.app{height:100%;box-sizing:border-box;padding-block:16px 14px;padding-inline:clamp(16px,2vw,28px);display:flex;flex-direction:column;gap:14px}
-.grid{order:1}
-.answer{order:2}
-.bar{order:3}
-/* 4 Leiste */
-.bar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;min-height:48px}
-.brand{font-family:var(--display);font-weight:700;font-size:28px;letter-spacing:.08em}
-.date{color:var(--muted);font-size:15px}
-.clock{font-family:var(--display);font-weight:500;font-size:22px;font-variant-numeric:tabular-nums}
-.spacer{flex:1}
-.ask{flex:1 1 280px;max-width:460px;display:flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border-radius:var(--radius);border:1px solid var(--line);background:var(--surface)}
-.ask:focus-within{border-color:var(--accent)}
-.ask .ico{width:18px;height:18px}
-.ask input{flex:1;min-width:0;border:0;background:transparent;font:inherit;font-size:15px;color:var(--ink);outline:none}
-.ask input::placeholder{color:var(--muted)}
+/* 4 Ort, Zustand der Quellen, Zahnrad (Leiste oben, css/abreissblock.css) */
 .status{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--muted);padding:5px 10px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
 .status i{width:8px;height:8px;border-radius:50%;background:var(--muted)}
 .status[data-level="ok"] i{background:var(--ok)}
@@ -76,56 +61,15 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .gear{display:flex;align-items:center;gap:6px;min-height:36px;padding:0 10px;border-radius:10px;border:1px solid var(--line);color:var(--muted);font-size:13px}
 .gear:hover{color:var(--ink);border-color:var(--accent)}
 .gear svg{width:16px;height:16px}
-.legal{display:flex;gap:14px;font-size:13px}
-.legal button{color:var(--muted);text-decoration:underline;text-underline-offset:3px;min-height:32px}
-.legal button:hover{color:var(--ink)}
-.legal .version{text-decoration:none;font-variant-numeric:tabular-nums;opacity:.8}
 .set-actions .version{margin-right:auto;font-size:12px;color:var(--muted);align-self:center}
 .versionen{font-size:13px;color:var(--muted)}
 .dversion{font-size:11px;font-weight:500;color:var(--muted);letter-spacing:0;text-transform:none}
-.answer{display:flex;align-items:flex-start;gap:14px;padding:14px 18px;border-radius:var(--radius);background:var(--active-bg);color:var(--active-ink);font-size:15px;line-height:1.45}
-.answer p{margin:0;flex:1}
-.answer .q{color:var(--active-muted);display:block;font-size:13px;margin-bottom:2px}
-/* 5 Raster & Kacheln */
-.grid{flex:1;min-height:0;display:grid;gap:10px;
-  grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:repeat(4,minmax(0,1fr))}
-.tile{position:relative;min-width:0;min-height:0;overflow:hidden;border-radius:var(--radius);background:var(--surface);border:1px solid var(--line);
-  display:grid;grid-template-columns:minmax(0,1fr);transition:background .35s,border-color .35s,color .35s}
-.tile:hover{border-color:var(--accent)}
-.head{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;padding:18px 20px;min-width:0;min-height:0;overflow:hidden;transition:padding .35s var(--ease)}
-.label{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;max-width:100%}
-.label span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.label .short{display:none}
+/* 5 Symbole und Abzeichen */
 .ico{width:18px;height:18px;flex:none;color:var(--accent)}
-.metric{display:flex;align-items:center;gap:8px;font-family:var(--display);font-weight:700;font-size:28px;line-height:1.1;max-width:100%;font-variant-numeric:tabular-nums}
-.metric .m-long,.metric .m-short{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-.metric .m-short{display:none}
-.metric[data-len="long"]{font-size:23px;line-height:1.12}
-.metric[data-len="long"] .m-long{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.mini{display:block;align-self:stretch;flex:1 1 auto;min-height:32px;padding-top:6px}
-.mini:empty{display:none}
-.tile .head:has(.mini:not(:empty)) .teaser{-webkit-line-clamp:2}
-.lglyph{flex:none;width:18px;height:18px;color:var(--accent);display:inline-flex}
-.lglyph[hidden]{display:none}
-.lglyph svg{width:100%;height:100%}
-.metric[data-leer]{display:none}
-.glyph{flex:none;width:1.05em;height:1.05em;color:var(--accent)}
-.glyph:empty{display:none}
-.glyph svg{width:100%;height:100%;display:block}
-.teaser{color:var(--muted);font-size:14px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.trend-up{color:var(--up)}
-.trend-down{color:var(--down)}
 .tag{flex:none;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
-/* Zustände: lädt · nicht verbunden · frei */
-.tile[data-state="loading"] .metric,.tile[data-state="loading"] .teaser{opacity:.45}
-.tile[data-state="off"]{background:transparent;border-style:dashed}
-.tile[data-state="off"] .metric{color:var(--muted);font-weight:600}
-.tile.free{background:transparent;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px}
-.tile.free:hover{border-color:var(--line)}
-/* 6 Schließen-Knopf (Antwort von Frag DAILY) und Definitionslisten */
-.close{align-self:flex-end;min-height:40px;padding:0 14px;border-radius:10px;border:1px solid var(--active-line);color:var(--active-ink);font-size:14px}
+/* Definitionslisten */
 dl{margin:0}
-/* 7 Dialoge (Impressum, Datenschutz, Einstellungen) */
+/* 6 Dialoge (Impressum, Datenschutz, Einstellungen) */
 dialog.doc{width:min(640px,calc(100vw - 32px));max-height:calc(100vh - 48px);box-sizing:border-box;padding:0;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);overflow:hidden}
 dialog.doc::backdrop{background:rgba(10,20,16,.45)}
 .doc-in{display:flex;flex-direction:column;max-height:calc(100vh - 48px)}
@@ -160,45 +104,10 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
 .set-results label{display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:8px;cursor:pointer}
 .set-results label:hover{background:var(--ground)}
 .set-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
-/* 8 Mobil: Kompaktraster (Spalten × Zeilen nach Kachelzahl, siehe tiles.js → raster) – Handy-Darstellung pausiert, kein Vollbild mehr (0.45.0) */
-@media (max-width:760px),(max-height:520px){
-  .bar{gap:10px 12px;min-height:0}
-  .brand{font-size:24px}
-  .clock{font-size:19px;margin-left:auto}
-  .gear{order:2}
-  .gear span{display:none}
-  .mini{display:none}
-  .metric[data-leer]{display:flex}
-  .ort-wahl{order:2}
-  .ort-wahl select{max-width:15ch}
-  .date{order:3;flex:1 1 auto;min-width:0;font-size:14px}
-  .status{order:4;padding:3px 8px}
-  .legal{order:5;flex-basis:100%;gap:12px;font-size:12px}
-  .ask{order:6;flex-basis:100%;max-width:none}
-  .spacer{display:none}
-  .grid{gap:7px}
-  .tile.free span{display:none}
-  .tile .head{padding:9px 8px !important;justify-content:space-between;height:100%;box-sizing:border-box}
-  .tile .label{font-family:var(--display);font-size:14px !important;font-weight:700;flex-direction:column;align-items:flex-start;gap:6px}
-  .tile .label .long{display:none}
-  .tile .label .short{display:block;white-space:normal}
-  .tile .tag{display:none}
-  .tile .metric{font-family:var(--body);font-size:12px !important;font-weight:600;color:var(--muted)}
-  .tile .glyph{display:none}
-  .tile .teaser{display:none}
-  .tile .metric .m-long{display:none}
-  .tile .metric .m-short{display:inline}
-}
-/* 9 Bewegung reduzieren */
-@media (prefers-reduced-motion:reduce){
-  .grid,.tile,.head{transition:none}
-}
-.set-check{display:flex;align-items:center;gap:8px;font-size:15px;cursor:pointer}
-.set-check input{width:18px;height:18px;accent-color:var(--accent)}
 /* Kalender: Liste „Datum | Ereignis“ mit farbigem Punkt je Art */
 .kl-leer{margin:4px 0;color:var(--muted)}
 .kl-kw{font-weight:500;color:var(--muted);margin-right:4px}   /* Kalenderwoche vorn im Kopf der Kachel „Kalender“ */
-/* Einstellungen je Kachel (Zahnrad-Reiter) – kompakt, ohne Scrollen */
+/* Einstellungen je Bereich (Formulare aus core/einstellungen.js im Einstellungsfenster) */
 .ke{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:6px 16px;font-size:13px;line-height:1.35;align-items:start}
 .ke-breit{grid-column:1/-1}
 .ke-titel{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--active-muted);margin-top:2px}
@@ -211,102 +120,22 @@ textarea.field{width:100%;font-size:13px;font-family:ui-monospace,Consolas,monos
 .ke textarea.field{min-height:44px}
 .ke-aktionen{display:flex;align-items:center;justify-content:flex-end;gap:10px;min-height:16px}
 .ke-ok{font-size:12px;color:var(--active-muted)}
-/* Einstellungen → Kacheln: zwei Listen */
-.k-listen{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.k-listen h4{margin:4px 0 6px}
-.k-liste{list-style:none;margin:0;padding:4px;border:1px solid var(--line);border-radius:10px;min-height:120px;max-height:320px;overflow:auto}
-.k-liste li{display:flex;align-items:center;gap:6px;padding:5px 6px;border-radius:7px;cursor:pointer;user-select:none;font-size:14px}
-.k-liste li:hover,.k-liste li:focus{background:var(--hover,rgba(127,127,127,.12));outline:none}
-.k-liste li:focus-visible{outline:2px solid var(--accent)}
-.k-liste li[draggable="true"]{cursor:grab}
-.k-name{display:flex;align-items:center;gap:6px;flex:1;min-width:0}
-.k-name .ico{width:16px;height:16px;flex:none}
-.k-vorschau{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:0 5px}
-.k-pfeile{display:flex;gap:2px}
-.k-pfeile button{border:0;background:none;color:var(--muted);cursor:pointer;font-size:11px;padding:2px 4px;border-radius:5px}
-.k-pfeile button:hover:not(:disabled){background:var(--line);color:inherit}
-.k-pfeile button:disabled{opacity:.3;cursor:default}
-.k-liste li.k-zieht{opacity:.4}
-.k-liste li.k-ueber{box-shadow:inset 0 2px 0 var(--accent)}
-.k-leer{color:var(--muted);cursor:default!important}
+/* Listen im Feld (Kalender, Wetter → Mehr, Gemerkt, Tools): Zeilen „Datum | Text“, als Link oder Aktion */
 .k-meldung{margin:6px 0 0;font-size:13px;color:var(--muted);min-height:1em}
-@media (max-width:560px){
-  .k-listen{grid-template-columns:1fr}
-}
-/* Kleine Kacheln: Name nur beim Überfahren (Hinweistext), im Kopf nur Inhalt (Wetter: Ort/Temperaturen, Kalender: KW).
-   Am Handy (siehe unten) bleibt der Kurzname. Aufgeklappt bleibt die Überschrift mit Namen. */
-.label .kopf:empty{display:none}
-.teaser .t-liste{display:none}
-@media (min-width:761px) and (min-height:521px){
-  .tile .label > .ico,.tile .label .long{display:none}
-  .tile .label:not(:has(.kopf:not(:empty),.tag:not([hidden]),.lglyph:not([hidden]))){display:none}
-  .tile .teaser.mit-liste .t-text{display:none}
-  .tile .teaser.mit-liste{display:block;-webkit-line-clamp:unset;overflow:hidden;min-width:0;max-width:100%}
-  .tile .teaser.mit-liste .t-liste{display:flex;flex-direction:column;gap:1px}
-}
 .tl-z{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tl-z.tl-neu{margin-top:6px}
 .tl-d{font-weight:600;color:var(--ink)}
-@media (max-width:760px),(max-height:520px){
-  .label .kopf{display:none}
-}
-@media (min-width:761px) and (min-height:521px){
-  .tile .head:has(.teaser.mit-liste) .metric{font-size:13px;font-family:inherit;font-weight:700;line-height:1.35;letter-spacing:0}
-  .tile .head:has(.teaser.mit-liste) .metric .m-long{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
-}
-.teaser .t-liste{font-size:13px;line-height:1.35}
-/* Wetter klein: Symbol der Wetterlage vor dem Text (zweite Zeile) statt im Kopf; Uhrzeit von Tiefst/Höchst klein */
-.teaser .t-icon{display:none}
-@media (min-width:761px) and (min-height:521px){
-  .tile .teaser .t-icon{display:inline-flex;vertical-align:-3px;margin-right:5px;color:var(--ink)}
-  .tile .teaser .t-icon svg{width:17px;height:17px}
-  .tile .head:has(.t-icon) .label .lglyph{display:none}
-}
-@media (min-width:761px) and (min-height:521px){
-  .tile .label .kopf{white-space:normal;overflow:visible;line-height:1.3}
-  .tile .label:has(.kopf:not(:empty)){max-width:100%;flex-wrap:wrap}
-}
-/* Kalender klein: KW unten */
-@media (min-width:761px) and (min-height:521px){
-  .tile .teaser.mit-liste{flex:1 1 auto;min-height:0}
-}
-/* (i) unten rechts in der kleinen Kachel: Info-Feld mit Name (später mehr) – nicht am Handy */
-.info-knopf{position:absolute;right:8px;bottom:8px;width:16px;height:16px;border-radius:50%;border:1px solid var(--line);background:var(--surface);
-  color:var(--muted);font:600 10px/14px Georgia,serif;font-style:italic;text-align:center;padding:0;cursor:pointer;z-index:2;opacity:.7}
-.info-knopf:hover,.info-knopf:focus-visible,.info-knopf.fest{opacity:1;color:var(--ink);border-color:var(--muted)}
-.info-feld{position:absolute;right:8px;bottom:30px;z-index:3;max-width:calc(100% - 16px);padding:6px 10px;border-radius:8px;
-  background:var(--ink);color:var(--surface);font-size:12px;line-height:1.35;box-shadow:0 4px 14px rgba(0,0,0,.18);display:flex;flex-direction:column}
-.info-feld[hidden]{display:none}
-.info-feld span:first-child{font-weight:600}
-@media (max-width:760px),(max-height:520px){
-  .info-knopf,.info-feld{display:none!important}
-}
-/* Zeilen der kleinen Kachel als Links (z. B. Tools, Schlagzeilen) */
 a.tl-z.tl-link{color:inherit;text-decoration:none;border-radius:6px;padding:2px 4px;margin:0 -4px}
 a.tl-z.tl-link:hover{background:var(--line)}
 a.tl-z.tl-link:hover .tl-d{text-decoration:underline}
 .tl-ico{width:14px;height:14px;vertical-align:-2px;margin-right:5px;color:var(--accent)}
-/* Mini-Reiter (entscheidungen.md Abschnitt 13): Reiter in der kleinen Kachel statt Aufklappen – links eine Spalte mit Symbolen, rechts der Inhalt */
-.tile.mit-kr{grid-template-rows:auto minmax(0,1fr)}
-.tile.mit-kr .head{padding-bottom:6px;cursor:default}
-.tile.mit-kr .head :is(.teaser,.mini,.metric){display:none}
-.kr[hidden]{display:none}
-.kr{display:grid;grid-template-columns:26px minmax(0,1fr);column-gap:10px;min-height:0;overflow:hidden;padding:0 20px 14px 14px}
-.kr-leiste{display:flex;flex-direction:column;gap:4px;min-height:0}
-.kr-leiste button{width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;border:1px solid transparent;border-radius:7px;
-  background:transparent;color:var(--muted);cursor:pointer;padding:0}
-.kr-leiste button .ico{width:16px;height:16px}
-.kr-leiste button:hover{color:var(--ink);border-color:var(--line)}
-.kr-leiste button[aria-selected="true"]{color:var(--accent);background:var(--line)}
-.kr-leiste .kr-einst{margin-top:auto}
+/* Feld eines Untertabs: Liste oben, Diagramm unten (.kr-unten bekommt zuerst seinen Platz) – Zeilen, die nicht passen, blendet core/mini-reiter.js aus */
 .kr-feld{min-width:0;min-height:0;overflow:hidden;font-size:13px;line-height:1.35;display:flex;flex-direction:column;gap:6px}
 .kr-feld>.kr-liste{flex:0 1 auto;min-height:0;overflow:hidden}
 .kr-unten{flex:1 1 0;min-height:84px;display:flex;flex-direction:column}
 .kr-liste{display:flex;flex-direction:column;gap:2px}
 .kr-liste .tl-z{flex:none}   /* Zeilen nie stauchen – was nicht passt, blendet krZeilen aus */
 .kr-liste .tl-z[hidden]{display:none}
-/* Schlagzeilen: Überschriften dürfen zwei Zeilen haben (dann „…“) – was nicht passt, blendet krZeilen ganz aus */
-#tile-news .kr-liste .tl-z:not([hidden]){white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2}
 .kr-feld .kr-z[hidden]{display:none}
 .tl-aktion{cursor:pointer;border-radius:4px}
 .tl-aktion:hover{background:var(--line)}

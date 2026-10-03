@@ -59,43 +59,6 @@ test('Betriebsart: Schalter DAILY_PRIVATE in api/config', async () => {
   delete process.env.DAILY_PRIVATE;
 });
 
-test('Layouts: öffentlich ohne private Kacheln, Standard 12 (fertige zuerst), Raster nach Kachelzahl', async () => {
-  const { LAYOUTS, CATALOG, byId, chooseLayout, SLOTS, STANDARD_ANZAHL, raster } = await esm('src/js/core/tiles.js');
-  for (const [mode, ids] of Object.entries(LAYOUTS)) {
-    assert.ok(ids.length <= SLOTS, mode);
-    assert.equal(new Set(ids).size, ids.length, mode + ': doppelte Kachel');
-    ids.forEach(id => assert.ok(byId[id], mode + ': unbekannt ' + id));
-  }
-  assert.ok(LAYOUTS.public.every(id => byId[id].scope === 'public'));
-  assert.ok(!CATALOG.some(t => t.id === 'mail' || t.id === 'parcels'));
-  // eigene Belegung: genau diese Kacheln in dieser Reihenfolge (auch Vorschau), ohne Doppelte, Unbekannte und öffentlich private
-  assert.deepEqual(chooseLayout(false, ['news', 'sport', 'sport', 'gibtsnicht', 'weather']).map(t => t.id), ['sport', 'weather']);
-  // frühere Kacheln „Abfahrten“ (transit) und „Tanken“ (fuel) → „Verkehr“, nur einmal
-  assert.deepEqual(chooseLayout(false, ['transit', 'weather', 'fuel']).map(t => t.id), ['verkehr', 'weather']);
-  assert.deepEqual(chooseLayout(true, ['news', 'kalender']).map(t => t.id), ['news', 'kalender']);   // privat erlaubt
-  assert.equal(chooseLayout(false, []).length, 0);                                    // leere eigene Belegung bleibt leer
-  assert.equal(chooseLayout(true, LAYOUTS.private.concat(CATALOG.map(t => t.id))).length, Math.min(SLOTS, CATALOG.length));   // höchstens 20
-  // Standard (keine eigene Belegung): 12 Kacheln, überarbeitete zuerst, dann Vorschau-Kacheln in Standardreihenfolge
-  const pub = chooseLayout(false).map(t => t.id);
-  assert.equal(pub.length, STANDARD_ANZAHL);
-  assert.deepEqual(pub, ['weather', 'kalender', 'links', 'tasks', 'verkehr', 'sport', 'money', 'unterhaltung', 'alltag', 'wissen', 'tools', 'usage']);
-  assert.deepEqual(chooseLayout(false, ['play', 'film', 'saving']).map(t => t.id), ['unterhaltung', 'money']);   // „Rätsel & Witz“ und „Film“ → Unterhaltung, „Sparen“ → Finanzen
-  assert.deepEqual(chooseLayout(false, ['knowledge', 'travel', 'weather']).map(t => t.id), ['wissen', 'weather']);   // „Wissen“ und „Land des Tages“ → Wissen
-  assert.ok(!CATALOG.some(t => t.id === 'knowledge' || t.id === 'travel'));
-  assert.deepEqual(chooseLayout(false, ['food', 'health', 'tech', 'relation', 'money']).map(t => t.id), ['alltag', 'money']);   // Essen, Gesundheit, Tech, Beziehung → Alltag
-  assert.ok(!CATALOG.some(t => ['food', 'health', 'tech', 'relation'].includes(t.id)));
-  assert.ok(!CATALOG.some(t => t.id === 'transit' || t.id === 'fuel'));
-  assert.ok(!pub.includes('news') && !pub.includes('alerts'));
-  const priv = chooseLayout(true).map(t => t.id);
-  assert.deepEqual(priv.slice(0, 12), ['weather', 'kalender', 'news', 'tasks', 'verkehr', 'sport', 'money', 'unterhaltung', 'alltag', 'wissen', 'links', 'tools']);
-  // Raster: Rechner (quer, Wunschform 1,4) und Handy (hochkant, quadratisch)
-  const r = (n, w, h, a, v) => { const x = raster(n, w, h, a, v); return `${x.cols}x${x.rows}`; };
-  assert.deepEqual([1, 2, 4, 6, 9, 12, 20].map(n => r(n, 1344, 700)), ['1x1', '2x1', '2x2', '3x2', '3x3', '4x3', '5x4']);
-  assert.deepEqual([2, 12].map(n => r(n, 1850, 900)), ['2x1', '4x3']);
-  assert.deepEqual([2, 4, 12, 20].map(n => r(n, 358, 560, 7, 1)), ['1x2', '2x2', '3x4', '4x5']);
-  assert.equal(r(0, 1344, 700), '1x1');
-});
-
 test('Meine Seiten: nur http(s)-Adressen', async () => {
   const { cleanUrl } = await esm('src/js/lib/url.js');
   assert.equal(cleanUrl('spiegel.de'), 'https://spiegel.de/');
@@ -154,29 +117,29 @@ test('Syntax: alle Browser-Module lassen sich parsen', () => {
   } finally { fs.rmSync(tmp, { recursive: true, force: true }); }
 });
 
-// Trennung: Das allgemeine Kachelraster (core/board.js) und die allgemeinen Styles (app.css) enthalten nichts Wetter- oder
-// Finanz-Spezifisches. Diagramme → ansichten/*.js, adapter/*diagramm.js, css/diagramm.css, css/wetter.css, css/finanzen.css.
-test('Aufbau: board.js und app.css ohne Wetter-/Finanz-Teile, ohne Aufklappen, Ansichts-CSS eingebunden', () => {
+// Trennung: Die Oberfläche (core/oberflaeche.js) und die allgemeinen Styles (app.css) enthalten nichts Wetter-Spezifisches.
+// Diagramme → ansichten/*.js, adapter/diagramm.js, css/diagramm.css, css/wetter.css. Seit 0.47.2 kein Kachelraster mehr.
+test('Aufbau: Oberfläche und app.css ohne Wetter-Teile, ohne Kachelraster, Ansichts-CSS eingebunden', () => {
   const lies = p => fs.readFileSync(path.join(__dirname, '..', p), 'utf8');
-  const board = lies('src/js/core/board.js').replace(/\/\/.*$/gm, '');
-  for (const muster of [/\bwd-/, /\bzp-|\bt-zp\b|data-zp|zpHtml/, /\bfi-/, /\bwh-/, /\brk-|\brs[1-4]\b/, /miniDichte|miniKurs|zeile2/])
-    assert.doesNotMatch(board, muster, 'board.js enthält ' + muster);
+  const ob = lies('src/js/core/oberflaeche.js').replace(/\/\/.*$/gm, '');
+  for (const muster of [/\bwd-/, /\bzp-|\bt-zp\b|data-zp|zpHtml/, /\bwh-/, /\brk-|\brs[1-4]\b/, /miniDichte|zeile2/])
+    assert.doesNotMatch(ob, muster, 'oberflaeche.js enthält ' + muster);
   const css = lies('src/app.css').replace(/\/\*[\s\S]*?\*\//g, '').replace(/var\(--wd-[\w-]+\)/g, '');
-  for (const muster of [/\.wd-|--wd-/, /\.zp-|\.t-zp|\.mit-zp/, /\.fi-/, /\.wh-/, /\.rk-|--rs\d/])
+  for (const muster of [/\.wd-|--wd-/, /\.zp-|\.t-zp|\.mit-zp/, /\.wh-/, /\.rk-|--rs\d/])
     assert.doesNotMatch(css, muster, 'app.css enthält ' + muster);
+  // kein Kachelraster, keine Leiste unten, kein Frag DAILY, keine Kachelauswahl (1b-2a)
+  assert.doesNotMatch(css, /\.tile\b|\.grid\b|\.head\b|\.metric|\.teaser|\.bar\b|\.ask\b|\.answer|\.legal|\.k-liste|\.info-knopf|\.kr-leiste/, 'app.css: Regeln der alten Kacheln');
   const html = lies('src/index.html'), sw = lies('src/sw.js');
-  // Seit 0.45.0 nur Mini-Reiter: kein Aufklappen, kein Handy-Vollbild, keine alten Reiter/Zeilenlisten (Review M4 Schritt 3)
-  for (const muster of [/activate|closeAll|fillContent|reiterVon|showSheet|data-mode|t\.rows|t\.tabs/])
-    assert.doesNotMatch(board, muster, 'board.js enthält noch ' + muster);
-  assert.ok(!html.includes('id="sheet"'), 'index.html enthält noch das Handy-Vollbild');
-  for (const f of ['src/app.css', 'src/css/diagramm.css', 'src/css/wetter.css', 'src/css/finanzen.css'])
-    assert.doesNotMatch(lies(f), /data-mode|\.sheet\b|\.reiterfeld|\.wd-gross/, f + ': Regeln fürs Aufklappen');
-  for (const f of ['/js/core/mini-reiter.js', '/js/core/einstellungsfenster.js']) assert.ok(sw.includes(`'${f}'`), 'nicht im Service Worker: ' + f);
-  for (const f of ['/css/diagramm.css', '/css/wetter.css', '/css/finanzen.css']) {
+  for (const f of ['core/board.js', 'core/tiles.js', 'core/ask.js', 'core/einstellungsfenster.js', 'ui/kacheln.js', 'providers/news.js', 'providers/finanzen.js',
+    'providers/sport.js', 'providers/verkehr.js', 'providers/local.js', 'providers/thema.js', 'adapter/finanzen.js', 'adapter/tanken.js', 'adapter/lokal.js'])
+    assert.ok(!fs.existsSync(path.join(__dirname, '../src/js', f)), 'noch vorhanden: ' + f);
+  for (const f of ['/css/abreissblock.css', '/css/diagramm.css', '/css/wetter.css', '/css/seiten.css']) {
     assert.ok(fs.existsSync(path.join(__dirname, '../src', f)), 'fehlt: ' + f);
     assert.ok(html.includes(`href="${f}"`), 'nicht in index.html: ' + f);
     assert.ok(sw.includes(`'${f}'`), 'nicht im Service Worker: ' + f);
   }
+  // Service Worker: nichts, was es nicht mehr gibt
+  for (const [, url] of sw.matchAll(/'(\/(?:js|css|tools|content)\/[^']+)'/g)) assert.ok(fs.existsSync(path.join(__dirname, '../src', url)), 'Service Worker nennt fehlende Datei: ' + url);
 });
 
 // Oberfläche „Abreißblock“ (0.47.0, Phase 1b): Gruppen unter „Heute“, Untertabs je Bereich, Adresse #bereich/untertab/teil
@@ -228,7 +191,4 @@ test('Oberfläche: Heute in Gruppen, Untertabs je Bereich, Adresse, Gemerkt', as
   for (const id of ['ab-tabs', 'ab-blatt', 'ort-select', 'open-settings', 'status', 'set-bereiche']) assert.ok(html.includes(`id="${id}"`), 'fehlt in index.html: ' + id);
   for (const weg of ['id="grid"', 'id="ask"', 'id="answer"', 'id="k-aktiv"']) assert.ok(!html.includes(weg), 'noch in index.html: ' + weg);
   assert.ok(html.includes('href="/css/abreissblock.css"') && sw.includes("'/css/abreissblock.css'") && sw.includes("'/fonts/big-shoulders-900.woff2'"));
-  const main = fs.readFileSync(path.join(__dirname, '../src/js/main.js'), 'utf8');
-  for (const weg of ['core/board.js', 'core/ask.js', 'ui/kacheln.js', 'providers/news.js', 'providers/finanzen.js', 'providers/sport.js', 'providers/verkehr.js', 'providers/local.js'])
-    assert.ok(!main.includes(weg), 'main.js lädt noch ' + weg);
 });
