@@ -7,6 +7,7 @@
 | `konzept/` | [uebergabe.md](konzept/uebergabe.md) | **Aktueller Arbeitsstand, Stolpersteine, nächste Schritte** – für neue Chats |
 | `konzept/` | [ausrichtung.md](konzept/ausrichtung.md) | **Ausrichtung seit 02.10.2026:** Unterhaltung, Mitmachen, Sammeln; Ideenliste A–E, Mitbewerber, Finanzierung |
 | `konzept/` | [plan-neuausrichtung.md](konzept/plan-neuausrichtung.md) | **Strategischer Plan zur Neuausrichtung** (Stand 03.10.2026): neue Oberfläche, Mitmach-Formate, Album, Kosten, Test, Phasen, Entscheidungen aus Phase 0 |
+| `konzept/` | [themen.md](konzept/themen.md) | **Themen und Gliederung** (03.10.2026): drei Ebenen Bereich → Rubrik → Thema, sechs Bereiche, Baum aller Themen, Liste „nach dem Test“ |
 | `konzept/` | [dienste-katalog.md](konzept/dienste-katalog.md) | Ideenliste → Dienste, Reihenfolge |
 | `architektur/` | [dienste.md](architektur/dienste.md) | Headless-Architektur, Austauschformat daily/1, Ort-Objekt |
 | `architektur/` | [skalierung.md](architektur/skalierung.md) | Cache-Stufen, Klassen A–D, Ausbaustufen, Bewertung je Dienst |
