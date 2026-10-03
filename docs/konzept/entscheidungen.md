@@ -21,6 +21,7 @@ Ausführlich: **`ausrichtung.md`** (inkl. sortierter Ideenliste A–E und Mitbew
 - **Zielgruppe:** Erwachsene, familienfreundlich (alles jugendfrei, kein eigenes Kinderprodukt).
 - **Info-Kacheln:** Standard Wetter, Kalender, Meine Seiten, Mein Daily; wählbar Tanken, Fußball, Autobahn, Abfahrten, Finanzen; privat Kurse, Schlagzeilen, Termine, Tools. **Keine neuen Info-Dienste bis nach dem Test** (Weltwetter, Klima, Strompreis, Verbindung, Krypto, Wetterkarte); gebaute nur pflegen. Arbeitszeit fließt in Herzstück und Staunen (Rätsel, Bilderrätsel, Quiz, Album).
 - **Finanzierung:** keine Werbebanner; während des Tests nicht kommerziell; danach Spenden und sparsame, gekennzeichnete Affiliate-Links; mittelfristig DAILY Plus oder gedrucktes Produkt. Immer kostenlos: Tagesinhalte, Mitmachen, Nachholen, Album.
+- **Oberfläche (Roger, 02.10.2026):** **eine Oberfläche für Handy und Rechner** – oben Tabs, jeder Tab hat Untertabs, jeder Untertab hat die ganze Fläche; das Kachelraster wird abgelöst. Strategischer Plan mit offenen Fragen: **`plan-neuausrichtung.md`** (Entwurf, Fragen werden einzeln geklärt).
 - **Nächste Schritte:** Markenrecherche „DAILY“, Test mit 5–10 Leuten (Erfolgskriterium vorher festlegen), erste 2–3 Mitmach-Formate und erstes Album auswählen, Jahrgang planen. Vor der Umsetzung je Format ein Plan.
 
 ## 1. Zielgruppe
