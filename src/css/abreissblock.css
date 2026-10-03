@@ -134,6 +134,15 @@ body{background:var(--ab-grund);color:var(--ab-tinte)}
 .ab-hinweis{margin:0;font-size:17px;line-height:1.4}
 .ab-ergebnis{margin:0;font-size:20px;font-weight:700}
 .ab-knopf:disabled{opacity:.45;cursor:default}
+/* Quiz (0.53.0): Fortschritt, Ergebnisliste in einer Zeile je Frage */
+.ab-fortschritt{letter-spacing:.02em}
+.ab-quiz-liste{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;font-size:16px}
+.ab-quiz-liste li{display:grid;grid-template-columns:1.4em minmax(0,1fr);align-items:start}
+.ab-quiz-liste li span{font-weight:700}
+.ab-quiz-liste small{display:block;font-size:.85em;color:var(--ab-grau);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ab-quiz-liste b{display:block}
+.ab-quiz-liste .ab-ok span{color:var(--ab-gruen)}
+.ab-quiz-liste .ab-nok span{color:var(--ab-rot)}
 .ab-tipp-knopf,.ab-teilen{margin-left:auto}
 .ab-knopf{flex:none;align-self:flex-start;min-height:44px;padding:0 16px;border:1.5px solid var(--ab-tinte);border-radius:10px;background:var(--ab-knopf);color:var(--ab-tinte);font-weight:600;font-size:15px}
 .ab-knopf:hover{background:var(--ab-feld)}
@@ -236,6 +245,9 @@ a.ab-ev:hover{text-decoration:underline}
   .ab-antwort{min-height:48px;font-size:16px;padding:4px 8px}
   .ab-hinweis{font-size:15px}
   .ab-ergebnis{font-size:17px}
+  .ab-quiz-liste{font-size:15px;gap:6px}
+  .ab-art[data-art="quiz"] .ab-inhalt{gap:10px}
+  .ab-erklaerung{font-size:15px;line-height:1.4}
   .ab-zutaten{font-size:16px;line-height:1.6}
   .ab-fakten dd{font-size:16px}
   .ab-ev{font-size:15px}
@@ -259,6 +271,7 @@ a.ab-ev:hover{text-decoration:underline}
   .ab-unter button{padding:0 7px;font-size:14px}
   .ab-leiste .ort-wahl select{max-width:10ch}
   .ab-datum-kurz{display:none}
+  .ab-art[data-art="quiz"] .ab-inhalt{gap:8px}   /* Quiz mit Erklärung passt so auch bei 360 px */
 }
 
 /* 9 Dialoge: Einstellungsfenster mit Abschnitten der Bereiche */

@@ -150,7 +150,7 @@ test('Oberfläche: drei Ebenen, Tagesinhalte in Heute · Entdecken · Mehr → A
   // jede Art steht genau einmal: Heute (Mitmachen), Entdecken, Mehr → Alltag (themen.md)
   const arten = [...ti.HEUTE_RUBRIKEN, ...ti.ENTDECKEN_RUBRIKEN].flatMap(g => g.arten).concat(ti.ALLTAG_ARTEN);
   assert.deepEqual([...arten].sort(), Object.keys(ti.ART).sort());
-  assert.deepEqual(ti.HEUTE_RUBRIKEN.map(g => g.id), ['raetsel', 'lachen']);
+  assert.deepEqual(ti.HEUTE_RUBRIKEN.map(g => g.id), ['raetsel', 'quiz', 'lachen']);
   assert.deepEqual(ti.ENTDECKEN_RUBRIKEN.map(g => g.id), ['sprache', 'zeitreise', 'welt', 'kultur']);
   assert.deepEqual(ti.ortVon('film'), { bereich: 'entdecken', rubrik: 'kultur', thema: null });
   assert.deepEqual(ti.ortVon('sprichwort'), { bereich: 'entdecken', rubrik: 'sprache', thema: 'sprichwort' });
@@ -158,7 +158,7 @@ test('Oberfläche: drei Ebenen, Tagesinhalte in Heute · Entdecken · Mehr → A
   assert.deepEqual(ti.ortVon('witz'), { bereich: 'heute', rubrik: 'lachen', thema: null });
   const fav = [{ art: 'witz', datum: '2026-09-27', kurz: 'x', text: 'x' }];
   const h = ti.heuteBereich(env, { favoriten: fav });
-  assert.deepEqual(h.kleinReiter.map(r => r.id), ['raetsel', 'lachen']);
+  assert.deepEqual(h.kleinReiter.map(r => r.id), ['raetsel', 'quiz', 'lachen']);
   assert.match(h.bereichKopf, /class="ab-tagzahl">27</); assert.match(h.bereichKopf, /Sonntag/); assert.match(h.bereichKopf, /September 2026/);
   assert.match(h.bereichKopf, /nachgeholt/); assert.match(h.bereichKopf, /data-ti="vor"(?! disabled)/);
   // Rätsel zum Mitmachen (0.51.0): vier Antworten je Tag fest gemischt, Tipps, Ergebnis mit Kästchen; ohne Antworten wie bisher „Lösung zeigen“
@@ -187,6 +187,24 @@ test('Oberfläche: drei Ebenen, Tagesinhalte in Heute · Entdecken · Mehr → A
   assert.match(ti.heuteBereich(alt, {}).kleinReiter[0].html, /data-ti="loesung"/);
   assert.doesNotMatch(ti.heuteBereich(alt, {}).kleinReiter[0].html, new RegExp(r.loesung.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));   // Lösung erst auf Knopfdruck
   assert.match(ti.heuteBereich(alt, { loesung: true }).kleinReiter[0].html, /class="ab-loesung"/);
+  // Quiz zum Mitmachen (0.53.0): Frage 1 offen, nach der Antwort Erklärung und „Weiter ›“, nach 5 Fragen Ergebnis mit Teilen
+  const q = tageInhalt.quiz, quiz = o => ti.heuteBereich(env, { spiele: { quiz: o } }).kleinReiter[1].html;
+  const q0 = quiz(undefined);
+  assert.match(q0, /Frage 1 von 5 · ⬜⬜⬜⬜⬜/);
+  assert.equal((q0.match(/data-ti="quiz-antwort"(?! disabled)/g) || []).length, 4);
+  assert.doesNotMatch(q0, /quiz-weiter|data-ti="teilen"|ab-erklaerung/);
+  const q1 = quiz({ antworten: [q[0].falsch[0]], frage: 0 });
+  assert.match(q1, new RegExp(`class="ab-text ab-erklaerung">Leider falsch\\. ${q[0].erklaerung.slice(0, 20)}`));
+  assert.match(q1, /data-ti="quiz-weiter">Weiter ›</); assert.equal((q1.match(/disabled/g) || []).length, 4);
+  assert.match(quiz({ antworten: [q[0].falsch[0]], frage: 1 }), /Frage 2 von 5 · 🟥⬜⬜⬜⬜/);
+  const alleRichtig = q.map(f => f.antwort);
+  assert.match(quiz({ antworten: alleRichtig, frage: 4 }), /data-ti="quiz-weiter">Ergebnis ›</);
+  const erg = quiz({ antworten: [...alleRichtig.slice(0, 3), q[3].falsch[1], q[4].antwort], frage: 5, geloest: true, nachgeholt: true });
+  assert.match(erg, /class="ab-ergebnis">🟩🟩🟩🟥🟩 4 von 5 richtig</); assert.match(erg, /Sehr gut! · nachgeholt/);
+  assert.equal((erg.match(/<li /g) || []).length, 5); assert.match(erg, /data-ti="teilen">Teilen</); assert.doesNotMatch(erg, /quiz-antwort/);
+  assert.notDeepEqual(ti.mischen([1, 2, 3, 4], '2026-09-27|0'), undefined);
+  assert.match(ti.artInhalt('quiz', tageInhalt).kurz, /^5 Fragen, z\. B\. „/);
+  assert.deepEqual(ti.ortVon('quiz'), { bereich: 'heute', rubrik: 'quiz', thema: null });
   // Teilen und Spielstand
   const t = await esm('src/js/core/teilen.js');
   assert.equal(t.kaestchen(['a', 'b', 'c'], 'c'), '🟥🟥🟩');
@@ -197,7 +215,7 @@ test('Oberfläche: drei Ebenen, Tagesinhalte in Heute · Entdecken · Mehr → A
   sp._setzeStand({ v: 1, tage: { '2026-09-27': { raetsel: { versuche: ['x'], tipps: 0, geloest: false } }, '2026-09-28': { raetsel: { versuche: ['y'], geloest: true } } } });
   assert.deepEqual(sp.geloesteTage(), ['2026-09-28']);
   assert.deepEqual(sp.spiel('2026-09-30', 'raetsel'), { versuche: [], tipps: 0, geloest: false, nachgeholt: false });
-  assert.match(h.kleinReiter[1].html, /aria-pressed="true">★ Gemerkt/);                                // Witz dieses Tags ist gemerkt
+  assert.match(h.kleinReiter[2].html, /aria-pressed="true">★ Gemerkt/);                                // Witz dieses Tags ist gemerkt
   // Entdecken: Sprache mit Themen Wort · Sprichwort, sonst eine Art je Rubrik; „vom …“ nur für Inhalte eines anderen Tags
   const e = ti.entdeckenBereich(env, {});
   assert.deepEqual(e.kleinReiter.map(r => [r.id, (r.teile || []).map(t => t.id).join(',')]), [['sprache', 'wort,sprichwort'], ['zeitreise', ''], ['welt', ''], ['kultur', '']]);

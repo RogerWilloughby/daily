@@ -171,7 +171,7 @@ Info-Dienste ohne Bereich (Tanken, Fußball, Autobahn, Finanzen, Kurse, Schlagze
 | `src/js/ansichten/mini-diagramm.js` | allgemeine Diagramm-Bedienung: Dichte je Platz (`miniDichte`), Überfahren der Spalten |
 | `src/js/ansichten/wetter.js` | Wetter: Zeitpunkt-Block unter „Jetzt“ („Jetzt“ / überfahrene Stunde oder Tag); HTML aus `adapter/wetter.js` (`zpHtml`, `jetztHtml`) |
 | `src/js/ansichten/radar.js` | Radarkarte (Untertab „Radar“): Bilder laufen lassen, Zeitleiste (Start/Pause, Sprung) |
-| `src/js/providers/heute.js` | Tagesinhalte für „Heute“ (mit Blättern; Rätsel zum Mitmachen: Antwort, Tipp, Teilen), „Entdecken“ und „Mehr → Alltag“ (immer heute, Gemerktes mit „vom …“): Dienste `tagesinhalt` und `andiesemtag` je Tag, Lösung, Rezeptseite, Merken (→ Mehr · Gemerkt); Zuordnung in `adapter/tagesinhalt.js` (`ortVon`) |
+| `src/js/providers/heute.js` | Tagesinhalte für „Heute“ (mit Blättern; Rätsel und Quiz zum Mitmachen: Antwort, Tipp, Weiter, Teilen), „Entdecken“ und „Mehr → Alltag“ (immer heute, Gemerktes mit „vom …“): Dienste `tagesinhalt` und `andiesemtag` je Tag, Lösung, Rezeptseite, Merken (→ Mehr · Gemerkt); Zuordnung in `adapter/tagesinhalt.js` (`ortVon`) |
 | `src/js/providers/weather.js`, `kalender.js`, `links.js`, `tools.js` | Wetter, Kalender (darin `himmelAnbieter` für Wetter → Himmel), Meine Seiten, Tools (privat) |
 | `src/js/adapter/diagramm.js` | Wetter-Diagramme als HTML/SVG-Text und gemeinsame Bausteine (`skala`, `pfad`, `pfadRund`, `MINI_WAHL` – Zeiträume für die Themen unter Wetter → Jetzt) |
 | `src/app.css` | allgemeine Styles, Design-Tokens, Dialoge, Listen im Feld |

@@ -1,11 +1,11 @@
 // Adapter „tagesinhalt“: macht aus dem Vertrag tagesinhalt v1 (und „andiesemtag“) die Bereiche „Heute“ (Datumsblock mit Blättern ‹ ›,
-// Rätsel zum Mitmachen, Lachen), „Entdecken“ und „Mehr → Alltag“ – je Art eine Fläche mit „☆ Merken“, dazu „Gemerkt“ unter Mehr.
+// Rätsel und Quiz zum Mitmachen, Lachen), „Entdecken“ und „Mehr → Alltag“ – je Art eine Fläche mit „☆ Merken“, dazu „Gemerkt“ unter Mehr.
 // Gemerktes speichert eine Kopie des Inhalts (bleibt erhalten, auch wenn der Vorrat wechselt). Rein, ohne DOM – testbar.
 import { esc } from '../core/util.js';
 import { kaestchen } from '../core/teilen.js';
 
 export const ART = {
-  raetsel: { name: 'Rätsel' }, witz: { name: 'Witz' }, film: { name: 'Film' }, wort: { name: 'Wort' }, sprichwort: { name: 'Sprichwort' }, land: { name: 'Land' },
+  raetsel: { name: 'Rätsel' }, quiz: { name: 'Quiz' }, witz: { name: 'Witz' }, film: { name: 'Film' }, wort: { name: 'Wort' }, sprichwort: { name: 'Sprichwort' }, land: { name: 'Land' },
   geschichte: { name: 'An diesem Tag' }, rezept: { name: 'Rezept' }, gesundheit: { name: 'Gesundheit' }, tech: { name: 'Tech' }, beziehung: { name: 'Beziehung' },
   spartipp: { name: 'Spartipp' }
 };
@@ -25,6 +25,7 @@ export function artInhalt(art, inhalt) {
   const i = inhalt || {};
   switch (art) {
     case 'raetsel': { const r = i.raetsel; return r ? { kurz: r.frage, text: `${r.frage} – Lösung: ${r.loesung}` } : null; }
+    case 'quiz': { const q = i.quiz; return q && q.length ? { kurz: `${q.length} Fragen, z. B. „${q[0].frage}“`, text: q.map((f, n) => `${n + 1}. ${f.frage} – ${f.antwort}`).join(' · ') } : null; }
     case 'witz': return i.witz ? { kurz: i.witz, text: i.witz } : null;
     case 'film': { const f = i.film; if (!f) return null;
       const kopf = `${f.titel}${f.jahr ? ` (${f.jahr})` : ''}${f.genre ? ' · ' + f.genre : ''}`;
@@ -54,6 +55,7 @@ export const favEintrag = (art, env) => { const a = artInhalt(art, env.daten.inh
 // Rubriken mit mehreren Arten haben Themen (Ebene 3). Weitere Rubriken laut themen.md kommen, sobald es Inhalte gibt.
 export const HEUTE_RUBRIKEN = [
   { id: 'raetsel', name: 'Rätsel', arten: ['raetsel'] },
+  { id: 'quiz', name: 'Quiz', arten: ['quiz'] },
   { id: 'lachen', name: 'Lachen', arten: ['witz'] }
 ];
 export const ENTDECKEN_RUBRIKEN = [
@@ -74,7 +76,7 @@ export function ortVon(art) {
 }
 // kurze Namen für den Umschalter im Feld, Überschrift über dem Inhalt
 const KURZ = { wort: 'Wort', sprichwort: 'Sprichwort', land: 'Land', geschichte: 'An diesem Tag', rezept: 'Rezept', gesundheit: 'Gesundheit', tech: 'Tech', beziehung: 'Beziehung', spartipp: 'Spartipp' };
-export const RUBRIK = { raetsel: 'Rätsel des Tages', witz: 'Witz des Tages', film: 'Film des Tages', wort: 'Wort des Tages', sprichwort: 'Sprichwort des Tages', land: 'Land des Tages', geschichte: 'An diesem Tag',
+export const RUBRIK = { raetsel: 'Rätsel des Tages', quiz: 'Quiz des Tages', witz: 'Witz des Tages', film: 'Film des Tages', wort: 'Wort des Tages', sprichwort: 'Sprichwort des Tages', land: 'Land des Tages', geschichte: 'An diesem Tag',
   rezept: 'Rezept des Tages', gesundheit: 'Gesundheit', tech: 'Tech-Tipp', beziehung: 'Für euch zwei', spartipp: 'Spartipp' };
 const MONATE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 const WTAGE = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
@@ -125,6 +127,30 @@ function raetselHtml(r, datum, s, p) {
       : (r.tipps || []).slice(0, s.tipps).map((t, i) => p('💡 ' + t, 'ab-hinweis' + (i ? ' ab-hinweis2' : ''))).join(''));
 }
 
+// Quiz zum Mitmachen (seit 0.53.0): eine Frage nach der anderen, je ein Versuch. Spielstand: antworten (gewählte Antwort je Frage),
+// frage (gezeigte Frage, 5 = Ergebnis), geloest (alle beantwortet), nachgeholt
+const LEER_QUIZ = { antworten: [], frage: 0, geloest: false, nachgeholt: false };
+export const quizKaestchen = (q, s) => s.antworten.map((a, n) => (a === q[n].antwort ? '🟩' : '🟥')).join('');
+export const quizRichtig = (q, s) => s.antworten.filter((a, n) => a === q[n].antwort).length;
+const LOB = ['Morgen gibt es neue Fragen.', 'Morgen gibt es neue Fragen.', 'Morgen gibt es neue Fragen.', 'Gut gemacht!', 'Sehr gut!', 'Perfekt!'];
+function quizHtml(q, datum, s, p) {
+  const n = Math.min(s.frage, q.length);
+  if (n >= q.length) {   // Ergebnis: Kästchen, Zahl, die Fragen mit richtiger Antwort
+    const k = quizRichtig(q, s);
+    return p(`${quizKaestchen(q, s)} ${k} von ${q.length} richtig`, 'ab-ergebnis') + p(LOB[Math.min(k, 5)] + (s.nachgeholt ? ' · nachgeholt' : ''), 'ab-meta') +
+      `<ol class="ab-quiz-liste">${q.map((f, i) => `<li class="${s.antworten[i] === f.antwort ? 'ab-ok' : 'ab-nok'}" title="${esc(f.frage)}"><span>${s.antworten[i] === f.antwort ? '✓' : '✗'}</span><div><small>${esc(f.frage)}</small><b>${esc(f.antwort)}</b></div></li>`).join('')}</ol>`;
+  }
+  const f = q[n], gewaehlt = s.antworten[n], offen = gewaehlt == null;
+  const fortschritt = q.map((x, i) => (i < s.antworten.length ? (s.antworten[i] === x.antwort ? '🟩' : '🟥') : '⬜')).join('');
+  const knoepfe = mischen([f.antwort, ...f.falsch], `${datum}|${n}`).map(a => {
+    const richtig = a === f.antwort, zeig = !offen && (a === gewaehlt || richtig);
+    return `<button type="button" class="ab-antwort${zeig ? (richtig ? ' ab-richtig' : ' ab-falsch') : ''}" data-ti="quiz-antwort" data-antwort="${esc(a)}"${offen ? '' : ' disabled'}` +
+      `${zeig ? ` aria-label="${esc(a)} – ${richtig ? 'richtig' : 'falsch'}"` : ''}>${esc(a)}</button>`;
+  }).join('');
+  return p(`Frage ${n + 1} von ${q.length} · ${fortschritt}`, 'ab-meta ab-fortschritt') + p(f.frage, 'ab-gross ab-frage') + `<div class="ab-antworten">${knoepfe}</div>` +
+    (offen ? '' : p(`${gewaehlt === f.antwort ? 'Richtig! ' : 'Leider falsch. '}${f.erklaerung || ''}`, 'ab-text ab-erklaerung'));
+}
+
 // Inhalt einer Art für die ganze Fläche (größer als in der Kachel). rezeptSeite: 1 = Zutaten, 2 = Zubereitung
 // spiel: Spielstand des Rätsels an diesem Tag (core/spielstand.js), datum: der Tag (fürs Mischen)
 export function flaecheHtml(art, inhalt, { loesung = false, rezeptSeite = 1, spiel = LEER_SPIEL, datum = '' } = {}) {
@@ -133,6 +159,7 @@ export function flaecheHtml(art, inhalt, { loesung = false, rezeptSeite = 1, spi
     case 'raetsel': { const r = i.raetsel; if (!r) return null;
       if (mitmachRaetsel(r)) return raetselHtml(r, datum, spiel, p);
       return p(r.frage, 'ab-gross') + (loesung ? p('Lösung: ' + r.loesung, 'ab-loesung') : '<button type="button" class="ab-knopf" data-ti="loesung">Lösung zeigen</button>'); }
+    case 'quiz': return i.quiz && i.quiz.length ? quizHtml(i.quiz, datum, { ...LEER_QUIZ, ...spiel }, p) : null;
     case 'witz': return i.witz ? p(i.witz, 'ab-gross ab-witz') : null;
     case 'film': { const f = i.film; if (!f) return null;
       return p(f.titel, 'ab-titel') + p([f.jahr, f.genre].filter(Boolean).join(' · '), 'ab-meta') + (f.text ? p(f.text) : ''); }
@@ -164,8 +191,11 @@ export function flaecheHtml(art, inhalt, { loesung = false, rezeptSeite = 1, spi
 // Fläche einer Art: Überschrift, Inhalt, „☆ Merken“ (Kopie im Browser, erscheint unter Mehr → Gemerkt).
 // vom: true = Inhalt eines anderen Tags in einem Bereich ohne ‹ › (aus „Gemerkt“ geöffnet) – Hinweis „vom 1.10.“ mit „zu heute“
 // Rätsel zum Mitmachen: neben „Merken“ der Tipp-Knopf (bis zu 2 Tipps), nach dem Lösen „Teilen“
-export function artFlaeche(art, d, { favoriten = [], loesung = false, rezeptSeite = 1, vom = false, spiel = LEER_SPIEL } = {}) {
+// spiele: Spielstand je Art ({ raetsel, quiz }); spiel: nur Rätsel (ältere Aufrufe)
+export function artFlaeche(art, d, { favoriten = [], loesung = false, rezeptSeite = 1, vom = false, spiel = LEER_SPIEL, spiele = {} } = {}) {
+  if (spiele[art]) spiel = spiele[art]; else if (art === 'quiz') spiel = LEER_QUIZ;
   const inh = d ? flaecheHtml(art, d.inhalt, { loesung, rezeptSeite, spiel, datum: d.datum }) : null, wiki = art === 'geschichte';
+  const quiz = art === 'quiz' && d && d.inhalt.quiz && d.inhalt.quiz.length ? d.inhalt.quiz : null, qs = quiz ? { ...LEER_QUIZ, ...spiel } : null;
   const rae = art === 'raetsel' && d && mitmachRaetsel(d.inhalt.raetsel) ? d.inhalt.raetsel : null, tippsGesamt = rae ? (rae.tipps || []).length : 0;
   const fav = !!d && favoriten.some(f => f.art === art && f.datum === d.datum);
   const leer = !d ? 'Die Tagesinhalte sind gerade nicht erreichbar.' : wiki && d.inhalt.geschichte === null ? 'Wikipedia ist gerade nicht erreichbar.' : 'Für diesen Tag gibt es hier nichts.';
@@ -175,6 +205,8 @@ export function artFlaeche(art, d, { favoriten = [], loesung = false, rezeptSeit
     (inh ? `<div class="ab-aktionen"><button type="button" class="ab-merken" data-ti="fav" data-art="${art}" aria-pressed="${fav}">${fav ? '★ Gemerkt' : '☆ Merken'}</button>` +
       (art === 'rezept' && d.inhalt.rezept.zubereitung ? `<button type="button" class="ab-knopf ab-weiter" data-ti="rezeptseite">${rezeptSeite === 2 ? '‹ Zutaten' : 'Zubereitung ›'}</button>` : '') +
       (rae && spiel.geloest ? '<button type="button" class="ab-knopf ab-teilen" data-ti="teilen">Teilen</button>' : '') +
+      (quiz && qs.frage >= quiz.length ? '<button type="button" class="ab-knopf ab-teilen" data-ti="teilen">Teilen</button>' : '') +
+      (quiz && qs.frage < quiz.length && qs.antworten.length > qs.frage ? `<button type="button" class="ab-knopf ab-weiter" data-ti="quiz-weiter">${qs.frage + 1 < quiz.length ? 'Weiter ›' : 'Ergebnis ›'}</button>` : '') +
       (rae && !spiel.geloest && tippsGesamt ? `<button type="button" class="ab-knopf ab-tipp-knopf" data-ti="tipp"${spiel.tipps >= tippsGesamt ? ' disabled' : ''}>💡 ${spiel.tipps ? 'Noch ein Tipp' : 'Tipp'}</button>` : '') +
       '</div>' : '') + '</div>';
 }
@@ -186,10 +218,10 @@ const rubriken = (liste, d, o) => liste.map(g => g.arten.length === 1
 const INFO = d => ['Inhalte von DAILY (mit KI vorbereitet)', d && d.wiederholt ? 'Vorrat wiederholt sich – neue Inhalte folgen' : null];
 
 // Bereich „Heute“ (rein, testbar): Datumsblock mit ‹ ›, Rubriken zum Mitmachen
-export function heuteBereich(env, { favoriten = [], loesung = false, rezeptSeite = 1, spiel = LEER_SPIEL } = {}) {
+export function heuteBereich(env, { favoriten = [], loesung = false, rezeptSeite = 1, spiel = LEER_SPIEL, spiele = {} } = {}) {
   const d = env && env.daten;
   return {
-    state: d ? 'content' : 'error', bereichKopf: d ? datumsKopf(d) : '', kleinReiter: rubriken(HEUTE_RUBRIKEN, d, { favoriten, loesung, spiel }), startReiter: 'raetsel',
+    state: d ? 'content' : 'error', bereichKopf: d ? datumsKopf(d) : '', kleinReiter: rubriken(HEUTE_RUBRIKEN, d, { favoriten, loesung, spiel, spiele }), startReiter: 'raetsel',
     info: [...INFO(d), 'Verpasst? Mit ‹ blätterst du zurück'].filter(Boolean)
   };
 }

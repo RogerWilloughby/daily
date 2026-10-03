@@ -1,12 +1,12 @@
 // Tagesinhalte (Dienste „tagesinhalt“ und „andiesemtag“) für drei Bereiche (seit 0.49.0, docs/konzept/themen.md):
-// „Heute“ (Rätsel zum Mitmachen, Lachen – mit ‹ ›, ältere Tage „nachgeholt“), „Entdecken“ (Sprache, Zeitreise, Welt, Kultur) und „Mehr → Alltag“
+// „Heute“ (Rätsel und Quiz zum Mitmachen, Lachen – mit ‹ ›, ältere Tage „nachgeholt“), „Entdecken“ (Sprache, Zeitreise, Welt, Kultur) und „Mehr → Alltag“
 // (Rezept, Gesundheit, Tech, Beziehung, Spartipp). Entdecken und Alltag zeigen immer heute; ein gemerkter Inhalt eines anderen Tags
 // öffnet dort mit „vom 1.10.“ und „zu heute“ (Entscheidung 03.10.2026). Fällt „andiesemtag“ aus, bleiben die übrigen Inhalte.
 import { set, zeige as zeigeBereich } from '../core/oberflaeche.js';
 import { favoriten, saveFavoriten } from '../core/store.js';
 import { dienst } from '../dienste/client.js';
 import { berlinDay } from '../core/util.js';
-import { heuteBereich, entdeckenBereich, alltagRubrik, gemerktReiter, favEintrag, tagPlus, mitZusatz, ortVon, datumText, mitmachRaetsel } from '../adapter/tagesinhalt.js';
+import { heuteBereich, entdeckenBereich, alltagRubrik, gemerktReiter, favEintrag, tagPlus, mitZusatz, ortVon, datumText, mitmachRaetsel, quizKaestchen, quizRichtig } from '../adapter/tagesinhalt.js';
 import { spiel, spielSetzen } from '../core/spielstand.js';
 import { kaestchen, teilenText, teilen } from '../core/teilen.js';
 
@@ -20,7 +20,7 @@ function zeichne() {
   if (!heute && fehler) { set('heute', { state: 'error', kleinReiter: [], bereichKopf: '' }); set('entdecken', { state: 'error', kleinReiter: [] }); }
   else {
     const h = envVon('heute');
-    set('heute', heuteBereich(h, { favoriten, loesung, spiel: h ? spiel(h.daten.datum, 'raetsel') : undefined }));
+    set('heute', heuteBereich(h, { favoriten, loesung, spiele: h ? { raetsel: spiel(h.daten.datum, 'raetsel'), quiz: quizSpiel(h.daten.datum) } : {} }));
     set('entdecken', entdeckenBereich(envVon('entdecken'), { favoriten, vom: !!tag.entdecken }));
     set('alltag', alltagRubrik(envVon('mehr'), { favoriten, rezeptSeite, vom: !!tag.mehr }));
   }
@@ -74,7 +74,9 @@ document.addEventListener('click', e => {
   else if (ti === 'zurueck') stelle('heute', tagPlus(env.daten.datum, -1));
   else if (ti === 'vor') stelle('heute', tagPlus(env.daten.datum, 1));
   else if (ti === 'loesung') { loesung = true; zeichne(); }
+  else if (ti === 'teilen' && b.closest('[data-art]').dataset.art === 'quiz') quiz(ti, env, b);
   else if (ti === 'antwort' || ti === 'tipp' || ti === 'teilen') raetsel(ti, env, b);
+  else if (ti === 'quiz-antwort' || ti === 'quiz-weiter') quiz(ti, env, b);
   else if (ti === 'rezeptseite') { rezeptSeite = rezeptSeite === 2 ? 1 : 2; zeichne(); }
 });
 
@@ -89,12 +91,31 @@ async function raetsel(ti, env, knopf) {
   } else if (ti === 'tipp' && !s.geloest) s.tipps = Math.min(s.tipps + 1, (r.tipps || []).length);
   else if (ti === 'teilen' && s.geloest) {
     const text = teilenText({ tag: datumText(d), format: 'Rätsel', ergebnis: kaestchen(s.versuche, r.antwort), tipps: s.tipps, adresse: location.origin + '/' });
-    const was = await teilen(text);
-    const meldung = { geteilt: '✓ Geteilt', kopiert: '✓ Kopiert', fehler: 'Teilen geht hier nicht' }[was];
-    if (meldung && knopf.isConnected) { knopf.textContent = meldung; setTimeout(() => { if (knopf.isConnected) knopf.textContent = 'Teilen'; }, 2500); }
-    return;
+    return meldeGeteilt(text, knopf);
   } else return;
   spielSetzen(d, 'raetsel', s);
+  zeichne();
+}
+
+// Quiz zum Mitmachen: je Frage ein Versuch, dann Erklärung und „Weiter ›“; nach der 5. Frage Ergebnis und Teilen
+const quizSpiel = d => { const s = spiel(d, 'quiz'); return { antworten: s.antworten || [], frage: s.frage || 0, geloest: !!s.geloest, nachgeholt: !!s.nachgeholt }; };
+async function meldeGeteilt(text, knopf) {
+  const was = await teilen(text);
+  const meldung = { geteilt: '✓ Geteilt', kopiert: '✓ Kopiert', fehler: 'Teilen geht hier nicht' }[was];
+  if (meldung && knopf.isConnected) { knopf.textContent = meldung; setTimeout(() => { if (knopf.isConnected) knopf.textContent = 'Teilen'; }, 2500); }
+}
+async function quiz(ti, env, knopf) {
+  const q = env.daten.inhalt.quiz, d = env.daten.datum;
+  if (!q || !q.length) return;
+  const s = quizSpiel(d);
+  if (ti === 'quiz-antwort' && s.antworten.length === s.frage && s.frage < q.length) {
+    s.antworten.push(knopf.dataset.antwort);
+    if (s.antworten.length === q.length) { s.geloest = true; s.nachgeholt = d < env.daten.heute; }
+  } else if (ti === 'quiz-weiter' && s.antworten.length > s.frage) s.frage++;
+  else if (ti === 'teilen' && s.frage >= q.length) {
+    return meldeGeteilt(teilenText({ tag: datumText(d), format: 'Quiz', ergebnis: `${quizRichtig(q, s)}/${q.length} ${quizKaestchen(q, s)}`, adresse: location.origin + '/' }), knopf);
+  } else return;
+  spielSetzen(d, 'quiz', s);
   zeichne();
 }
 

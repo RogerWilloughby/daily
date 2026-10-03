@@ -1,6 +1,6 @@
 // App-Version der Oberfläche. Die Nummer pflegt Claude bei jeder Änderung (package.json und hier gleich halten, ein Test prüft das):
 // kleine Korrektur → 0.6.1, neue Funktion → 0.7.0. Stand (Zeitpunkt) und Commit setzt der Build (build.js) automatisch ein.
-export const APP = { version: '0.52.0', stand: null, commit: null };
+export const APP = { version: '0.53.0', stand: null, commit: null };
 
 // Statusleiste (seit 0.51.1): „v0.51.1 · 03.10.2026 09:14“, kurz fürs Handy „v0.51.1 · 3.10. 09:14“ (lokal ohne Stand nur die Nummer)
 export function leistenText(app = APP, kurz = false) {
