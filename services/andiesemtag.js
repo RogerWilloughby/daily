@@ -32,8 +32,9 @@ const SCHEMA = S.obj({
 module.exports = {
   id: 'andiesemtag',
   version: 1,
-  programmversion: '1.1.0',
+  programmversion: '1.1.1',
   aenderungen: [
+    { version: '1.1.1', datum: '2026-10-03', text: 'Tagestakt endet um Mitternacht deutscher Zeit statt um Mitternacht UTC (1 bzw. 2 Uhr) – auch an Tagen der Zeitumstellung.' },
     { version: '1.1.0', datum: '2026-10-02', text: 'Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026).' },
     { version: '1.0.0', datum: '2026-10-01', text: 'Erste Fassung: ersetzt api/onthisday.js, jetzt mit Datum (Verlauf), nie in die Zukunft' }],
   titel: 'An diesem Tag',
@@ -43,7 +44,7 @@ module.exports = {
   laender: 'alle',
   klasse: 'oeffentlich',
   ttl: 86400,
-  takt: 86400,   // gültig bis Mitternacht (UTC); die Ereignisse eines Kalendertags ändern sich selten
+  takt: 86400,   // gültig bis Mitternacht deutscher Zeit; die Ereignisse eines Kalendertags ändern sich selten
   quellen: QUELLEN,
   schema: SCHEMA,
   blatt: {
@@ -69,7 +70,7 @@ module.exports = {
       klasse: 'B',
       quelle: 'Wikimedia-Feed: frei, ohne Schlüssel; Wikimedia bittet um eine eindeutige Kennung (User-Agent mit Kontakt) und maßvolle Abrufe.',
       kosten: 'Je Tag und Datum ein bis zwei Abrufe bei Wikimedia, Antwort klein (< 5 KB).',
-      cache: 'Für alle gleich je Datum: CDN und Instanz halten jede Antwort bis Mitternacht (UTC).',
+      cache: 'Für alle gleich je Datum: CDN und Instanz halten jede Antwort bis Mitternacht deutscher Zeit.',
       bei10Mio: 'Unkritisch: an einem Tag fast nur das heutige Datum (dazu wenige vergangene) – also eine Handvoll Abrufe bei Wikimedia, der Rest sind Cache-Treffer.'
     }
   },

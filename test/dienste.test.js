@@ -1556,3 +1556,24 @@ test('Dienste erst beim ersten Aufruf laden: Kaltstart lädt keinen Dienst, ein 
   assert.ok(aus.nachher.includes('wetter'), 'wetter fehlt');
   assert.ok(!aus.nachher.includes('termine') && !aus.nachher.includes('himmel'), 'zu viel geladen: ' + aus.nachher.join(', '));
 });
+
+test('Tagesgrenze: Tagestakt endet um Mitternacht deutscher Zeit (Sommer, Winter, Zeitumstellung), kürzere Takte unverändert', async () => {
+  const { gueltigBisVon, mitternachtNach, antwort } = require('../services/_lib/rahmen');
+  const iso = t => new Date(t).toISOString().replace(/\.\d{3}Z$/, 'Z');
+  const tag = { takt: 86400, ttl: 86400 }, P = Date.parse;
+  assert.equal(iso(gueltigBisVon(tag, P('2026-10-03T21:30:00Z'))), '2026-10-03T22:00:00Z');   // 23:30 Sommerzeit → 0 Uhr = 22 Uhr UTC
+  assert.equal(iso(gueltigBisVon(tag, P('2026-10-03T22:30:00Z'))), '2026-10-04T22:00:00Z');   // 0:30 deutscher Zeit: schon der neue Tag
+  assert.equal(iso(gueltigBisVon(tag, P('2026-12-01T22:59:00Z'))), '2026-12-01T23:00:00Z');   // Winterzeit: 0 Uhr = 23 Uhr UTC
+  assert.equal(iso(gueltigBisVon(tag, P('2026-10-25T10:00:00Z'))), '2026-10-25T23:00:00Z');   // Tag der Umstellung auf Winterzeit (25 Std.)
+  assert.equal(iso(gueltigBisVon(tag, P('2026-10-24T22:00:00Z'))), '2026-10-25T23:00:00Z');   // genau Mitternacht → nächste
+  assert.equal(iso(gueltigBisVon(tag, P('2027-03-28T10:00:00Z'))), '2027-03-28T22:00:00Z');   // Tag der Umstellung auf Sommerzeit (23 Std.)
+  assert.equal(iso(mitternachtNach(P('2026-10-03T12:00:00Z'), 'UTC')), '2026-10-04T00:00:00Z');
+  // kürzere Takte und ttl wie bisher
+  assert.equal(iso(gueltigBisVon({ takt: 1800 }, P('2026-10-03T21:31:00Z'))), '2026-10-03T22:00:00Z');
+  assert.equal(iso(gueltigBisVon({ takt: 300 }, P('2026-10-03T21:31:00Z'))), '2026-10-03T21:35:00Z');
+  assert.equal(iso(gueltigBisVon({ ttl: 60 }, P('2026-10-03T21:31:00Z'))), '2026-10-03T21:32:00Z');
+  // alle Dienste mit Tagestakt: Antwort kurz vor Mitternacht deutscher Zeit gilt nur bis dahin
+  const tagesdienste = dienste.DIENSTE.filter(d => d.takt === 86400).map(d => d.id).sort();
+  assert.deepEqual(tagesdienste, ['andiesemtag', 'feiertage', 'namenstage', 'tagesinhalt']);
+  for (const id of tagesdienste) assert.equal(antwort(dienste.byId[id], { daten: {}, jetzt: P('2026-10-03T21:59:00Z') }).gueltigBis, '2026-10-03T22:00:00Z', id);
+});

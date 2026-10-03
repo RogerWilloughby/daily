@@ -69,6 +69,7 @@ Jede Antwort – auch jeder Fehler – hat diese Form:
 - **Feldnamen** deutsch, camelCase, nur ASCII (`gefuehltC`, `graeser`).
 - **Einheit im Feldnamen**: `tempC`, `windKmh`, `niederschlagMm`, `regenProzent`, `preisEur`, `entfernungKm`.
 - **Zeitpunkte**: ISO 8601 in UTC mit `Z` (`2026-09-27T15:00:00Z`). **Kalendertage**: `JJJJ-MM-TT` in der Zeitzone des Orts.
+- **Takt** (`takt`, Sekunden): Antworten gelten für alle bis zum nächsten Taktende (`gueltigBis`, z. B. :00/:30). Tagestakt (86400) endet um **Mitternacht deutscher Zeit** (seit 0.46.2, `rahmen.js` → `mitternachtNach`).
 - **Zustände als Aufzählung** (`teilweise_bewoelkt`, `ausreichend`), die Übersetzung in Text macht der Adapter.
 - **Fehlender Wert** = `null`, nie leerer String oder 0.
 - **Listen** sind sortiert (zeitlich aufsteigend oder nach Relevanz – im Schema dokumentiert).

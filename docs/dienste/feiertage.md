@@ -7,7 +7,7 @@ Gesetzliche Feiertage und Schulferien des Bundeslands, Brückentage, Zeitumstell
 | | |
 |---|---|
 | Aufruf | `GET /api/v1/feiertage` |
-| Programmversion | 2.1.0 |
+| Programmversion | 2.1.1 |
 | Vertrag (Datenformat) | daily/1, Version 1 |
 | Klasse | oeffentlich |
 | Länder | DE |
@@ -68,7 +68,7 @@ Quellen mit Lizenz:
 | Klasse | B – für alle gleich – ein Abruf je Zeitraum reicht für alle Nutzer |
 | Quelle | OpenHolidays: frei, ohne Schlüssel, keine veröffentlichte Grenze. Alles andere wird gerechnet. |
 | Kosten | Je Bundesland und Tag 1 Abruf der Ferien; Rechnen < 1 ms. |
-| Cache | Gültig bis Mitternacht (UTC, Takt 1 Tag); die Adresse enthält nur das Bundesland → 16 Fächer für ganz Deutschland, fast nur Cache-Treffer. |
+| Cache | Gültig bis Mitternacht deutscher Zeit (Takt 1 Tag); die Adresse enthält nur das Bundesland → 16 Fächer für ganz Deutschland, fast nur Cache-Treffer. |
 | Bei 10 Mio. Aufrufen/Tag | Unproblematisch: höchstens 16 verschiedene Antworten am Tag (je Bundesland eine) und damit höchstens 16 Ferien-Abrufe, unabhängig von der Nutzerzahl. |
 
 Rahmen und Stufen: `../architektur/skalierung.md`
@@ -76,6 +76,7 @@ Rahmen und Stufen: `../architektur/skalierung.md`
 ## Änderungen
 | Version | Datum | Änderung |
 |---|---|---|
+| 2.1.1 | 2026-10-03 | Tagestakt endet um Mitternacht deutscher Zeit statt um Mitternacht UTC (1 bzw. 2 Uhr) – auch an Tagen der Zeitumstellung. |
 | 2.1.0 | 2026-10-02 | Kürzel nur in Großbuchstaben (SN, nicht sn). Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026). |
 | 2.0.0 | 2026-10-02 | Eingabe nur noch das Bundesland (bundesland=SN): eine Antwort je Bundesland statt je Ort – höchstens 16 Ferien-Abrufe am Tag. Ort, Koordinaten und Name entfallen. |
 | 1.0.0 | 2026-09-27 | Erste Fassung als Dienst: Feiertage je Bundesland, Schulferien (OpenHolidays), Brückentage, Zeitumstellung, Kalenderwoche, Aktions- und Brauchtumstage; Bundesland aus dem Ort |

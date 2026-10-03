@@ -153,8 +153,9 @@ const SCHEMA = S.obj({
 module.exports = {
   id: 'feiertage',
   version: 1,
-  programmversion: '2.1.0',
+  programmversion: '2.1.1',
   aenderungen: [
+    { version: '2.1.1', datum: '2026-10-03', text: 'Tagestakt endet um Mitternacht deutscher Zeit statt um Mitternacht UTC (1 bzw. 2 Uhr) – auch an Tagen der Zeitumstellung.' },
     { version: '2.1.0', datum: '2026-10-02', text: 'Kürzel nur in Großbuchstaben (SN, nicht sn). Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026).' },
     { version: '2.0.0', datum: '2026-10-02', text: 'Eingabe nur noch das Bundesland (bundesland=SN): eine Antwort je Bundesland statt je Ort – höchstens 16 Ferien-Abrufe am Tag. Ort, Koordinaten und Name entfallen.' },
     { version: '1.0.0', datum: '2026-09-27', text: 'Erste Fassung als Dienst: Feiertage je Bundesland, Schulferien (OpenHolidays), Brückentage, Zeitumstellung, Kalenderwoche, Aktions- und Brauchtumstage; Bundesland aus dem Ort' }
@@ -210,7 +211,7 @@ module.exports = {
       klasse: 'B',
       quelle: 'OpenHolidays: frei, ohne Schlüssel, keine veröffentlichte Grenze. Alles andere wird gerechnet.',
       kosten: 'Je Bundesland und Tag 1 Abruf der Ferien; Rechnen < 1 ms.',
-      cache: 'Gültig bis Mitternacht (UTC, Takt 1 Tag); die Adresse enthält nur das Bundesland → 16 Fächer für ganz Deutschland, fast nur Cache-Treffer.',
+      cache: 'Gültig bis Mitternacht deutscher Zeit (Takt 1 Tag); die Adresse enthält nur das Bundesland → 16 Fächer für ganz Deutschland, fast nur Cache-Treffer.',
       bei10Mio: 'Unproblematisch: höchstens 16 verschiedene Antworten am Tag (je Bundesland eine) und damit höchstens 16 Ferien-Abrufe, unabhängig von der Nutzerzahl.'
     }
   },

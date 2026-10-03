@@ -7,7 +7,7 @@ Rätsel, Witz, Wort und Sprichwort des Tages, Rezept, Land, Film, Gesundheits-, 
 | | |
 |---|---|
 | Aufruf | `GET /api/v1/tagesinhalt` |
-| Programmversion | 1.1.0 |
+| Programmversion | 1.1.1 |
 | Vertrag (Datenformat) | daily/1, Version 1 |
 | Klasse | oeffentlich |
 | Länder | weltweit |
@@ -87,7 +87,7 @@ Quellen mit Lizenz:
 | Klasse | B – für alle gleich – ein Abruf je Zeitraum reicht für alle Nutzer |
 | Quelle | Feste Datei im Repo – keine externe Quelle, keine Grenzen. |
 | Kosten | Datei liegt im Speicher der Funktion; Antwort < 1 ms. |
-| Cache | Für alle gleich je Tag: CDN und Browser halten jede Antwort bis Mitternacht (UTC); vergangene Tage ändern sich nicht. |
+| Cache | Für alle gleich je Tag: CDN und Browser halten jede Antwort bis Mitternacht deutscher Zeit; vergangene Tage ändern sich nicht. |
 | Bei 10 Mio. Aufrufen/Tag | Unkritisch: höchstens ein paar hundert verschiedene Antworten (je Tag eine), fast nur Cache-Treffer. |
 
 Rahmen und Stufen: `../architektur/skalierung.md`
@@ -95,6 +95,7 @@ Rahmen und Stufen: `../architektur/skalierung.md`
 ## Änderungen
 | Version | Datum | Änderung |
 |---|---|---|
+| 1.1.1 | 2026-10-03 | Tagestakt endet um Mitternacht deutscher Zeit statt um Mitternacht UTC (1 bzw. 2 Uhr) – auch an Tagen der Zeitumstellung. |
 | 1.1.0 | 2026-10-02 | Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026). |
 | 1.0.0 | 2026-10-01 | Erste Fassung: alle Tagesinhalte eines Tags aus der festen Datei, auch vergangene Tage (Verlauf), nie in die Zukunft |
 

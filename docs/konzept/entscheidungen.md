@@ -29,6 +29,7 @@ Ausführlich: **`ausrichtung.md`** (inkl. sortierter Ideenliste A–E und Mitbew
   - **Inhalte:** 31 Tage je Format, Rätsel/Quiz prüft Roger vollständig; Lese-Rubriken bleiben, schrittweise Mitmachen; Vorrat ab 27.10. im Kreis bis Phase 4.
   - **Technik/Kosten:** Wetter-Werte reduzieren in Phase 4; doppelte Anfragen vermeiden und nur Sichtbares laden in Phase 1; Tankerkönig-Bremse 1/min (Phase 4).
   - **Test:** Erfolg = Hälfte der Tester öffnet an 4 von 7 Tagen + Fragebogen; Adresse `daily.craibotics.org`.
+- **Phase 1, Schritt 1a – Tagesgrenze (03.10.2026, App 0.46.2; Plan „ja“):** Dienste mit Tagestakt (`feiertage`, `namenstage`, `tagesinhalt`, `andiesemtag`) gelten bis **Mitternacht deutscher Zeit** statt Mitternacht UTC (1 bzw. 2 Uhr) – `services/_lib/rahmen.js` (`mitternachtNach`, `gueltigBisVon`), auch an Tagen der Zeitumstellung (23/25 Std.). „Heute“ rechneten die Dienste schon in deutscher Zeit; falsch war nur, wie lange der Zwischenspeicher den Vortag hielt. Kürzere Takte unverändert (Stunden und halbe Stunden sind in UTC und deutscher Zeit gleich). Test mit Sommer, Winter, beiden Umstellungstagen; `npm run zeitreise` grün.
 - **Nächste Schritte:** Markenrecherche „DAILY“, Test mit 5–10 Leuten (Erfolgskriterium vorher festlegen), erste 2–3 Mitmach-Formate und erstes Album auswählen, Jahrgang planen. Vor der Umsetzung je Format ein Plan.
 
 ## 1. Zielgruppe

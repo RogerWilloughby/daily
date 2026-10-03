@@ -7,7 +7,7 @@ Wer heute und in den nächsten Tagen Namenstag hat – und wann ein bestimmter V
 | | |
 |---|---|
 | Aufruf | `GET /api/v1/namenstage` |
-| Programmversion | 1.2.0 |
+| Programmversion | 1.2.1 |
 | Vertrag (Datenformat) | daily/1, Version 1 |
 | Klasse | oeffentlich |
 | Länder | weltweit |
@@ -62,6 +62,7 @@ Rahmen und Stufen: `../architektur/skalierung.md`
 ## Änderungen
 | Version | Datum | Änderung |
 |---|---|---|
+| 1.2.1 | 2026-10-03 | Tagestakt endet um Mitternacht deutscher Zeit statt um Mitternacht UTC (1 bzw. 2 Uhr) – auch an Tagen der Zeitumstellung. |
 | 1.2.0 | 2026-10-02 | Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026). |
 | 1.1.0 | 2026-09-27 | Feste, gepflegte Liste deutscher Namenstage nach dem kirchlichen Kalender statt Wikidata-Abruf (lieferte keine brauchbaren deutschen Namen); keine Action mehr |
 | 1.0.2 | 2026-09-27 | Deutsche Namen: Vorname aus dem deutschen Namen des Heiligen (nur mit Artikel in der deutschen Wikipedia), Prüfung an bekannten Namenstagen; Bestände ohne Fassung 2 werden ignoriert |

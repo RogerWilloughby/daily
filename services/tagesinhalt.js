@@ -42,8 +42,9 @@ const SCHEMA = S.obj({
 module.exports = {
   id: 'tagesinhalt',
   version: 1,
-  programmversion: '1.1.0',
+  programmversion: '1.1.1',
   aenderungen: [
+    { version: '1.1.1', datum: '2026-10-03', text: 'Tagestakt endet um Mitternacht deutscher Zeit statt um Mitternacht UTC (1 bzw. 2 Uhr) – auch an Tagen der Zeitumstellung.' },
     { version: '1.1.0', datum: '2026-10-02', text: 'Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026).' },
     { version: '1.0.0', datum: '2026-10-01', text: 'Erste Fassung: alle Tagesinhalte eines Tags aus der festen Datei, auch vergangene Tage (Verlauf), nie in die Zukunft' }],
   titel: 'Tagesinhalte',
@@ -53,7 +54,7 @@ module.exports = {
   laender: 'alle',
   klasse: 'oeffentlich',
   ttl: 86400,
-  takt: 86400,   // gültig bis Mitternacht (UTC); die Oberfläche fragt immer mit Datum, jeder Tag hat seine eigene Antwort
+  takt: 86400,   // gültig bis Mitternacht deutscher Zeit; die Oberfläche fragt immer mit Datum, jeder Tag hat seine eigene Antwort
   quellen: QUELLEN,
   schema: SCHEMA,
   blatt: {
@@ -91,7 +92,7 @@ module.exports = {
       klasse: 'B',
       quelle: 'Feste Datei im Repo – keine externe Quelle, keine Grenzen.',
       kosten: 'Datei liegt im Speicher der Funktion; Antwort < 1 ms.',
-      cache: 'Für alle gleich je Tag: CDN und Browser halten jede Antwort bis Mitternacht (UTC); vergangene Tage ändern sich nicht.',
+      cache: 'Für alle gleich je Tag: CDN und Browser halten jede Antwort bis Mitternacht deutscher Zeit; vergangene Tage ändern sich nicht.',
       bei10Mio: 'Unkritisch: höchstens ein paar hundert verschiedene Antworten (je Tag eine), fast nur Cache-Treffer.'
     }
   },

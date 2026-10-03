@@ -48,8 +48,9 @@ const SCHEMA = S.obj({
 module.exports = {
   id: 'namenstage',
   version: 1,
-  programmversion: '1.2.0',
+  programmversion: '1.2.1',
   aenderungen: [
+    { version: '1.2.1', datum: '2026-10-03', text: 'Tagestakt endet um Mitternacht deutscher Zeit statt um Mitternacht UTC (1 bzw. 2 Uhr) – auch an Tagen der Zeitumstellung.' },
     { version: '1.2.0', datum: '2026-10-02', text: 'Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026).' },
     { version: '1.1.0', datum: '2026-09-27', text: 'Feste, gepflegte Liste deutscher Namenstage nach dem kirchlichen Kalender statt Wikidata-Abruf (lieferte keine brauchbaren deutschen Namen); keine Action mehr' },
     { version: '1.0.2', datum: '2026-09-27', text: 'Deutsche Namen: Vorname aus dem deutschen Namen des Heiligen (nur mit Artikel in der deutschen Wikipedia), Prüfung an bekannten Namenstagen; Bestände ohne Fassung 2 werden ignoriert' },

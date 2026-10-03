@@ -7,7 +7,7 @@ Ausgewählte geschichtliche Ereignisse eines Kalendertags aus der deutschen Wiki
 | | |
 |---|---|
 | Aufruf | `GET /api/v1/andiesemtag` |
-| Programmversion | 1.1.0 |
+| Programmversion | 1.1.1 |
 | Vertrag (Datenformat) | daily/1, Version 1 |
 | Klasse | oeffentlich |
 | Länder | weltweit |
@@ -49,7 +49,7 @@ Quellen mit Lizenz:
 | Klasse | B – für alle gleich – ein Abruf je Zeitraum reicht für alle Nutzer |
 | Quelle | Wikimedia-Feed: frei, ohne Schlüssel; Wikimedia bittet um eine eindeutige Kennung (User-Agent mit Kontakt) und maßvolle Abrufe. |
 | Kosten | Je Tag und Datum ein bis zwei Abrufe bei Wikimedia, Antwort klein (< 5 KB). |
-| Cache | Für alle gleich je Datum: CDN und Instanz halten jede Antwort bis Mitternacht (UTC). |
+| Cache | Für alle gleich je Datum: CDN und Instanz halten jede Antwort bis Mitternacht deutscher Zeit. |
 | Bei 10 Mio. Aufrufen/Tag | Unkritisch: an einem Tag fast nur das heutige Datum (dazu wenige vergangene) – also eine Handvoll Abrufe bei Wikimedia, der Rest sind Cache-Treffer. |
 
 Rahmen und Stufen: `../architektur/skalierung.md`
@@ -57,6 +57,7 @@ Rahmen und Stufen: `../architektur/skalierung.md`
 ## Änderungen
 | Version | Datum | Änderung |
 |---|---|---|
+| 1.1.1 | 2026-10-03 | Tagestakt endet um Mitternacht deutscher Zeit statt um Mitternacht UTC (1 bzw. 2 Uhr) – auch an Tagen der Zeitumstellung. |
 | 1.1.0 | 2026-10-02 | Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026). |
 | 1.0.0 | 2026-10-01 | Erste Fassung: ersetzt api/onthisday.js, jetzt mit Datum (Verlauf), nie in die Zukunft |
 
