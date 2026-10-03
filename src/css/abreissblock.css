@@ -1,0 +1,231 @@
+/* DAILY – Oberfläche „Abreißblock“ (Variante A, Entscheidung 03.10.2026, seit 0.47.0):
+   dunkelgrüner Grund, ein Blatt Papier mit Perforation oben, rote Akzente, Tageszahl in Big Shoulders Display.
+   Aufbau: 1 Schriften · 2 Farben (hell/dunkel) · 3 Gerüst Rechner · 4 Leiste · 5 Blatt, Untertabs, Feld · 6 Inhalte Heute ·
+           7 Wetter, Kalender, Mehr im Blatt · 8 Handy · 9 Dialoge
+   Die Seite scrollt nie: Was nicht passt, blendet core/oberflaeche.js zeilenweise aus. */
+
+/* 1 Schriften (selbst gehostet) */
+@font-face{font-family:"Big Shoulders Display";src:url(/fonts/big-shoulders-900.woff2) format("woff2");font-weight:900;font-display:swap}
+@font-face{font-family:"Figtree";src:url(/fonts/figtree-700.woff2) format("woff2");font-weight:700;font-display:swap}
+
+/* 2 Farben – Grund und Leiste sind in beiden Schemen dunkel; das Papier wird nachts zu gedämpftem warmem Dunkelgrau */
+:root{
+  --ab-grund:#2F3A35; --ab-papier:#F7F2E8; --ab-tinte:#1F2522; --ab-rot:#B8322A; --ab-rot-tief:#8E241E; --ab-grau:#5E625B;
+  --ab-linie:#DDD5C4; --ab-balken:#C9BFAB; --ab-blau:#2D5DA8; --ab-knopf:#FFFDF8; --ab-feld:#EFE8DA;
+  --ab-hell:#E9E2D3; --ab-marke:#F7F2E8;
+  --display:"Big Shoulders Display","Figtree",system-ui,sans-serif;
+  /* die bisherigen Farben der App (app.css, Diagramme, Dialoge) auf das Papier umstellen */
+  --ground:var(--ab-feld); --surface:var(--ab-papier); --line:var(--ab-linie); --ink:var(--ab-tinte); --muted:var(--ab-grau);
+  --accent:var(--ab-rot); --active-bg:var(--ab-tinte); --active-ink:var(--ab-papier); --active-muted:var(--ab-grau); --active-line:var(--ab-linie)}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ab-grund:#161C19; --ab-papier:#2A2824; --ab-tinte:#ECE6DA; --ab-rot:#E26E62; --ab-rot-tief:#F09488; --ab-grau:#ABA597;
+    --ab-linie:#45403A; --ab-balken:#5E574D; --ab-blau:#8AAEE8; --ab-knopf:#33302B; --ab-feld:#211F1C; --ab-hell:#D9D2C3; --ab-marke:#EFE8DA}
+}
+:root[data-theme="dark"]{
+  --ab-grund:#161C19; --ab-papier:#2A2824; --ab-tinte:#ECE6DA; --ab-rot:#E26E62; --ab-rot-tief:#F09488; --ab-grau:#ABA597;
+  --ab-linie:#45403A; --ab-balken:#5E574D; --ab-blau:#8AAEE8; --ab-knopf:#33302B; --ab-feld:#211F1C; --ab-hell:#D9D2C3; --ab-marke:#EFE8DA}
+
+/* 3 Gerüst am Rechner: Marke · Bereiche · Leiste oben, darunter das Blatt */
+body{background:var(--ab-grund);color:var(--ab-tinte)}
+.ab{height:100%;box-sizing:border-box;display:grid;grid-template-columns:auto auto minmax(0,1fr);grid-template-rows:64px minmax(0,1fr);
+  grid-template-areas:"marke tabs leiste" "blatt blatt blatt";padding:0 clamp(16px,2vw,28px)}
+.ab-marke{grid-area:marke;align-self:center;margin-right:28px;font-family:var(--display);font-weight:900;font-size:28px;letter-spacing:.08em;color:var(--ab-marke)}
+.ab-tabs{grid-area:tabs;align-self:center;display:flex;gap:6px}
+.ab-tabs button{display:flex;align-items:center;height:40px;padding:0 18px;border-radius:20px;color:var(--ab-hell);font-weight:600;font-size:15px}
+.ab-tabs button:hover{background:rgba(255,255,255,.08)}
+.ab-tabs .ico{display:none}
+.ab-tabs button[aria-current="page"]{background:var(--ab-rot);color:#fff;font-weight:700}
+.ab-tabs [data-hinweis] span::after{content:"";display:inline-block;width:8px;height:8px;margin-left:6px;border-radius:50%;background:#F2D02E;vertical-align:2px}
+
+/* 4 Leiste: Datum, Uhr (nur Rechner), Zustand der Quellen (Punkt), Ort, Zahnrad */
+.ab-leiste{grid-area:leiste;display:flex;align-items:center;justify-content:flex-end;gap:6px;min-width:0;color:var(--ab-hell)}
+.ab-datum-kurz{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.ab-datum-kurz .kurz{display:none}
+.ab-uhr{font-size:15px;font-variant-numeric:tabular-nums}
+.ab-uhr::before{content:"·";margin:0 6px 0 0}
+.ab-leiste .status{padding:0;border:0;width:24px;height:24px;justify-content:center;flex:none}
+.ab-leiste .status i{width:8px;height:8px}
+.ab-leiste .ort-wahl{border:0;color:var(--ab-hell);padding:0 2px 0 8px;min-height:44px}
+.ab-leiste .ort-wahl svg{color:var(--ab-hell);width:18px;height:18px}
+.ab-leiste .ort-wahl select{font-size:15px;font-weight:500;color:var(--ab-hell);max-width:18ch}
+.ab-leiste .ort-wahl select option{color:#1F2522;background:#F7F2E8}
+.ab-leiste .gear{width:44px;height:44px;justify-content:center;padding:0;border:0;color:var(--ab-hell);flex:none}
+.ab-leiste .gear svg{width:20px;height:20px}
+.ab-leiste .gear:hover,.ab-leiste .ort-wahl:hover{color:#fff;border-color:transparent}
+
+/* 5 Blatt mit Perforation; je Bereich ein Abschnitt (Kachel-ID bleibt für Diagramme und Radar) */
+.ab-blatt{grid-area:blatt;min-height:0;display:flex;flex-direction:column;overflow:hidden;background:var(--ab-papier);border-radius:4px 4px 0 0;color:var(--ab-tinte)}
+.ab-perfo{flex:none;height:16px;background-image:radial-gradient(circle,var(--ab-grund) 3.5px,transparent 4px);background-size:20px 20px;background-position:6px -4px}
+.ab-bereich.tile{flex:1;min-height:0;border:0;border-radius:0;background:transparent;transition:none;
+  display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto;grid-template-areas:"kopf" "unter" "feld" "info"}
+.ab-bereich.tile:hover{border-color:transparent}
+.ab-kopf{grid-area:kopf;min-width:0}
+.ab-kopf:empty{display:none}
+.ab-unter{grid-area:unter;display:flex;gap:6px;padding:8px 32px 0;border-bottom:1px solid var(--ab-linie);min-width:0}
+.ab-unter button{flex:0 1 auto;min-width:0;height:46px;padding:0 14px;border-bottom:3px solid transparent;color:var(--ab-grau);font-weight:600;font-size:16px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ab-unter button:hover{color:var(--ab-tinte)}
+.ab-unter button[aria-selected="true"]{border-bottom-color:var(--ab-rot);color:var(--ab-tinte);font-weight:700}
+.ab-feld.kr-feld{grid-area:feld;padding:28px 56px 16px;font-size:16px;line-height:1.45;gap:14px;color:var(--ab-tinte)}
+.ab-info{grid-area:info;padding:0 56px 12px;font-size:12px;color:var(--ab-grau);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ab-zkopf{flex:none;font-size:16px;line-height:1.35}
+.ab-zkopf small{color:var(--ab-grau);font-size:.9em;margin-left:4px}
+/* Umschalter im Feld (z. B. Wissen: Wort · Land · An diesem Tag) */
+.ab-teile{flex:none;display:flex;flex-wrap:wrap;gap:6px}
+.ab-teile button{height:36px;padding:0 13px;border:1px solid var(--ab-linie);border-radius:18px;color:var(--ab-tinte);font-size:14px;white-space:nowrap}
+.ab-teile button:hover{border-color:var(--ab-grau)}
+.ab-teile button[aria-selected="true"]{background:var(--ab-tinte);border-color:var(--ab-tinte);color:var(--ab-papier);font-weight:600}
+.ab-bereich[data-state="loading"] .ab-feld>.ab-meta{opacity:.7}
+
+/* Heute am Rechner: Untertabs oben, links die Datumsspalte, rechts der Inhalt */
+.ab-bereich[data-bereich="heute"]{grid-template-columns:minmax(250px,30%) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;
+  grid-template-areas:"unter unter" "kopf feld" "kopf info"}
+.ab-bereich[data-bereich="heute"] .ab-kopf{border-right:1px solid var(--ab-linie);margin:28px 0 16px 56px;padding-right:40px;min-height:0;overflow:hidden}
+.ab-bereich[data-bereich="heute"] .ab-feld{padding-left:48px;padding-right:48px;max-width:760px}
+.ab-bereich[data-bereich="heute"] .ab-info{padding-left:48px}
+.ab-datum{height:100%;display:grid;grid-template-rows:auto auto auto auto minmax(0,1fr) auto;grid-template-areas:"wtag" "zahl" "monat" "zusatz" "." "blaettern";gap:6px}
+.ab-datum-text{display:contents}
+.ab-wtag{grid-area:wtag;font-weight:700;font-size:22px;color:var(--ab-rot)}
+.ab-tagzahl{grid-area:zahl;margin-top:12px;font-family:var(--display);font-weight:900;font-size:clamp(110px,24vh,230px);line-height:.8;font-variant-numeric:tabular-nums}
+.ab-monat{grid-area:monat;font-size:22px;font-weight:600}
+.ab-zusatz{grid-area:zusatz;font-size:16px;color:var(--ab-grau)}
+.ab-link{color:var(--ab-rot);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.ab-blaettern{grid-area:blaettern;display:flex;gap:8px}
+.ab-blaettern button{width:44px;height:44px;border:1.5px solid var(--ab-tinte);border-radius:10px;font-size:22px;line-height:1;color:var(--ab-tinte)}
+.ab-blaettern button:hover:not([disabled]){background:var(--ab-feld)}
+.ab-blaettern button[disabled]{opacity:.3;cursor:default}
+.ab-alt .ab-tagzahl{color:var(--ab-grau)}
+
+/* 6 Inhalte unter „Heute“ */
+.ab-art{flex:1;min-height:0;display:flex;flex-direction:column;gap:14px}
+.ab-rubrik{flex:none;font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ab-rot)}
+.ab-rubrik small{font-weight:500;letter-spacing:0;text-transform:none;color:var(--ab-grau);margin-left:6px}
+.ab-inhalt{flex:0 1 auto;min-height:0;display:flex;flex-direction:column;gap:12px;overflow:hidden}
+.ab-gross{margin:0;font-size:32px;font-weight:700;line-height:1.25}
+.ab-witz{font-weight:600;line-height:1.4}
+.ab-tipp{font-size:26px;font-weight:600;line-height:1.35}
+.ab-titel{margin:0;font-size:30px;font-weight:700;line-height:1.2}
+.ab-wort{margin:0;font-family:var(--display);font-weight:900;font-size:72px;line-height:1;overflow-wrap:anywhere}
+.ab-wort.ab-l2{font-size:58px}
+.ab-wort.ab-l3{font-size:46px}
+.ab-text{margin:0;font-size:18px;line-height:1.5}
+.ab-meta{margin:0;font-size:15px;color:var(--ab-grau)}
+.ab-sprichwort{margin:6px 0 0;padding-top:14px;border-top:1px solid var(--ab-linie);font-size:17px}
+.ab-loesung{margin:0;font-size:22px;font-weight:700;color:var(--ab-rot)}
+.ab-knopf{flex:none;align-self:flex-start;min-height:44px;padding:0 16px;border:1.5px solid var(--ab-tinte);border-radius:10px;background:var(--ab-knopf);color:var(--ab-tinte);font-weight:600;font-size:15px}
+.ab-knopf:hover{background:var(--ab-feld)}
+.ab-weiter{margin-left:auto}
+.ab-aktionen{flex:none;margin-top:6px;display:flex;gap:10px}
+.ab-merken{min-height:44px;padding:0 16px;border:1.5px solid var(--ab-tinte);border-radius:10px;color:var(--ab-tinte);font-weight:600;font-size:15px}
+.ab-merken[aria-pressed="true"]{background:var(--ab-tinte);color:var(--ab-papier)}
+.ab-zutaten{margin:0;padding-left:22px;font-size:18px;line-height:1.65}
+.ab-fakten{margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 20px}
+.ab-fakten dt{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ab-grau)}
+.ab-fakten dd{margin:0;font-size:18px}
+.ab-ereignisse{display:flex;flex-direction:column;gap:10px;min-height:0;overflow:hidden}
+.ab-ev{flex:none;margin:0;font-size:17px;line-height:1.4;color:var(--ab-tinte);text-decoration:none;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.ab-ev b{color:var(--ab-rot);font-variant-numeric:tabular-nums;margin-right:4px}
+a.ab-ev:hover{text-decoration:underline}
+.ab-feld .kr-z[hidden]{display:none}
+.ab-ueber{display:flex;flex-direction:column;gap:14px}
+.ab-ueber-knoepfe{display:flex;flex-wrap:wrap;gap:10px}
+
+/* 7 Wetter, Kalender, Mehr im Blatt */
+.ab-wkopf{padding:12px 32px 0;font-size:17px;line-height:1.35}
+.ab-wkopf .tag{margin-left:6px;vertical-align:2px}
+.ab-feld .kr-liste{gap:0}
+.ab-feld .kr-liste .tl-z{padding:7px 0;border-bottom:1px solid var(--ab-linie);font-size:16px;line-height:1.35}
+.ab-feld .kr-liste .tl-z.tl-neu{margin-top:10px}
+.ab-feld .tl-aktion:hover{background:var(--ab-feld)}
+.ab-feld .wz-jetzt .t-zp{font-size:18px;row-gap:6px}
+.ab-feld .wz-jetzt .zp-t{font-family:var(--display);font-weight:900;font-size:1.9em;line-height:1}
+.ab-feld .zp-l svg{width:24px;height:24px}
+.ab-feld .kr-unten{min-height:150px}
+.ab-feld .wd-minilegende,.ab-feld .wd-marken,.ab-feld .wd-miniskala{font-size:12px}
+.ab-feld .wd-wahl button{font-size:13px;padding:4px 9px}
+.ab-feld .wh-feld,.ab-feld .rk-werte{font-size:15px}
+.ab-feld .rk-klein .rk-werte{font-size:14px}
+.ab-feld .ms-raster{grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:12px 6px}
+.ab-feld .ms-sym{width:44px;height:44px;font-size:19px;border-radius:10px}
+.ab-feld .ms-name{font-size:13px}
+.ab-feld .kt-text{font-size:16px}
+.ab-feld .kt-knopf{font-size:15px;padding:8px 14px;border-color:var(--ab-tinte);border-radius:10px}
+.ab-feld .kl-leer,.ab-feld .ms-text{font-size:15px}
+
+/* 8 Handy: Marke und Leiste oben, Blatt in der Mitte, Bereiche unten */
+@media (max-width:760px){
+  .ab{grid-template-columns:auto minmax(0,1fr);grid-template-rows:52px minmax(0,1fr) auto;grid-template-areas:"marke leiste" "blatt blatt" "tabs tabs";padding:0 10px}
+  .ab-marke{font-size:24px;margin:0 0 0 8px}
+  .ab-uhr{display:none}
+  .ab-datum-kurz{font-size:14px;flex:none}
+  .ab-datum-kurz .lang{display:none}
+  .ab-datum-kurz .kurz{display:inline}
+  .ab-leiste{gap:2px}
+  .ab-leiste .ort-wahl select{max-width:13ch}
+  .ab-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;padding:4px 0 calc(4px + env(safe-area-inset-bottom,0px))}
+  .ab-tabs button{flex-direction:column;justify-content:center;gap:3px;height:58px;padding:0;border-radius:0;font-size:12px}
+  .ab-tabs button:hover{background:none}
+  .ab-tabs .ico{display:block;width:54px;height:30px;padding:5px 0;box-sizing:border-box;border-radius:15px;color:inherit}
+  .ab-tabs button[aria-current="page"]{background:none;color:var(--ab-marke)}
+  .ab-tabs button[aria-current="page"] .ico{background:var(--ab-rot);color:#fff}
+  .ab-tabs [data-hinweis] span::after{width:7px;height:7px;margin-left:4px}
+  .ab-perfo{height:14px;background-image:radial-gradient(circle,var(--ab-grund) 3px,transparent 3.6px);background-size:16px 16px;background-position:4px -4px}
+  .ab-unter{gap:2px;padding:4px 10px 0}
+  .ab-unter button{height:44px;padding:0 9px;font-size:15px}
+  .ab-feld.kr-feld{padding:16px 20px 10px;gap:12px;font-size:15px}
+  .ab-info{padding:0 20px 8px;font-size:11px}
+  .ab-wkopf{padding:10px 20px 0;font-size:15px}
+  /* Heute: Datumsblock quer über dem Inhalt */
+  .ab-bereich[data-bereich="heute"]{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto;grid-template-areas:"kopf" "unter" "feld" "info"}
+  .ab-bereich[data-bereich="heute"] .ab-kopf{margin:0;padding:6px 14px 4px 20px;border-right:0}
+  .ab-bereich[data-bereich="heute"] .ab-feld{padding-left:20px;padding-right:20px;max-width:none}
+  .ab-bereich[data-bereich="heute"] .ab-info{padding-left:20px}
+  .ab-datum{height:auto;display:flex;align-items:flex-end;gap:14px}
+  .ab-tagzahl{margin-top:0;font-size:84px;line-height:.82}
+  .ab-aktionen{margin-top:auto}   /* am Handy unten, in Daumennähe */
+  .ab-datum-text{display:flex;flex-direction:column;gap:1px;padding-bottom:2px;min-width:0;flex:1}
+  .ab-wtag{font-size:18px}
+  .ab-monat{font-size:15px;font-weight:500}
+  .ab-zusatz{font-size:13px}
+  .ab-blaettern{align-self:center;gap:6px}
+  .ab-blaettern button{width:40px;height:40px;font-size:20px}
+  /* Inhalte etwas kleiner */
+  .ab-art{gap:12px}
+  .ab-rubrik{font-size:12px}
+  .ab-gross{font-size:22px;line-height:1.3}
+  .ab-tipp{font-size:20px}
+  .ab-titel{font-size:22px}
+  .ab-wort{font-size:52px}
+  .ab-wort.ab-l2{font-size:42px}
+  .ab-wort.ab-l3{font-size:34px}
+  .ab-text{font-size:16px}
+  .ab-meta{font-size:14px}
+  .ab-sprichwort{font-size:15px;padding-top:10px}
+  .ab-loesung{font-size:18px}
+  .ab-zutaten{font-size:16px;line-height:1.6}
+  .ab-fakten dd{font-size:16px}
+  .ab-ev{font-size:15px}
+  .ab-teile button{height:34px;padding:0 11px;font-size:13.5px}
+  .ab-feld .kr-liste .tl-z{font-size:15px;padding:6px 0}
+  .ab-feld .wz-jetzt .t-zp{font-size:14px;grid-template-columns:7ch 4.5ch 6.5ch minmax(0,1fr)}
+  .ab-feld .wz-jetzt .zp-r{grid-template-columns:7ch 5.5ch 10.5ch 5ch}
+  .ab-feld .zp-l svg{width:20px;height:20px}
+  .ab-feld .kr-unten{min-height:120px}
+}
+@media (max-width:760px) and (max-height:780px){
+  .ab-zutaten{columns:2;column-gap:18px}
+  .ab-zutaten li{break-inside:avoid}
+}
+@media (max-width:380px){
+  .ab-unter button{padding:0 7px;font-size:14px}
+  .ab-leiste .ort-wahl select{max-width:10ch}
+  .ab-datum-kurz{display:none}
+}
+
+/* 9 Dialoge: Einstellungsfenster mit Abschnitten der Bereiche */
+dialog.doc{background:var(--ab-papier);color:var(--ab-tinte)}
+.doc-head h2{font-weight:900;letter-spacing:.02em}
+.set-bereich{border-top:1px solid var(--ab-linie);margin-top:14px}
+.set-bereich .ke{font-size:14px}
+.set-bereich .ke-titel{color:var(--ab-grau)}

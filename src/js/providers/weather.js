@@ -1,13 +1,11 @@
 // Kachel „Wetter“: holt den Dienst „wetter“ (daily/1) und stellt ihn über den Adapter dar.
 // Alle Daten und Rechenwege liegen im Dienst (services/wetter.js), hier passiert nur die Anbindung.
-// Mini-Reiter in der kleinen Kachel (Jetzt · Radar · Hinweise · Mehr, Zahnrad → Einstellungsfenster), kein Aufklappen.
-import { set } from '../core/board.js';
+// Bereich „Wetter“ mit Untertabs Jetzt · Radar · Hinweise · Mehr (core/oberflaeche.js); Einstellungen im Einstellungsfenster (Zahnrad oben).
+import { set } from '../core/oberflaeche.js';
 import { settings, kachelOpt, kachelOptSpeichern } from '../core/store.js';
-import { addAnswer } from '../core/ask.js';
 import { dienst, gespeichert, ortParams, mitOrt } from '../dienste/client.js';
-import { kachel, antwort, mitOptionen, WETTER_STANDARD } from '../adapter/wetter.js';
+import { kachel, mitOptionen, WETTER_STANDARD } from '../adapter/wetter.js';
 import { kachelEinstellungen } from '../core/einstellungen.js';
-import { antwort as hinweisAntwort } from '../adapter/hinweise.js';
 import { hm } from '../core/util.js';
 import { MINI_WAHL, miniWahl } from '../adapter/diagramm.js';
 import '../ansichten/wetter.js'; // Zeitpunkt-Block im Reiter „Jetzt“ (wechselt beim Überfahren des Diagramms)
@@ -24,10 +22,10 @@ const stand = e => (e && (e.veraltet || Date.parse(e.gueltigBis) < Date.now()) ?
 // Radar und Hinweise sind optional: außerhalb Deutschlands oder bei Störung zeigt die Kachel das Wetter ohne sie.
 const oder = x => (x instanceof Error ? null : x);
 const opt = () => kachelOpt('weather', WETTER_STANDARD);
-// Unwetter (Stufe 3–4): einmal je Warnung von selbst auf den Reiter „Hinweise“ – danach gilt wieder die eigene Wahl
+// Unwetter (Stufe 3–4): einmal je Warnung von selbst auf den Untertab „Hinweise“ (springe) – danach gilt wieder die eigene Wahl
 function zeige(w, r, h) {
   const k = mitOptionen(kachel(w, r, h), w, opt());
-  if (k.unwetter && opt().unwetterGesehen !== k.unwetter) kachelOptSpeichern('weather', { reiter: 'hinweise', unwetterGesehen: k.unwetter });
+  if (k.unwetter && opt().unwetterGesehen !== k.unwetter) { kachelOptSpeichern('weather', { unwetterGesehen: k.unwetter }); return { ...k, springe: 'hinweise' }; }
   return k;
 }
 export async function load() {
@@ -44,14 +42,6 @@ export async function load() {
   set('weather', { ...zeige(env, regen, hinweise), tag: stand(env) });
 }
 
-// Warnfragen zuerst (vor der allgemeinen Wetterantwort)
-addAnswer(/warnung|hinweis|unwetter|sturm|gewitter|glätte|glaette|glatteis|frost|hitze|orkan/i, () =>
-  hinweise ? hinweisAntwort(hinweise, settings.place.name, (env && env.ort.zeitzone) || 'Europe/Berlin')
-    : env ? `Für ${settings.place.name} sind gerade keine amtlichen Wetterhinweise verfügbar.` : 'Die Wetterdaten sind gerade nicht erreichbar.');
-
-addAnswer(/schirm|regen|wetter|warm|kalt|grad|pollen|luft|jacke|radar/i, () =>
-  env ? antwort(env, regen) : 'Die Wetterdaten sind gerade nicht erreichbar.');
-
 // Umschalter im Diagramm des Reiters „Jetzt“ (Heute · 3 Tage · 7 Tage · 15 Tage): dieselbe Einstellung wie im Einstellungsfenster, sofort ohne Abruf
 document.addEventListener('click', e => {
   const b = e.target.closest('#tile-weather [data-mini-wahl]'); if (!b) return;
@@ -59,16 +49,16 @@ document.addEventListener('click', e => {
   if (env) set('weather', { ...zeige(env, regen, hinweise), tag: stand(env) });
 });
 
-// Einstellungen der Kachel (Zahnrad in der Reiterspalte → Einstellungsfenster)
+// Einstellungen (Abschnitt „Wetter“ im Einstellungsfenster)
 const REITER = [['radar', 'Radar'], ['mehr', 'Mehr']];
 kachelEinstellungen('weather', {
   felder: () => {
     const o = opt();
     return [
-      { typ: 'titel', label: 'Reiter anzeigen' },
+      { typ: 'titel', label: 'Untertabs anzeigen' },
       { typ: 'hinweis', label: '„Jetzt“ ist immer da. „Hinweise“ erscheint, sobald eine amtliche Warnung vorliegt.' },
       ...REITER.map(([k, n]) => ({ typ: 'check', key: k, label: n, wert: o[k] !== false })),
-      { typ: 'select', key: 'mini', label: 'Diagramm im Reiter „Jetzt“', wert: String(miniWahl(o.mini)), optionen: MINI_WAHL.map(([w, t]) => [String(w), t]) }
+      { typ: 'select', key: 'mini', label: 'Diagramm unter „Jetzt“', wert: String(miniWahl(o.mini)), optionen: MINI_WAHL.map(([w, t]) => [String(w), t]) }
     ];
   },
   speichern: w => {

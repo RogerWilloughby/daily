@@ -4,17 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>DAILY</title>
-<meta name="description" content="Dein Tag auf einer Seite.">
+<meta name="description" content="DAILY – dein digitaler Abreißkalender.">
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#E8ECEA" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#101513" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#2F3A35" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#161C19" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <link rel="icon" href="/icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DAILY">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="preload" href="/fonts/bricolage-grotesque.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/big-shoulders-900.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/figtree-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/app.css">
 <link rel="stylesheet" href="/css/diagramm.css">
 <link rel="stylesheet" href="/css/wetter.css">
@@ -23,38 +24,23 @@
 <link rel="stylesheet" href="/css/seiten.css">
 <link rel="stylesheet" href="/css/tagesinhalt.css">
 <link rel="stylesheet" href="/css/lokal.css">
+<link rel="stylesheet" href="/css/abreissblock.css">
 <script type="module" src="/js/main.js"></script>
 </head>
 <body>
 
-<div class="app">
-  <main class="grid" id="grid" aria-label="Tageskacheln"></main>
-
-  <div class="answer" id="answer" hidden>
-    <p id="answer-text" aria-live="polite"></p>
-    <button class="close" type="button" id="answer-close">Schließen</button>
-  </div>
-
-  <footer class="bar">
-    <div class="brand">DAILY</div>
-    <div class="date" id="date"></div>
-    <div class="clock" id="clock"></div>
-    <div class="spacer"></div>
-    <form class="ask" id="ask" role="search">
-      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
-      <input id="q" type="search" placeholder="Frag DAILY … (z. B. Schirm heute?)" aria-label="Frage an DAILY" autocomplete="off">
-    </form>
-    <div class="spacer"></div>
-    <div class="status" id="status" data-level="idle" title="Datenquellen"><i aria-hidden="true"></i><span id="status-text">Beispieldaten</span></div>
+<!-- Oberfläche „Abreißblock“ (seit 0.47.0): Marke, Bereiche (Handy unten, Rechner oben), schmale Leiste, Blatt mit Untertabs (core/oberflaeche.js) -->
+<div class="ab">
+  <span class="ab-marke">DAILY</span>
+  <nav class="ab-tabs" id="ab-tabs" aria-label="Bereiche"></nav>
+  <header class="ab-leiste">
+    <span class="ab-datum-kurz" id="date"></span>
+    <span class="ab-uhr" id="clock"></span>
+    <span class="status" id="status" data-level="idle" title="Datenquellen"><i aria-hidden="true"></i><span id="status-text" class="sr">Beispieldaten</span></span>
     <label class="ort-wahl" title="Ort"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span class="sr">Ort</span><select id="ort-select" aria-label="Ort wählen"></select></label>
-    <button class="gear" type="button" id="open-settings" aria-label="Einstellungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Einstellungen</span></button>
-    <nav class="legal" aria-label="Rechtliches">
-      <button type="button" data-doc="quellen">Datenquellen</button>
-      <button type="button" data-doc="impressum">Impressum</button>
-      <button type="button" data-doc="datenschutz">Datenschutz</button>
-      <button type="button" data-doc="quellen" class="version" data-version="kurz" title="Version – Details unter „Datenquellen“"></button>
-    </nav>
-  </footer>
+    <button class="gear" type="button" id="open-settings" aria-label="Einstellungen" title="Einstellungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+  </header>
+  <main class="ab-blatt" id="ab-blatt"><div class="ab-perfo" aria-hidden="true"></div></main>
 </div>
 
 <dialog class="doc" id="doc-quellen" aria-labelledby="h-quellen">
@@ -113,10 +99,10 @@
   <div class="doc-in">
     <div class="doc-head"><h2 id="h-set">Einstellungen</h2><button class="x" type="button" data-doc-close>Fertig</button></div>
     <div class="doc-body">
-      <p class="set-hinweis">Hier stehen nur allgemeine Einstellungen. Was eine Kachel zeigt, stellst du in der aufgeklappten Kachel über das Zahnrad ein.</p>
+      <p class="set-hinweis">Alles an einem Ort: Ort, Wetter, Kalender und deine Seiten. Jede Änderung gilt sofort.</p>
 
       <h3 id="set-orte">Orte <small id="ort-anzahl"></small></h3>
-      <p class="set-hinweis">Für Wetter, Regen, Wetterhinweise, Kalender und Tankpreise. Schnell wechseln kannst du unten in der Leiste.</p>
+      <p class="set-hinweis">Für Wetter, Regen, Wetterhinweise und Kalender. Schnell wechseln kannst du oben in der Leiste.</p>
       <ul class="ort-meine" id="ort-meine"></ul>
       <h4>Ort hinzufügen</h4>
       <button type="button" class="btn primary wide" id="ort-hier"><span aria-hidden="true">&#x2316;</span> Meinen Standort ermitteln</button>
@@ -128,17 +114,11 @@
       </div>
       <div id="ort-results" class="ort-liste" aria-live="polite"></div>
 
-      <h3>Kacheln</h3>
-      <p class="set-hinweis">Doppelklick (oder Enter) verschiebt eine Kachel in die andere Liste. Die Reihenfolge unter „Aktiv“ ist die Reihenfolge im Raster – zum Ändern ziehen oder die Pfeile nutzen. „Vorschau“ = noch nicht überarbeitet.</p>
-      <div class="k-listen">
-        <div><h4>Aktiv <small id="k-anzahl"></small></h4><ul class="k-liste" id="k-aktiv" aria-label="Aktive Kacheln"></ul></div>
-        <div><h4>Verfügbar</h4><ul class="k-liste" id="k-frei" aria-label="Verfügbare Kacheln"></ul></div>
-      </div>
-      <p class="k-meldung" id="k-meldung" aria-live="polite"></p>
+      <div id="set-bereiche"></div>
 
       <section id="set-privat" hidden>
         <h3>Privater Betrieb</h3>
-        <p class="set-hinweis">Termine, Märkte und Schlagzeilen gibt es nur mit dem Kennwort, das in Vercel als <code>DAILY_PRIVAT_KENNWORT</code> hinterlegt ist. Es bleibt nur in diesem Browser und geht nur an die privaten Dienste.</p>
+        <p class="set-hinweis">Private Teile gibt es nur mit dem Kennwort, das in Vercel als <code>DAILY_PRIVAT_KENNWORT</code> hinterlegt ist. Es bleibt nur in diesem Browser und geht nur an die privaten Dienste.</p>
         <div class="set-row">
           <label for="set-kennwort" class="sr">Kennwort</label>
           <input class="field" id="set-kennwort" type="password" autocomplete="current-password" placeholder="Kennwort">

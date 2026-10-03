@@ -1,15 +1,15 @@
 // DAILY Service Worker: App offline startbar, Daten und Code immer frisch aus dem Netz.
 const CACHE = 'daily-dev';   // build.js ersetzt das je Upload durch daily-<version>-<commit>
 const SHELL = [
-  '/', '/app.css', '/css/diagramm.css', '/css/wetter.css', '/css/finanzen.css', '/css/verkehr.css', '/css/seiten.css', '/css/tagesinhalt.css', '/css/lokal.css', '/manifest.webmanifest', '/content/seiten.json',
-  '/js/main.js', '/js/core/util.js', '/js/core/store.js', '/js/core/tiles.js', '/js/core/board.js', '/js/core/mini-reiter.js', '/js/core/einstellungsfenster.js',
+  '/', '/app.css', '/css/diagramm.css', '/css/wetter.css', '/css/finanzen.css', '/css/verkehr.css', '/css/seiten.css', '/css/tagesinhalt.css', '/css/lokal.css', '/css/abreissblock.css', '/manifest.webmanifest', '/content/seiten.json',
+  '/js/main.js', '/js/core/util.js', '/js/core/store.js', '/js/core/tiles.js', '/js/core/board.js', '/js/core/mini-reiter.js', '/js/core/einstellungsfenster.js', '/js/core/oberflaeche.js', '/js/providers/heute.js',
   '/js/core/ask.js', '/js/core/status.js', '/js/core/version.js', '/js/ui/dialogs.js', '/js/ui/ort.js',
   '/js/providers/weather.js', '/js/providers/news.js', '/js/adapter/schlagzeilen.js', '/js/providers/finanzen.js', '/js/providers/verkehr.js', '/js/adapter/tanken.js', '/js/adapter/autobahn.js',
   '/js/providers/sport.js', '/js/adapter/fussball.js', '/js/providers/wissen.js', '/js/providers/local.js', '/js/adapter/lokal.js',
   '/js/providers/links.js', '/js/adapter/seiten.js', '/js/adapter/tagesinhalt.js', '/js/providers/thema.js', '/js/providers/unterhaltung.js', '/js/providers/alltag.js', '/js/providers/tools.js', '/js/tools/verzeichnis.js', '/tools/arbeitszeit.html', '/tools/setzkasten.html', '/js/providers/kalender.js',
   '/js/lib/url.js',
   '/js/dienste/client.js', '/js/dienste/vertraege.js', '/js/ui/privat.js', '/js/lib/bundesland.js', '/js/core/betrieb.js', '/js/core/einstellungen.js', '/js/ui/kacheln.js', '/js/adapter/wetter.js', '/js/adapter/diagramm.js', '/js/adapter/kursdiagramm.js', '/js/core/ansichten.js', '/js/ansichten/mini-diagramm.js', '/js/ansichten/wetter.js', '/js/ansichten/radar.js', '/js/adapter/regen.js', '/js/adapter/hinweise.js', '/js/adapter/kalender.js', '/js/adapter/finanzen.js', '/js/adapter/katalog.js',
-  '/fonts/bricolage-grotesque.woff2', '/fonts/figtree-400.woff2', '/fonts/figtree-500.woff2', '/fonts/figtree-600.woff2',
+  '/fonts/bricolage-grotesque.woff2', '/fonts/figtree-400.woff2', '/fonts/figtree-500.woff2', '/fonts/figtree-600.woff2', '/fonts/figtree-700.woff2', '/fonts/big-shoulders-900.woff2',
   '/icons/icon-192.png', '/icons/icon-512.png'
 ];
 self.addEventListener('install', e => {

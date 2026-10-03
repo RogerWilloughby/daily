@@ -25,7 +25,9 @@ const fonts = {
   'bricolage-grotesque.woff2': '@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2',
   'figtree-400.woff2': '@fontsource/figtree/files/figtree-latin-400-normal.woff2',
   'figtree-500.woff2': '@fontsource/figtree/files/figtree-latin-500-normal.woff2',
-  'figtree-600.woff2': '@fontsource/figtree/files/figtree-latin-600-normal.woff2'
+  'figtree-600.woff2': '@fontsource/figtree/files/figtree-latin-600-normal.woff2',
+  'figtree-700.woff2': '@fontsource/figtree/files/figtree-latin-700-normal.woff2',
+  'big-shoulders-900.woff2': '@fontsource/big-shoulders-display/files/big-shoulders-display-latin-900-normal.woff2'   // Abreißblock (seit 0.47.0): Tageszahl, Überschriften
 };
 for (const [name, mod] of Object.entries(fonts)) fs.copyFileSync(nm(mod), path.join(OUT, 'fonts', name));
 
