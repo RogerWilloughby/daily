@@ -1,6 +1,8 @@
 # Erzeugt services/daten/daily.json (seit App 0.42.0; vorher src/content/ – war öffentlich abrufbar): Tagesinhalte für 31 Tage (26.09.–26.10.2026).
 # Alle Texte sind eigene Service-Inhalte (keine Nachrichten, keine Anlageempfehlungen).
-import json, datetime, pathlib
+import json, datetime, pathlib, sys
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from quiz_2026_10 import QUIZ   # Quiz zum Mitmachen (Phase 3, App 0.52.0) – eigene Datei, weil lang
 
 START = datetime.date(2026, 9, 26)
 
@@ -399,17 +401,18 @@ SPAR_K = ['Deckel auf den Topf', 'Mit Liste einkaufen', 'Abos prüfen', 'Standby
 BEZ_K = ['Handyfrei kochen', 'Kurze Nachricht', 'Drei Dinge', 'Zuhör-Spaziergang', 'Kleine Aufmerksamkeit', 'Fotos von früher', 'Aufgabe abnehmen', 'Du wählst den Film', 'Etwas Neues', 'Schönster Moment', 'Versteckter Zettel', 'Freies Wochenende', 'Lange Umarmung', 'Gemeinsames Frühstück', 'Nach Träumen fragen', 'Euer Song', 'Spieleabend', 'Sonnenuntergang', 'Danke sagen', 'Wohnzimmer-Picknick', 'Bildschirmfreier Abend', 'Gemeinsames Monatsziel', 'Eure Playlist', 'Kaffee ans Bett', 'Erst zuhören', 'Alter Lieblingsort', 'Zusammen Sport', 'Ein echter Brief', 'Gemeinsam ausmisten', 'Dein Abend, meine Wahl', 'Wie geht es dir?']
 GES_K = ['Wasser zuerst', 'Stündlich strecken', 'Treppe statt Aufzug', 'Verdauungsspaziergang', 'Mehr Gemüse', 'Früher ins Bett', 'Telefonieren im Gehen', 'Ruhig atmen', 'Bildschirm weg', 'Nüsse statt Süßes', 'Tageslicht tanken', 'Schultern kreisen', 'Langsam essen', 'Kniebeugen-Pause', 'Zu Fuß einkaufen', '20-20-20-Regel', 'Ohne Zuckergetränke', 'Abends dehnen', 'Wasser in Sichtweite', 'Haferflocken-Frühstück', 'Freunde anrufen', '1.000 Schritte mehr', 'Eine Minute Planke', 'Kein Koffein am Abend', 'Balance beim Zähneputzen', 'Essen ohne Bildschirm', 'Vor dem Schlafen lüften', 'Aktiv aufräumen', 'Tee statt Snack', 'Handypause', 'Fünf am Tag']
 
-lists = [RAETSEL, MITMACHEN, WITZE, WORTE, SPRICHWOERTER, REZEPTE, LAENDER, TECH, BEZIEHUNG, SPARTIPP, GESUNDHEIT, FILME]
+lists = [RAETSEL, MITMACHEN, QUIZ, WITZE, WORTE, SPRICHWOERTER, REZEPTE, LAENDER, TECH, BEZIEHUNG, SPARTIPP, GESUNDHEIT, FILME]
 for l in lists:
     assert len(l) == 31, (len(l), l[0])
 
 days = []
 for i in range(31):
     d = START + datetime.timedelta(days=i)
-    r, mi, w, wo, sp, re_, la, te, be, sa, ge, fi = (l[i] for l in lists)
+    r, mi, qz, w, wo, sp, re_, la, te, be, sa, ge, fi = (l[i] for l in lists)
     days.append({
         "datum": d.isoformat(),
         "raetsel": {"frage": r[0], "loesung": r[1], "antwort": mi[0], "falsch": mi[1], "tipps": mi[2]},
+        "quiz": [{"frage": q[0], "antwort": q[1], "falsch": q[2], "erklaerung": q[3]} for q in qz],
         "witz": w,
         "wort": {"wort": wo[0], "bedeutung": wo[1], "herkunft": wo[2]},
         "sprichwort": sp,

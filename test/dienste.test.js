@@ -1048,6 +1048,17 @@ test('Tagesinhalte: Dienst je Tag (Verlauf, nie Zukunft), Bereich „Heute“ mi
     for (const t of r.tipps) assert.ok(!wort.test(t.toLowerCase()), `${datum} Tipp verrät „${r.antwort}“: ${t}`);
     assert.ok(r.loesung.toLowerCase().includes(ohneArtikel(r.antwort)) || r.antwort === 'Beide gleich schwer', `${datum} Antwort passt zur Lösung`);
   }
+  // Quiz (Dienst 1.3.0): je Tag 5 Fragen, je 3 verschiedene falsche Antworten, Erklärung; keine Frage doppelt über alle Tage
+  const fragen = d.VORRAT.tage.flatMap(t => t.quiz.map(q => q.frage));
+  assert.equal(new Set(fragen).size, fragen.length, 'keine Quizfrage doppelt');
+  for (const { datum, quiz } of d.VORRAT.tage) {
+    assert.equal(quiz.length, 5, datum);
+    for (const q of quiz) {
+      assert.equal(q.falsch.length, 3, q.frage);
+      assert.equal(new Set([q.antwort, ...q.falsch].map(x => x.toLowerCase())).size, 4, q.frage + ' Antworten verschieden');
+      assert.ok(q.erklaerung && q.erklaerung.length >= 15, q.frage + ' Erklärung');
+    }
+  }
   const jetzt = Date.parse('2026-10-01T10:00:00Z');
   const heute = await dienste.ausfuehren('tagesinhalt', {}, { jetzt });
   gueltig(heute, d.schema);

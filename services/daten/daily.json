@@ -19,6 +19,58 @@
      "Er gehört zu den Haaren."
     ]
    },
+   "quiz": [
+    {
+     "frage": "Wie viele Beine hat eine Spinne?",
+     "antwort": "8",
+     "falsch": [
+      "6",
+      "10",
+      "12"
+     ],
+     "erklaerung": "Spinnen sind Spinnentiere mit acht Beinen – Insekten haben sechs."
+    },
+    {
+     "frage": "Welche Farbe entsteht, wenn man blaue und gelbe Malfarbe mischt?",
+     "antwort": "Grün",
+     "falsch": [
+      "Lila",
+      "Orange",
+      "Braun"
+     ],
+     "erklaerung": "Blau und Gelb ergeben beim Mischen von Malfarben Grün."
+    },
+    {
+     "frage": "Wie heißt die Hauptstadt von Kanada?",
+     "antwort": "Ottawa",
+     "falsch": [
+      "Toronto",
+      "Montreal",
+      "Vancouver"
+     ],
+     "erklaerung": "Toronto ist die größte Stadt Kanadas, Hauptstadt ist aber Ottawa."
+    },
+    {
+     "frage": "Wer malte die „Mona Lisa“?",
+     "antwort": "Leonardo da Vinci",
+     "falsch": [
+      "Michelangelo",
+      "Raffael",
+      "Rembrandt"
+     ],
+     "erklaerung": "Leonardo malte sie Anfang des 16. Jahrhunderts; heute hängt sie im Louvre in Paris."
+    },
+    {
+     "frage": "Welches chemische Element hat das Zeichen „Fe“?",
+     "antwort": "Eisen",
+     "falsch": [
+      "Fluor",
+      "Fermium",
+      "Phosphor"
+     ],
+     "erklaerung": "„Fe“ kommt vom lateinischen „ferrum“ für Eisen."
+    }
+   ],
    "witz": "Treffen sich zwei Magnete. Sagt der eine: „Was soll ich heute bloß anziehen?“",
    "wort": {
     "wort": "Kairos",
@@ -87,6 +139,58 @@
      "Eigentlich besteht es aus … nichts."
     ]
    },
+   "quiz": [
+    {
+     "frage": "Wie viele Minuten hat eine Stunde?",
+     "antwort": "60",
+     "falsch": [
+      "100",
+      "30",
+      "90"
+     ],
+     "erklaerung": "Eine Stunde hat 60 Minuten, eine Minute 60 Sekunden."
+    },
+    {
+     "frage": "Welches ist das größte heute lebende Tier?",
+     "antwort": "Blauwal",
+     "falsch": [
+      "Afrikanischer Elefant",
+      "Pottwal",
+      "Walhai"
+     ],
+     "erklaerung": "Blauwale werden bis zu etwa 30 Meter lang."
+    },
+    {
+     "frage": "In welchem Land stehen die Pyramiden von Gizeh?",
+     "antwort": "Ägypten",
+     "falsch": [
+      "Mexiko",
+      "Sudan",
+      "Marokko"
+     ],
+     "erklaerung": "Gizeh liegt am Rand von Kairo."
+    },
+    {
+     "frage": "Welcher Planet ist der Sonne am nächsten?",
+     "antwort": "Merkur",
+     "falsch": [
+      "Venus",
+      "Mars",
+      "Erde"
+     ],
+     "erklaerung": "Merkur ist der innerste und kleinste Planet unseres Sonnensystems."
+    },
+    {
+     "frage": "Aus welchem Land stammte der Komponist Frédéric Chopin?",
+     "antwort": "Polen",
+     "falsch": [
+      "Frankreich",
+      "Österreich",
+      "Ungarn"
+     ],
+     "erklaerung": "Chopin wurde 1810 bei Warschau geboren und lebte später in Paris."
+    }
+   ],
    "witz": "Was macht ein Pirat am Computer? – Er drückt die Enter-Taste.",
    "wort": {
     "wort": "Fernweh",
@@ -155,6 +259,58 @@
      "Man braucht es nach dem Duschen."
     ]
    },
+   "quiz": [
+    {
+     "frage": "Was fressen Große Pandas hauptsächlich?",
+     "antwort": "Bambus",
+     "falsch": [
+      "Eukalyptus",
+      "Fisch",
+      "Gras"
+     ],
+     "erklaerung": "Große Pandas fressen fast nur Bambus – Eukalyptus ist das Futter der Koalas."
+    },
+    {
+     "frage": "Welcher Fluss fließt durch Wien?",
+     "antwort": "Donau",
+     "falsch": [
+      "Rhein",
+      "Elbe",
+      "Moldau"
+     ],
+     "erklaerung": "Die Donau fließt durch vier Hauptstädte: Wien, Bratislava, Budapest und Belgrad."
+    },
+    {
+     "frage": "Wer schrieb „Faust“?",
+     "antwort": "Johann Wolfgang von Goethe",
+     "falsch": [
+      "Friedrich Schiller",
+      "Heinrich Heine",
+      "Thomas Mann"
+     ],
+     "erklaerung": "Goethe arbeitete fast sein ganzes Leben an „Faust“."
+    },
+    {
+     "frage": "Wie heißt der höchste Berg Deutschlands?",
+     "antwort": "Zugspitze",
+     "falsch": [
+      "Watzmann",
+      "Feldberg",
+      "Brocken"
+     ],
+     "erklaerung": "Die Zugspitze im Wettersteingebirge ist 2962 Meter hoch."
+    },
+    {
+     "frage": "Was misst die Einheit „Hertz“?",
+     "antwort": "Frequenz",
+     "falsch": [
+      "Lautstärke",
+      "Spannung",
+      "Leistung"
+     ],
+     "erklaerung": "Ein Hertz ist eine Schwingung pro Sekunde – benannt nach Heinrich Hertz."
+    }
+   ],
    "witz": "Warum können Seeräuber keinen Kreis berechnen? – Weil sie Pi raten.",
    "wort": {
     "wort": "Serendipität",
@@ -223,6 +379,58 @@
      "Oben hat sie einen Deckel oder Korken."
     ]
    },
+   "quiz": [
+    {
+     "frage": "Welches dieser Tiere ist ein Säugetier?",
+     "antwort": "Delfin",
+     "falsch": [
+      "Hai",
+      "Thunfisch",
+      "Seepferdchen"
+     ],
+     "erklaerung": "Delfine atmen Luft und säugen ihre Jungen."
+    },
+    {
+     "frage": "Wie viele Ecken hat ein Würfel?",
+     "antwort": "8",
+     "falsch": [
+      "6",
+      "12",
+      "4"
+     ],
+     "erklaerung": "Ein Würfel hat 6 Flächen, 12 Kanten und 8 Ecken."
+    },
+    {
+     "frage": "In welcher Stadt steht das Brandenburger Tor?",
+     "antwort": "Berlin",
+     "falsch": [
+      "Potsdam",
+      "Brandenburg an der Havel",
+      "Hamburg"
+     ],
+     "erklaerung": "Das Brandenburger Tor steht in Berlin am Pariser Platz."
+    },
+    {
+     "frage": "Welches Gas nehmen Pflanzen für die Fotosynthese auf?",
+     "antwort": "Kohlendioxid",
+     "falsch": [
+      "Sauerstoff",
+      "Stickstoff",
+      "Wasserstoff"
+     ],
+     "erklaerung": "Pflanzen nehmen Kohlendioxid auf und geben Sauerstoff ab."
+    },
+    {
+     "frage": "In welchem Jahr fiel die Berliner Mauer?",
+     "antwort": "1989",
+     "falsch": [
+      "1990",
+      "1987",
+      "1991"
+     ],
+     "erklaerung": "Die Mauer fiel am 9. November 1989; die Einheit folgte am 3. Oktober 1990."
+    }
+   ],
    "witz": "Was ist grün und klopft an die Tür? – Ein Klopfsalat.",
    "wort": {
     "wort": "Hygge",
@@ -290,6 +498,58 @@
      "Andere rufen dich damit."
     ]
    },
+   "quiz": [
+    {
+     "frage": "Welche Jahreszeit beginnt auf der Nordhalbkugel im Dezember?",
+     "antwort": "Winter",
+     "falsch": [
+      "Herbst",
+      "Frühling",
+      "Sommer"
+     ],
+     "erklaerung": "Der astronomische Winter beginnt um den 21. Dezember."
+    },
+    {
+     "frage": "Welches Musikinstrument hat meist 88 Tasten?",
+     "antwort": "Klavier",
+     "falsch": [
+      "Orgel",
+      "Akkordeon",
+      "Cembalo"
+     ],
+     "erklaerung": "Ein modernes Klavier hat 88 Tasten: 52 weiße und 36 schwarze."
+    },
+    {
+     "frage": "Wie heißt die Währung Japans?",
+     "antwort": "Yen",
+     "falsch": [
+      "Won",
+      "Yuan",
+      "Baht"
+     ],
+     "erklaerung": "Der Won ist die Währung Koreas, der Yuan die Chinas, der Baht die Thailands."
+    },
+    {
+     "frage": "Welcher Vogel kann sogar rückwärts fliegen?",
+     "antwort": "Kolibri",
+     "falsch": [
+      "Mauersegler",
+      "Eisvogel",
+      "Turmfalke"
+     ],
+     "erklaerung": "Kolibris können in der Luft stehen und auch rückwärts fliegen."
+    },
+    {
+     "frage": "Wie viele Knochen hat ein erwachsener Mensch ungefähr?",
+     "antwort": "206",
+     "falsch": [
+      "106",
+      "306",
+      "256"
+     ],
+     "erklaerung": "Ein Erwachsener hat etwa 206 Knochen; bei Babys sind es mehr, einige wachsen später zusammen."
+    }
+   ],
    "witz": "Wie nennt man einen Bumerang, der nicht zurückkommt? – Stock.",
    "wort": {
     "wort": "Kummerspeck",
@@ -358,6 +618,58 @@
      "Auch der Januar hat einen 28. Tag."
     ]
    },
+   "quiz": [
+    {
+     "frage": "Welche Form hat ein Stoppschild?",
+     "antwort": "Achteck",
+     "falsch": [
+      "Dreieck",
+      "Kreis",
+      "Quadrat"
+     ],
+     "erklaerung": "Das Stoppschild ist ein rotes Achteck – fast überall auf der Welt."
+    },
+    {
+     "frage": "Welches Land hat die Form eines Stiefels?",
+     "antwort": "Italien",
+     "falsch": [
+      "Griechenland",
+      "Spanien",
+      "Portugal"
+     ],
+     "erklaerung": "Italien sieht auf der Karte aus wie ein Stiefel."
+    },
+    {
+     "frage": "Wie heißt das größte Organ des Menschen?",
+     "antwort": "Die Haut",
+     "falsch": [
+      "Die Leber",
+      "Die Lunge",
+      "Das Gehirn"
+     ],
+     "erklaerung": "Die Haut eines Erwachsenen ist rund 1,5 bis 2 Quadratmeter groß."
+    },
+    {
+     "frage": "Wer entwickelte die Relativitätstheorie?",
+     "antwort": "Albert Einstein",
+     "falsch": [
+      "Isaac Newton",
+      "Max Planck",
+      "Niels Bohr"
+     ],
+     "erklaerung": "Einstein veröffentlichte 1905 die spezielle und 1915 die allgemeine Relativitätstheorie."
+    },
+    {
+     "frage": "Wie heißt die Hauptstadt von Australien?",
+     "antwort": "Canberra",
+     "falsch": [
+      "Sydney",
+      "Melbourne",
+      "Perth"
+     ],
+     "erklaerung": "Canberra wurde als Kompromiss zwischen Sydney und Melbourne zur Hauptstadt."
+    }
+   ],
    "witz": "Was sagt der große Stift zum kleinen Stift? – „Wachs mal, Stift!“",
    "wort": {
     "wort": "Lagom",
@@ -425,6 +737,58 @@
      "Man gibt es jemandem – und sollte es halten."
     ]
    },
+   "quiz": [
+    {
+     "frage": "Welches Obst ist gelb und krumm?",
+     "antwort": "Banane",
+     "falsch": [
+      "Zitrone",
+      "Birne",
+      "Mango"
+     ],
+     "erklaerung": "Bananen wachsen in Büscheln und krümmen sich zum Licht."
+    },
+    {
+     "frage": "Wie viele Spieler einer Mannschaft stehen beim Hallenvolleyball auf dem Feld?",
+     "antwort": "6",
+     "falsch": [
+      "5",
+      "7",
+      "8"
+     ],
+     "erklaerung": "Beim Hallenvolleyball spielen sechs gegen sechs, beim Beachvolleyball zwei gegen zwei."
+    },
+    {
+     "frage": "Welcher Ozean ist der größte?",
+     "antwort": "Pazifik",
+     "falsch": [
+      "Atlantik",
+      "Indischer Ozean",
+      "Arktischer Ozean"
+     ],
+     "erklaerung": "Der Pazifik ist größer als alle Landflächen der Erde zusammen."
+    },
+    {
+     "frage": "Wer komponierte die Neunte Sinfonie mit der „Ode an die Freude“?",
+     "antwort": "Ludwig van Beethoven",
+     "falsch": [
+      "Wolfgang Amadeus Mozart",
+      "Johann Sebastian Bach",
+      "Franz Schubert"
+     ],
+     "erklaerung": "Beethoven war bei der Uraufführung 1824 schon fast taub."
+    },
+    {
+     "frage": "Was bedeutet „carpe diem“?",
+     "antwort": "Nutze den Tag",
+     "falsch": [
+      "Hüte dich vor dem Tag",
+      "Der Tag ist vorbei",
+      "Bete am Tag"
+     ],
+     "erklaerung": "Der lateinische Spruch stammt vom römischen Dichter Horaz."
+    }
+   ],
    "witz": "Was ist orange und läuft durch den Wald? – Eine Wanderine.",
    "wort": {
     "wort": "Ikigai",
@@ -493,6 +857,58 @@
      "Man blättert darin."
     ]
    },
+   "quiz": [
+    {
+     "frage": "Welches Tier gilt als „König der Tiere“?",
+     "antwort": "Löwe",
+     "falsch": [
+      "Tiger",
+      "Adler",
+      "Elefant"
+     ],
+     "erklaerung": "In Fabeln und Märchen ist der Löwe der König der Tiere."
+    },
+    {
+     "frage": "Bei wie viel Grad Celsius gefriert Wasser?",
+     "antwort": "0 °C",
+     "falsch": [
+      "−10 °C",
+      "4 °C",
+      "100 °C"
+     ],
+     "erklaerung": "Bei normalem Luftdruck gefriert Wasser bei 0 °C und siedet bei 100 °C."
+    },
+    {
+     "frage": "Welches ist das flächenmäßig größte deutsche Bundesland?",
+     "antwort": "Bayern",
+     "falsch": [
+      "Niedersachsen",
+      "Baden-Württemberg",
+      "Nordrhein-Westfalen"
+     ],
+     "erklaerung": "Bayern ist das größte Bundesland, Niedersachsen das zweitgrößte."
+    },
+    {
+     "frage": "Wer betrat als erster Mensch den Mond?",
+     "antwort": "Neil Armstrong",
+     "falsch": [
+      "Buzz Aldrin",
+      "Juri Gagarin",
+      "Michael Collins"
+     ],
+     "erklaerung": "Armstrong betrat im Juli 1969 als Erster den Mond, Aldrin folgte kurz danach."
+    },
+    {
+     "frage": "Wie viele Herzen hat ein Krake?",
+     "antwort": "3",
+     "falsch": [
+      "1",
+      "2",
+      "4"
+     ],
+     "erklaerung": "Zwei Herzen pumpen das Blut durch die Kiemen, eines durch den Körper."
+    }
+   ],
    "witz": "Was macht ein Clown im Büro? – Faxen.",
    "wort": {
     "wort": "Sisu",
@@ -560,6 +976,58 @@
      "Paris hat fünf Buchstaben."
     ]
    },
+   "quiz": [
+    {
+     "frage": "Welche Farbe hat ein Smaragd?",
+     "antwort": "Grün",
+     "falsch": [
+      "Rot",
+      "Blau",
+      "Gelb"
+     ],
+     "erklaerung": "Smaragde sind grüne Edelsteine – Rubine sind rot, Saphire meist blau."
+    },
+    {
+     "frage": "Wie viele Saiten hat eine gewöhnliche Gitarre?",
+     "antwort": "6",
+     "falsch": [
+      "4",
+      "5",
+      "8"
+     ],
+     "erklaerung": "Eine Gitarre hat meist sechs Saiten, ein E-Bass meist vier."
+    },
+    {
+     "frage": "Wie heißt die Hauptstadt von Spanien?",
+     "antwort": "Madrid",
+     "falsch": [
+      "Barcelona",
+      "Sevilla",
+      "Valencia"
+     ],
+     "erklaerung": "Madrid liegt fast genau in der Mitte Spaniens."
+    },
+    {
+     "frage": "Welches Vitamin bildet der Körper mithilfe von Sonnenlicht?",
+     "antwort": "Vitamin D",
+     "falsch": [
+      "Vitamin C",
+      "Vitamin A",
+      "Vitamin B12"
+     ],
+     "erklaerung": "Mit UV-Licht bildet die Haut Vitamin D – wichtig für die Knochen."
+    },
+    {
+     "frage": "Wie heißt die Lehre von den Pilzen?",
+     "antwort": "Mykologie",
+     "falsch": [
+      "Ornithologie",
+      "Botanik",
+      "Entomologie"
+     ],
+     "erklaerung": "Griechisch „mýkēs“ heißt Pilz; Ornithologie ist die Vogelkunde, Entomologie die Insektenkunde."
+    }
+   ],
    "witz": "Welcher Bus hat den Atlantik überquert? – Kolumbus.",
    "wort": {
     "wort": "Schadenfreude",
@@ -627,6 +1095,58 @@
      "Die Tasten sind schwarz und weiß."
     ]
    },
+   "quiz": [
+    {
+     "frage": "Welche Zahl steht auf dem Zifferblatt einer Uhr ganz oben?",
+     "antwort": "12",
+     "falsch": [
+      "1",
+      "6",
+      "0"
+     ],
+     "erklaerung": "Oben steht die 12, unten die 6."
+    },
+    {
+     "frage": "Welches Tier ist das Wappentier Deutschlands?",
+     "antwort": "Adler",
+     "falsch": [
+      "Löwe",
+      "Bär",
+      "Hirsch"
+     ],
+     "erklaerung": "Der Bundesadler ist das Wappentier der Bundesrepublik."
+    },
+    {
+     "frage": "In welcher Stadt steht der Schiefe Turm?",
+     "antwort": "Pisa",
+     "falsch": [
+      "Rom",
+      "Florenz",
+      "Venedig"
+     ],
+     "erklaerung": "Der Glockenturm des Doms von Pisa neigte sich schon während des Baus."
+    },
+    {
+     "frage": "Woraus wird Glas hauptsächlich hergestellt?",
+     "antwort": "Quarzsand",
+     "falsch": [
+      "Ton",
+      "Salz",
+      "Holz"
+     ],
+     "erklaerung": "Glas entsteht vor allem aus geschmolzenem Quarzsand, dazu kommen Soda und Kalk."
+    },
+    {
+     "frage": "Welche Sprache hat weltweit die meisten Muttersprachler?",
+     "antwort": "Chinesisch (Mandarin)",
+     "falsch": [
+      "Englisch",
+      "Spanisch",
+      "Hindi"
+     ],
+     "erklaerung": "Englisch wird häufiger gesprochen, wenn man alle mitzählt, die es als Zweitsprache sprechen."
+    }
+   ],
    "witz": "Was sitzt auf dem Baum und ruft „Aha“? – Ein Uhu mit Sprachfehler.",
    "wort": {
     "wort": "Wanderlust",
@@ -695,6 +1215,58 @@
      "Zähle die Buchstaben in „Moment“."
     ]
    },
+   "quiz": [
+    {
+     "frage": "Wie nennt man ein junges Pferd?",
+     "antwort": "Fohlen",
+     "falsch": [
+      "Kalb",
+      "Lamm",
+      "Ferkel"
+     ],
+     "erklaerung": "Ein Kalb ist ein junges Rind, ein Lamm ein junges Schaf, ein Ferkel ein junges Schwein."
+    },
+    {
+     "frage": "Wie viel Grad hat ein rechter Winkel?",
+     "antwort": "90",
+     "falsch": [
+      "45",
+      "180",
+      "100"
+     ],
+     "erklaerung": "Ein rechter Winkel hat 90 Grad, ein gestreckter 180 Grad."
+    },
+    {
+     "frage": "Welche dieser Inseln gehört zu Deutschland?",
+     "antwort": "Rügen",
+     "falsch": [
+      "Bornholm",
+      "Texel",
+      "Gotland"
+     ],
+     "erklaerung": "Bornholm gehört zu Dänemark, Texel zu den Niederlanden, Gotland zu Schweden."
+    },
+    {
+     "frage": "Wer erfand in Europa den Buchdruck mit beweglichen Lettern?",
+     "antwort": "Johannes Gutenberg",
+     "falsch": [
+      "Martin Luther",
+      "Albrecht Dürer",
+      "Leonardo da Vinci"
+     ],
+     "erklaerung": "Gutenberg druckte um 1450 in Mainz – seine Bibel ist berühmt."
+    },
+    {
+     "frage": "Welches Metall ist bei Zimmertemperatur flüssig?",
+     "antwort": "Quecksilber",
+     "falsch": [
+      "Blei",
+      "Zinn",
+      "Aluminium"
+     ],
+     "erklaerung": "Quecksilber ist das einzige Metall, das bei üblicher Zimmertemperatur (um 20 °C) flüssig ist."
+    }
+   ],
    "witz": "Wie heißt der Bruder von Elvis? – Zwölfis.",
    "wort": {
     "wort": "Fingerspitzengefühl",
@@ -761,6 +1333,58 @@
      "Man näht damit."
     ]
    },
+   "quiz": [
+    {
+     "frage": "Was sammeln Bienen aus Blüten?",
+     "antwort": "Nektar",
+     "falsch": [
+      "Honig",
+      "Wachs",
+      "Harz"
+     ],
+     "erklaerung": "Aus dem Nektar machen Bienen im Stock Honig."
+    },
+    {
+     "frage": "Wie viele Stunden hat ein Tag?",
+     "antwort": "24",
+     "falsch": [
+      "12",
+      "36",
+      "20"
+     ],
+     "erklaerung": "Ein Tag hat 24 Stunden – so lange dauert ungefähr eine Drehung der Erde."
+    },
+    {
+     "frage": "Welches ist das kleinste deutsche Bundesland?",
+     "antwort": "Bremen",
+     "falsch": [
+      "Saarland",
+      "Hamburg",
+      "Berlin"
+     ],
+     "erklaerung": "Bremen ist mit Bremerhaven das kleinste Bundesland."
+    },
+    {
+     "frage": "Welcher Planet hat die auffälligsten Ringe?",
+     "antwort": "Saturn",
+     "falsch": [
+      "Jupiter",
+      "Uranus",
+      "Neptun"
+     ],
+     "erklaerung": "Alle großen Gasplaneten haben Ringe, die des Saturn sind aber am hellsten."
+    },
+    {
+     "frage": "Aus welcher Sprache stammt das Wort „Kindergarten“, das viele Sprachen übernommen haben?",
+     "antwort": "Deutsch",
+     "falsch": [
+      "Englisch",
+      "Niederländisch",
+      "Dänisch"
+     ],
+     "erklaerung": "Friedrich Fröbel prägte den Begriff 1840; heute sagt man ihn auch im Englischen."
+    }
+   ],
    "witz": "Was liegt am Strand und spricht undeutlich? – Eine Nuschel.",
    "wort": {
     "wort": "Zeitgeist",
@@ -829,6 +1453,58 @@
      "Danach braucht man einen Schirm."
     ]
    },
+   "quiz": [
+    {
+     "frage": "Welches Tier hat einen Rüssel?",
+     "antwort": "Elefant",
+     "falsch": [
+      "Nashorn",
+      "Nilpferd",
+      "Giraffe"
+     ],
+     "erklaerung": "Mit dem Rüssel greift, trinkt und riecht der Elefant."
+    },
+    {
+     "frage": "Wie heißt das Ergebnis einer Addition?",
+     "antwort": "Summe",
+     "falsch": [
+      "Produkt",
+      "Differenz",
+      "Quotient"
+     ],
+     "erklaerung": "Summe beim Addieren, Differenz beim Subtrahieren, Produkt beim Multiplizieren, Quotient beim Dividieren."
+    },
+    {
+     "frage": "In welcher Stadt sitzen Regierung und Parlament der Schweiz?",
+     "antwort": "Bern",
+     "falsch": [
+      "Zürich",
+      "Genf",
+      "Basel"
+     ],
+     "erklaerung": "Bern ist die Bundesstadt der Schweiz – Zürich ist die größte Stadt."
+    },
+    {
+     "frage": "Welche Blutgruppe gilt als Universalspender für rote Blutkörperchen?",
+     "antwort": "0 negativ",
+     "falsch": [
+      "AB positiv",
+      "A positiv",
+      "B negativ"
+     ],
+     "erklaerung": "0 negativ kann im Notfall fast allen gegeben werden; AB positiv gilt als Universalempfänger."
+    },
+    {
+     "frage": "Wer schrieb das Drama „Die Räuber“?",
+     "antwort": "Friedrich Schiller",
+     "falsch": [
+      "Johann Wolfgang von Goethe",
+      "Gotthold Ephraim Lessing",
+      "Heinrich von Kleist"
+     ],
+     "erklaerung": "Schiller schrieb „Die Räuber“ als junger Mann; die Uraufführung war 1782 in Mannheim."
+    }
+   ],
    "witz": "Was ist ein Keks unter einem Baum? – Ein schattiges Plätzchen.",
    "wort": {
     "wort": "Weltschmerz",
@@ -896,6 +1572,58 @@
      "Beim Tauchen merkst du es."
     ]
    },
+   "quiz": [
+    {
+     "frage": "Welches Tier baut Dämme in Flüssen?",
+     "antwort": "Biber",
+     "falsch": [
+      "Fischotter",
+      "Nutria",
+      "Waschbär"
+     ],
+     "erklaerung": "Biber stauen Bäche mit Ästen und Schlamm auf."
+    },
+    {
+     "frage": "Um welchen Tag herum ist auf der Nordhalbkugel die längste Nacht?",
+     "antwort": "21. Dezember",
+     "falsch": [
+      "21. Juni",
+      "1. Januar",
+      "21. März"
+     ],
+     "erklaerung": "Zur Wintersonnenwende um den 21. Dezember ist die Nacht am längsten."
+    },
+    {
+     "frage": "Welches Land der EU hat die meisten Einwohner?",
+     "antwort": "Deutschland",
+     "falsch": [
+      "Frankreich",
+      "Italien",
+      "Spanien"
+     ],
+     "erklaerung": "Deutschland hat gut 80 Millionen Einwohner, Frankreich folgt auf Platz zwei."
+    },
+    {
+     "frage": "Wer sammelte das Märchen „Hänsel und Gretel“?",
+     "antwort": "Die Brüder Grimm",
+     "falsch": [
+      "Hans Christian Andersen",
+      "Wilhelm Hauff",
+      "Charles Perrault"
+     ],
+     "erklaerung": "Jacob und Wilhelm Grimm gaben ab 1812 ihre „Kinder- und Hausmärchen“ heraus."
+    },
+    {
+     "frage": "Wie viel der Erdoberfläche ist ungefähr mit Wasser bedeckt?",
+     "antwort": "etwa 71 %",
+     "falsch": [
+      "etwa 50 %",
+      "etwa 85 %",
+      "etwa 60 %"
+     ],
+     "erklaerung": "Rund 71 Prozent der Erdoberfläche sind Wasser – fast alles davon Meer."
+    }
+   ],
    "witz": "Wo wohnen Katzen am liebsten? – Im Miezhaus.",
    "wort": {
     "wort": "Ohrwurm",
@@ -963,6 +1691,58 @@
      "Es kommt von der Sonne."
     ]
    },
+   "quiz": [
+    {
+     "frage": "Welches dieser Fahrzeuge fährt auf Schienen?",
+     "antwort": "Straßenbahn",
+     "falsch": [
+      "Bus",
+      "Lastwagen",
+      "Taxi"
+     ],
+     "erklaerung": "Straßenbahnen fahren auf Schienen, meist mitten in der Stadt."
+    },
+    {
+     "frage": "Was zeigt ein Thermometer an?",
+     "antwort": "Temperatur",
+     "falsch": [
+      "Luftdruck",
+      "Luftfeuchtigkeit",
+      "Windstärke"
+     ],
+     "erklaerung": "Griechisch „thermós“ heißt warm."
+    },
+    {
+     "frage": "Welches Meer liegt im Norden Deutschlands neben der Ostsee?",
+     "antwort": "Nordsee",
+     "falsch": [
+      "Mittelmeer",
+      "Schwarzes Meer",
+      "Barentssee"
+     ],
+     "erklaerung": "Deutschland grenzt an Nordsee und Ostsee."
+    },
+    {
+     "frage": "Was ist die Hauptzutat von Guacamole?",
+     "antwort": "Avocado",
+     "falsch": [
+      "Gurke",
+      "Erbsen",
+      "Limette"
+     ],
+     "erklaerung": "Guacamole ist ein mexikanischer Dip aus Avocado, oft mit Limette und Zwiebel."
+    },
+    {
+     "frage": "In welchem Jahr begann der Erste Weltkrieg?",
+     "antwort": "1914",
+     "falsch": [
+      "1912",
+      "1916",
+      "1918"
+     ],
+     "erklaerung": "Der Erste Weltkrieg dauerte von 1914 bis 1918."
+    }
+   ],
    "witz": "Was ist weiß und stört beim Essen? – Eine Lawine.",
    "wort": {
     "wort": "Torschlusspanik",
@@ -1030,6 +1810,58 @@
      "Man trägt sie am Handgelenk oder hängt sie an die Wand."
     ]
    },
+   "quiz": [
+    {
+     "frage": "Was hat ein Zebra auf dem Fell?",
+     "antwort": "Streifen",
+     "falsch": [
+      "Punkte",
+      "Schuppen",
+      "Federn"
+     ],
+     "erklaerung": "Jedes Zebra hat ein eigenes Streifenmuster – wie ein Fingerabdruck."
+    },
+    {
+     "frage": "Wie viele Nullen hat eine Million?",
+     "antwort": "6",
+     "falsch": [
+      "5",
+      "7",
+      "9"
+     ],
+     "erklaerung": "Eine Million ist 1.000.000 – eine Milliarde hat neun Nullen."
+    },
+    {
+     "frage": "Wie heißt die Hauptstadt von Portugal?",
+     "antwort": "Lissabon",
+     "falsch": [
+      "Porto",
+      "Faro",
+      "Coimbra"
+     ],
+     "erklaerung": "Lissabon liegt an der Mündung des Tejo in den Atlantik."
+    },
+    {
+     "frage": "Welches dieser Tiere ist ein Beuteltier?",
+     "antwort": "Känguru",
+     "falsch": [
+      "Faultier",
+      "Gürteltier",
+      "Ameisenbär"
+     ],
+     "erklaerung": "Kängurus tragen ihre Jungen im Beutel am Bauch."
+    },
+    {
+     "frage": "Wie heißt die Angst vor Spinnen?",
+     "antwort": "Arachnophobie",
+     "falsch": [
+      "Klaustrophobie",
+      "Akrophobie",
+      "Agoraphobie"
+     ],
+     "erklaerung": "Klaustrophobie ist Angst vor engen Räumen, Akrophobie Höhenangst."
+    }
+   ],
    "witz": "Was macht ein Mathematiker im Garten? – Er zieht Wurzeln.",
    "wort": {
     "wort": "verschlimmbessern",
@@ -1098,6 +1930,58 @@
      "Am Abend hilft ein Stock."
     ]
    },
+   "quiz": [
+    {
+     "frage": "Welches dieser Tiere hält Winterschlaf?",
+     "antwort": "Igel",
+     "falsch": [
+      "Reh",
+      "Eichhörnchen",
+      "Fuchs"
+     ],
+     "erklaerung": "Igel schlafen den ganzen Winter; Eichhörnchen halten nur Winterruhe und wachen oft auf."
+    },
+    {
+     "frage": "Welche Farbe hat der Kreis auf der Flagge Japans?",
+     "antwort": "Rot",
+     "falsch": [
+      "Gelb",
+      "Blau",
+      "Schwarz"
+     ],
+     "erklaerung": "Der rote Kreis auf Weiß steht für die Sonne."
+    },
+    {
+     "frage": "Welcher Kontinent ist der größte?",
+     "antwort": "Asien",
+     "falsch": [
+      "Afrika",
+      "Nordamerika",
+      "Europa"
+     ],
+     "erklaerung": "Asien ist der größte Kontinent – nach Fläche und nach Einwohnern."
+    },
+    {
+     "frage": "Wie viele Spieler einer Mannschaft stehen beim Basketball auf dem Feld?",
+     "antwort": "5",
+     "falsch": [
+      "6",
+      "7",
+      "4"
+     ],
+     "erklaerung": "Beim Basketball spielen fünf gegen fünf."
+    },
+    {
+     "frage": "Wer gilt als Begründer der Evolutionstheorie durch natürliche Auslese?",
+     "antwort": "Charles Darwin",
+     "falsch": [
+      "Gregor Mendel",
+      "Alexander von Humboldt",
+      "Carl von Linné"
+     ],
+     "erklaerung": "Darwin veröffentlichte 1859 „Über die Entstehung der Arten“."
+    }
+   ],
    "witz": "Wie nennt man einen Schneemann mit Sonnenbrand? – Pfütze.",
    "wort": {
     "wort": "Luftschloss",
@@ -1165,6 +2049,58 @@
      "Man drückt ihn aus."
     ]
    },
+   "quiz": [
+    {
+     "frage": "An welchem Fest werden traditionell Eier bemalt?",
+     "antwort": "Ostern",
+     "falsch": [
+      "Weihnachten",
+      "Pfingsten",
+      "Erntedank"
+     ],
+     "erklaerung": "Bemalte Eier gehören bei uns zum Osterfest."
+    },
+    {
+     "frage": "Welches ist das schnellste Landtier?",
+     "antwort": "Gepard",
+     "falsch": [
+      "Löwe",
+      "Antilope",
+      "Strauß"
+     ],
+     "erklaerung": "Geparde erreichen im Sprint über 100 km/h – aber nur kurz."
+    },
+    {
+     "frage": "Welches dieser Länder grenzt nicht an Deutschland?",
+     "antwort": "Italien",
+     "falsch": [
+      "Österreich",
+      "Polen",
+      "Luxemburg"
+     ],
+     "erklaerung": "Zwischen Deutschland und Italien liegen Österreich und die Schweiz."
+    },
+    {
+     "frage": "Was ist H₂O?",
+     "antwort": "Wasser",
+     "falsch": [
+      "Wasserstoffperoxid",
+      "Kochsalz",
+      "Sauerstoff"
+     ],
+     "erklaerung": "Ein Wassermolekül besteht aus zwei Wasserstoffatomen und einem Sauerstoffatom."
+    },
+    {
+     "frage": "Wie heißt die Hauptstadt der Türkei?",
+     "antwort": "Ankara",
+     "falsch": [
+      "Istanbul",
+      "Izmir",
+      "Antalya"
+     ],
+     "erklaerung": "Istanbul ist die größte Stadt, Hauptstadt ist seit 1923 Ankara."
+    }
+   ],
    "witz": "Was ist klein, braun und rund und sitzt hinter Gittern? – Eine Knastanie.",
    "wort": {
     "wort": "Treppenwitz",
@@ -1232,6 +2168,58 @@
      "Man findet sie auf einem Brief."
     ]
    },
+   "quiz": [
+    {
+     "frage": "Welches heimische Wildtier ist mit dem Hund verwandt und hat meist rotes Fell?",
+     "antwort": "Fuchs",
+     "falsch": [
+      "Dachs",
+      "Marder",
+      "Luchs"
+     ],
+     "erklaerung": "Der Rotfuchs gehört zur Familie der Hunde."
+    },
+    {
+     "frage": "Wie viele Minuten dauert ein Fußballspiel ohne Nachspielzeit?",
+     "antwort": "90",
+     "falsch": [
+      "80",
+      "100",
+      "120"
+     ],
+     "erklaerung": "Zwei Halbzeiten zu je 45 Minuten."
+    },
+    {
+     "frage": "In welchem Land liegt Machu Picchu?",
+     "antwort": "Peru",
+     "falsch": [
+      "Mexiko",
+      "Bolivien",
+      "Chile"
+     ],
+     "erklaerung": "Die Inka-Stadt liegt hoch in den Anden Perus."
+    },
+    {
+     "frage": "Wie heißt die Wissenschaft von den Sternen und dem Weltall?",
+     "antwort": "Astronomie",
+     "falsch": [
+      "Astrologie",
+      "Geologie",
+      "Meteorologie"
+     ],
+     "erklaerung": "Astrologie ist Sterndeutung und keine Wissenschaft."
+    },
+    {
+     "frage": "Welcher Komponist wurde in Salzburg geboren?",
+     "antwort": "Wolfgang Amadeus Mozart",
+     "falsch": [
+      "Joseph Haydn",
+      "Franz Schubert",
+      "Johann Strauss"
+     ],
+     "erklaerung": "Mozart wurde 1756 in Salzburg geboren."
+    }
+   ],
    "witz": "Was ist ein Cowboy ohne Pferd? – Ein Sattelschlepper.",
    "wort": {
     "wort": "Feierabend",
@@ -1300,6 +2288,58 @@
      "Dreh sie um 180 Grad."
     ]
    },
+   "quiz": [
+    {
+     "frage": "Welche Jahreszeit folgt auf den Sommer?",
+     "antwort": "Herbst",
+     "falsch": [
+      "Winter",
+      "Frühling",
+      "Regenzeit"
+     ],
+     "erklaerung": "Auf den Sommer folgt der Herbst – bei uns beginnt er um den 22. September."
+    },
+    {
+     "frage": "Wie heißt der Stern im Mittelpunkt unseres Sonnensystems?",
+     "antwort": "Sonne",
+     "falsch": [
+      "Polarstern",
+      "Sirius",
+      "Mond"
+     ],
+     "erklaerung": "Alle Planeten unseres Sonnensystems kreisen um die Sonne."
+    },
+    {
+     "frage": "Wie heißt die Hauptstadt von Sachsen?",
+     "antwort": "Dresden",
+     "falsch": [
+      "Leipzig",
+      "Chemnitz",
+      "Magdeburg"
+     ],
+     "erklaerung": "Leipzig ist die größte Stadt Sachsens, Hauptstadt ist Dresden."
+    },
+    {
+     "frage": "Was misst ein Barometer?",
+     "antwort": "Luftdruck",
+     "falsch": [
+      "Temperatur",
+      "Windgeschwindigkeit",
+      "Luftfeuchtigkeit"
+     ],
+     "erklaerung": "Fällt der Luftdruck, kommt oft schlechtes Wetter."
+    },
+    {
+     "frage": "Wie heißt das kleinste Land der Welt?",
+     "antwort": "Vatikanstadt",
+     "falsch": [
+      "Monaco",
+      "San Marino",
+      "Liechtenstein"
+     ],
+     "erklaerung": "Die Vatikanstadt in Rom ist nicht einmal einen halben Quadratkilometer groß."
+    }
+   ],
    "witz": "Warum sind Fische so schlau? – Weil sie in Schulen gehen.",
    "wort": {
     "wort": "Geborgenheit",
@@ -1367,6 +2407,58 @@
      "Darauf liegt dein Kissen."
     ]
    },
+   "quiz": [
+    {
+     "frage": "Welche Farbe haben Feuerwehrautos in Deutschland meistens?",
+     "antwort": "Rot",
+     "falsch": [
+      "Gelb",
+      "Blau",
+      "Grün"
+     ],
+     "erklaerung": "Feuerwehrfahrzeuge sind bei uns meist rot."
+    },
+    {
+     "frage": "Wie viele Tage hat ein Schaltjahr?",
+     "antwort": "366",
+     "falsch": [
+      "365",
+      "364",
+      "367"
+     ],
+     "erklaerung": "Im Schaltjahr hat der Februar 29 Tage."
+    },
+    {
+     "frage": "Welches dieser Tiere ist kein Vogel?",
+     "antwort": "Fledermaus",
+     "falsch": [
+      "Pinguin",
+      "Strauß",
+      "Kiwi"
+     ],
+     "erklaerung": "Fledermäuse sind Säugetiere – die einzigen, die richtig fliegen können."
+    },
+    {
+     "frage": "Wer malte „Die Sternennacht“?",
+     "antwort": "Vincent van Gogh",
+     "falsch": [
+      "Claude Monet",
+      "Paul Cézanne",
+      "Edvard Munch"
+     ],
+     "erklaerung": "Van Gogh malte das Bild 1889 in Südfrankreich."
+    },
+    {
+     "frage": "Welcher Planet ist der größte unseres Sonnensystems?",
+     "antwort": "Jupiter",
+     "falsch": [
+      "Saturn",
+      "Neptun",
+      "Uranus"
+     ],
+     "erklaerung": "In den Jupiter würde die Erde mehr als tausendmal hineinpassen."
+    }
+   ],
    "witz": "Was ist groß, grau und telefoniert? – Ein Telefant.",
    "wort": {
     "wort": "Wabi-Sabi",
@@ -1435,6 +2527,58 @@
      "Man braucht sie zum Grillen."
     ]
    },
+   "quiz": [
+    {
+     "frage": "Welches Tier hat lange Ohren und hoppelt über das Feld?",
+     "antwort": "Hase",
+     "falsch": [
+      "Hamster",
+      "Igel",
+      "Meerschweinchen"
+     ],
+     "erklaerung": "Feldhasen haben lange Ohren und kräftige Hinterbeine."
+    },
+    {
+     "frage": "Wie heißt die Hauptstadt von Österreich?",
+     "antwort": "Wien",
+     "falsch": [
+      "Salzburg",
+      "Graz",
+      "Innsbruck"
+     ],
+     "erklaerung": "Wien liegt an der Donau."
+    },
+    {
+     "frage": "Welches Gemüse lässt beim Schneiden oft die Augen tränen?",
+     "antwort": "Zwiebel",
+     "falsch": [
+      "Karotte",
+      "Gurke",
+      "Paprika"
+     ],
+     "erklaerung": "Beim Schneiden setzt die Zwiebel einen Stoff frei, der die Augen reizt."
+    },
+    {
+     "frage": "Auf welchem Kontinent liegt der Südpol?",
+     "antwort": "Antarktika",
+     "falsch": [
+      "Arktis",
+      "Australien",
+      "Grönland"
+     ],
+     "erklaerung": "Die Arktis am Nordpol ist kein Kontinent, sondern ein vereistes Meer."
+    },
+    {
+     "frage": "In welchem Jahr veröffentlichte Martin Luther seine 95 Thesen?",
+     "antwort": "1517",
+     "falsch": [
+      "1492",
+      "1521",
+      "1555"
+     ],
+     "erklaerung": "Der 31. Oktober 1517 gilt als Beginn der Reformation."
+    }
+   ],
    "witz": "Warum können Gespenster so schlecht lügen? – Weil man durch sie hindurchsieht.",
    "wort": {
     "wort": "Saudade",
@@ -1502,6 +2646,58 @@
      "Meist kommt er im Paar."
     ]
    },
+   "quiz": [
+    {
+     "frage": "Wie nennt man einen jungen Hund?",
+     "antwort": "Welpe",
+     "falsch": [
+      "Kitz",
+      "Küken",
+      "Frischling"
+     ],
+     "erklaerung": "Ein Kitz ist ein junges Reh, ein Frischling ein junges Wildschwein."
+    },
+    {
+     "frage": "Welche Farbe entsteht aus Rot und Weiß?",
+     "antwort": "Rosa",
+     "falsch": [
+      "Lila",
+      "Orange",
+      "Braun"
+     ],
+     "erklaerung": "Rot mit Weiß aufgehellt ergibt Rosa."
+    },
+    {
+     "frage": "Wie heißt die Hauptstadt von Norwegen?",
+     "antwort": "Oslo",
+     "falsch": [
+      "Bergen",
+      "Stockholm",
+      "Helsinki"
+     ],
+     "erklaerung": "Stockholm ist die Hauptstadt Schwedens, Helsinki die Finnlands."
+    },
+    {
+     "frage": "Welches Gas ist in der Luft am häufigsten?",
+     "antwort": "Stickstoff",
+     "falsch": [
+      "Sauerstoff",
+      "Kohlendioxid",
+      "Argon"
+     ],
+     "erklaerung": "Luft besteht zu etwa 78 Prozent aus Stickstoff und zu etwa 21 Prozent aus Sauerstoff."
+    },
+    {
+     "frage": "Wer schrieb „Romeo und Julia“?",
+     "antwort": "William Shakespeare",
+     "falsch": [
+      "Christopher Marlowe",
+      "Charles Dickens",
+      "Molière"
+     ],
+     "erklaerung": "Shakespeare schrieb die Tragödie Ende des 16. Jahrhunderts."
+    }
+   ],
    "witz": "Was sagt die Null zur Acht? – „Schicker Gürtel!“",
    "wort": {
     "wort": "Ubuntu",
@@ -1569,6 +2765,58 @@
      "Sie kommt oft im Herbst."
     ]
    },
+   "quiz": [
+    {
+     "frage": "Welches Tier spinnt ein Netz, um Beute zu fangen?",
+     "antwort": "Spinne",
+     "falsch": [
+      "Raupe",
+      "Ameise",
+      "Biene"
+     ],
+     "erklaerung": "Die Fäden des Netzes kommen aus den Spinndrüsen am Hinterleib."
+    },
+    {
+     "frage": "Wie viele Zentimeter hat ein Meter?",
+     "antwort": "100",
+     "falsch": [
+      "10",
+      "1000",
+      "60"
+     ],
+     "erklaerung": "Ein Meter hat 100 Zentimeter oder 1000 Millimeter."
+    },
+    {
+     "frage": "In welcher Stadt steht die Freiheitsstatue?",
+     "antwort": "New York",
+     "falsch": [
+      "Washington",
+      "Boston",
+      "Philadelphia"
+     ],
+     "erklaerung": "Die Statue war ein Geschenk Frankreichs und steht seit 1886 vor New York."
+    },
+    {
+     "frage": "Welche Sportart wird beim Turnier in Wimbledon gespielt?",
+     "antwort": "Tennis",
+     "falsch": [
+      "Golf",
+      "Cricket",
+      "Polo"
+     ],
+     "erklaerung": "Wimbledon in London ist das älteste Tennisturnier der Welt."
+    },
+    {
+     "frage": "Wie lautet das Fachwort für Tiere, die nur Pflanzen fressen?",
+     "antwort": "Herbivoren",
+     "falsch": [
+      "Karnivoren",
+      "Omnivoren",
+      "Insektivoren"
+     ],
+     "erklaerung": "Karnivoren fressen Fleisch, Omnivoren alles."
+    }
+   ],
    "witz": "Was trinkt ein Vampir am liebsten zum Frühstück? – Blutorangensaft.",
    "wort": {
     "wort": "Sitzfleisch",
@@ -1637,6 +2885,58 @@
      "Morgen gehört dazu."
     ]
    },
+   "quiz": [
+    {
+     "frage": "Womit schreibt man traditionell auf eine Schultafel?",
+     "antwort": "Kreide",
+     "falsch": [
+      "Tinte",
+      "Radiergummi",
+      "Kleber"
+     ],
+     "erklaerung": "Tafelkreide besteht meist aus Gips oder Kalk."
+    },
+    {
+     "frage": "Wie viele Felder hat ein Schachbrett?",
+     "antwort": "64",
+     "falsch": [
+      "32",
+      "81",
+      "100"
+     ],
+     "erklaerung": "Ein Schachbrett hat 8 mal 8 Felder."
+    },
+    {
+     "frage": "Welches Tier ist das Zeichen der Naturschutzorganisation WWF?",
+     "antwort": "Großer Panda",
+     "falsch": [
+      "Eisbär",
+      "Tiger",
+      "Gorilla"
+     ],
+     "erklaerung": "Der Panda ist seit der Gründung 1961 im Zeichen des WWF."
+    },
+    {
+     "frage": "Welcher Fluss fließt durch Paris?",
+     "antwort": "Seine",
+     "falsch": [
+      "Loire",
+      "Rhône",
+      "Garonne"
+     ],
+     "erklaerung": "Die Seine fließt durch Paris und mündet bei Le Havre in den Ärmelkanal."
+    },
+    {
+     "frage": "Was ist der Hauptbestandteil von Erdgas?",
+     "antwort": "Methan",
+     "falsch": [
+      "Propan",
+      "Butan",
+      "Ethanol"
+     ],
+     "erklaerung": "Erdgas besteht größtenteils aus Methan."
+    }
+   ],
    "witz": "Warum wurde die Tomate rot? – Sie hat das Salatdressing gesehen.",
    "wort": {
     "wort": "Eselsbrücke",
@@ -1704,6 +3004,58 @@
      "Wer sie anfasst, bekommt rote Pusteln."
     ]
    },
+   "quiz": [
+    {
+     "frage": "Was ist das Gegenteil von „heiß“?",
+     "antwort": "Kalt",
+     "falsch": [
+      "Warm",
+      "Lauwarm",
+      "Feucht"
+     ],
+     "erklaerung": "Heiß und kalt sind Gegensätze, lauwarm liegt dazwischen."
+    },
+    {
+     "frage": "Wie heißt die Wohnung eines Bibers?",
+     "antwort": "Biberburg",
+     "falsch": [
+      "Kobel",
+      "Horst",
+      "Kessel"
+     ],
+     "erklaerung": "Ein Kobel ist das Nest des Eichhörnchens, ein Horst das eines Greifvogels, der Kessel die Wohnhöhle im Fuchs- oder Dachsbau. Manche Biber wohnen statt in einer Burg in einem Erdbau am Ufer."
+    },
+    {
+     "frage": "Wie heißt die Hauptstadt von Griechenland?",
+     "antwort": "Athen",
+     "falsch": [
+      "Thessaloniki",
+      "Sparta",
+      "Korinth"
+     ],
+     "erklaerung": "Über Athen thront die Akropolis."
+    },
+    {
+     "frage": "Welches Tier kann seine Farbe wechseln?",
+     "antwort": "Chamäleon",
+     "falsch": [
+      "Krokodil",
+      "Schildkröte",
+      "Salamander"
+     ],
+     "erklaerung": "Chamäleons ändern ihre Farbe je nach Stimmung, Temperatur und Licht."
+    },
+    {
+     "frage": "Wer entdeckte das Penicillin?",
+     "antwort": "Alexander Fleming",
+     "falsch": [
+      "Louis Pasteur",
+      "Robert Koch",
+      "Marie Curie"
+     ],
+     "erklaerung": "Fleming entdeckte das Penicillin 1928 durch einen Schimmelpilz auf einer Bakterienkultur in einer Petrischale."
+    }
+   ],
    "witz": "Was macht ein Schaf beim Sport? – Määärathon.",
    "wort": {
     "wort": "Lampenfieber",
@@ -1772,6 +3124,58 @@
      "Es wiederholt deine Worte."
     ]
    },
+   "quiz": [
+    {
+     "frage": "Welches dieser Tiere lebt im Wasser und hat Flossen?",
+     "antwort": "Forelle",
+     "falsch": [
+      "Frosch",
+      "Ente",
+      "Biber"
+     ],
+     "erklaerung": "Forellen sind Fische und atmen mit Kiemen."
+    },
+    {
+     "frage": "Welche Form hat die Erde ungefähr?",
+     "antwort": "Kugel",
+     "falsch": [
+      "Scheibe",
+      "Würfel",
+      "Ring"
+     ],
+     "erklaerung": "Die Erde ist fast eine Kugel, an den Polen etwas abgeplattet."
+    },
+    {
+     "frage": "Welche dieser Städte liegt an der Elbe?",
+     "antwort": "Hamburg",
+     "falsch": [
+      "Köln",
+      "München",
+      "Frankfurt am Main"
+     ],
+     "erklaerung": "Köln liegt am Rhein, München an der Isar, Frankfurt am Main."
+    },
+    {
+     "frage": "Von welchem Tier stammt Seide?",
+     "antwort": "Seidenraupe",
+     "falsch": [
+      "Spinne",
+      "Schaf",
+      "Biene"
+     ],
+     "erklaerung": "Die Raupe des Seidenspinners spinnt einen Kokon aus Seidenfaden."
+    },
+    {
+     "frage": "Welches Land richtete 1896 die ersten Olympischen Spiele der Neuzeit aus?",
+     "antwort": "Griechenland",
+     "falsch": [
+      "Frankreich",
+      "Großbritannien",
+      "USA"
+     ],
+     "erklaerung": "Die ersten Spiele der Neuzeit fanden 1896 in Athen statt."
+    }
+   ],
    "witz": "Welche Stadt hat keine Häuser? – Die Werkstatt.",
    "wort": {
     "wort": "Kopfkino",
@@ -1838,6 +3242,58 @@
      "Sie ist aus Wachs."
     ]
    },
+   "quiz": [
+    {
+     "frage": "Welches Wetter braucht man für einen Regenbogen?",
+     "antwort": "Sonne und Regen",
+     "falsch": [
+      "Schnee und Wind",
+      "Nebel und Frost",
+      "Gewitter in der Nacht"
+     ],
+     "erklaerung": "Sonnenlicht wird in Regentropfen gebrochen – die Sonne steht dabei hinter dir."
+    },
+    {
+     "frage": "Was ist länger: ein Kilometer oder eine Meile?",
+     "antwort": "Eine Meile",
+     "falsch": [
+      "Ein Kilometer",
+      "Beide gleich lang",
+      "Kommt aufs Land an"
+     ],
+     "erklaerung": "Eine Meile ist etwa 1,6 Kilometer lang."
+    },
+    {
+     "frage": "Wie heißt die Hauptstadt von Irland?",
+     "antwort": "Dublin",
+     "falsch": [
+      "Cork",
+      "Belfast",
+      "Galway"
+     ],
+     "erklaerung": "Belfast ist die Hauptstadt von Nordirland, das zum Vereinigten Königreich gehört."
+    },
+    {
+     "frage": "Welches Organ reinigt das Blut und bildet Urin?",
+     "antwort": "Niere",
+     "falsch": [
+      "Leber",
+      "Milz",
+      "Lunge"
+     ],
+     "erklaerung": "Die Nieren filtern jeden Tag viele hundert Liter Blut."
+    },
+    {
+     "frage": "Wer schrieb „Die Verwandlung“, in der Gregor Samsa zu einem Ungeziefer wird?",
+     "antwort": "Franz Kafka",
+     "falsch": [
+      "Thomas Mann",
+      "Hermann Hesse",
+      "Robert Musil"
+     ],
+     "erklaerung": "Kafkas Erzählung erschien 1915 – meist stellt man sich das Ungeziefer als Käfer vor."
+    }
+   ],
    "witz": "Was ist braun und sitzt im Wald auf dem Klavier? – Ein Brummbär mit Lampenfieber.",
    "wort": {
     "wort": "Waldeinsamkeit",
@@ -1905,6 +3361,58 @@
      "Die Zahl hat drei Nullen."
     ]
    },
+   "quiz": [
+    {
+     "frage": "Welches dieser Tiere hat einen Panzer?",
+     "antwort": "Schildkröte",
+     "falsch": [
+      "Frosch",
+      "Eidechse",
+      "Schnecke"
+     ],
+     "erklaerung": "Der Panzer der Schildkröte ist mit ihrem Skelett verwachsen."
+    },
+    {
+     "frage": "Wie viele Farben hat ein Regenbogen nach der üblichen Zählung?",
+     "antwort": "7",
+     "falsch": [
+      "5",
+      "6",
+      "9"
+     ],
+     "erklaerung": "Rot, Orange, Gelb, Grün, Blau, Indigo und Violett – so zählte schon Isaac Newton."
+    },
+    {
+     "frage": "Wie heißt der höchste Berg der Welt?",
+     "antwort": "Mount Everest",
+     "falsch": [
+      "K2",
+      "Kilimandscharo",
+      "Mont Blanc"
+     ],
+     "erklaerung": "Der Mount Everest im Himalaya ist rund 8849 Meter hoch."
+    },
+    {
+     "frage": "In welcher Einheit misst man elektrische Spannung?",
+     "antwort": "Volt",
+     "falsch": [
+      "Ampere",
+      "Watt",
+      "Ohm"
+     ],
+     "erklaerung": "Ampere ist die Stromstärke, Watt die Leistung, Ohm der Widerstand."
+    },
+    {
+     "frage": "In welcher Stadt wurde Ludwig van Beethoven geboren?",
+     "antwort": "Bonn",
+     "falsch": [
+      "Wien",
+      "Köln",
+      "Salzburg"
+     ],
+     "erklaerung": "Beethoven wurde 1770 in Bonn geboren und lebte später in Wien."
+    }
+   ],
    "witz": "Was ist gelb und schießt? – Eine Banone.",
    "wort": {
     "wort": "Muße",
@@ -1973,6 +3481,58 @@
      "Ein Kilo ist ein Kilo."
     ]
    },
+   "quiz": [
+    {
+     "frage": "Welche Frucht wächst an einer Palme und hat eine harte Schale?",
+     "antwort": "Kokosnuss",
+     "falsch": [
+      "Walnuss",
+      "Mango",
+      "Ananas"
+     ],
+     "erklaerung": "Kokosnüsse wachsen an Kokospalmen, oft an tropischen Stränden."
+    },
+    {
+     "frage": "Wie viele Wochen hat ein Jahr ungefähr?",
+     "antwort": "52",
+     "falsch": [
+      "48",
+      "50",
+      "56"
+     ],
+     "erklaerung": "Ein Jahr hat 52 Wochen und ein oder zwei Tage."
+    },
+    {
+     "frage": "Wie heißt die Hauptstadt von Polen?",
+     "antwort": "Warschau",
+     "falsch": [
+      "Krakau",
+      "Danzig",
+      "Breslau"
+     ],
+     "erklaerung": "Krakau war bis um 1600 Hauptstadt, seitdem ist es Warschau."
+    },
+    {
+     "frage": "Welches ist das größte Landtier?",
+     "antwort": "Afrikanischer Elefant",
+     "falsch": [
+      "Nashorn",
+      "Flusspferd",
+      "Giraffe"
+     ],
+     "erklaerung": "Giraffen sind die höchsten Tiere, Afrikanische Elefanten die schwersten an Land."
+    },
+    {
+     "frage": "Wie heißt der griechische Gott des Meeres?",
+     "antwort": "Poseidon",
+     "falsch": [
+      "Zeus",
+      "Hades",
+      "Apollon"
+     ],
+     "erklaerung": "Bei den Römern hieß er Neptun."
+    }
+   ],
    "witz": "Was steht auf dem Grabstein eines Mathematikers? – „Damit hat er nicht gerechnet.“",
    "wort": {
     "wort": "Kaizen",
@@ -2041,6 +3601,58 @@
      "Man stellt Teller darauf."
     ]
    },
+   "quiz": [
+    {
+     "frage": "Welches Tier kräht am Morgen?",
+     "antwort": "Hahn",
+     "falsch": [
+      "Huhn",
+      "Gans",
+      "Ente"
+     ],
+     "erklaerung": "Der Hahn ist das männliche Huhn – er kräht."
+    },
+    {
+     "frage": "Welcher Monat hat die wenigsten Tage?",
+     "antwort": "Februar",
+     "falsch": [
+      "April",
+      "November",
+      "Juni"
+     ],
+     "erklaerung": "Der Februar hat 28 Tage, im Schaltjahr 29."
+    },
+    {
+     "frage": "Welches Land ist für Tulpen und Windmühlen bekannt?",
+     "antwort": "Niederlande",
+     "falsch": [
+      "Belgien",
+      "Dänemark",
+      "Schweiz"
+     ],
+     "erklaerung": "Die Niederlande sind einer der größten Blumenzüchter der Welt."
+    },
+    {
+     "frage": "Wie heißt die Verwandlung einer Raupe in einen Schmetterling?",
+     "antwort": "Metamorphose",
+     "falsch": [
+      "Mutation",
+      "Fotosynthese",
+      "Häutung"
+     ],
+     "erklaerung": "Aus der Raupe wird eine Puppe und daraus der Schmetterling."
+    },
+    {
+     "frage": "Welcher Seefahrer erreichte 1492 Amerika?",
+     "antwort": "Christoph Kolumbus",
+     "falsch": [
+      "Vasco da Gama",
+      "Ferdinand Magellan",
+      "Amerigo Vespucci"
+     ],
+     "erklaerung": "Kolumbus wollte eigentlich nach Indien – Amerika wurde später nach Amerigo Vespucci benannt."
+    }
+   ],
    "witz": "Was ist ein Keller voller Kekse? – Ein Krümelkeller.",
    "wort": {
     "wort": "Hüftgold",
