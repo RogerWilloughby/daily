@@ -154,13 +154,13 @@ Daraus entstehen der Katalog `/api/v1/dienste`, die Dateien `docs/dienste/<id>.m
 | `src/js/adapter/*.js` | Darstellung je Dienst (ohne DOM, testbar) |
 
 ## Aufbau der Oberfläche: wo liegt was
-Seit App 0.47.0 die Oberfläche „Abreißblock“ (Phase 1b): Bereiche Heute · Wetter · Kalender · Mehr mit Untertabs; seit 0.47.2 ohne das alte Kachelraster.
+Seit App 0.47.0 die Oberfläche „Abreißblock“ (Phase 1b); seit 0.47.2 ohne das alte Kachelraster; seit 0.49.0 drei Ebenen Bereich → Rubrik → Thema (Bereiche Heute · Entdecken · Wetter · Kalender · Mehr, Gliederung `../konzept/themen.md`).
 Die Oberfläche weiß nichts über einzelne Bereiche – besondere Darstellung hängt sich über Ansichten ein (Test „Aufbau“ in `test/daily.test.js` wacht darüber).
 Info-Dienste ohne Bereich (Tanken, Fußball, Autobahn, Finanzen, Kurse, Schlagzeilen, Termine, Abfahrten) laufen nur noch auf dem Server (headless, nur pflegen).
 
 | Datei | Zweck |
 |---|---|
-| `src/js/core/oberflaeche.js` | Gerüst: Bereiche, Untertabs (`untertabsVon`), Umschalter im Feld (`teile`), Adresse `#bereich/untertab/teil` (`adresseLesen`), `set(id, patch)` für die Anbieter, nur ganze Zeilen |
+| `src/js/core/oberflaeche.js` | Gerüst: drei Ebenen Bereich → Rubrik (`untertabsVon`) → Thema (`teile`, Zeile `.ab-themen`, Ereignis `daily:thema`), Adresse `#bereich/rubrik/thema` (`adresseLesen`), `set(id, patch)` für die Anbieter, nur ganze Zeilen |
 | `src/js/core/mini-reiter.js` | Listen (`listeHtml`, Zeile mit `href` oder `aktion` → `data-aktion`), Zeilen ausblenden, die nicht passen (`krZeilen`) |
 | `src/js/core/betrieb.js` | Betriebsart (öffentlich/privat) und `GENUTZTE_DIENSTE` – die Dienste der Oberfläche (für „Woher kommen die Daten?“ und den Speicher im Browser) |
 | `src/js/core/store.js` | Speicher im Browser: Einstellungen, Orte, Meine Seiten, Gemerktes; einmaliges Aufräumen der Kachel-Daten (`aufraeumen`, 0.47.3) |
@@ -169,16 +169,16 @@ Info-Dienste ohne Bereich (Tanken, Fußball, Autobahn, Finanzen, Kurse, Schlagze
 | `src/js/ansichten/mini-diagramm.js` | allgemeine Diagramm-Bedienung: Dichte je Platz (`miniDichte`), Überfahren der Spalten |
 | `src/js/ansichten/wetter.js` | Wetter: Zeitpunkt-Block unter „Jetzt“ („Jetzt“ / überfahrene Stunde oder Tag); HTML aus `adapter/wetter.js` (`zpHtml`, `jetztHtml`) |
 | `src/js/ansichten/radar.js` | Radarkarte (Untertab „Radar“): Bilder laufen lassen, Zeitleiste (Start/Pause, Sprung) |
-| `src/js/providers/heute.js` | Bereich „Heute“: Dienste `tagesinhalt` und `andiesemtag` je Tag, Blättern, Lösung, Rezeptseite, Merken (→ Mehr · Gemerkt) |
-| `src/js/providers/weather.js`, `kalender.js`, `links.js`, `tools.js` | Wetter, Kalender, Meine Seiten, Tools (privat) |
-| `src/js/adapter/diagramm.js` | Wetter-Diagramme als HTML/SVG-Text und gemeinsame Bausteine (`skala`, `pfad`, `pfadRund`, `umschalter`) |
+| `src/js/providers/heute.js` | Tagesinhalte für „Heute“ (mit Blättern), „Entdecken“ und „Mehr → Alltag“ (immer heute, Gemerktes mit „vom …“): Dienste `tagesinhalt` und `andiesemtag` je Tag, Lösung, Rezeptseite, Merken (→ Mehr · Gemerkt); Zuordnung in `adapter/tagesinhalt.js` (`ortVon`) |
+| `src/js/providers/weather.js`, `kalender.js`, `links.js`, `tools.js` | Wetter, Kalender (darin `himmelAnbieter` für Wetter → Himmel), Meine Seiten, Tools (privat) |
+| `src/js/adapter/diagramm.js` | Wetter-Diagramme als HTML/SVG-Text und gemeinsame Bausteine (`skala`, `pfad`, `pfadRund`, `MINI_WAHL` – Zeiträume für die Themen unter Wetter → Jetzt) |
 | `src/app.css` | allgemeine Styles, Design-Tokens, Dialoge, Listen im Feld |
 | `src/css/abreissblock.css` | Gestaltung Variante A: Farben hell/dunkel, Gerüst Handy/Rechner, Blatt, Untertabs, Inhalte |
 | `src/css/diagramm.css` | gemeinsame Diagramm-Styles `.wd-*` und Farben `--wd-*` (Wetter, Kalender) |
 | `src/css/wetter.css` | nur Wetter: Zeitpunkt-Block, Radar, Hinweise, Sonnenzahlen |
 | `src/css/seiten.css`, `lokal.css` | Meine Seiten (Symbolraster), Tools (Beschreibung, Knopf) |
 
-**Laden (seit 0.48.0):** Jeder Anbieter hat einen `bereich` (heute · wetter · kalender · mehr oder `immer`); `main.js` startet nur die Anbieter des sichtbaren Bereichs (`faelligeAnbieter`, Ereignis `daily:bereich`) und frischt nur diese auf. `src/sw.js` hält alles außer `/api` je Version im Speicher; `main.js` meldet ihn an, prüft bei jedem Öffnen auf eine neue Version und lädt nach dem Wechsel einmal neu.
+**Laden (seit 0.48.0):** Jeder Anbieter hat einen `bereich` (heute · entdecken · wetter · kalender · mehr, eine Liste davon oder `immer`); `main.js` startet nur die Anbieter des sichtbaren Bereichs (`faelligeAnbieter`, Ereignis `daily:bereich`) und frischt nur diese auf. `src/sw.js` hält alles außer `/api` je Version im Speicher; `main.js` meldet ihn an, prüft bei jedem Öffnen auf eine neue Version und lädt nach dem Wechsel einmal neu.
 
 Neuer Bereich oder Untertab mit eigener Darstellung: Datei unter `src/js/ansichten/`, vom Anbieter importiert; eigene Styles unter `src/css/`, in `index.html` und `sw.js` eingetragen.
 
@@ -189,7 +189,7 @@ Neuer Bereich oder Untertab mit eigener Darstellung: Datei unter `src/js/ansicht
 | `wetter` | ✅ daily/1 – Referenz; Kachel über Adapter |
 | `regen` | ✅ daily/1 – DWD-Radar über Bright Sky; erscheint in der Wetterkachel (Hinweis + Reiter „Radar“) |
 | `wetterhinweise` | ✅ daily/1 – amtliche DWD-Warnungen über Bright Sky; ersetzt die Kachel „Warnungen“, erscheint in der Wetterkachel (Abzeichen, Hinweis, Reiter „Hinweise“) nur, wenn es etwas gibt |
-| `feiertage`, `himmel` | ✅ daily/1 – Kachel „Kalender“ (ersetzt „Feiertage & Ferien“ und „Himmel“): Feiertage, Ferien (OpenHolidays), Brückentage, Zeitumstellung, KW, Aktionstage; Mond, Finsternisse, Sternschnuppen, Jahreszeiten (Astronomy Engine) |
+| `feiertage`, `himmel` | ✅ daily/1 – Kachel „Kalender“ (ersetzt „Feiertage & Ferien“ und „Himmel“): Feiertage, Ferien (OpenHolidays), Brückentage, Zeitumstellung, KW, Aktionstage; Mond, Finsternisse, Sternschnuppen, Jahreszeiten (Astronomy Engine); seit 0.49.0 erscheint `himmel` unter Wetter → Himmel |
 | `namenstage` | ✅ daily/1 – feste, gepflegte Liste nach dem kirchlichen Kalender (`services/daten/namenstage.json`); in der Kachel „Kalender“ (Zeile, Reiter „Namenstage“, Frag DAILY „Wann hat Josef Namenstag?“) |
 | `termine` | ✅ daily/1, **nur privat** – eigene Termine aus iCal (14 Tage), Links nur per POST, nie zwischengespeichert; in der Kachel „Kalender“ (Kennzahl „14:00 Zahnarzt“, Reiter „Termine“) |
 | `finanzen` | ✅ daily/1 – EZB: Wechselkurse (90 Tage), Leitzinsen, Inflation; Kachel „Finanzen“ |

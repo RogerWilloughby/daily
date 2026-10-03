@@ -4,7 +4,7 @@
 import { esc } from '../core/util.js';
 
 export const ART = {
-  raetsel: { name: 'Rätsel' }, witz: { name: 'Witz' }, film: { name: 'Film' }, wort: { name: 'Wort & Sprichwort' }, land: { name: 'Land' },
+  raetsel: { name: 'Rätsel' }, witz: { name: 'Witz' }, film: { name: 'Film' }, wort: { name: 'Wort' }, sprichwort: { name: 'Sprichwort' }, land: { name: 'Land' },
   geschichte: { name: 'An diesem Tag' }, rezept: { name: 'Rezept' }, gesundheit: { name: 'Gesundheit' }, tech: { name: 'Tech' }, beziehung: { name: 'Beziehung' },
   spartipp: { name: 'Spartipp' }
 };
@@ -28,8 +28,8 @@ export function artInhalt(art, inhalt) {
     case 'film': { const f = i.film; if (!f) return null;
       const kopf = `${f.titel}${f.jahr ? ` (${f.jahr})` : ''}${f.genre ? ' · ' + f.genre : ''}`;
       return { kurz: kopf, text: `${kopf}. ${f.text || ''}`.trim() }; }
-    case 'wort': { const w = i.wort; if (!w && !i.sprichwort) return null;
-      return { kurz: w ? w.wort : i.sprichwort, text: [w ? `${w.wort}: ${w.bedeutung}${w.herkunft ? ` (${w.herkunft})` : ''}` : '', i.sprichwort ? `Sprichwort: ${i.sprichwort}` : ''].filter(Boolean).join(' · ') }; }
+    case 'wort': { const w = i.wort; return w ? { kurz: w.wort, text: `${w.wort}: ${w.bedeutung}${w.herkunft ? ` (${w.herkunft})` : ''}` } : null; }
+    case 'sprichwort': return i.sprichwort ? { kurz: i.sprichwort, text: `Sprichwort: ${i.sprichwort}` } : null;
     case 'land': { const l = i.land; if (!l) return null;
       const daten = [l.hauptstadt && `Hauptstadt ${l.hauptstadt}`, l.sprache, l.waehrung, l.gericht && `typisch: ${l.gericht}`].filter(Boolean).join(' · ');
       return { kurz: l.name, text: `${l.name}: ${daten}. ${l.fakt || ''}`.trim() }; }
@@ -48,19 +48,32 @@ export function artInhalt(art, inhalt) {
 // Gemerktes als Kopie: { art, datum, kurz, text }
 export const favEintrag = (art, env) => { const a = artInhalt(art, env.daten.inhalt); return a ? { art, datum: env.daten.datum, kurz: a.kurz, text: a.text } : null; };
 
-// ---- Oberfläche „Abreißblock“ (seit 0.47.0, Phase 1b): Bereich „Heute“ mit Untertabs als Gruppen und Umschalter im Feld ----
-// Rätsel · Lachen (Witz) · Wissen (Wort & Sprichwort, Land, An diesem Tag) · Kultur (Film) · Alltag (Rezept, Gesundheit, Tech, Beziehung, Spartipp)
-export const GRUPPEN = [
+// ---- Oberfläche (seit 0.49.0, Schritt 1d, docs/konzept/themen.md): Bereich → Rubrik → Thema ----
+// Tagesinhalte erscheinen in drei Bereichen: „Heute“ (Mitmachen, mit ‹ ›), „Entdecken“ und „Mehr → Alltag“ (immer heute).
+// Rubriken mit mehreren Arten haben Themen (Ebene 3). Weitere Rubriken laut themen.md kommen, sobald es Inhalte gibt.
+export const HEUTE_RUBRIKEN = [
   { id: 'raetsel', name: 'Rätsel', arten: ['raetsel'] },
-  { id: 'lachen', name: 'Lachen', arten: ['witz'] },
-  { id: 'wissen', name: 'Wissen', arten: ['wort', 'land', 'geschichte'] },
-  { id: 'kultur', name: 'Kultur', arten: ['film'] },
-  { id: 'alltag', name: 'Alltag', arten: ['rezept', 'gesundheit', 'tech', 'beziehung', 'spartipp'] }
+  { id: 'lachen', name: 'Lachen', arten: ['witz'] }
 ];
-export const gruppeVon = art => (GRUPPEN.find(g => g.arten.includes(art)) || GRUPPEN[0]).id;
+export const ENTDECKEN_RUBRIKEN = [
+  { id: 'sprache', name: 'Sprache', arten: ['wort', 'sprichwort'] },
+  { id: 'zeitreise', name: 'Zeitreise', arten: ['geschichte'] },
+  { id: 'welt', name: 'Welt', arten: ['land'] },
+  { id: 'kultur', name: 'Kultur', arten: ['film'] }
+];
+export const ALLTAG_ARTEN = ['rezept', 'gesundheit', 'tech', 'beziehung', 'spartipp'];
+// Wo steht eine Art? { bereich, rubrik, thema } – thema nur, wenn die Rubrik mehrere Arten hat (für „Gemerkt“)
+export function ortVon(art) {
+  if (ALLTAG_ARTEN.includes(art)) return { bereich: 'mehr', rubrik: 'alltag', thema: art };
+  for (const [bereich, liste] of [['heute', HEUTE_RUBRIKEN], ['entdecken', ENTDECKEN_RUBRIKEN]]) {
+    const r = liste.find(x => x.arten.includes(art));
+    if (r) return { bereich, rubrik: r.id, thema: r.arten.length > 1 ? art : null };
+  }
+  return { bereich: 'heute', rubrik: HEUTE_RUBRIKEN[0].id, thema: null };
+}
 // kurze Namen für den Umschalter im Feld, Überschrift über dem Inhalt
-const KURZ = { wort: 'Wort', land: 'Land', geschichte: 'An diesem Tag', rezept: 'Rezept', gesundheit: 'Gesundheit', tech: 'Tech', beziehung: 'Beziehung', spartipp: 'Spartipp' };
-export const RUBRIK = { raetsel: 'Rätsel des Tages', witz: 'Witz des Tages', film: 'Film des Tages', wort: 'Wort des Tages', land: 'Land des Tages', geschichte: 'An diesem Tag',
+const KURZ = { wort: 'Wort', sprichwort: 'Sprichwort', land: 'Land', geschichte: 'An diesem Tag', rezept: 'Rezept', gesundheit: 'Gesundheit', tech: 'Tech', beziehung: 'Beziehung', spartipp: 'Spartipp' };
+export const RUBRIK = { raetsel: 'Rätsel des Tages', witz: 'Witz des Tages', film: 'Film des Tages', wort: 'Wort des Tages', sprichwort: 'Sprichwort des Tages', land: 'Land des Tages', geschichte: 'An diesem Tag',
   rezept: 'Rezept des Tages', gesundheit: 'Gesundheit', tech: 'Tech-Tipp', beziehung: 'Für euch zwei', spartipp: 'Spartipp' };
 const MONATE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 const WTAGE = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
@@ -92,10 +105,10 @@ export function flaecheHtml(art, inhalt, { loesung = false, rezeptSeite = 1 } = 
     case 'witz': return i.witz ? p(i.witz, 'ab-gross ab-witz') : null;
     case 'film': { const f = i.film; if (!f) return null;
       return p(f.titel, 'ab-titel') + p([f.jahr, f.genre].filter(Boolean).join(' · '), 'ab-meta') + (f.text ? p(f.text) : ''); }
-    case 'wort': { const w = i.wort; if (!w && !i.sprichwort) return null;
-      const lang = w && w.wort.length > 15 ? ' ab-l3' : w && w.wort.length > 11 ? ' ab-l2' : '';   // lange Wörter kleiner (Fingerspitzengefühl)
-      return (w ? p(w.wort, 'ab-wort' + lang) + p(w.bedeutung) + (w.herkunft ? p('Herkunft: ' + w.herkunft, 'ab-meta') : '') : '') +
-        (i.sprichwort ? `<p class="ab-sprichwort">Sprichwort: <b>${esc(i.sprichwort)}</b></p>` : ''); }
+    case 'wort': { const w = i.wort; if (!w) return null;
+      const lang = w.wort.length > 15 ? ' ab-l3' : w.wort.length > 11 ? ' ab-l2' : '';   // lange Wörter kleiner (Fingerspitzengefühl)
+      return p(w.wort, 'ab-wort' + lang) + p(w.bedeutung) + (w.herkunft ? p('Herkunft: ' + w.herkunft, 'ab-meta') : ''); }
+    case 'sprichwort': return i.sprichwort ? p('„' + i.sprichwort + '“', 'ab-gross ab-spruch') : null;
     case 'land': { const l = i.land; if (!l) return null;
       const f = [['Hauptstadt', l.hauptstadt], ['Sprache', l.sprache], ['Währung', l.waehrung], ['Typisch', l.gericht]].filter(x => x[1]);
       return p(l.name, 'ab-titel') + `<dl class="ab-fakten">${f.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>` + (l.fakt ? p(l.fakt) : ''); }
@@ -117,34 +130,49 @@ export function flaecheHtml(art, inhalt, { loesung = false, rezeptSeite = 1 } = 
   }
 }
 
-// Fläche einer Art: Überschrift, Inhalt, „☆ Merken“ (Kopie im Browser, erscheint unter Mehr → Gemerkt)
-export function artFlaeche(art, d, { favoriten = [], loesung = false, rezeptSeite = 1 } = {}) {
+// Fläche einer Art: Überschrift, Inhalt, „☆ Merken“ (Kopie im Browser, erscheint unter Mehr → Gemerkt).
+// vom: true = Inhalt eines anderen Tags in einem Bereich ohne ‹ › (aus „Gemerkt“ geöffnet) – Hinweis „vom 1.10.“ mit „zu heute“
+export function artFlaeche(art, d, { favoriten = [], loesung = false, rezeptSeite = 1, vom = false } = {}) {
   const inh = d ? flaecheHtml(art, d.inhalt, { loesung, rezeptSeite }) : null, wiki = art === 'geschichte';
   const fav = !!d && favoriten.some(f => f.art === art && f.datum === d.datum);
   const leer = !d ? 'Die Tagesinhalte sind gerade nicht erreichbar.' : wiki && d.inhalt.geschichte === null ? 'Wikipedia ist gerade nicht erreichbar.' : 'Für diesen Tag gibt es hier nichts.';
   return `<div class="ab-art" data-art="${art}"><span class="ab-rubrik">${esc(RUBRIK[art])}${wiki ? ' <small title="Texte: Wikipedia, CC BY-SA 4.0">aus Wikipedia</small>' : ''}</span>` +
+    (vom && d ? `<p class="ab-meta ab-vom">vom ${esc(datumText(d.datum))} · <button type="button" class="ab-link" data-ti="heute">zu heute</button></p>` : '') +
     (inh ? `<div class="ab-inhalt">${inh}</div>` : `<p class="ab-meta">${leer}</p>`) +
     (inh ? `<div class="ab-aktionen"><button type="button" class="ab-merken" data-ti="fav" data-art="${art}" aria-pressed="${fav}">${fav ? '★ Gemerkt' : '☆ Merken'}</button>` +
       (art === 'rezept' && d.inhalt.rezept.zubereitung ? `<button type="button" class="ab-knopf ab-weiter" data-ti="rezeptseite">${rezeptSeite === 2 ? '‹ Zutaten' : 'Zubereitung ›'}</button>` : '') + '</div>' : '') + '</div>';
 }
 
-// Bereich „Heute“ (rein, testbar): Datumsblock, je Gruppe ein Untertab; Gruppen mit mehreren Arten haben einen Umschalter (teile)
+// Rubriken aus einer Liste (rein): eine Art → Inhalt direkt, mehrere Arten → Themen (Ebene 3)
+const rubriken = (liste, d, o) => liste.map(g => g.arten.length === 1
+  ? { id: g.id, name: g.name, html: artFlaeche(g.arten[0], d, o) }
+  : { id: g.id, name: g.name, teile: g.arten.map(a => ({ id: a, name: KURZ[a] || ART[a].name, html: artFlaeche(a, d, o) })) });
+const INFO = d => ['Inhalte von DAILY (mit KI vorbereitet)', d && d.wiederholt ? 'Vorrat wiederholt sich – neue Inhalte folgen' : null];
+
+// Bereich „Heute“ (rein, testbar): Datumsblock mit ‹ ›, Rubriken zum Mitmachen
 export function heuteBereich(env, { favoriten = [], loesung = false, rezeptSeite = 1 } = {}) {
-  const d = env && env.daten, o = { favoriten, loesung, rezeptSeite };
-  const kleinReiter = GRUPPEN.map(g => g.arten.length === 1
-    ? { id: g.id, name: g.name, html: artFlaeche(g.arten[0], d, o) }
-    : { id: g.id, name: g.name, teile: g.arten.map(a => ({ id: a, name: KURZ[a] || ART[a].name, html: artFlaeche(a, d, o) })) });
+  const d = env && env.daten;
   return {
-    state: d ? 'content' : 'error', bereichKopf: d ? datumsKopf(d) : '', kleinReiter, startReiter: 'raetsel',
-    info: ['Inhalte von DAILY (mit KI vorbereitet)', '„An diesem Tag“: Wikipedia (CC BY-SA 4.0)', d && d.wiederholt ? 'Vorrat wiederholt sich – neue Inhalte folgen' : 'Verpasst? Mit ‹ blätterst du zurück']
-      .filter(Boolean)
+    state: d ? 'content' : 'error', bereichKopf: d ? datumsKopf(d) : '', kleinReiter: rubriken(HEUTE_RUBRIKEN, d, { favoriten, loesung }), startReiter: 'raetsel',
+    info: [...INFO(d), 'Verpasst? Mit ‹ blätterst du zurück'].filter(Boolean)
   };
 }
+// Bereich „Entdecken“ (rein): immer heute; vom = Inhalt eines anderen Tags (aus „Gemerkt“)
+export function entdeckenBereich(env, { favoriten = [], vom = false } = {}) {
+  const d = env && env.daten;
+  return { state: d ? 'content' : 'error', kleinReiter: rubriken(ENTDECKEN_RUBRIKEN, d, { favoriten, vom }), startReiter: 'sprache',
+    info: [...INFO(d), '„An diesem Tag“: Wikipedia (CC BY-SA 4.0)'].filter(Boolean) };
+}
+// Mehr → „Alltag“ (rein): Themen Rezept · Gesundheit · Tech · Beziehung · Spartipp, immer heute
+export function alltagRubrik(env, { favoriten = [], rezeptSeite = 1, vom = false } = {}) {
+  const d = env && env.daten;
+  return { id: 'alltag', name: 'Alltag', teile: ALLTAG_ARTEN.map(a => ({ id: a, name: KURZ[a], html: artFlaeche(a, d, { favoriten, rezeptSeite, vom }) })) };
+}
 
-// Mehr → „Gemerkt“: alle gemerkten Inhalte, neueste zuerst; ein Klick öffnet den Tag unter „Heute“
+// Mehr → „Gemerkt“: alle gemerkten Inhalte, neueste zuerst; ein Klick öffnet den Inhalt in seinem Bereich
 export function gemerktReiter(favoriten = []) {
   const favs = [...favoriten].filter(f => ART[f.art]).sort((a, b) => (b.datum + b.art).localeCompare(a.datum + a.art));
   return { id: 'gemerkt', name: 'Gemerkt', kopf: `<b>Gemerkt</b> <small>${favs.length}</small>`,
     liste: favs.map(f => ({ d: datumText(f.datum, true), t: `${ART[f.art].name}: ${f.kurz}`, tip: f.text, aktion: 'fav:' + favKey(f.art, f.datum), gruppe: 1 })),
-    html: '<p class="ab-meta">Noch nichts gemerkt. Mit ☆ Merken unter „Heute“ hebst du dir einen Inhalt auf – er bleibt hier, auch Tage später.</p>' };
+    html: '<p class="ab-meta">Noch nichts gemerkt. Mit ☆ Merken hebst du dir einen Inhalt auf – er bleibt hier, auch Tage später.</p>' };
 }

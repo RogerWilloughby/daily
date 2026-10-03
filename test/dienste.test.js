@@ -249,7 +249,7 @@ test('Adapter Wetter: Bereich aus dem Vertrag', async () => {
   assert.match(k.chart, /wd-miniskala-r wd-t-regen"><div class="wd-sk"><span class="wd-g5"[^>]*>0<\/span><span[^>]*>2<\/span>.*<span class="wd-g5"[^>]*>12 mm<\/span><\/div>/);   // Regen grün
   assert.match(k.chart, /<b class="wd-t-regen" title="Balkenhöhe = Regenmenge in mm · kräftigere Farbe = Regen wahrscheinlicher">Regen mm<\/b> · <b class="wd-t-max" title="Höchst = wärmster Wert des Tages">Höchst<\/b> · <b class="wd-t-min" title="Tiefst = [^"]+">Tiefst<\/b>/);
   assert.doesNotMatch(k.chart, /kräftiger = wahrscheinlicher/);                     // Erklärung nur noch als Mouseover
-  assert.match(k.chart, /data-mini-wahl="1" aria-pressed="false">Heute<.*data-mini-wahl="3"[^>]*>3 Tage<.*data-mini-wahl="7"[^>]*>7 Tage<.*data-mini-wahl="15" aria-pressed="true">15 Tage</);
+  assert.doesNotMatch(k.chart, /data-mini-wahl|wd-wahl/);                          // Zeitraum ist seit 0.49.0 Ebene 3 (Themen unter „Jetzt“)
   assert.match(k.chart, /wd-marken">(<span[^>]*>(Mo|Di|Mi|Do|Fr|Sa|So)<\/span>){8}<\/div>/);   // Wochentage, bei 15 Tagen jeder zweite
   // Sonne (Tage) als gelbe Balken von oben, Mouseover je Tag, runde Linien
   assert.doesNotMatch(k.chart, /class="wd-sonne"/);                                   // keine Sonnenbalken mehr
@@ -624,17 +624,19 @@ test('Adapter Kalender: Bereich aus Feiertagen und Himmel, Untertabs', async () 
   assert.equal(k.m, 'Tag der Deutschen Einheit');
   assert.equal(k.ms, '6 Tage');
   assert.match(k.x, /^In 6 Tagen \(Sa\., 3\.10\.\) · Herbstferien ab Mo\., 12\.10\./);
-  // Mini-Reiter (seit 0.37.0): Nächste · Feiertage & Ferien · Himmel; kein Aufklappen
+  // Rubriken (seit 0.49.0): Nächste · Feiertage · Ferien · Himmel (erscheint unter Wetter)
   const R = (kk, id) => kk.kleinReiter.find(x => x.id === id);
-  assert.deepEqual(k.kleinReiter.map(t => t.id), ['naechste', 'frei', 'himmel']);
+  assert.deepEqual(k.kleinReiter.map(t => t.id), ['naechste', 'feiertage', 'ferien', 'himmel']);
   assert.ok(k.kleinReiter.every(x => /^<svg class="ico"/.test(x.icon)));
   assert.equal(k.tabs, undefined); assert.deepEqual(k.liste, []); assert.equal(k.startReiter, 'naechste');
   assert.equal(R(k, 'naechste').kopf, '<small class="kl-kw">KW 39</small> <b>Tag der Deutschen Einheit</b> <small>in 6 Tagen</small>');
   assert.deepEqual(R(k, 'naechste').liste.map(z => z.t).slice(0, 2), ['Herbstferien', 'Winterzeit: Uhr zurück (3 → 2 Uhr)']);   // die große Zeile steht im Kopf
-  assert.match(R(k, 'frei').kopf, /Feiertage &amp; Ferien<\/b> <small>Sachsen/);
-  const fr = R(k, 'frei').liste;
+  assert.match(R(k, 'feiertage').kopf, /Feiertage<\/b> <small>Sachsen/);
+  const fr = R(k, 'feiertage').liste;
   assert.deepEqual([fr[0].d, fr[0].t], ['Sa., 3.10.', 'Tag der Deutschen Einheit (am Wochenende)']);
-  assert.ok(fr.some(z => z.d === 'ab Mo., 12.10.' && z.t === 'Herbstferien'));
+  assert.ok(!fr.some(z => z.t === 'Herbstferien'));
+  assert.deepEqual(R(k, 'ferien').liste.map(z => [z.d, z.t]), [['ab Mo., 12.10.', 'Herbstferien']]);
+  assert.match(R(kachel({ daten: { ...fe.daten, ferien: null } }, hi, jetzt), 'ferien').html, /Schulferien sind gerade nicht erreichbar/);
   assert.match(fr[0].tip, /^Feiertag · Sa\., 3\.10\. \(in 6 Tagen\)/);
   assert.match(R(k, 'himmel').kopf, /^<b>Vollmond<\/b> <small>\d+ % beleuchtet/);
   assert.ok(R(k, 'himmel').liste.some(z => /Partielle Sonnenfinsternis/.test(z.t)));
@@ -756,16 +758,21 @@ test('Einstellungen: Formular, Wetter-Optionen', async () => {
   // Wetter: Reiter aus, Start-Reiter, Mini-Diagramm 7 Tage; Unwetter bleibt vorn
   const { kachel, mitOptionen } = await esm('src/js/adapter/wetter.js');
   const w = await mitName((await rufe('wetter', BERLIN)).body), r = (await rufe('regen', BERLIN)).body;
-  const C = k => k.kleinReiter.find(x => x.id === 'jetzt').unten;                      // Diagramm unter dem Zeitpunkt-Block im Reiter „Jetzt“
+  // Jetzt hat die Themen Heute · 3 Tage · 7 Tage · 15 Tage (Ebene 3); C = Diagramm des Start-Themas (zuletzt gewählter Zeitraum)
+  const J = k => k.kleinReiter.find(x => x.id === 'jetzt'), C = k => J(k).teile.find(t => t.id === J(k).startTeil).unten;
   const k = mitOptionen(kachel(w, r, null), w, { radar: false, mini: 7 });
   assert.deepEqual(k.kleinReiter.map(x => x.id), ['jetzt', 'mehr']);
   assert.equal(k.startReiter, 'jetzt');
   assert.match(C(k), /7 Tage: /);
   assert.equal(k.chart, '');                                                             // nicht mehr im Kopf der Kachel
   assert.deepEqual(mitOptionen(kachel(w, r, null), w, { mehr: false }).kleinReiter.map(x => x.id), ['jetzt', 'radar']);
+  assert.deepEqual(J(k).teile.map(t => [t.id, t.name]), [['m1', 'Heute'], ['m3', '3 Tage'], ['m7', '7 Tage'], ['m15', '15 Tage']]);
+  assert.equal(J(k).startTeil, 'm7');
+  assert.ok(J(k).teile.every(t => t.html === J(k).html && /wd-minibox/.test(t.unten)));             // je Zeitraum Zeitpunkt-Block und Diagramm
   // Standard: Mini-Diagramm Heute (0–24 Uhr; Temperatur + Regen mm, Deckkraft nach Wahrscheinlichkeit)
   const k24 = mitOptionen(kachel(w, r, null), w, {});
-  assert.match(C(k24), /data-mini-wahl="1" aria-pressed="true">Heute<.*<b class="wd-t-regen"[^>]*>Regen mm<\/b> · <b class="wd-t-max" title="Temperatur je Stunde, heute 0 bis 24 Uhr">Temperatur<\/b>/);
+  assert.equal(J(k24).startTeil, 'm1');
+  assert.match(C(k24), /<b class="wd-t-regen"[^>]*>Regen mm<\/b> · <b class="wd-t-max" title="Temperatur je Stunde, heute 0 bis 24 Uhr">Temperatur<\/b>/);
   assert.equal((C(k24).match(/class="wd-spalte"/g) || []).length, w.daten.heute.length);
   assert.match(C(k24), /wd-marken"><span[^>]*>3<\/span><span[^>]*>6<\/span>.*>21<\/span><\/div>/);   // 0–24 Uhr, alle 3 Std.
   assert.equal(C(mitOptionen(kachel(w, r, null), w, { mini: 24 })), C(k24));          // früher „24 Std.“ → Heute
@@ -783,7 +790,7 @@ test('Einstellungen: Formular, Wetter-Optionen', async () => {
   assert.doesNotMatch(C(k24), /wd-sonnen/);                                        // Sonne nur bei Tagen
   // 3 Tage: 12 Tageszeiten, Wochentag mittig je Tag, jeder zweite Tag hinterlegt, Sonne je Tageszeit; früher „48 Std.“ → 3 Tage
   const k48 = mitOptionen(kachel(w, r, null), w, { mini: 48 });
-  assert.match(C(k48), /data-mini-wahl="3" aria-pressed="true">3 Tage</);
+  assert.equal(J(k48).startTeil, 'm3');
   assert.equal((C(k48).match(/class="wd-spalte"/g) || []).length, 12);
   assert.equal((C(k48).match(/wd-streifen/g) || []).length, 1);
   assert.match(C(k48), /wd-marken">(<span style="left:(16\.7|50\.0|83\.3)%">(Mo|Di|Mi|Do|Fr|Sa|So)<\/span>){3}<\/div>/);
@@ -1052,12 +1059,12 @@ test('Tagesinhalte: Dienst je Tag (Verlauf, nie Zukunft), Bereich „Heute“ mi
   const fl = a.gemerktReiter(fav).liste;
   assert.deepEqual(fl.map(z => z.aktion), ['fav:film|2026-10-01', 'fav:rezept|2026-09-30', 'fav:witz|2026-09-26']);
   assert.match(fl[0].t, /^Film: /);
-  assert.match(a.heuteBereich(heute, { favoriten: fav }).kleinReiter.find(x => x.id === 'kultur').html, /aria-pressed="true">★ Gemerkt</);
+  assert.match(a.entdeckenBereich(heute, { favoriten: fav }).kleinReiter.find(x => x.id === 'kultur').html, /aria-pressed="true">★ Gemerkt</);
   assert.match(a.gemerktReiter([]).html, /Noch nichts gemerkt/);
   for (const weg of ['kachel', 'navZeile', 'THEMEN']) assert.equal(a[weg], undefined, 'noch da: ' + weg);   // alte Themen-Kachel entfernt (0.47.3)
 });
 
-test('An diesem Tag: Dienst je Datum (Wikipedia, neueste zuerst), unter „Heute“ → Wissen', async () => {
+test('An diesem Tag: Dienst je Datum (Wikipedia, neueste zuerst), unter Entdecken → Zeitreise', async () => {
   const d = dienste.byId.andiesemtag;
   const ev = d.umwandeln(require('../tools/fixtures').onthisday().selected);
   assert.deepEqual(ev.map(e => e.jahr), [1990, 1950, 1871]);
@@ -1075,28 +1082,25 @@ test('An diesem Tag: Dienst je Datum (Wikipedia, neueste zuerst), unter „Heute
   const a = await esm('src/js/adapter/tagesinhalt.js');
   const t = await dienste.ausfuehren('tagesinhalt', {}, { jetzt });
   const env = a.mitZusatz(t, 'geschichte', heute);
-  const w = a.heuteBereich(env, {}).kleinReiter.find(x => x.id === 'wissen');
-  assert.deepEqual(w.teile.map(x => x.id), ['wort', 'land', 'geschichte']);
-  const g = w.teile[2].html;
+  const g = a.entdeckenBereich(env, {}).kleinReiter.find(x => x.id === 'zeitreise').html;
   assert.match(g, /<a class="ab-ev kr-z" href="https:\/\/de\.wikipedia\.org\/wiki\/Beispiel_A" target="_blank" rel="noopener noreferrer" title="vor 36 Jahren · [^"]+"><b>1990<\/b> /);
   assert.match(g, /<p class="ab-ev kr-z"[^>]*><b>1871<\/b>/);            // ohne Link: keine Verlinkung
   assert.match(g, /aus Wikipedia/);
-  assert.ok(a.heuteBereich(env, {}).info.some(x => /CC BY-SA/.test(x)));
+  assert.ok(a.entdeckenBereich(env, {}).info.some(x => /CC BY-SA/.test(x)));
   const f = a.favEintrag('geschichte', env);
   assert.deepEqual([f.art, f.datum, f.kurz], ['geschichte', '2026-10-01', '1990: Beispielereignis A für die Testansicht.']);
   // Wikipedia nicht erreichbar: übrige Teile bleiben, Hinweis im Teil
-  const ohne = a.heuteBereich(a.mitZusatz(t, 'geschichte', null), {});
+  const ohne = a.entdeckenBereich(a.mitZusatz(t, 'geschichte', null), {});
   assert.equal(ohne.state, 'content');
-  const wo = ohne.kleinReiter.find(x => x.id === 'wissen');
-  assert.match(wo.teile[2].html, /Wikipedia ist gerade nicht erreichbar/);
-  assert.match(wo.teile[1].html, /class="ab-inhalt"/);
+  assert.match(ohne.kleinReiter.find(x => x.id === 'zeitreise').html, /Wikipedia ist gerade nicht erreichbar/);
+  assert.match(ohne.kleinReiter.find(x => x.id === 'welt').html, /class="ab-inhalt"/);
   assert.equal(a.jahrText(-44), '44 v. Chr.');
 });
 
-test('„Heute“ → Alltag: Rezept, Gesundheit, Tech, Beziehung, Spartipp', async () => {
+test('Mehr → Alltag: Rezept, Gesundheit, Tech, Beziehung, Spartipp', async () => {
   const a = await esm('src/js/adapter/tagesinhalt.js');
   const t = await dienste.ausfuehren('tagesinhalt', {}, { jetzt: Date.parse('2026-10-01T10:00:00Z') });
-  const al = a.heuteBereich(t, {}).kleinReiter.find(x => x.id === 'alltag');
+  const al = a.alltagRubrik(t, {});
   assert.deepEqual(al.teile.map(x => x.id), ['rezept', 'gesundheit', 'tech', 'beziehung', 'spartipp']);
   assert.match(al.teile[0].html, /<p class="ab-titel">[^<]+<\/p><p class="ab-meta">\d+ Minuten · für 2/);
   assert.match(al.teile[1].html, /keine medizinische Beratung/);

@@ -143,48 +143,65 @@ test('Aufbau: Oberfläche und app.css ohne Wetter-Teile, ohne Kachelraster, Ansi
 });
 
 // Oberfläche „Abreißblock“ (0.47.0, Phase 1b): Gruppen unter „Heute“, Untertabs je Bereich, Adresse #bereich/untertab/teil
-test('Oberfläche: Heute in Gruppen, Untertabs je Bereich, Adresse, Gemerkt', async () => {
+test('Oberfläche: drei Ebenen, Tagesinhalte in Heute · Entdecken · Mehr → Alltag, Adresse, Gemerkt', async () => {
   const ti = await esm('src/js/adapter/tagesinhalt.js');
   const { tageInhalt } = { tageInhalt: require('../services/daten/daily.json').tage[0] };
   const env = { daten: { datum: '2026-09-27', heute: '2026-10-03', erster: '2026-09-26', wiederholt: false, inhalt: { ...tageInhalt, geschichte: null } } };
-  // Gruppen: jede Art genau einmal (Spartipp jetzt unter Alltag), Film unter Kultur
-  assert.deepEqual(ti.GRUPPEN.map(g => g.id), ['raetsel', 'lachen', 'wissen', 'kultur', 'alltag']);
-  const arten = ti.GRUPPEN.flatMap(g => g.arten);
+  // jede Art steht genau einmal: Heute (Mitmachen), Entdecken, Mehr → Alltag (themen.md)
+  const arten = [...ti.HEUTE_RUBRIKEN, ...ti.ENTDECKEN_RUBRIKEN].flatMap(g => g.arten).concat(ti.ALLTAG_ARTEN);
   assert.deepEqual([...arten].sort(), Object.keys(ti.ART).sort());
-  assert.equal(ti.gruppeVon('film'), 'kultur'); assert.equal(ti.gruppeVon('spartipp'), 'alltag');
-  const h = ti.heuteBereich(env, { favoriten: [{ art: 'witz', datum: '2026-09-27', kurz: 'x', text: 'x' }] });
-  assert.deepEqual(h.kleinReiter.map(r => [r.id, (r.teile || []).map(t => t.id).join(',')]),
-    [['raetsel', ''], ['lachen', ''], ['wissen', 'wort,land,geschichte'], ['kultur', ''], ['alltag', 'rezept,gesundheit,tech,beziehung,spartipp']]);
+  assert.deepEqual(ti.HEUTE_RUBRIKEN.map(g => g.id), ['raetsel', 'lachen']);
+  assert.deepEqual(ti.ENTDECKEN_RUBRIKEN.map(g => g.id), ['sprache', 'zeitreise', 'welt', 'kultur']);
+  assert.deepEqual(ti.ortVon('film'), { bereich: 'entdecken', rubrik: 'kultur', thema: null });
+  assert.deepEqual(ti.ortVon('sprichwort'), { bereich: 'entdecken', rubrik: 'sprache', thema: 'sprichwort' });
+  assert.deepEqual(ti.ortVon('spartipp'), { bereich: 'mehr', rubrik: 'alltag', thema: 'spartipp' });
+  assert.deepEqual(ti.ortVon('witz'), { bereich: 'heute', rubrik: 'lachen', thema: null });
+  const fav = [{ art: 'witz', datum: '2026-09-27', kurz: 'x', text: 'x' }];
+  const h = ti.heuteBereich(env, { favoriten: fav });
+  assert.deepEqual(h.kleinReiter.map(r => r.id), ['raetsel', 'lachen']);
   assert.match(h.bereichKopf, /class="ab-tagzahl">27</); assert.match(h.bereichKopf, /Sonntag/); assert.match(h.bereichKopf, /September 2026/);
   assert.match(h.bereichKopf, /nachgeholt/); assert.match(h.bereichKopf, /data-ti="vor"(?! disabled)/);
   assert.match(h.kleinReiter[0].html, /data-ti="loesung"/);
   assert.doesNotMatch(h.kleinReiter[0].html, new RegExp(tageInhalt.raetsel.loesung.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));   // Lösung erst auf Knopfdruck
   assert.match(ti.heuteBereich(env, { loesung: true }).kleinReiter[0].html, /class="ab-loesung"/);
   assert.match(h.kleinReiter[1].html, /aria-pressed="true">★ Gemerkt/);                                // Witz dieses Tags ist gemerkt
-  assert.match(h.kleinReiter[2].teile[2].html, /Wikipedia ist gerade nicht erreichbar/);
-  const rez = h.kleinReiter[4].teile[0].html;
-  assert.match(rez, /Seite 1 von 2: Zutaten/); assert.match(rez, /<ul class="ab-zutaten">/); assert.match(rez, /Zubereitung ›/);
-  assert.match(ti.heuteBereich(env, { rezeptSeite: 2 }).kleinReiter[4].teile[0].html, /Seite 2 von 2: Zubereitung[\s\S]*‹ Zutaten/);
+  // Entdecken: Sprache mit Themen Wort · Sprichwort, sonst eine Art je Rubrik; „vom …“ nur für Inhalte eines anderen Tags
+  const e = ti.entdeckenBereich(env, {});
+  assert.deepEqual(e.kleinReiter.map(r => [r.id, (r.teile || []).map(t => t.id).join(',')]), [['sprache', 'wort,sprichwort'], ['zeitreise', ''], ['welt', ''], ['kultur', '']]);
+  assert.match(e.kleinReiter[0].teile[1].html, /Sprichwort des Tages/);
+  assert.doesNotMatch(e.kleinReiter[0].teile[0].html, /Sprichwort/);                                    // Wort und Sprichwort getrennt
+  assert.match(e.kleinReiter[1].html, /Wikipedia ist gerade nicht erreichbar/);
+  assert.doesNotMatch(e.kleinReiter[2].html, /ab-vom/);
+  assert.match(ti.entdeckenBereich(env, { vom: true }).kleinReiter[2].html, /class="ab-meta ab-vom">vom So 27\.9\. · <button type="button" class="ab-link" data-ti="heute">zu heute/);
+  // Mehr → Alltag: Themen, Rezept in zwei Seiten
+  const al = ti.alltagRubrik(env, {});
+  assert.deepEqual(al.teile.map(t => t.id), ['rezept', 'gesundheit', 'tech', 'beziehung', 'spartipp']);
+  assert.match(al.teile[0].html, /Seite 1 von 2: Zutaten/); assert.match(al.teile[0].html, /<ul class="ab-zutaten">/); assert.match(al.teile[0].html, /Zubereitung ›/);
+  assert.match(ti.alltagRubrik(env, { rezeptSeite: 2 }).teile[0].html, /Seite 2 von 2: Zubereitung[\s\S]*‹ Zutaten/);
   assert.match(ti.datumsKopf({ datum: '2026-10-03', heute: '2026-10-03', erster: '2026-09-26' }), /KW 40[\s\S]*data-ti="vor" aria-label="Tag vor" title="Tag vor" disabled/);
   assert.deepEqual([ti.kw('2026-01-01'), ti.kw('2026-10-03'), ti.kw('2026-12-31')], [1, 40, 53]);
   assert.equal(ti.heuteBereich(null).state, 'error');
   const g = ti.gemerktReiter([{ art: 'witz', datum: '2026-09-27', kurz: 'A', text: 'A' }, { art: 'land', datum: '2026-10-01', kurz: 'B', text: 'B' }]);
   assert.deepEqual(g.liste.map(z => z.aktion), ['fav:land|2026-10-01', 'fav:witz|2026-09-27']);  // neueste zuerst
-  // Untertabs je Bereich
+  // Rubriken je Bereich
   const o = await esm('src/js/core/oberflaeche.js');
-  const T = { heute: h, weather: { kleinReiter: [{ id: 'jetzt', name: 'Jetzt' }, { id: 'mehr', name: 'Mehr' }] },
-    kalender: { kleinReiter: [{ id: 'naechste', name: 'Nächste' }, { id: 'termine', name: 'Termine' }, { id: 'frei', name: 'Feiertage & Ferien' }] },
-    links: { kleinReiter: [{ id: 'meine', name: 'Meine Seiten' }] }, gemerkt: g, tools: { kleinReiter: [{ id: 'alle', name: 'Alle Tools' }] } };
-  assert.deepEqual(o.BEREICHE.map(b => b.id), ['heute', 'wetter', 'kalender', 'mehr']);
-  assert.deepEqual(o.untertabsVon('kalender', T).map(r => r.name), ['Nächste', 'Feiertage']);       // ohne Termine, kurzer Name
-  assert.deepEqual(o.untertabsVon('mehr', T).map(r => r.id), ['seiten', 'gemerkt', 'ueber']);         // öffentlich ohne Tools
-  assert.deepEqual(o.untertabsVon('mehr', T, { privat: true }).map(r => r.id), ['seiten', 'gemerkt', 'tools', 'ueber']);
-  assert.match(o.untertabsVon('mehr', T, { version: 'DAILY 0.47.0' })[2].html, /data-doc="quellen"[\s\S]*data-doc="impressum"[\s\S]*data-doc="datenschutz"[\s\S]*DAILY 0\.47\.0/);
+  const T = { heute: h, entdecken: e, weather: { kleinReiter: [{ id: 'jetzt', name: 'Jetzt' }, { id: 'mehr', name: 'Details' }] }, himmel: { kleinReiter: [{ id: 'himmel', name: 'Himmel' }] },
+    kalender: { kleinReiter: [{ id: 'naechste', name: 'Nächste' }, { id: 'termine', name: 'Termine' }, { id: 'feiertage', name: 'Feiertage' }, { id: 'ferien', name: 'Ferien' }, { id: 'himmel', name: 'Himmel' }, { id: 'namen', name: 'Namenstage' }] },
+    alltag: al, links: { kleinReiter: [{ id: 'meine', name: 'Meine Seiten' }, { id: 'news', name: 'News' }] }, gemerkt: g, tools: { kleinReiter: [{ id: 'alle', name: 'Alle Tools' }] } };
+  assert.deepEqual(o.BEREICHE.map(b => b.id), ['heute', 'entdecken', 'wetter', 'kalender', 'mehr']);   // Album ab Phase 3
+  assert.ok(o.BEREICHE.length <= 6);
+  assert.deepEqual(o.untertabsVon('wetter', T).map(r => r.id), ['jetzt', 'mehr', 'himmel']);        // Himmel unter Wetter
+  assert.deepEqual(o.untertabsVon('kalender', T).map(r => r.name), ['Nächste', 'Feiertage', 'Ferien', 'Namenstage']);   // ohne Termine und Himmel
+  assert.deepEqual(o.untertabsVon('mehr', T).map(r => r.id), ['alltag', 'seiten', 'gemerkt', 'ueber']);         // öffentlich ohne Tools
+  assert.deepEqual(o.untertabsVon('mehr', T, { privat: true }).map(r => r.id), ['alltag', 'seiten', 'gemerkt', 'tools', 'ueber']);
+  assert.deepEqual(o.untertabsVon('mehr', T)[1].teile.map(t => t.name), ['Meine', 'News']);           // kurze Namen für die Themen-Zeile
+  assert.match(o.untertabsVon('mehr', T, { version: 'DAILY 0.49.0' }).at(-1).html, /data-doc="quellen"[\s\S]*data-doc="impressum"[\s\S]*data-doc="datenschutz"[\s\S]*DAILY 0\.49\.0/);
   assert.deepEqual(o.untertabsVon('wetter', {}), []);
+  for (const b of o.BEREICHE) assert.ok(o.untertabsVon(b.id, T, { privat: true }).length <= 6, 'mehr als 6 Rubriken: ' + b.id);
   // Adresse
   assert.deepEqual(o.adresseLesen(''), { bereich: 'heute', unter: null, teil: null });
   assert.deepEqual(o.adresseLesen('#wetter/radar'), { bereich: 'wetter', unter: 'radar', teil: null });
-  assert.deepEqual(o.adresseLesen('#heute/wissen/land'), { bereich: 'heute', unter: 'wissen', teil: 'land' });
+  assert.deepEqual(o.adresseLesen('#entdecken/sprache/sprichwort'), { bereich: 'entdecken', unter: 'sprache', teil: 'sprichwort' });
   assert.equal(o.adresseLesen('#quatsch/x').bereich, 'heute');
   // Gerüst: Oberfläche eingebunden, keine Kachel-Leiste und kein „Frag DAILY“ mehr in der Seite
   const html = fs.readFileSync(path.join(__dirname, '../src/index.html'), 'utf8'), sw = fs.readFileSync(path.join(__dirname, '../src/sw.js'), 'utf8');
@@ -233,8 +250,10 @@ test('Laden: nur der sichtbare Bereich (und Wetterhinweise), Service Worker spei
   assert.deepEqual(ids('heute', { heute: 960 }, 1000, () => 10), ['heute', 'wetterhinweise']);          // kürzere Grenze (Rückkehr in den Browser-Tab)
   // jeder Anbieter gehört zu einem Bereich
   const lies = p => fs.readFileSync(path.join(__dirname, '../src/js', p), 'utf8');
-  for (const [p, b] of [['providers/heute.js', 'heute'], ['providers/weather.js', 'wetter'], ['providers/kalender.js', 'kalender'], ['providers/links.js', 'mehr'], ['providers/tools.js', 'mehr']])
-    assert.match(lies(p), new RegExp(`export default \\{[^}]*bereich: '${b}'`), p);
+  for (const [p, b] of [['providers/heute.js', "\\['heute', 'entdecken', 'mehr'\\]"], ['providers/weather.js', "'wetter'"], ['providers/kalender.js', "'kalender'"], ['providers/links.js', "'mehr'"], ['providers/tools.js', "'mehr'"]])
+    assert.match(lies(p), new RegExp(`export default \\{[^}]*bereich: ${b}`), p);
+  assert.match(lies('providers/kalender.js'), /himmelAnbieter = \{ id: 'himmel', name: 'Himmel', bereich: 'wetter'/);   // Wetter → Himmel braucht nur den Dienst „himmel“
+  assert.deepEqual(faelligeAnbieter([{ id: 'h', bereich: ['heute', 'mehr'], every: 9 }], 'mehr', new Map(), 100).map(p => p.id), ['h']);   // Liste von Bereichen
   assert.match(lies('providers/weather.js'), /hinweiseAnbieter = \{ id: 'wetterhinweise', name: 'Wetterhinweise', bereich: 'immer'/);
   const main = lies('main.js');
   assert.doesNotMatch(main, /PROVIDERS\.forEach\(run\)/, 'main.js startet noch alle Anbieter');

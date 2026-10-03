@@ -96,15 +96,13 @@ function mini(d) {
     `<div class="wd-mini24">${svg}${sonnen}<div class="wd-marken">${marken}</div></div>` +
     `<div class="wd-miniskala wd-miniskala-r wd-t-regen"><div class="wd-sk">${rechts}</div></div></div>` +
     // „Regen mm“ zuerst: bleibt auch in schmalen Kacheln sichtbar (Mouseover mit Erklärung), der Rest wird notfalls gekürzt
-    `<div class="wd-minilegende">${umschalter(d.wahl)}<span class="wd-leg">` +
+    `<div class="wd-minilegende"><span class="wd-leg">` +
     `<b class="wd-t-regen" title="Balkenhöhe = Regenmenge in mm · kräftigere Farbe = Regen wahrscheinlicher">Regen mm</b> · ${d.legende}${d.sonne ? ` · <b class="wd-t-sonne" title="Zahlen oben im Diagramm = Sonnenstunden ${d.gruppe ? 'der Tageszeit' : 'des Tages'} (gerundet)">Sonne</b>` : ''}</span></div>`;
 }
-// Umschalter unter dem Diagramm: Heute (1) · 3 Tage · 7 Tage · 15 Tage (Klick → providers/weather.js speichert und zeichnet neu)
+// Zeiträume unter Wetter → Jetzt (seit 0.49.0 Themen auf Ebene 3, kein Umschalter mehr im Diagramm): Heute (1) · 3 Tage · 7 Tage · 15 Tage
 export const MINI_WAHL = [[1, 'Heute'], [3, '3 Tage'], [7, '7 Tage'], [15, '15 Tage']];
 // Gespeicherte Werte von früher: 24 Std. → Heute, 48 Std. → 3 Tage, 16 Tage → 15 Tage
 export const miniWahl = v => ({ 1: 1, 24: 1, 3: 3, 48: 3, 7: 7, 15: 15, 16: 15 })[+v] || 1;
-export const umschalter = (wahl, optionen = MINI_WAHL) => `<span class="wd-wahl" role="group" aria-label="Zeitraum des Diagramms">` +
-  optionen.map(([w, t]) => `<button type="button" data-mini-wahl="${w}" aria-pressed="${w === wahl}">${t}</button>`).join('') + '</span>';
 const wtagKurz = datum => new Date(datum + 'T12:00:00Z').toLocaleDateString('de-DE', { weekday: 'short', timeZone: 'UTC' }).replace('.', '');
 
 // 7 oder 15 Tage: Höchst- und Tiefstlinie, Regen mm/Tag, Wochentage (15 Tage: jeder zweite)
@@ -118,7 +116,7 @@ export function miniDiagramm(tage, tip = null) {
     regen: tage.map(t => ({ mm: t.niederschlagMm || 0, p: t.regenProzent })), mmMin: 10,
     sonne: tage.map(t => t.sonnenstunden), tips: tip ? tage.map(tip) : null,
     marken: tage.map((t, i) => ({ i, text: wtagKurz(t.datum) })).filter(m => n <= 8 || m.i % 2 === 0),
-    wahl: n > 7 ? 15 : n, legende: '<b class="wd-t-max" title="Höchst = wärmster Wert des Tages">Höchst</b> · <b class="wd-t-min" title="Tiefst = kältester Wert des Tages (meist nachts oder früh)">Tiefst</b>',
+    legende: '<b class="wd-t-max" title="Höchst = wärmster Wert des Tages">Höchst</b> · <b class="wd-t-min" title="Tiefst = kältester Wert des Tages (meist nachts oder früh)">Tiefst</b>',
     aria: `${n} Tage: Höchstwerte bis ${r0(tmax)}°, Tiefstwerte bis ${r0(tmin)}°`
   });
 }
@@ -134,7 +132,7 @@ export function miniHeute(stunden, stunde, tip = null) {
     linien: [{ werte: l.map(s => s.tempC), klasse: 'wd-max' }],
     regen: l.map(s => ({ mm: s.niederschlagMm || 0, p: s.regenProzent })), mmMin: 2, tips: tip ? l.map(tip) : null,
     marken: l.map((s, i) => ({ i, h: stunde(s.zeit) })).filter(m => m.h % 3 === 0).map(m => ({ i: m.i, text: String(m.h) })),
-    wahl: 1, legende: '<b class="wd-t-max" title="Temperatur je Stunde, heute 0 bis 24 Uhr">Temperatur</b>',
+    legende: '<b class="wd-t-max" title="Temperatur je Stunde, heute 0 bis 24 Uhr">Temperatur</b>',
     aria: `Heute: Temperatur ${r0(Math.min(...temps))}° bis ${r0(Math.max(...temps))}°`
   });
 }
@@ -153,7 +151,7 @@ export function miniTageszeiten(tz, tip = null) {
     linien: [{ werte: l.map(t => t.tempC), klasse: 'wd-max' }],
     regen: l.map(t => ({ mm: t.niederschlagMm || 0, p: t.regenProzent })), mmMin: 5,
     sonne: l.map(t => t.sonnenstunden), tips: tip ? l.map(tip) : null, marken,
-    wahl: 3, legende: '<b class="wd-t-max" title="Mittlere Temperatur je Tageszeit: Morgen 6–12, Mittag 12–18, Abend 18–24, Nacht 0–6 Uhr">Temperatur</b>',
+    legende: '<b class="wd-t-max" title="Mittlere Temperatur je Tageszeit: Morgen 6–12, Mittag 12–18, Abend 18–24, Nacht 0–6 Uhr">Temperatur</b>',
     aria: `3 Tage je Morgen, Mittag, Abend, Nacht: Temperatur ${r0(Math.min(...temps))}° bis ${r0(Math.max(...temps))}°`
   });
 }

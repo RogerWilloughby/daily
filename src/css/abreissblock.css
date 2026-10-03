@@ -1,6 +1,7 @@
 /* DAILY – Oberfläche „Abreißblock“ (Variante A, Entscheidung 03.10.2026, seit 0.47.0):
    dunkelgrüner Grund, ein Blatt Papier mit Perforation oben, rote Akzente, Tageszahl in Big Shoulders Display.
-   Aufbau: 1 Schriften · 2 Farben (hell/dunkel) · 3 Gerüst Rechner · 4 Leiste · 5 Blatt, Untertabs, Feld · 6 Inhalte Heute ·
+   Drei Ebenen Bereich → Rubrik → Thema (seit 0.49.0): am Rechner alle oben, am Handy alle unten (ganz unten der Bereich).
+   Aufbau: 1 Schriften · 2 Farben (hell/dunkel) · 3 Gerüst Rechner · 4 Leiste · 5 Blatt, Rubriken, Themen, Feld · 6 Inhalte Heute ·
            7 Wetter, Kalender, Mehr im Blatt · 8 Handy · 9 Dialoge
    Die Seite scrollt nie: Was nicht passt, blendet core/oberflaeche.js zeilenweise aus. */
 
@@ -58,7 +59,7 @@ body{background:var(--ab-grund);color:var(--ab-tinte)}
 .ab-blatt{grid-area:blatt;min-height:0;display:flex;flex-direction:column;overflow:hidden;background:var(--ab-papier);border-radius:4px 4px 0 0;color:var(--ab-tinte)}
 .ab-perfo{flex:none;height:16px;background-image:radial-gradient(circle,var(--ab-grund) 3.5px,transparent 4px);background-size:20px 20px;background-position:6px -4px}
 .ab-bereich.tile{flex:1;min-height:0;border:0;border-radius:0;background:transparent;transition:none;
-  display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto;grid-template-areas:"kopf" "unter" "feld" "info"}
+  display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto minmax(0,1fr) auto;grid-template-areas:"unter" "themen" "kopf" "feld" "info"}
 .ab-bereich.tile:hover{border-color:transparent}
 .ab-kopf{grid-area:kopf;min-width:0}
 .ab-kopf:empty{display:none}
@@ -71,16 +72,17 @@ body{background:var(--ab-grund);color:var(--ab-tinte)}
 .ab-info{grid-area:info;padding:0 56px 12px;font-size:12px;color:var(--ab-grau);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ab-zkopf{flex:none;font-size:16px;line-height:1.35}
 .ab-zkopf small{color:var(--ab-grau);font-size:.9em;margin-left:4px}
-/* Umschalter im Feld (z. B. Wissen: Wort · Land · An diesem Tag) */
-.ab-teile{flex:none;display:flex;flex-wrap:wrap;gap:6px}
-.ab-teile button{height:36px;padding:0 13px;border:1px solid var(--ab-linie);border-radius:18px;color:var(--ab-tinte);font-size:14px;white-space:nowrap}
-.ab-teile button:hover{border-color:var(--ab-grau)}
-.ab-teile button[aria-selected="true"]{background:var(--ab-tinte);border-color:var(--ab-tinte);color:var(--ab-papier);font-weight:600}
+/* Themen (Ebene 3, z. B. Sprache: Wort · Sprichwort) – eigene Zeile direkt an den Rubriken */
+.ab-themen{grid-area:themen;display:flex;flex-wrap:wrap;gap:6px;padding:12px 32px 0 46px;min-width:0}
+.ab-themen button{height:36px;padding:0 13px;border:1px solid var(--ab-linie);border-radius:18px;color:var(--ab-tinte);font-size:14px;white-space:nowrap}
+.ab-themen button:hover{border-color:var(--ab-grau)}
+.ab-themen button[aria-selected="true"]{background:var(--ab-tinte);border-color:var(--ab-tinte);color:var(--ab-papier);font-weight:600}
+.ab-vom{flex:none}
 .ab-bereich[data-state="loading"] .ab-feld>.ab-meta{opacity:.7}
 
 /* Heute am Rechner: Untertabs oben, links die Datumsspalte, rechts der Inhalt */
-.ab-bereich[data-bereich="heute"]{grid-template-columns:minmax(250px,30%) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;
-  grid-template-areas:"unter unter" "kopf feld" "kopf info"}
+.ab-bereich[data-bereich="heute"]{grid-template-columns:minmax(250px,30%) minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto;
+  grid-template-areas:"unter unter" "themen themen" "kopf feld" "kopf info"}
 .ab-bereich[data-bereich="heute"] .ab-kopf{border-right:1px solid var(--ab-linie);margin:28px 0 16px 56px;padding-right:40px;min-height:0;overflow:hidden}
 .ab-bereich[data-bereich="heute"] .ab-feld{padding-left:48px;padding-right:48px;max-width:760px}
 .ab-bereich[data-bereich="heute"] .ab-info{padding-left:48px}
@@ -164,7 +166,7 @@ a.ab-ev:hover{text-decoration:underline}
   .ab-leiste{gap:2px}
   .ab-leiste .status{order:1}   /* Punkt ganz rechts, nach dem Zahnrad */
   .ab-leiste .ort-wahl select{max-width:13ch}
-  .ab-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;padding:4px 0 calc(4px + env(safe-area-inset-bottom,0px))}
+  .ab-tabs{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:0;padding:4px 0 calc(4px + env(safe-area-inset-bottom,0px))}
   .ab-tabs button{flex-direction:column;justify-content:center;gap:3px;height:58px;padding:0;border-radius:0;font-size:12px}
   .ab-tabs button:hover{background:none}
   .ab-tabs .ico{display:block;width:54px;height:30px;padding:5px 0;box-sizing:border-box;border-radius:15px;color:inherit}
@@ -172,13 +174,18 @@ a.ab-ev:hover{text-decoration:underline}
   .ab-tabs button[aria-current="page"] .ico{background:var(--ab-rot);color:#fff}
   .ab-tabs [data-hinweis] span::after{width:7px;height:7px;margin-left:4px}
   .ab-perfo{height:14px;background-image:radial-gradient(circle,var(--ab-grund) 3px,transparent 3.6px);background-size:16px 16px;background-position:4px -4px}
-  .ab-unter{gap:2px;padding:4px 10px 0}
-  .ab-unter button{height:44px;padding:0 9px;font-size:15px}
+  /* Ebenen unten, gespiegelt: Feld, Info, Themen, Rubriken – darunter (außerhalb des Blatts) die Bereiche */
+  .ab-bereich.tile{grid-template-rows:auto minmax(0,1fr) auto auto auto;grid-template-areas:"kopf" "feld" "info" "themen" "unter"}
+  .ab-unter{gap:2px;padding:0 10px 2px;border-bottom:0;border-top:1px solid var(--ab-linie)}
+  .ab-unter button{height:44px;padding:0 9px;font-size:15px;border-bottom:0;border-top:3px solid transparent}
+  .ab-unter button[aria-selected="true"]{border-top-color:var(--ab-rot)}
+  .ab-themen{padding:0 8px 8px;gap:4px;flex-wrap:nowrap}
+  .ab-themen button{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
   .ab-feld.kr-feld{padding:16px 20px 10px;gap:12px;font-size:15px}
   .ab-info{padding:0 20px 8px;font-size:11px}
   .ab-wkopf{padding:10px 20px 0;font-size:15px}
   /* Heute: Datumsblock quer über dem Inhalt */
-  .ab-bereich[data-bereich="heute"]{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto;grid-template-areas:"kopf" "unter" "feld" "info"}
+  .ab-bereich[data-bereich="heute"]{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto auto auto;grid-template-areas:"kopf" "feld" "info" "themen" "unter"}
   .ab-bereich[data-bereich="heute"] .ab-kopf{margin:0;padding:6px 14px 4px 20px;border-right:0}
   .ab-bereich[data-bereich="heute"] .ab-feld{padding-left:20px;padding-right:20px;max-width:none}
   .ab-bereich[data-bereich="heute"] .ab-info{padding-left:20px}
@@ -207,7 +214,7 @@ a.ab-ev:hover{text-decoration:underline}
   .ab-zutaten{font-size:16px;line-height:1.6}
   .ab-fakten dd{font-size:16px}
   .ab-ev{font-size:15px}
-  .ab-teile button{height:34px;padding:0 11px;font-size:13.5px}
+  .ab-themen button{height:34px;padding:0 9px;font-size:13.5px}
   .ab-feld .kr-liste .tl-z{font-size:15px;padding:6px 0}
   .ab-feld .wz-jetzt .t-zp{font-size:14px;grid-template-columns:7ch 4.5ch 6.5ch minmax(0,1fr)}
   .ab-feld .wz-jetzt .zp-r{grid-template-columns:7ch 5.5ch 10.5ch 5ch}
@@ -218,7 +225,12 @@ a.ab-ev:hover{text-decoration:underline}
   .ab-zutaten{columns:2;column-gap:18px}
   .ab-zutaten li{break-inside:avoid}
 }
+@media (max-width:400px){
+  .ab-themen button{padding:0 7px;font-size:13px}
+}
 @media (max-width:380px){
+  .ab-themen{gap:3px}
+  .ab-themen button{padding:0 5px;font-size:12.5px}   /* 5 Themen (Alltag) passen so auch bei 360 px in eine Zeile */
   .ab-unter button{padding:0 7px;font-size:14px}
   .ab-leiste .ort-wahl select{max-width:10ch}
   .ab-datum-kurz{display:none}

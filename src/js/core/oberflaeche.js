@@ -1,23 +1,25 @@
-// Oberfläche „Abreißblock“ (Phase 1b, Entscheidungen 03.10.2026 – docs/konzept/plan-neuausrichtung.md):
-// vier Bereiche Heute · Wetter · Kalender · Mehr (am Handy unten, am Rechner oben), jeder mit Untertabs; jeder Untertab hat die ganze Fläche.
-// Untertabs mit mehreren Teilen (z. B. Wissen: Wort · Land · An diesem Tag) haben im Feld einen Umschalter.
-// Die Anbieter melden ihren Stand wie bisher über set(id, patch) – hier entsteht daraus der Bereich (früher core/board.js).
-// Adresse: #bereich/untertab/teil (z. B. #wetter/radar); ohne Adresse öffnet DAILY immer mit „Heute“. Die Seite scrollt nie.
+// Oberfläche „Abreißblock“ (seit 0.47.0) mit drei Ebenen Bereich → Rubrik → Thema (seit 0.49.0, docs/konzept/themen.md):
+// je höchstens 6 Einträge, am Rechner alle drei oben, am Handy alle drei unten (ganz unten der Bereich). Die Themen-Zeile erscheint nur,
+// wenn eine Rubrik mehrere Themen hat. Im Code heißen Rubriken „Untertabs“ (kleinReiter) und Themen „teile“.
+// Die Anbieter melden ihren Stand über set(id, patch) – hier entsteht daraus der Bereich.
+// Adresse: #bereich/rubrik/thema (z. B. #wetter/jetzt/m7); ohne Adresse öffnet DAILY immer mit „Heute“. Die Seite scrollt nie.
 import { esc, icon } from './util.js';
 import { erweiterungen } from './ansichten.js';
 import { listeHtml, krZeilen } from './mini-reiter.js';
 import { versionText } from './version.js';
 
+// Album folgt in Phase 3 (bis dahin ausgeblendet)
 export const BEREICHE = [
   { id: 'heute', name: 'Heute', icon: 'cal', kachel: 'heute' },
+  { id: 'entdecken', name: 'Entdecken', icon: 'book', kachel: 'entdecken' },
   { id: 'wetter', name: 'Wetter', icon: 'sun', kachel: 'weather' },
   { id: 'kalender', name: 'Kalender', icon: 'moon', kachel: 'kalender' },
   { id: 'mehr', name: 'Mehr', icon: 'list', kachel: 'mehr' }
 ];
 // welcher Anbieter (set-ID) welchen Bereich füllt
-const BEREICH_VON = { heute: 'heute', weather: 'wetter', kalender: 'kalender', links: 'mehr', gemerkt: 'mehr', tools: 'mehr' };
-// kürzere Namen für Untertabs, die sonst am Handy nicht nebeneinander passen
-const KURZNAME = { frei: 'Feiertage', namen: 'Namenstage' };
+const BEREICH_VON = { heute: 'heute', entdecken: 'entdecken', weather: 'wetter', himmel: 'wetter', kalender: 'kalender', alltag: 'mehr', links: 'mehr', gemerkt: 'mehr', tools: 'mehr' };
+// kürzere Namen, die am Handy nebeneinander passen
+const KURZNAME = { namen: 'Namenstage', meine: 'Meine', alle: 'Alle' };
 
 // „Über DAILY“: Datenquellen, Impressum, Datenschutz (öffnen die bisherigen Dialoge) und die Version
 export const ueberHtml = version => '<div class="ab-ueber"><p class="ab-text">DAILY – dein digitaler Abreißkalender. Jeden Tag ein neues Blatt zum Mitmachen.</p>' +
@@ -25,19 +27,21 @@ export const ueberHtml = version => '<div class="ab-ueber"><p class="ab-text">DA
   '<button type="button" class="ab-knopf" data-doc="impressum">Impressum</button><button type="button" class="ab-knopf" data-doc="datenschutz">Datenschutz</button></div>' +
   `<p class="ab-meta">${esc(version)}</p></div>`;
 
-// Untertabs eines Bereichs aus dem Stand der Anbieter (rein, testbar). T: { id → Stand }, privat: privater Betrieb (Tools)
+// Rubriken eines Bereichs aus dem Stand der Anbieter (rein, testbar). T: { id → Stand }, privat: privater Betrieb (Tools)
 export function untertabsVon(bereich, T, { privat = false, version = '' } = {}) {
   const k = id => (T[id] && T[id].kleinReiter) || [];
   const kurz = r => (KURZNAME[r.id] ? { ...r, name: KURZNAME[r.id] } : r);
   switch (bereich) {
     case 'heute': return k('heute');
-    case 'wetter': return k('weather').map(kurz);
-    case 'kalender': return k('kalender').filter(r => r.id !== 'termine').map(kurz);   // Termine sind seit 0.47.0 nicht mehr in der Oberfläche
+    case 'entdecken': return k('entdecken');
+    case 'wetter': return [...k('weather'), ...k('himmel')].map(kurz);   // Himmel kommt aus dem Kalender (Dienst „himmel“)
+    case 'kalender': return k('kalender').filter(r => r.id !== 'termine' && r.id !== 'himmel').map(kurz);   // Himmel steht unter Wetter
     case 'mehr': return [
-      { id: 'seiten', name: 'Meine Seiten', teile: k('links'), html: '<p class="ab-meta">Wird geladen …</p>' },
+      ...(T.alltag ? [T.alltag] : []),
+      { id: 'seiten', name: 'Seiten', titel: 'Meine Seiten', teile: k('links').map(kurz), html: '<p class="ab-meta">Wird geladen …</p>' },
       ...(T.gemerkt ? [T.gemerkt] : []),
-      ...(privat && T.tools ? [{ id: 'tools', name: 'Tools', teile: k('tools') }] : []),
-      { id: 'ueber', name: 'Über DAILY', html: ueberHtml(version) }
+      ...(privat && T.tools ? [{ id: 'tools', name: 'Tools', teile: k('tools').map(kurz) }] : []),
+      { id: 'ueber', name: 'Über', titel: 'Über DAILY', html: ueberHtml(version) }
     ];
     default: return [];
   }
@@ -48,6 +52,8 @@ export function adresseLesen(hash) {
   const [b, u, t] = String(hash || '').replace(/^#\/?/, '').split('/').map(x => decodeURIComponent(x || ''));
   return { bereich: BEREICHE.some(x => x.id === b) ? b : 'heute', unter: u || null, teil: t || null };
 }
+// Themen-Zeile nur ab zwei Themen; ein einzelnes Thema zeigt seinen Inhalt direkt
+const themenVon = r => (r.teile && r.teile.length > 1 ? r.teile : null);
 
 // gewählter Eintrag: gemerkte Wahl > Start > erster
 const waehle = (liste, wahl, start) => liste.find(x => x.id === wahl) || liste.find(x => x.id === start) || liste[0];
@@ -77,15 +83,18 @@ function bereichHtml(b) {
   }
   const r = waehle(liste, wahlUnter[b.id], quelle.startReiter);
   const unter = `<div class="ab-unter" role="tablist" aria-label="${esc(b.name)}">${liste.map(x =>
-    `<button type="button" role="tab" data-unter="${esc(x.id)}" aria-selected="${x === r}">${esc(x.name)}</button>`).join('')}</div>`;
-  let feld;
-  if (r.teile && r.teile.length) {
-    const t = waehle(r.teile, wahlTeil[b.id + '/' + r.id]);
-    feld = `<div class="ab-teile" role="tablist" aria-label="${esc(r.name)}">${r.teile.map(x =>
-      `<button type="button" role="tab" data-teil="${esc(x.id)}" aria-selected="${x === t}">${esc(x.name)}</button>`).join('')}</div>` + inhaltHtml(t, false);
-  } else feld = inhaltHtml(r, b.id !== 'heute');
+    `<button type="button" role="tab" data-unter="${esc(x.id)}" aria-selected="${x === r}"${x.titel ? ` title="${esc(x.titel)}" aria-label="${esc(x.titel)}"` : ''}>${esc(x.name)}</button>`).join('')}</div>`;
+  const themen = themenVon(r), einzeln = r.teile && r.teile.length === 1 ? r.teile[0] : null;
+  let feld, zeile = '';
+  if (themen) {
+    const t = waehle(themen, wahlTeil[b.id + '/' + r.id], r.startTeil);
+    zeile = `<div class="ab-themen" role="tablist" aria-label="${esc(r.name)}" data-rubrik="${esc(r.id)}">${themen.map(x =>
+      `<button type="button" role="tab" data-teil="${esc(x.id)}" aria-selected="${x === t}">${esc(x.name)}</button>`).join('')}</div>`;
+    feld = inhaltHtml(t, false);
+  } else feld = einzeln ? inhaltHtml(einzeln, false) : r.teile && !r.teile.length ? (r.html || '') : inhaltHtml(r, b.id !== 'heute' && b.id !== 'entdecken');
   const info = (quelle.info || []).filter(Boolean).join(' · ');
-  return `<div class="ab-kopf">${kopf}</div>${unter}<div class="kr-feld ab-feld" role="tabpanel" data-unter-feld="${esc(r.id)}">${feld}</div>` +
+  // Reihenfolge im Gerüst: Kopf, Rubriken, Themen, Feld, Info – wo was steht (oben am Rechner, unten am Handy), regelt css/abreissblock.css
+  return `<div class="ab-kopf">${kopf}</div>${unter}${zeile}<div class="kr-feld ab-feld${zeile ? ' mit-themen' : ''}" role="tabpanel">${feld}</div>` +
     (info ? `<div class="ab-info" title="${esc(info)}">${esc(info)}</div>` : '');
 }
 
@@ -141,8 +150,9 @@ export const aktiverBereich = () => aktiv;
 // Welche Anbieter jetzt laden sollen (rein, testbar; seit 0.48.0 „nur Sichtbares laden“): die des sichtbaren Bereichs und die mit
 // bereich 'immer' (z. B. Wetterhinweise für den Unwetter-Punkt) – jeweils nur, wenn ihr letzter Lauf älter ist als maxAlter(p).
 // lastRun: Map Anbieter-ID → Zeitpunkt; nie gelaufen = sofort fällig.
+// p.bereich darf auch eine Liste sein (Tagesinhalte gehören zu Heute, Entdecken und Mehr).
 export function faelligeAnbieter(anbieter, aktivBereich, lastRun, jetzt = Date.now(), maxAlter = p => p.every) {
-  return anbieter.filter(p => (p.bereich === 'immer' || p.bereich === aktivBereich) && jetzt - (lastRun.get(p.id) || 0) >= maxAlter(p));
+  return anbieter.filter(p => [].concat(p.bereich).some(b => b === 'immer' || b === aktivBereich) && jetzt - (lastRun.get(p.id) || 0) >= maxAlter(p));
 }
 
 // Anbieter melden neue Werte hierüber (wie früher board.js → set)
@@ -169,7 +179,11 @@ export function initOberflaeche({ privat = false } = {}) {
     const u = e.target.closest('[data-unter]'), t = e.target.closest('[data-teil]');
     if (!u && !t) return;
     if (u) wahlUnter[aktiv] = u.dataset.unter;
-    else { const feld = t.closest('[data-unter-feld]'); wahlTeil[aktiv + '/' + feld.dataset.unterFeld] = t.dataset.teil; }
+    else {
+      const rubrik = t.closest('[data-rubrik]').dataset.rubrik;
+      wahlTeil[aktiv + '/' + rubrik] = t.dataset.teil;
+      document.dispatchEvent(new CustomEvent('daily:thema', { detail: { bereich: aktiv, rubrik, thema: t.dataset.teil } }));   // z. B. Wetter merkt sich den Zeitraum
+    }
     zeichne(aktiv); adresseSchreiben();
   });
   addEventListener('hashchange', () => { const x = adresseLesen(location.hash); zeige(x.bereich, x.unter, x.teil); });

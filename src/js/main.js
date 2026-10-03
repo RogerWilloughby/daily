@@ -1,5 +1,5 @@
 // DAILY – Einstieg: Oberfläche „Abreißblock“ aufbauen (seit 0.47.0), Anbieter starten und regelmäßig aktualisieren.
-// Bereiche Heute · Wetter · Kalender · Mehr (core/oberflaeche.js); DAILY öffnet immer mit „Heute“.
+// Bereiche Heute · Entdecken · Wetter · Kalender · Mehr (core/oberflaeche.js, Album ab Phase 3); DAILY öffnet immer mit „Heute“.
 // Seit 0.48.0 (Phase 1c) lädt ein Bereich erst, wenn er sichtbar ist, und frischt sich nur auf, solange er sichtbar ist;
 // immer geladen werden nur die Wetterhinweise (Unwetter-Punkt am Tab „Wetter“).
 import { initOberflaeche, aktiverBereich, faelligeAnbieter } from './core/oberflaeche.js';
@@ -13,7 +13,7 @@ import { betrieb } from './core/betrieb.js';
 import './ansichten/mini-diagramm.js'; // Mini-Diagramme: Dichte, Zeiger (allgemein)
 import heute from './providers/heute.js';
 import weather, { hinweiseAnbieter } from './providers/weather.js';
-import kalender from './providers/kalender.js';
+import kalender, { himmelAnbieter } from './providers/kalender.js';
 import links from './providers/links.js';
 
 // Betriebsart vom Server: privat nur mit Vercel-Variable DAILY_PRIVATE=1 (Tools unter Mehr)
@@ -23,7 +23,7 @@ betrieb.privat = isPrivate;
 const tools = isPrivate ? (await import('./providers/tools.js')).default : null;
 
 // Jeder Anbieter gehört zu einem Bereich (p.bereich) oder läuft immer ('immer')
-const PROVIDERS = [heute, hinweiseAnbieter, weather, kalender, links, tools].filter(Boolean);
+const PROVIDERS = [heute, hinweiseAnbieter, weather, himmelAnbieter, kalender, links, tools].filter(Boolean);
 const lastRun = new Map();   // Anbieter-ID → letzter Lauf
 
 async function run(p) {
@@ -54,7 +54,7 @@ initOberflaeche({ privat: isPrivate });
 initDialogs();
 initPrivat(isPrivate);
 // Ort geändert → ortsbezogene Anbieter gelten als veraltet; sichtbar ist, lädt sofort, der Rest beim nächsten Antippen
-initOrt(() => { [hinweiseAnbieter, weather, kalender].forEach(p => lastRun.delete(p.id)); ladeFaellige(); });
+initOrt(() => { [hinweiseAnbieter, weather, himmelAnbieter, kalender].forEach(p => lastRun.delete(p.id)); ladeFaellige(); });
 // Einstellungen gespeichert → den passenden Anbieter neu laden, wenn er schon einmal geladen hat
 document.addEventListener('daily:einstellungen', e => PROVIDERS.filter(p => p.id === e.detail && lastRun.has(p.id)).forEach(run));
 tick(); setInterval(tick, 15e3);

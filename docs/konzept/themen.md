@@ -2,7 +2,7 @@
 
 Ergebnis der Konsolidierung vom 03.10.2026 (Roger, Fragen einzeln). Grundlage: Rogers Themenliste, die Ausrichtung
 „digitaler Abreißkalender zum Mitmachen“ (`ausrichtung.md`, `entscheidungen.md` 0a) und der Plan `plan-neuausrichtung.md`.
-Umgesetzt wird die Gliederung im Schritt **1d** (vor Phase 2), Inhalte kommen danach Thema für Thema.
+Umgesetzt im Schritt **1d** (App 0.49.0); Inhalte kommen danach Thema für Thema.
 
 ## 1. Bedienung: drei Ebenen
 
@@ -17,7 +17,7 @@ Umgesetzt wird die Gliederung im Schritt **1d** (vor Phase 2), Inhalte kommen da
 
 ## 2. Der Baum
 
-✅ = Inhalt gibt es schon (App 0.48.0). Alles andere ist neu und erscheint erst mit Inhalt.
+✅ = Inhalt gibt es schon (seit 0.49.0 so eingeordnet). Alles andere ist neu und erscheint erst mit Inhalt. Kurznamen in der App: „Seiten“ (Meine Seiten), „Über“ (Über DAILY).
 
 | Bereich | Rubrik (Ebene 2) | Themen (Ebene 3) |
 |---|---|---|

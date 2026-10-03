@@ -1,7 +1,7 @@
 // Adapter „wetter“: macht aus dem Vertrag wetter v1 (reine Daten) den Bereich „Wetter“ (Kopfzeile, Untertabs Jetzt · Radar · Hinweise · Mehr).
 // Ohne DOM – daher auch in Node testbar.
 import { glyph, esc, icon } from '../core/util.js';
-import { miniDiagramm, miniHeute, miniTageszeiten, miniWahl } from './diagramm.js';
+import { miniDiagramm, miniHeute, miniTageszeiten, miniWahl, MINI_WAHL } from './diagramm.js';
 import { hinweis as regenHinweis, radarKlein, radarKopf, radarInfo } from './regen.js';
 import { abzeichen, zeilen as hinweisZeilen } from './hinweise.js';
 
@@ -95,7 +95,7 @@ export function kachel(env, regenEnv = null, hinweisEnv = null) {
     { id: 'jetzt', name: 'Jetzt', icon: icon('sun'), html: jetztHtml(zpJetzt(env)) },
     ...(regenEnv && regenEnv.daten && regenEnv.daten.karte ? [{ id: 'radar', name: 'Radar', icon: icon('schirm'), kopf: esc(radarKopf(regenEnv)), html: radarKlein(regenEnv, z.hm) }] : []),
     ...(hz.length ? [{ id: 'hinweise', name: 'Hinweise', icon: icon('warn'), kopf: abzeichen(hinweisEnv) + ' <small class="wh-dwd">Deutscher Wetterdienst</small>', liste: hz }] : []),
-    { id: 'mehr', name: 'Mehr', icon: icon('list'), liste: mehrListe(env, { z, heute, regenMax, regenUm, pollen }) }
+    { id: 'mehr', name: 'Details', icon: icon('list'), liste: mehrListe(env, { z, heute, regenMax, regenUm, pollen }) }
   ];
   return {
     state: 'live', kopf: kopfzeileHtml(env, true, false) + abzeichen(hinweisEnv) + radarAbzeichen(regenEnv),
@@ -116,7 +116,7 @@ export function zpHtml(z) {
 // Inhalt des Untertabs „Jetzt“: Zeitpunkt-Block (wechselt beim Überfahren des Diagramms, ansichten/wetter.js)
 export const jetztHtml = zp => `<div class="wz-jetzt"><span class="t-zp" data-jetzt="${esc(JSON.stringify(zp))}">${zpHtml(zp)}</span></div>`;
 
-// Untertab „Mehr“: Details von heute und Zusatzwerte als Zeilen (wichtigste zuerst, die Oberfläche zeigt so viele, wie ganz passen)
+// Untertab „Details“ (id 'mehr'): Details von heute und Zusatzwerte als Zeilen (wichtigste zuerst, die Oberfläche zeigt so viele, wie ganz passen)
 export function mehrListe(env, { z, heute, regenMax, regenUm, pollen }) {
   const a = env.daten.aktuell, d = env.daten, m = d.tage[1], l = [];
   const zeile = (dd, t, tip) => l.push({ d: dd, t, tip: tip || `${dd}: ${t}`, gruppe: 1 });
@@ -186,20 +186,21 @@ export function radarAbzeichen(regenEnv) {
   return ` <span class="wh-badge wd-radar" title="${esc('Regenradar: ' + t)}">☂ ${esc(kurz)}</span>`;
 }
 
-// Einstellungen anwenden (rein, testbar): Untertabs Radar/Mehr aus- oder einblenden, Diagramm unter „Jetzt“:
-// Heute (1, Standard), 3, 7 oder 15 Tage (gespeichert von früher: 24 Std. → Heute, 48 Std. → 3 Tage, 16 → 15 Tage; siehe miniWahl).
-// „Jetzt“ ist immer da; „Hinweise“ erscheint nur bei einer Warnung (nicht abwählbar).
+// Einstellungen anwenden (rein, testbar): Untertabs Radar/Details aus- oder einblenden; „Jetzt“ bekommt die Zeiträume
+// Heute · 3 Tage · 7 Tage · 15 Tage als Themen (Ebene 3, seit 0.49.0) – Start ist der zuletzt gewählte (mini; früher gespeicherte
+// Werte 24 Std. → Heute, 48 Std. → 3 Tage, 16 → 15 Tage, siehe miniWahl). „Jetzt“ ist immer da; „Hinweise“ nur bei Warnung (nicht abwählbar).
 export const WETTER_STANDARD = { radar: true, mehr: true, mini: 1 };
 export function mitOptionen(k, env, opt = {}) {
   const o = { ...WETTER_STANDARD, ...opt };
   const zone = (env && env.ort && env.ort.zeitzone) || 'Europe/Berlin';
   const stunde = iso => +new Date(iso).toLocaleTimeString('de-DE', { timeZone: zone, hour: '2-digit', hourCycle: 'h23' }).slice(0, 2);
-  const w = miniWahl(o.mini), d = env && env.daten;
-  // Ältere Antworten (vor wetter 1.5.0) ohne „heute“/„tageszeiten“: 15 Tage wie bisher
-  const chart = !d ? k.chart : w === 7 ? miniDiagramm(d.tage.slice(0, 7), zpTag)
+  const d = env && env.daten;
+  // Ältere Antworten (vor wetter 1.5.0) ohne „heute“/„tageszeiten“: 15 Tage
+  const diagramm = w => !d ? k.chart : w === 7 ? miniDiagramm(d.tage.slice(0, 7), zpTag)
     : w === 3 && d.tageszeiten && d.tageszeiten.length ? miniTageszeiten(d.tageszeiten, zpTageszeit)
     : w === 1 && d.heute && d.heute.length ? miniHeute(d.heute, stunde, s => zpStunde(s, d.tage, zone)) : k.chart;
   const kleinReiter = (k.kleinReiter || []).filter(r => r.id === 'jetzt' || r.id === 'hinweise' || o[r.id] !== false)
-    .map(r => (r.id === 'jetzt' ? { ...r, unten: chart } : r));
+    .map(r => (r.id === 'jetzt' ? { ...r, startTeil: 'm' + miniWahl(o.mini),
+      teile: MINI_WAHL.map(([w, name]) => ({ id: 'm' + w, name, html: r.html, unten: diagramm(w) })) } : r));
   return { ...k, kleinReiter, startReiter: 'jetzt', chart: '' };
 }

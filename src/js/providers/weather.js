@@ -7,7 +7,6 @@ import { dienst, gespeichert, ortParams, mitOrt } from '../dienste/client.js';
 import { kachel, mitOptionen, WETTER_STANDARD } from '../adapter/wetter.js';
 import { kachelEinstellungen } from '../core/einstellungen.js';
 import { hm } from '../core/util.js';
-import { MINI_WAHL, miniWahl } from '../adapter/diagramm.js';
 import '../ansichten/wetter.js'; // Zeitpunkt-Block im Reiter „Jetzt“ (wechselt beim Überfahren des Diagramms)
 import '../ansichten/radar.js'; // Radarkarte: Bilder laufen lassen, Zeitleiste
 
@@ -42,27 +41,25 @@ export async function load() {
   set('weather', { ...zeige(env, regen, hinweise), tag: stand(env) });
 }
 
-// Umschalter im Diagramm des Reiters „Jetzt“ (Heute · 3 Tage · 7 Tage · 15 Tage): dieselbe Einstellung wie im Einstellungsfenster, sofort ohne Abruf
-document.addEventListener('click', e => {
-  const b = e.target.closest('#tile-weather [data-mini-wahl]'); if (!b) return;
-  kachelOptSpeichern('weather', { ...opt(), mini: +b.dataset.miniWahl });
-  if (env) set('weather', { ...zeige(env, regen, hinweise), tag: stand(env) });
+// Zeitraum unter „Jetzt“ (Themen Heute · 3 Tage · 7 Tage · 15 Tage, seit 0.49.0): die Wahl merken – beim nächsten Öffnen startet „Jetzt“ damit
+document.addEventListener('daily:thema', e => {
+  const { bereich, rubrik, thema } = e.detail || {};
+  if (bereich === 'wetter' && rubrik === 'jetzt' && /^m\d+$/.test(thema)) kachelOptSpeichern('weather', { mini: +thema.slice(1) });
 });
 
 // Einstellungen (Abschnitt „Wetter“ im Einstellungsfenster)
-const REITER = [['radar', 'Radar'], ['mehr', 'Mehr']];
+const REITER = [['radar', 'Radar'], ['mehr', 'Details']];
 kachelEinstellungen('weather', {
   felder: () => {
     const o = opt();
     return [
       { typ: 'titel', label: 'Untertabs anzeigen' },
       { typ: 'hinweis', label: '„Jetzt“ ist immer da. „Hinweise“ erscheint, sobald eine amtliche Warnung vorliegt.' },
-      ...REITER.map(([k, n]) => ({ typ: 'check', key: k, label: n, wert: o[k] !== false })),
-      { typ: 'select', key: 'mini', label: 'Diagramm unter „Jetzt“', wert: String(miniWahl(o.mini)), optionen: MINI_WAHL.map(([w, t]) => [String(w), t]) }
+      ...REITER.map(([k, n]) => ({ typ: 'check', key: k, label: n, wert: o[k] !== false }))
     ];
   },
   speichern: w => {
-    kachelOptSpeichern('weather', { ...Object.fromEntries(REITER.map(([k]) => [k, !!w[k]])), mini: +w.mini });
+    kachelOptSpeichern('weather', Object.fromEntries(REITER.map(([k]) => [k, !!w[k]])));
     if (env) set('weather', { ...zeige(env, regen, hinweise), tag: stand(env) });   // sofort, ohne neuen Abruf
   }
 });

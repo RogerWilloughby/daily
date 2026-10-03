@@ -1,5 +1,5 @@
 // Adapter „kalender“: macht aus den Diensten „feiertage“, „himmel“ und „namenstage“ den Bereich „Kalender“
-// (Untertabs Nächste · Feiertage · Himmel · Namenstage). Seit 0.47.3 ohne eigene Termine und ohne Frag DAILY.
+// (Rubriken Nächste · Feiertage · Ferien · Namenstage) und die Rubrik „Himmel“ unter Wetter. Seit 0.47.3 ohne Termine und Frag DAILY.
 // Ohne DOM, testbar. Zeiten in der Zeitzone des Orts (Standard Europe/Berlin).
 import { esc, icon } from '../core/util.js';
 
@@ -54,7 +54,7 @@ const SYM = { naechste: 'cal', frei: 'flag', himmel: 'moon', namen: 'etikett' };
 const tipp = (t, heute) => [ART_TEXT[t.art], t.laeuft ? `läuft bis ${wtag(t.bis)}` : `${t.bis ? `${wtag(t.datum)} – ${wtag(t.bis)}` : wtag(t.datum)} (${wann(tageBis(heute, t.datum))})`, t.zusatz].filter(Boolean).join(' · ');
 
 // Der Bereich. fEnv (feiertage) kann fehlen (Ausland, Störung), hEnv (himmel) und nEnv (namenstage) ebenso.
-// Untertabs: Nächste · Feiertage & Ferien · Himmel · Namenstage
+// Rubriken: Nächste · Feiertage · Ferien · Himmel (erscheint unter Wetter) · Namenstage
 export function kachel(fEnv, hEnv, jetzt = Date.now(), zone = 'Europe/Berlin', nEnv = null) {
   const heute = tagImOrt(new Date(jetzt).toISOString(), zone);
   const f = fEnv && fEnv.daten, h = hEnv && hEnv.daten;
@@ -94,10 +94,13 @@ export function kachel(fEnv, hEnv, jetzt = Date.now(), zone = 'Europe/Berlin', n
     kopf: `${kwText}<b>${esc(m)}</b>${kopfZusatz ? ` <small>${esc(kopfZusatz)}</small>` : ''}`,
     liste: naechsteListe, html: '<p class="kl-leer">Nichts Besonderes in Sicht.</p>' }];
 
-  // Feiertage & Ferien (nur Deutschland): Feiertage, Brückentage, Ferien, Zeitumstellung nach Datum
-  if (f) reiter.push({ id: 'frei', name: 'Feiertage & Ferien', icon: icon(SYM.frei), kopf: `<b>Feiertage &amp; Ferien</b> <small>${esc(f.bundesland)}</small>`,
-    liste: frei.map(t => ({ d: t.laeuft ? `bis ${wtag(t.bis)}` : t.bis ? `ab ${wtag(t.datum)}` : wtag(t.datum), t: t.text + (t.zusatz ? ` (${t.zusatz})` : ''), tip: tipp(t, heute), gruppe: 1 })),
-    html: '<p class="kl-leer">Keine Feiertage oder Ferien gefunden.</p>' });
+  // Feiertage (Feiertage, Brückentage, Zeitumstellung) und Ferien – je eine Rubrik (seit 0.49.0), nur Deutschland
+  const zeileFrei = t => ({ d: t.laeuft ? `bis ${wtag(t.bis)}` : t.bis ? `ab ${wtag(t.datum)}` : wtag(t.datum), t: t.text + (t.zusatz ? ` (${t.zusatz})` : ''), tip: tipp(t, heute), gruppe: 1 });
+  if (f) reiter.push({ id: 'feiertage', name: 'Feiertage', icon: icon(SYM.frei), kopf: `<b>Feiertage</b> <small>${esc(f.bundesland)}</small>`,
+    liste: frei.filter(t => t.art !== 'ferien').map(zeileFrei), html: '<p class="kl-leer">Keine Feiertage gefunden.</p>' });
+  if (f) reiter.push({ id: 'ferien', name: 'Ferien', icon: icon(SYM.frei), kopf: `<b>Schulferien</b> <small>${esc(f.bundesland)}</small>`,
+    liste: frei.filter(t => t.art === 'ferien').map(zeileFrei),
+    html: `<p class="kl-leer">${f.ferien ? 'Keine Ferientermine gefunden.' : 'Die Schulferien sind gerade nicht erreichbar.'}</p>` });
   // Himmel: Mond jetzt, dann je Art nur die nächsten (2 Mondtermine, 1 Sternschnuppen-Nacht, 2 Finsternisse, 1 Jahreszeit)
   if (h) {
     const md = h.mond, je = { mond: 2, sterne: 1, finsternis: 2, jahreszeit: 1 }, n = {};
