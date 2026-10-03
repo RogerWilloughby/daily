@@ -142,10 +142,16 @@ test('Syntax: alle Browser-Module lassen sich parsen', () => {
   const dateien = [];
   const lauf = d => fs.readdirSync(d, { withFileTypes: true }).forEach(e => { const p = path.join(d, e.name); if (e.isDirectory()) lauf(p); else if (p.endsWith('.js')) dateien.push(p); });
   lauf(path.join(__dirname, '..', 'src', 'js'));
-  for (const f of dateien) {
-    const r = spawnSync(process.execPath, ['--experimental-default-type=module', '--check', f], { encoding: 'utf8' });
-    assert.equal(r.status, 0, path.relative(process.cwd(), f) + ': ' + (r.stderr || '').split('\n').slice(0, 5).join(' '));
-  }
+  // Als .mjs-Kopie prüfen: so gilt die Datei in jeder Node-Version als Modul (der Schalter --experimental-default-type fehlt ab Node 24)
+  const tmp = fs.mkdtempSync(path.join(require('os').tmpdir(), 'daily-syntax-'));
+  try {
+    for (const f of dateien) {
+      const kopie = path.join(tmp, 'pruef.mjs');
+      fs.copyFileSync(f, kopie);
+      const r = spawnSync(process.execPath, ['--check', kopie], { encoding: 'utf8' });
+      assert.equal(r.status, 0, path.relative(process.cwd(), f) + ': ' + (r.stderr || '').split('\n').slice(0, 5).join(' '));
+    }
+  } finally { fs.rmSync(tmp, { recursive: true, force: true }); }
 });
 
 // Trennung: Das allgemeine Kachelraster (core/board.js) und die allgemeinen Styles (app.css) enthalten nichts Wetter- oder
