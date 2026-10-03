@@ -7,7 +7,17 @@
    "datum": "2026-09-26",
    "raetsel": {
     "frage": "Was hat Zähne, kann aber nicht beißen?",
-    "loesung": "Ein Kamm."
+    "loesung": "Ein Kamm.",
+    "antwort": "Ein Kamm",
+    "falsch": [
+     "Eine Gabel",
+     "Eine Bürste",
+     "Ein Hai"
+    ],
+    "tipps": [
+     "Du benutzt ihn morgens vor dem Spiegel.",
+     "Er gehört zu den Haaren."
+    ]
    },
    "witz": "Treffen sich zwei Magnete. Sagt der eine: „Was soll ich heute bloß anziehen?“",
    "wort": {
@@ -65,7 +75,17 @@
    "datum": "2026-09-27",
    "raetsel": {
     "frage": "Je mehr man davon wegnimmt, desto größer wird es. Was ist es?",
-    "loesung": "Ein Loch."
+    "loesung": "Ein Loch.",
+    "antwort": "Ein Loch",
+    "falsch": [
+     "Ein Sandhaufen",
+     "Eine Pfütze",
+     "Ein Stapel"
+    ],
+    "tipps": [
+     "Denk an eine Schaufel.",
+     "Eigentlich besteht es aus … nichts."
+    ]
    },
    "witz": "Was macht ein Pirat am Computer? – Er drückt die Enter-Taste.",
    "wort": {
@@ -123,7 +143,17 @@
    "datum": "2026-09-28",
    "raetsel": {
     "frage": "Was wird nasser, je mehr es trocknet?",
-    "loesung": "Ein Handtuch."
+    "loesung": "Ein Handtuch.",
+    "antwort": "Ein Handtuch",
+    "falsch": [
+     "Ein Regenschirm",
+     "Ein Föhn",
+     "Die Wäsche"
+    ],
+    "tipps": [
+     "Es hängt oft im Bad.",
+     "Man braucht es nach dem Duschen."
+    ]
    },
    "witz": "Warum können Seeräuber keinen Kreis berechnen? – Weil sie Pi raten.",
    "wort": {
@@ -181,7 +211,17 @@
    "datum": "2026-09-29",
    "raetsel": {
     "frage": "Was hat einen Hals, aber keinen Kopf?",
-    "loesung": "Eine Flasche."
+    "loesung": "Eine Flasche.",
+    "antwort": "Eine Flasche",
+    "falsch": [
+     "Eine Giraffe",
+     "Ein Schal",
+     "Ein Hut"
+    ],
+    "tipps": [
+     "Man kann daraus trinken.",
+     "Oben hat sie einen Deckel oder Korken."
+    ]
    },
    "witz": "Was ist grün und klopft an die Tür? – Ein Klopfsalat.",
    "wort": {
@@ -238,7 +278,17 @@
    "datum": "2026-09-30",
    "raetsel": {
     "frage": "Was gehört dir, wird aber von anderen viel öfter benutzt als von dir?",
-    "loesung": "Dein Name."
+    "loesung": "Dein Name.",
+    "antwort": "Dein Name",
+    "falsch": [
+     "Dein Handy",
+     "Dein Auto",
+     "Deine Zahnbürste"
+    ],
+    "tipps": [
+     "Man kann es nicht anfassen.",
+     "Andere rufen dich damit."
+    ]
    },
    "witz": "Wie nennt man einen Bumerang, der nicht zurückkommt? – Stock.",
    "wort": {
@@ -296,7 +346,17 @@
    "datum": "2026-10-01",
    "raetsel": {
     "frage": "Welcher Monat hat 28 Tage?",
-    "loesung": "Alle Monate."
+    "loesung": "Alle Monate.",
+    "antwort": "Alle Monate",
+    "falsch": [
+     "Der Februar",
+     "Kein Monat",
+     "Nur Monate mit 30 Tagen"
+    ],
+    "tipps": [
+     "In der Frage steht nicht „genau“.",
+     "Auch der Januar hat einen 28. Tag."
+    ]
    },
    "witz": "Was sagt der große Stift zum kleinen Stift? – „Wachs mal, Stift!“",
    "wort": {
@@ -353,7 +413,17 @@
    "datum": "2026-10-02",
    "raetsel": {
     "frage": "Was kann man brechen, ohne es zu berühren?",
-    "loesung": "Ein Versprechen."
+    "loesung": "Ein Versprechen.",
+    "antwort": "Ein Versprechen",
+    "falsch": [
+     "Ein Ast",
+     "Ein Teller",
+     "Ein Bleistift"
+    ],
+    "tipps": [
+     "Es besteht nur aus Worten.",
+     "Man gibt es jemandem – und sollte es halten."
+    ]
    },
    "witz": "Was ist orange und läuft durch den Wald? – Eine Wanderine.",
    "wort": {
@@ -411,7 +481,17 @@
    "datum": "2026-10-03",
    "raetsel": {
     "frage": "Was hat Blätter, ist aber kein Baum?",
-    "loesung": "Ein Buch."
+    "loesung": "Ein Buch.",
+    "antwort": "Ein Buch",
+    "falsch": [
+     "Ein Stuhl",
+     "Eine Kerze",
+     "Ein Teller"
+    ],
+    "tipps": [
+     "Es steht oft in einem Regal.",
+     "Man blättert darin."
+    ]
    },
    "witz": "Was macht ein Clown im Büro? – Faxen.",
    "wort": {
@@ -468,7 +548,17 @@
    "datum": "2026-10-04",
    "raetsel": {
     "frage": "Was steht genau in der Mitte von Paris?",
-    "loesung": "Der Buchstabe R."
+    "loesung": "Der Buchstabe R.",
+    "antwort": "Der Buchstabe R",
+    "falsch": [
+     "Der Eiffelturm",
+     "Der Louvre",
+     "Die Seine"
+    ],
+    "tipps": [
+     "Denk nicht an die Stadt, sondern an das Wort.",
+     "Paris hat fünf Buchstaben."
+    ]
    },
    "witz": "Welcher Bus hat den Atlantik überquert? – Kolumbus.",
    "wort": {
@@ -525,7 +615,17 @@
    "datum": "2026-10-05",
    "raetsel": {
     "frage": "Was hat viele Tasten, öffnet aber keine einzige Tür?",
-    "loesung": "Ein Klavier."
+    "loesung": "Ein Klavier.",
+    "antwort": "Ein Klavier",
+    "falsch": [
+     "Ein Schlüsselbund",
+     "Eine Trommel",
+     "Eine Geige"
+    ],
+    "tipps": [
+     "Es macht Musik.",
+     "Die Tasten sind schwarz und weiß."
+    ]
    },
    "witz": "Was sitzt auf dem Baum und ruft „Aha“? – Ein Uhu mit Sprachfehler.",
    "wort": {
@@ -583,7 +683,17 @@
    "datum": "2026-10-06",
    "raetsel": {
     "frage": "Was kommt einmal im Monat vor, zweimal im Moment, aber nie in einer Stunde?",
-    "loesung": "Der Buchstabe M."
+    "loesung": "Der Buchstabe M.",
+    "antwort": "Der Buchstabe M",
+    "falsch": [
+     "Der Buchstabe O",
+     "Der Buchstabe N",
+     "Der Vollmond"
+    ],
+    "tipps": [
+     "Schau dir die Wörter selbst an.",
+     "Zähle die Buchstaben in „Moment“."
+    ]
    },
    "witz": "Wie heißt der Bruder von Elvis? – Zwölfis.",
    "wort": {
@@ -639,7 +749,17 @@
    "datum": "2026-10-07",
    "raetsel": {
     "frage": "Was hat ein Auge, kann aber nicht sehen?",
-    "loesung": "Eine Nadel."
+    "loesung": "Eine Nadel.",
+    "antwort": "Eine Nadel",
+    "falsch": [
+     "Eine Schere",
+     "Ein Knopf",
+     "Ein Faden"
+    ],
+    "tipps": [
+     "Man braucht dazu einen Faden.",
+     "Man näht damit."
+    ]
    },
    "witz": "Was liegt am Strand und spricht undeutlich? – Eine Nuschel.",
    "wort": {
@@ -697,7 +817,17 @@
    "datum": "2026-10-08",
    "raetsel": {
     "frage": "Was fällt, ohne sich jemals wehzutun?",
-    "loesung": "Regen."
+    "loesung": "Regen.",
+    "antwort": "Regen",
+    "falsch": [
+     "Ein Glas",
+     "Ein Ei",
+     "Ein Kletterer"
+    ],
+    "tipps": [
+     "Es kommt von oben.",
+     "Danach braucht man einen Schirm."
+    ]
    },
    "witz": "Was ist ein Keks unter einem Baum? – Ein schattiges Plätzchen.",
    "wort": {
@@ -754,7 +884,17 @@
    "datum": "2026-10-09",
    "raetsel": {
     "frage": "Was ist leichter als eine Feder, und doch kann es selbst der Stärkste nicht lange halten?",
-    "loesung": "Der Atem."
+    "loesung": "Der Atem.",
+    "antwort": "Der Atem",
+    "falsch": [
+     "Ein Luftballon",
+     "Ein Blatt Papier",
+     "Ein Haar"
+    ],
+    "tipps": [
+     "Du tust es den ganzen Tag, ohne nachzudenken.",
+     "Beim Tauchen merkst du es."
+    ]
    },
    "witz": "Wo wohnen Katzen am liebsten? – Im Miezhaus.",
    "wort": {
@@ -811,7 +951,17 @@
    "datum": "2026-10-10",
    "raetsel": {
     "frage": "Was geht durch Glas, ohne es zu zerbrechen?",
-    "loesung": "Licht."
+    "loesung": "Licht.",
+    "antwort": "Licht",
+    "falsch": [
+     "Wasser",
+     "Ein Stein",
+     "Ein Vogel"
+    ],
+    "tipps": [
+     "Ohne es wäre ein Fenster nutzlos.",
+     "Es kommt von der Sonne."
+    ]
    },
    "witz": "Was ist weiß und stört beim Essen? – Eine Lawine.",
    "wort": {
@@ -868,7 +1018,17 @@
    "datum": "2026-10-11",
    "raetsel": {
     "frage": "Was hat Zeiger, kann aber nichts zeigen außer der Zeit?",
-    "loesung": "Eine Uhr."
+    "loesung": "Eine Uhr.",
+    "antwort": "Eine Uhr",
+    "falsch": [
+     "Ein Tacho",
+     "Ein Kalender",
+     "Ein Wegweiser"
+    ],
+    "tipps": [
+     "Sie tickt oft.",
+     "Man trägt sie am Handgelenk oder hängt sie an die Wand."
+    ]
    },
    "witz": "Was macht ein Mathematiker im Garten? – Er zieht Wurzeln.",
    "wort": {
@@ -926,7 +1086,17 @@
    "datum": "2026-10-12",
    "raetsel": {
     "frage": "Was geht morgens auf vier, mittags auf zwei und abends auf drei Beinen?",
-    "loesung": "Der Mensch: als Baby krabbelnd, als Erwachsener aufrecht, im Alter mit Gehstock."
+    "loesung": "Der Mensch: als Baby krabbelnd, als Erwachsener aufrecht, im Alter mit Gehstock.",
+    "antwort": "Der Mensch",
+    "falsch": [
+     "Ein Hund",
+     "Ein Pferd",
+     "Ein Tisch"
+    ],
+    "tipps": [
+     "Morgen, Mittag und Abend stehen für ein ganzes Leben.",
+     "Am Abend hilft ein Stock."
+    ]
    },
    "witz": "Wie nennt man einen Schneemann mit Sonnenbrand? – Pfütze.",
    "wort": {
@@ -983,7 +1153,17 @@
    "datum": "2026-10-13",
    "raetsel": {
     "frage": "Was ist voller Löcher und hält trotzdem Wasser?",
-    "loesung": "Ein Schwamm."
+    "loesung": "Ein Schwamm.",
+    "antwort": "Ein Schwamm",
+    "falsch": [
+     "Ein Sieb",
+     "Ein Eimer",
+     "Ein Netz"
+    ],
+    "tipps": [
+     "Man findet ihn in der Küche.",
+     "Man drückt ihn aus."
+    ]
    },
    "witz": "Was ist klein, braun und rund und sitzt hinter Gittern? – Eine Knastanie.",
    "wort": {
@@ -1040,7 +1220,17 @@
    "datum": "2026-10-14",
    "raetsel": {
     "frage": "Was reist um die ganze Welt und bleibt dabei immer in seiner Ecke?",
-    "loesung": "Eine Briefmarke."
+    "loesung": "Eine Briefmarke.",
+    "antwort": "Eine Briefmarke",
+    "falsch": [
+     "Ein Flugzeug",
+     "Ein Koffer",
+     "Ein Globus"
+    ],
+    "tipps": [
+     "Sie klebt.",
+     "Man findet sie auf einem Brief."
+    ]
    },
    "witz": "Was ist ein Cowboy ohne Pferd? – Ein Sattelschlepper.",
    "wort": {
@@ -1098,7 +1288,17 @@
    "datum": "2026-10-15",
    "raetsel": {
     "frage": "Was wird größer, wenn man es auf den Kopf stellt?",
-    "loesung": "Die Zahl 6 – sie wird zur 9."
+    "loesung": "Die Zahl 6 – sie wird zur 9.",
+    "antwort": "Die Zahl 6",
+    "falsch": [
+     "Die Zahl 8",
+     "Die Zahl 9",
+     "Die Zahl 1"
+    ],
+    "tipps": [
+     "Es ist eine Ziffer.",
+     "Dreh sie um 180 Grad."
+    ]
    },
    "witz": "Warum sind Fische so schlau? – Weil sie in Schulen gehen.",
    "wort": {
@@ -1155,7 +1355,17 @@
    "datum": "2026-10-16",
    "raetsel": {
     "frage": "Was hat ein Kopfende und ein Fußende, aber keinen Körper?",
-    "loesung": "Ein Bett."
+    "loesung": "Ein Bett.",
+    "antwort": "Ein Bett",
+    "falsch": [
+     "Ein Tisch",
+     "Ein Schrank",
+     "Ein Teppich"
+    ],
+    "tipps": [
+     "Es steht im Schlafzimmer.",
+     "Darauf liegt dein Kissen."
+    ]
    },
    "witz": "Was ist groß, grau und telefoniert? – Ein Telefant.",
    "wort": {
@@ -1213,7 +1423,17 @@
    "datum": "2026-10-17",
    "raetsel": {
     "frage": "Schwarz beim Kauf, rot beim Benutzen, grau beim Wegwerfen. Was ist es?",
-    "loesung": "Holzkohle."
+    "loesung": "Holzkohle.",
+    "antwort": "Holzkohle",
+    "falsch": [
+     "Eine Tomate",
+     "Ein Ziegelstein",
+     "Tinte"
+    ],
+    "tipps": [
+     "Sie glüht.",
+     "Man braucht sie zum Grillen."
+    ]
    },
    "witz": "Warum können Gespenster so schlecht lügen? – Weil man durch sie hindurchsieht.",
    "wort": {
@@ -1270,7 +1490,17 @@
    "datum": "2026-10-18",
    "raetsel": {
     "frage": "Was hat einen Daumen und vier Finger, lebt aber nicht?",
-    "loesung": "Ein Handschuh."
+    "loesung": "Ein Handschuh.",
+    "antwort": "Ein Handschuh",
+    "falsch": [
+     "Eine Socke",
+     "Ein Schuh",
+     "Ein Ring"
+    ],
+    "tipps": [
+     "Im Winter ist er praktisch.",
+     "Meist kommt er im Paar."
+    ]
    },
    "witz": "Was sagt die Null zur Acht? – „Schicker Gürtel!“",
    "wort": {
@@ -1327,7 +1557,17 @@
    "datum": "2026-10-19",
    "raetsel": {
     "frage": "Was kann man sich einfangen, aber nicht werfen?",
-    "loesung": "Eine Erkältung."
+    "loesung": "Eine Erkältung.",
+    "antwort": "Eine Erkältung",
+    "falsch": [
+     "Einen Ball",
+     "Einen Fisch",
+     "Ein Frisbee"
+    ],
+    "tipps": [
+     "Danach braucht man Taschentücher.",
+     "Sie kommt oft im Herbst."
+    ]
    },
    "witz": "Was trinkt ein Vampir am liebsten zum Frühstück? – Blutorangensaft.",
    "wort": {
@@ -1385,7 +1625,17 @@
    "datum": "2026-10-20",
    "raetsel": {
     "frage": "Was ist immer vor dir, und doch kannst du es nie sehen?",
-    "loesung": "Die Zukunft."
+    "loesung": "Die Zukunft.",
+    "antwort": "Die Zukunft",
+    "falsch": [
+     "Dein Rücken",
+     "Der Horizont",
+     "Die Vergangenheit"
+    ],
+    "tipps": [
+     "Es ist keine Sache, sondern eine Zeit.",
+     "Morgen gehört dazu."
+    ]
    },
    "witz": "Warum wurde die Tomate rot? – Sie hat das Salatdressing gesehen.",
    "wort": {
@@ -1442,7 +1692,17 @@
    "datum": "2026-10-21",
    "raetsel": {
     "frage": "Was brennt, ist aber kein Feuer?",
-    "loesung": "Die Brennnessel."
+    "loesung": "Die Brennnessel.",
+    "antwort": "Die Brennnessel",
+    "falsch": [
+     "Eine Kerze",
+     "Ein Kamin",
+     "Die Rose"
+    ],
+    "tipps": [
+     "Sie wächst am Wegrand.",
+     "Wer sie anfasst, bekommt rote Pusteln."
+    ]
    },
    "witz": "Was macht ein Schaf beim Sport? – Määärathon.",
    "wort": {
@@ -1500,7 +1760,17 @@
    "datum": "2026-10-22",
    "raetsel": {
     "frage": "Man hört es, sieht es nie, und es antwortet nur, wenn man es anspricht. Was ist es?",
-    "loesung": "Ein Echo."
+    "loesung": "Ein Echo.",
+    "antwort": "Ein Echo",
+    "falsch": [
+     "Ein Radio",
+     "Der Wind",
+     "Ein Telefon"
+    ],
+    "tipps": [
+     "Am besten klappt es in den Bergen.",
+     "Es wiederholt deine Worte."
+    ]
    },
    "witz": "Welche Stadt hat keine Häuser? – Die Werkstatt.",
    "wort": {
@@ -1556,7 +1826,17 @@
    "datum": "2026-10-23",
    "raetsel": {
     "frage": "Was wird umso kürzer, je länger es brennt?",
-    "loesung": "Eine Kerze."
+    "loesung": "Eine Kerze.",
+    "antwort": "Eine Kerze",
+    "falsch": [
+     "Ein Kamin",
+     "Eine Glühbirne",
+     "Ein Ofen"
+    ],
+    "tipps": [
+     "Sie steht gern auf dem Adventskranz.",
+     "Sie ist aus Wachs."
+    ]
    },
    "witz": "Was ist braun und sitzt im Wald auf dem Klavier? – Ein Brummbär mit Lampenfieber.",
    "wort": {
@@ -1613,7 +1893,17 @@
    "datum": "2026-10-24",
    "raetsel": {
     "frage": "Welches Tier trägt eine große Zahl im Namen, hat aber längst nicht so viele Beine?",
-    "loesung": "Der Tausendfüßer."
+    "loesung": "Der Tausendfüßer.",
+    "antwort": "Der Tausendfüßer",
+    "falsch": [
+     "Die Spinne",
+     "Der Regenwurm",
+     "Die Raupe"
+    ],
+    "tipps": [
+     "Er lebt unter Steinen und Laub.",
+     "Die Zahl hat drei Nullen."
+    ]
    },
    "witz": "Was ist gelb und schießt? – Eine Banone.",
    "wort": {
@@ -1671,7 +1961,17 @@
    "datum": "2026-10-25",
    "raetsel": {
     "frage": "Was ist schwerer: ein Kilo Federn oder ein Kilo Eisen?",
-    "loesung": "Keins – beide wiegen ein Kilo."
+    "loesung": "Keins – beide wiegen ein Kilo.",
+    "antwort": "Beide gleich schwer",
+    "falsch": [
+     "Das Kilo Eisen",
+     "Das Kilo Federn",
+     "Kommt auf die Größe an"
+    ],
+    "tipps": [
+     "Lies die Mengen genau.",
+     "Ein Kilo ist ein Kilo."
+    ]
    },
    "witz": "Was steht auf dem Grabstein eines Mathematikers? – „Damit hat er nicht gerechnet.“",
    "wort": {
@@ -1729,7 +2029,17 @@
    "datum": "2026-10-26",
    "raetsel": {
     "frage": "Was hat vier Beine, kann aber nicht laufen?",
-    "loesung": "Ein Tisch."
+    "loesung": "Ein Tisch.",
+    "antwort": "Ein Tisch",
+    "falsch": [
+     "Ein Hund",
+     "Eine Lampe",
+     "Ein Teppich"
+    ],
+    "tipps": [
+     "Daran isst man.",
+     "Man stellt Teller darauf."
+    ]
    },
    "witz": "Was ist ein Keller voller Kekse? – Ein Krümelkeller.",
    "wort": {

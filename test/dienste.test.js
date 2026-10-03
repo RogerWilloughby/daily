@@ -1029,6 +1029,19 @@ test('Meine Seiten: feste Seiten-Auswahl, Mini-Reiter mit Symbolraster, Einstell
 test('Tagesinhalte: Dienst je Tag (Verlauf, nie Zukunft), Bereich „Heute“ mit Blättern, Lösung, Merken', async () => {
   const d = dienste.byId.tagesinhalt;
   for (const tag of d.VORRAT.tage) assert.deepEqual(pruefeStreng(d.umwandeln(tag, tag.datum, { heute: tag.datum, erster: d.VORRAT.von, wiederholt: false }), d.schema), [], tag.datum);   // ganzer Vorrat erfüllt den Vertrag
+  // Rätsel zum Mitmachen (Dienst 1.2.0): jede Antwort eindeutig – genau 3 falsche, keine doppelt, keine gleich der richtigen; höchstens 2 Tipps,
+  // kein Tipp nennt die Antwort; die kurze Antwort passt zur ausführlichen Lösung
+  const ohneArtikel = x => x.toLowerCase().replace(/^(der|die|das|ein|eine|einen|dein|deine) /, '').replace(/^(buchstabe|zahl) /, '');
+  for (const { datum, raetsel: r } of d.VORRAT.tage) {
+    assert.ok(r.antwort && r.antwort.length <= 24, datum + ' Antwort kurz');
+    assert.equal(r.falsch.length, 3, datum);
+    const alle = [r.antwort, ...r.falsch].map(x => x.toLowerCase());
+    assert.equal(new Set(alle).size, 4, datum + ' Antworten verschieden');
+    assert.ok(r.tipps.length <= 2, datum);
+    const wort = new RegExp(`(^|[^\\p{L}\\d])${ohneArtikel(r.antwort).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}($|[^\\p{L}\\d])`, 'u');   // ganzes Wort
+    for (const t of r.tipps) assert.ok(!wort.test(t.toLowerCase()), `${datum} Tipp verrät „${r.antwort}“: ${t}`);
+    assert.ok(r.loesung.toLowerCase().includes(ohneArtikel(r.antwort)) || r.antwort === 'Beide gleich schwer', `${datum} Antwort passt zur Lösung`);
+  }
   const jetzt = Date.parse('2026-10-01T10:00:00Z');
   const heute = await dienste.ausfuehren('tagesinhalt', {}, { jetzt });
   gueltig(heute, d.schema);

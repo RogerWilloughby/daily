@@ -109,7 +109,7 @@ Heute kostet nichts, und nichts kann von selbst eine Rechnung erzeugen.
 |---|---|---|
 | **0 Klären** | ✅ 22 Fragen geklärt (02./03.10.2026) | Entscheidungen in `entscheidungen.md` |
 | **1 Fundament** | ✅ 1a Tagesgrenze (0.46.2); ✅ 1b-1 neue Oberfläche „Abreißblock“ (0.47.0); ✅ 1b-2a alte Dateien gelöscht (0.47.2); ✅ 1b-2b Reste und Rechtstexte (0.47.3); ✅ 1c weniger Anfragen (0.48.0); ✅ 1d neue Gliederung nach `themen.md` (drei Ebenen; 0.49.0) – **Phase 1 erledigt**. Tagesgrenze; neue Oberfläche (Tabs/Untertabs, Handy unten/Rechner oben, kein Scrollen) mit Wetter, Kalender, Tagesinhalten, Meine Seiten, Tools; Info-Anbieter, Mein Daily, Deine Nutzung, Termine aus der Oberfläche; doppelte Anfragen vermeiden | DAILY in neuer Form, am Handy benutzbar |
-| **2 Mitmachen I** | Grundlage (Spielstand, Teilen, Nachholen) + Rätsel zum Mitmachen | erstes lösbares Format |
+| **2 Mitmachen I** | ✅ 2a Rätsel-Daten (0.50.0); offen 2b Grundlage (Spielstand, Teilen, Nachholen) + Rätsel zum Mitmachen | erstes lösbares Format |
 | **3 Mitmachen II** | Quiz (5 Fragen); Bilderrätsel mit Album „Vögel“ | Mitmachen und Sammeln komplett |
 | **4 Testreife** | Inhalte für 31 Tage (Rätsel, Quiz, Bilder); Quiz-Name; Pflegepunkte (Wetter-Werte, Tankerkönig); Firewall-Regel; Rauchtest; Fragebogen; Domain | startklar |
 | **5 Test** | zwei Wochen, Auswertung | Entscheidung über Formate, Name, nächste Schritte |

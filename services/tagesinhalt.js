@@ -28,7 +28,7 @@ const KURZTEXT = () => S.obj({ kurz: S.text(), text: S.text() }, ['kurz', 'text'
 const SCHEMA = S.obj({
   datum: S.datum(), heute: S.datum(), erster: S.datum(), wiederholt: { type: 'boolean' },
   inhalt: S.obj({
-    raetsel: S.obj({ frage: S.text(), loesung: S.text() }, ['frage', 'loesung'], true),
+    raetsel: S.obj({ frage: S.text(), loesung: S.text(), antwort: S.text(), falsch: S.liste({ type: 'string' }), tipps: S.liste({ type: 'string' }) }, ['frage', 'loesung'], true),
     witz: S.text(),
     wort: S.obj({ wort: S.text(), bedeutung: S.text(), herkunft: S.text() }, ['wort', 'bedeutung'], true),
     sprichwort: S.text(),
@@ -42,8 +42,9 @@ const SCHEMA = S.obj({
 module.exports = {
   id: 'tagesinhalt',
   version: 1,
-  programmversion: '1.1.1',
+  programmversion: '1.2.0',
   aenderungen: [
+    { version: '1.2.0', datum: '2026-10-03', text: 'Rätsel zum Mitmachen: kurze richtige Antwort, 3 falsche Antworten und bis zu 2 Tipps (Lösungen offen in der Antwort, wie bei Wordle – der Browser prüft selbst).' },
     { version: '1.1.1', datum: '2026-10-03', text: 'Tagestakt endet um Mitternacht deutscher Zeit statt um Mitternacht UTC (1 bzw. 2 Uhr) – auch an Tagen der Zeitumstellung.' },
     { version: '1.1.0', datum: '2026-10-02', text: 'Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026).' },
     { version: '1.0.0', datum: '2026-10-01', text: 'Erste Fassung: alle Tagesinhalte eines Tags aus der festen Datei, auch vergangene Tage (Verlauf), nie in die Zukunft' }],
@@ -66,7 +67,8 @@ module.exports = {
     verarbeitung: [
       'Datum: Standard heute in Deutschland (Europe/Berlin). Tage in der Zukunft und vor dem ersten Tag des Vorrats werden abgelehnt (eingabe_ungueltig).',
       'Gibt es den Tag im Vorrat, kommt genau dieser Eintrag; nach dem letzten Tag wiederholt sich der Vorrat im Kreis (Tag im Jahr), gekennzeichnet mit wiederholt: true.',
-      'Inhalte unverändert aus der Datei; fehlende Arten als null.'
+      'Inhalte unverändert aus der Datei; fehlende Arten als null.',
+      'Rätsel: Antwort, falsche Antworten und Tipps stehen offen in der Antwort (wie bei Wordle) – der Browser mischt die vier Antworten je Tag gleich für alle und prüft selbst; nichts geht an DAILY zurück.'
     ],
     ausgabe: {
       datum: 'gezeigter Tag (JJJJ-MM-TT)',
@@ -74,7 +76,8 @@ module.exports = {
       erster: 'erster Tag des Vorrats – weiter zurück geht es nicht',
       wiederholt: 'true, wenn der Tag nach dem Vorrat liegt und ein Eintrag im Kreis wiederholt wird',
       inhalt: 'Inhalte des Tags je Art (null: fehlt)',
-      'inhalt.raetsel': 'Rätsel', 'inhalt.raetsel.frage': 'Frage', 'inhalt.raetsel.loesung': 'Lösung',
+      'inhalt.raetsel': 'Rätsel', 'inhalt.raetsel.frage': 'Frage', 'inhalt.raetsel.loesung': 'Lösung (ganzer Satz, nach dem Lösen)',
+      'inhalt.raetsel.antwort': 'richtige Antwort, kurz – für den Antwort-Knopf (fehlt: nur „Lösung zeigen“)', 'inhalt.raetsel.falsch': 'drei falsche Antworten', 'inhalt.raetsel.tipps': 'bis zu zwei Tipps, der zweite deutlicher',
       'inhalt.witz': 'Witz des Tages',
       'inhalt.wort': 'Wort des Tages', 'inhalt.wort.wort': 'das Wort', 'inhalt.wort.bedeutung': 'Bedeutung', 'inhalt.wort.herkunft': 'Herkunft (null: unbekannt)',
       'inhalt.sprichwort': 'Sprichwort des Tages',

@@ -38,6 +38,42 @@ RAETSEL = [
  ("Was hat vier Beine, kann aber nicht laufen?", "Ein Tisch."),
 ]
 
+# Mitmachen (Phase 2, App 0.50.0): je Rätsel die kurze richtige Antwort (Knopf), 3 falsche Antworten und bis zu 2 Tipps.
+# Falsche Antworten müssen eindeutig falsch sein (Roger prüft vollständig, Entscheidung 0a/15); die Reihenfolge mischt der Browser je Tag.
+MITMACHEN = [
+ ("Ein Kamm", ["Eine Gabel", "Eine Bürste", "Ein Hai"], ["Du benutzt ihn morgens vor dem Spiegel.", "Er gehört zu den Haaren."]),
+ ("Ein Loch", ["Ein Sandhaufen", "Eine Pfütze", "Ein Stapel"], ["Denk an eine Schaufel.", "Eigentlich besteht es aus … nichts."]),
+ ("Ein Handtuch", ["Ein Regenschirm", "Ein Föhn", "Die Wäsche"], ["Es hängt oft im Bad.", "Man braucht es nach dem Duschen."]),
+ ("Eine Flasche", ["Eine Giraffe", "Ein Schal", "Ein Hut"], ["Man kann daraus trinken.", "Oben hat sie einen Deckel oder Korken."]),
+ ("Dein Name", ["Dein Handy", "Dein Auto", "Deine Zahnbürste"], ["Man kann es nicht anfassen.", "Andere rufen dich damit."]),
+ ("Alle Monate", ["Der Februar", "Kein Monat", "Nur Monate mit 30 Tagen"], ["In der Frage steht nicht „genau“.", "Auch der Januar hat einen 28. Tag."]),
+ ("Ein Versprechen", ["Ein Ast", "Ein Teller", "Ein Bleistift"], ["Es besteht nur aus Worten.", "Man gibt es jemandem – und sollte es halten."]),
+ ("Ein Buch", ["Ein Stuhl", "Eine Kerze", "Ein Teller"], ["Es steht oft in einem Regal.", "Man blättert darin."]),
+ ("Der Buchstabe R", ["Der Eiffelturm", "Der Louvre", "Die Seine"], ["Denk nicht an die Stadt, sondern an das Wort.", "Paris hat fünf Buchstaben."]),
+ ("Ein Klavier", ["Ein Schlüsselbund", "Eine Trommel", "Eine Geige"], ["Es macht Musik.", "Die Tasten sind schwarz und weiß."]),
+ ("Der Buchstabe M", ["Der Buchstabe O", "Der Buchstabe N", "Der Vollmond"], ["Schau dir die Wörter selbst an.", "Zähle die Buchstaben in „Moment“."]),
+ ("Eine Nadel", ["Eine Schere", "Ein Knopf", "Ein Faden"], ["Man braucht dazu einen Faden.", "Man näht damit."]),
+ ("Regen", ["Ein Glas", "Ein Ei", "Ein Kletterer"], ["Es kommt von oben.", "Danach braucht man einen Schirm."]),
+ ("Der Atem", ["Ein Luftballon", "Ein Blatt Papier", "Ein Haar"], ["Du tust es den ganzen Tag, ohne nachzudenken.", "Beim Tauchen merkst du es."]),
+ ("Licht", ["Wasser", "Ein Stein", "Ein Vogel"], ["Ohne es wäre ein Fenster nutzlos.", "Es kommt von der Sonne."]),
+ ("Eine Uhr", ["Ein Tacho", "Ein Kalender", "Ein Wegweiser"], ["Sie tickt oft.", "Man trägt sie am Handgelenk oder hängt sie an die Wand."]),
+ ("Der Mensch", ["Ein Hund", "Ein Pferd", "Ein Tisch"], ["Morgen, Mittag und Abend stehen für ein ganzes Leben.", "Am Abend hilft ein Stock."]),
+ ("Ein Schwamm", ["Ein Sieb", "Ein Eimer", "Ein Netz"], ["Man findet ihn in der Küche.", "Man drückt ihn aus."]),
+ ("Eine Briefmarke", ["Ein Flugzeug", "Ein Koffer", "Ein Globus"], ["Sie klebt.", "Man findet sie auf einem Brief."]),
+ ("Die Zahl 6", ["Die Zahl 8", "Die Zahl 9", "Die Zahl 1"], ["Es ist eine Ziffer.", "Dreh sie um 180 Grad."]),
+ ("Ein Bett", ["Ein Tisch", "Ein Schrank", "Ein Teppich"], ["Es steht im Schlafzimmer.", "Darauf liegt dein Kissen."]),
+ ("Holzkohle", ["Eine Tomate", "Ein Ziegelstein", "Tinte"], ["Sie glüht.", "Man braucht sie zum Grillen."]),
+ ("Ein Handschuh", ["Eine Socke", "Ein Schuh", "Ein Ring"], ["Im Winter ist er praktisch.", "Meist kommt er im Paar."]),
+ ("Eine Erkältung", ["Einen Ball", "Einen Fisch", "Ein Frisbee"], ["Danach braucht man Taschentücher.", "Sie kommt oft im Herbst."]),
+ ("Die Zukunft", ["Dein Rücken", "Der Horizont", "Die Vergangenheit"], ["Es ist keine Sache, sondern eine Zeit.", "Morgen gehört dazu."]),
+ ("Die Brennnessel", ["Eine Kerze", "Ein Kamin", "Die Rose"], ["Sie wächst am Wegrand.", "Wer sie anfasst, bekommt rote Pusteln."]),
+ ("Ein Echo", ["Ein Radio", "Der Wind", "Ein Telefon"], ["Am besten klappt es in den Bergen.", "Es wiederholt deine Worte."]),
+ ("Eine Kerze", ["Ein Kamin", "Eine Glühbirne", "Ein Ofen"], ["Sie steht gern auf dem Adventskranz.", "Sie ist aus Wachs."]),
+ ("Der Tausendfüßer", ["Die Spinne", "Der Regenwurm", "Die Raupe"], ["Er lebt unter Steinen und Laub.", "Die Zahl hat drei Nullen."]),
+ ("Beide gleich schwer", ["Das Kilo Eisen", "Das Kilo Federn", "Kommt auf die Größe an"], ["Lies die Mengen genau.", "Ein Kilo ist ein Kilo."]),
+ ("Ein Tisch", ["Ein Hund", "Eine Lampe", "Ein Teppich"], ["Daran isst man.", "Man stellt Teller darauf."]),
+]
+
 WITZE = [
  "Treffen sich zwei Magnete. Sagt der eine: „Was soll ich heute bloß anziehen?“",
  "Was macht ein Pirat am Computer? – Er drückt die Enter-Taste.",
@@ -363,17 +399,17 @@ SPAR_K = ['Deckel auf den Topf', 'Mit Liste einkaufen', 'Abos prüfen', 'Standby
 BEZ_K = ['Handyfrei kochen', 'Kurze Nachricht', 'Drei Dinge', 'Zuhör-Spaziergang', 'Kleine Aufmerksamkeit', 'Fotos von früher', 'Aufgabe abnehmen', 'Du wählst den Film', 'Etwas Neues', 'Schönster Moment', 'Versteckter Zettel', 'Freies Wochenende', 'Lange Umarmung', 'Gemeinsames Frühstück', 'Nach Träumen fragen', 'Euer Song', 'Spieleabend', 'Sonnenuntergang', 'Danke sagen', 'Wohnzimmer-Picknick', 'Bildschirmfreier Abend', 'Gemeinsames Monatsziel', 'Eure Playlist', 'Kaffee ans Bett', 'Erst zuhören', 'Alter Lieblingsort', 'Zusammen Sport', 'Ein echter Brief', 'Gemeinsam ausmisten', 'Dein Abend, meine Wahl', 'Wie geht es dir?']
 GES_K = ['Wasser zuerst', 'Stündlich strecken', 'Treppe statt Aufzug', 'Verdauungsspaziergang', 'Mehr Gemüse', 'Früher ins Bett', 'Telefonieren im Gehen', 'Ruhig atmen', 'Bildschirm weg', 'Nüsse statt Süßes', 'Tageslicht tanken', 'Schultern kreisen', 'Langsam essen', 'Kniebeugen-Pause', 'Zu Fuß einkaufen', '20-20-20-Regel', 'Ohne Zuckergetränke', 'Abends dehnen', 'Wasser in Sichtweite', 'Haferflocken-Frühstück', 'Freunde anrufen', '1.000 Schritte mehr', 'Eine Minute Planke', 'Kein Koffein am Abend', 'Balance beim Zähneputzen', 'Essen ohne Bildschirm', 'Vor dem Schlafen lüften', 'Aktiv aufräumen', 'Tee statt Snack', 'Handypause', 'Fünf am Tag']
 
-lists = [RAETSEL, WITZE, WORTE, SPRICHWOERTER, REZEPTE, LAENDER, TECH, BEZIEHUNG, SPARTIPP, GESUNDHEIT, FILME]
+lists = [RAETSEL, MITMACHEN, WITZE, WORTE, SPRICHWOERTER, REZEPTE, LAENDER, TECH, BEZIEHUNG, SPARTIPP, GESUNDHEIT, FILME]
 for l in lists:
     assert len(l) == 31, (len(l), l[0])
 
 days = []
 for i in range(31):
     d = START + datetime.timedelta(days=i)
-    r, w, wo, sp, re_, la, te, be, sa, ge, fi = (l[i] for l in lists)
+    r, mi, w, wo, sp, re_, la, te, be, sa, ge, fi = (l[i] for l in lists)
     days.append({
         "datum": d.isoformat(),
-        "raetsel": {"frage": r[0], "loesung": r[1]},
+        "raetsel": {"frage": r[0], "loesung": r[1], "antwort": mi[0], "falsch": mi[1], "tipps": mi[2]},
         "witz": w,
         "wort": {"wort": wo[0], "bedeutung": wo[1], "herkunft": wo[2]},
         "sprichwort": sp,

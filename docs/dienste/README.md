@@ -17,7 +17,7 @@
 | [`kurse`](kurse.md) | Kurse (privat) | 1.1.0 | Yahoo Finance (nur private Nutzung) | weltweit | B |
 | [`tanken`](tanken.md) | Tanken | 2.1.0 | Tankerkönig (Daten der Markttransparenzstelle für Kraftstoffe) | DE | C |
 | [`autobahn`](autobahn.md) | Autobahn | 1.1.0 | Die Autobahn GmbH des Bundes (Autobahn-API) | DE | B |
-| [`tagesinhalt`](tagesinhalt.md) | Tagesinhalte | 1.1.1 | DAILY (eigene Tagesinhalte, mit KI vorbereitet) | weltweit | B |
+| [`tagesinhalt`](tagesinhalt.md) | Tagesinhalte | 1.2.0 | DAILY (eigene Tagesinhalte, mit KI vorbereitet) | weltweit | B |
 | [`andiesemtag`](andiesemtag.md) | An diesem Tag | 1.1.1 | Wikipedia – „An diesem Tag“ (Wikimedia-Feed) | weltweit | B |
 | [`fussball`](fussball.md) | Fußball | 1.0.0 | OpenLigaDB (Community-Datenbank für Sportergebnisse) | weltweit | B |
 | [`schlagzeilen`](schlagzeilen.md) | Schlagzeilen (privat) | 1.0.0 | Tagesschau (RSS/Atom, Originalüberschriften), MDR Sachsen (RSS/Atom, Originalüberschriften), heise (RSS/Atom, Originalüberschriften) | weltweit | B |

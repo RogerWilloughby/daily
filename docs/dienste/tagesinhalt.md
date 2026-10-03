@@ -7,7 +7,7 @@ Rätsel, Witz, Wort und Sprichwort des Tages, Rezept, Land, Film, Gesundheits-, 
 | | |
 |---|---|
 | Aufruf | `GET /api/v1/tagesinhalt` |
-| Programmversion | 1.1.1 |
+| Programmversion | 1.2.0 |
 | Vertrag (Datenformat) | daily/1, Version 1 |
 | Klasse | oeffentlich |
 | Länder | weltweit |
@@ -32,6 +32,7 @@ Quellen mit Lizenz:
 - Datum: Standard heute in Deutschland (Europe/Berlin). Tage in der Zukunft und vor dem ersten Tag des Vorrats werden abgelehnt (eingabe_ungueltig).
 - Gibt es den Tag im Vorrat, kommt genau dieser Eintrag; nach dem letzten Tag wiederholt sich der Vorrat im Kreis (Tag im Jahr), gekennzeichnet mit wiederholt: true.
 - Inhalte unverändert aus der Datei; fehlende Arten als null.
+- Rätsel: Antwort, falsche Antworten und Tipps stehen offen in der Antwort (wie bei Wordle) – der Browser mischt die vier Antworten je Tag gleich für alle und prüft selbst; nichts geht an DAILY zurück.
 
 ## Ausgabe (`daten`)
 | Feld | Bedeutung |
@@ -43,7 +44,10 @@ Quellen mit Lizenz:
 | `inhalt` | Inhalte des Tags je Art (null: fehlt) |
 | `inhalt.raetsel` | Rätsel |
 | `inhalt.raetsel.frage` | Frage |
-| `inhalt.raetsel.loesung` | Lösung |
+| `inhalt.raetsel.loesung` | Lösung (ganzer Satz, nach dem Lösen) |
+| `inhalt.raetsel.antwort` | richtige Antwort, kurz – für den Antwort-Knopf (fehlt: nur „Lösung zeigen“) |
+| `inhalt.raetsel.falsch` | drei falsche Antworten |
+| `inhalt.raetsel.tipps` | bis zu zwei Tipps, der zweite deutlicher |
 | `inhalt.witz` | Witz des Tages |
 | `inhalt.wort` | Wort des Tages |
 | `inhalt.wort.wort` | das Wort |
@@ -95,6 +99,7 @@ Rahmen und Stufen: `../architektur/skalierung.md`
 ## Änderungen
 | Version | Datum | Änderung |
 |---|---|---|
+| 1.2.0 | 2026-10-03 | Rätsel zum Mitmachen: kurze richtige Antwort, 3 falsche Antworten und bis zu 2 Tipps (Lösungen offen in der Antwort, wie bei Wordle – der Browser prüft selbst). |
 | 1.1.1 | 2026-10-03 | Tagestakt endet um Mitternacht deutscher Zeit statt um Mitternacht UTC (1 bzw. 2 Uhr) – auch an Tagen der Zeitumstellung. |
 | 1.1.0 | 2026-10-02 | Unbekannte Angaben werden abgelehnt (Adresse = Cache-Schlüssel, Entscheidung 02.10.2026). |
 | 1.0.0 | 2026-10-01 | Erste Fassung: alle Tagesinhalte eines Tags aus der festen Datei, auch vergangene Tage (Verlauf), nie in die Zukunft |
