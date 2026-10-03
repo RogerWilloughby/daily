@@ -2,7 +2,7 @@
 // (seit 0.47.0): Ort (ui/ort.js) · Wetter · Kalender · Meine Seiten · privat Tools (Formulare aus core/einstellungen.js) · Kennwort (ui/privat.js).
 import { dienst } from '../dienste/client.js';
 import { seite as quellenSeite } from '../adapter/katalog.js';
-import { versionText } from '../core/version.js';
+import { versionText, leistenText } from '../core/version.js';
 import { formular, binden, offeneSpeichern } from '../core/einstellungen.js';
 import { betrieb } from '../core/betrieb.js';
 
@@ -25,8 +25,12 @@ export function initDialogs() {
     d.addEventListener('click', e => { if (e.target === d || e.target.closest('[data-doc-close]')) d.close(); });
   });
 
-  // Version unten im Einstellungsfenster
-  document.querySelectorAll('[data-version]').forEach(e => { e.textContent = e.dataset.version === 'kurz' ? 'v' + versionText().split(' ')[1] : versionText(); });
+  // Version unten im Einstellungsfenster und in der Statusleiste (Rechner: lang, Handy: kurz unter „DAILY“; Commit beim Überfahren)
+  document.querySelectorAll('[data-version]').forEach(e => {
+    const art = e.dataset.version;
+    e.textContent = art === 'leiste' ? leistenText() : art === 'leiste-kurz' ? leistenText(undefined, true) : art === 'kurz' ? 'v' + versionText().split(' ')[1] : versionText();
+    if (art.startsWith('leiste')) e.title = versionText();
+  });
 
   document.getElementById('open-settings').addEventListener('click', () => oeffneEinstellungen());
   const dlg = document.getElementById('settings');

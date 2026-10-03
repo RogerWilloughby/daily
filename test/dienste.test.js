@@ -378,6 +378,12 @@ test('Versionen: App-Nummer gleich in package.json und Oberfläche, Programmvers
   assert.match(APP.version, /^\d+\.\d+\.\d+$/);
   assert.equal(versionText({ version: '0.6.0', stand: '2026-09-27T12:32:00Z', commit: 'b518008' }), 'DAILY 0.6.0 · 27.09.2026 14:32 · b518008');
   assert.equal(versionText({ version: '0.6.0', stand: null, commit: null }), 'DAILY 0.6.0');
+  const { leistenText } = await esm('src/js/core/version.js');   // Statusleiste (0.51.1)
+  assert.equal(leistenText({ version: '0.51.1', stand: '2026-10-03T07:14:00Z', commit: 'b518008' }), 'v0.51.1 · 03.10.2026 09:14');
+  assert.equal(leistenText({ version: '0.51.1', stand: '2026-10-03T07:14:00Z', commit: 'b518008' }, true), 'v0.51.1 · 3.10. 09:14');
+  assert.equal(leistenText({ version: '0.51.1', stand: null, commit: null }), 'v0.51.1');
+  const html = require('node:fs').readFileSync(path.join(__dirname, '..', 'src', 'index.html'), 'utf8');
+  assert.match(html, /class="ab-version" data-version="leiste"/); assert.match(html, /class="ab-ver" data-version="leiste-kurz"/);
   const w = await rufe('wetter', BERLIN);
   assert.equal(w.body.programm, dienste.byId.wetter.programmversion);
   const k = (await rufe('dienste')).body.daten;

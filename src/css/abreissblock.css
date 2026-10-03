@@ -44,6 +44,14 @@ body{background:var(--ab-grund);color:var(--ab-tinte)}
 .ab-datum-kurz{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .ab-datum-kurz .kurz{display:none}
 .ab-uhr{font-size:15px;font-variant-numeric:tabular-nums}
+.ab-version{font-size:12px;opacity:.6;white-space:nowrap;margin-right:10px;font-variant-numeric:tabular-nums}   /* Version und Build-Zeitpunkt (0.51.1) */
+/* kurze Form unter „DAILY“ – wo die Leiste zu schmal ist (Handy und Rechner bis 1280 px) */
+.ab-ver{display:none;margin-top:3px;font-family:Figtree,system-ui,sans-serif;font-weight:500;font-size:10px;letter-spacing:0;color:var(--ab-hell);opacity:.6;white-space:nowrap;font-variant-numeric:tabular-nums}
+@media (max-width:1280px){
+  .ab-marke{display:flex;flex-direction:column;line-height:1}
+  .ab-ver{display:block}
+  .ab-version{display:none}
+}
 .ab-uhr::before{content:"·";margin:0 6px 0 0}
 .ab-leiste .status{padding:0;border:0;width:24px;height:24px;justify-content:center;flex:none}
 .ab-leiste .status i{width:8px;height:8px}
@@ -171,6 +179,7 @@ a.ab-ev:hover{text-decoration:underline}
 @media (max-width:760px){
   .ab{grid-template-columns:auto minmax(0,1fr);grid-template-rows:52px minmax(0,1fr) auto;grid-template-areas:"marke leiste" "blatt blatt" "tabs tabs";padding:0 10px}
   .ab-marke{font-size:24px;margin:0 0 0 8px}
+  .ab-ver{font-size:9.5px}
   .ab-uhr{display:none}
   .ab-datum-kurz{font-size:14px;flex:none}
   .ab-datum-kurz .lang{display:none}

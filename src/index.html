@@ -28,9 +28,10 @@
 
 <!-- Oberfläche „Abreißblock“ (seit 0.47.0): Marke, Bereiche (Handy unten, Rechner oben), schmale Leiste, Blatt mit Untertabs (core/oberflaeche.js) -->
 <div class="ab">
-  <span class="ab-marke">DAILY</span>
+  <span class="ab-marke">DAILY<small class="ab-ver" data-version="leiste-kurz"></small></span>
   <nav class="ab-tabs" id="ab-tabs" aria-label="Bereiche"></nav>
   <header class="ab-leiste">
+    <span class="ab-version" data-version="leiste"></span>
     <span class="ab-datum-kurz" id="date"></span>
     <span class="ab-uhr" id="clock"></span>
     <span class="status" id="status" data-level="idle" title="Datenquellen"><i aria-hidden="true"></i><span id="status-text" class="sr">Beispieldaten</span></span>
