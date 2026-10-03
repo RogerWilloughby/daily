@@ -178,6 +178,8 @@ Info-Dienste ohne Bereich (Tanken, Fußball, Autobahn, Finanzen, Kurse, Schlagze
 | `src/css/wetter.css` | nur Wetter: Zeitpunkt-Block, Radar, Hinweise, Sonnenzahlen |
 | `src/css/seiten.css`, `lokal.css` | Meine Seiten (Symbolraster), Tools (Beschreibung, Knopf) |
 
+**Laden (seit 0.48.0):** Jeder Anbieter hat einen `bereich` (heute · wetter · kalender · mehr oder `immer`); `main.js` startet nur die Anbieter des sichtbaren Bereichs (`faelligeAnbieter`, Ereignis `daily:bereich`) und frischt nur diese auf. `src/sw.js` hält alles außer `/api` je Version im Speicher; `main.js` meldet ihn an, prüft bei jedem Öffnen auf eine neue Version und lädt nach dem Wechsel einmal neu.
+
 Neuer Bereich oder Untertab mit eigener Darstellung: Datei unter `src/js/ansichten/`, vom Anbieter importiert; eigene Styles unter `src/css/`, in `index.html` und `sw.js` eingetragen.
 
 ## Stand der Umstellung

@@ -134,6 +134,15 @@ export function zeige(bereich, unter = null, teil = null) {
   tabsZeichnen();
   zeichne(bereich);
   adresseSchreiben();
+  document.dispatchEvent(new CustomEvent('daily:bereich', { detail: bereich }));   // main.js lädt, was dieser Bereich braucht (1c)
+}
+export const aktiverBereich = () => aktiv;
+
+// Welche Anbieter jetzt laden sollen (rein, testbar; seit 0.48.0 „nur Sichtbares laden“): die des sichtbaren Bereichs und die mit
+// bereich 'immer' (z. B. Wetterhinweise für den Unwetter-Punkt) – jeweils nur, wenn ihr letzter Lauf älter ist als maxAlter(p).
+// lastRun: Map Anbieter-ID → Zeitpunkt; nie gelaufen = sofort fällig.
+export function faelligeAnbieter(anbieter, aktivBereich, lastRun, jetzt = Date.now(), maxAlter = p => p.every) {
+  return anbieter.filter(p => (p.bereich === 'immer' || p.bereich === aktivBereich) && jetzt - (lastRun.get(p.id) || 0) >= maxAlter(p));
 }
 
 // Anbieter melden neue Werte hierüber (wie früher board.js → set)

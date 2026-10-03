@@ -8,7 +8,7 @@ import { dienst } from '../dienste/client.js';
 import { berlinDay } from '../core/util.js';
 import { heuteBereich, gemerktReiter, favEintrag, tagPlus, mitZusatz, gruppeVon, GRUPPEN } from '../adapter/tagesinhalt.js';
 
-let env = null, datum = null, loesung = false, rezeptSeite = 1, fehler = null;
+let env = null, datum = null, ziel = null, loesung = false, rezeptSeite = 1, fehler = null;   // ziel: angefragter Tag (auch während des Ladens)
 
 const zeichne = () => {
   set('heute', env || !fehler ? heuteBereich(env, { favoriten, loesung, rezeptSeite }) : { state: 'error', kleinReiter: [], bereichKopf: '' });
@@ -16,6 +16,7 @@ const zeichne = () => {
 };
 
 async function holeTag(d) {
+  ziel = d;
   try {
     const [t, z] = await Promise.all([dienst('tagesinhalt', { datum: d }), dienst('andiesemtag', { datum: d }).catch(() => null)]);
     env = mitZusatz(t, 'geschichte', z); datum = env.daten.datum; loesung = false; rezeptSeite = 1; fehler = null;
@@ -52,9 +53,13 @@ document.addEventListener('click', e => {
   else if (ti === 'rezeptseite') { rezeptSeite = rezeptSeite === 2 ? 1 : 2; zeichne(); }
 });
 
-// Beim Laden: heute; ist man zurückgeblättert, bleibt der Tag (ein neuer Tag nach Mitternacht wird beim nächsten Laden „heute“)
+// Beim Laden: heute; ist man zurückgeblättert (oder öffnet gerade einen gemerkten Tag), bleibt der Tag
+// (ein neuer Tag nach Mitternacht wird beim nächsten Laden „heute“)
 export async function load() {
-  await holeTag(!datum || (env && datum === env.daten.heute) ? berlinDay() : datum);
+  await holeTag(!ziel || (env && ziel === env.daten.heute) ? berlinDay() : ziel);
 }
 
-export default { id: 'heute', name: 'Tagesinhalte', every: 30 * 60e3, load };
+// „Gemerkt“ unter Mehr braucht keinen Abruf – gleich beim Start zeigen (auch wenn DAILY mit #mehr geöffnet wird)
+set('gemerkt', gemerktReiter(favoriten));
+
+export default { id: 'heute', name: 'Tagesinhalte', bereich: 'heute', every: 30 * 60e3, load };

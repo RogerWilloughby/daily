@@ -32,4 +32,4 @@ export async function load() {
   paint();
 }
 
-export default { id: ID, name: 'Meine Seiten', local: true, every: 60 * 60e3, load };
+export default { id: ID, name: 'Meine Seiten', bereich: 'mehr', local: true, every: 60 * 60e3, load };

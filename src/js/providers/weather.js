@@ -67,4 +67,14 @@ kachelEinstellungen('weather', {
   }
 });
 
-export default { id: 'weather', name: 'Wetter', every: 5 * 60e3, load };
+// Wetterhinweise allein (seit 0.48.0): beim Öffnen auch ohne Antippen von „Wetter“ – nur für den Unwetter-Punkt am Tab.
+// Still: ein Ausfall (z. B. Ort im Ausland) meldet keine Störung. Lädt der ganze Bereich, kommt dieselbe Antwort aus dem Speicher.
+export const hinweiseAnbieter = { id: 'wetterhinweise', name: 'Wetterhinweise', bereich: 'immer', every: 5 * 60e3, still: true,
+  async load() {
+    try {
+      const h = await dienst('wetterhinweise', ortParams(settings.place)), top = h && h.daten && h.daten.hinweise[0];
+      set('weather', { unwetter: top && top.stufe >= 3 ? `${top.ereignis}|${top.beginn || ''}` : null });
+    } catch (e) { /* ohne Hinweise kein Punkt */ }
+  } };
+
+export default { id: 'weather', name: 'Wetter', bereich: 'wetter', every: 5 * 60e3, load };

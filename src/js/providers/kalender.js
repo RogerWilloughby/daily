@@ -52,4 +52,4 @@ kachelEinstellungen('kalender', {
   }
 });
 
-export default { id: 'kalender', name: 'Kalender', every: 60 * 60e3, load };   // Himmel hat den kürzesten Takt (1 Stunde)
+export default { id: 'kalender', name: 'Kalender', bereich: 'kalender', every: 60 * 60e3, load };   // Himmel hat den kürzesten Takt (1 Stunde)

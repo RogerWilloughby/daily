@@ -219,3 +219,33 @@ test('Aufräumen: alte Browser-Daten einmal entfernen, Rechtstexte nur mit genut
     assert.doesNotMatch(html, weg, 'index.html nennt noch ' + weg);
   for (const da of [/Open-Meteo/, /Bright Sky/, /GeoNames/, /OpenHolidays/, /Astronomy Engine/, /Wikipedia/, /gemerkt/]) assert.match(html, da);
 });
+
+// 1c (0.48.0): nur Sichtbares laden; Programmdateien je Version aus dem Speicher des Service Workers
+test('Laden: nur der sichtbare Bereich (und Wetterhinweise), Service Worker speichert je Version', async () => {
+  const { faelligeAnbieter } = await esm('src/js/core/oberflaeche.js');
+  const A = [{ id: 'heute', bereich: 'heute', every: 100 }, { id: 'wetterhinweise', bereich: 'immer', every: 50 }, { id: 'weather', bereich: 'wetter', every: 100 },
+    { id: 'kalender', bereich: 'kalender', every: 100 }, { id: 'links', bereich: 'mehr', every: 100 }];
+  const ids = (b, lr, t = 1000, max) => faelligeAnbieter(A, b, new Map(Object.entries(lr)), t, max).map(p => p.id);
+  assert.deepEqual(ids('heute', {}), ['heute', 'wetterhinweise']);                                      // Öffnen mit „Heute“: kein Wetter, kein Kalender
+  assert.deepEqual(ids('wetter', { heute: 990, wetterhinweise: 990 }), ['weather']);                    // erstes Antippen von „Wetter“
+  assert.deepEqual(ids('wetter', { heute: 990, wetterhinweise: 900, weather: 950 }), ['wetterhinweise']);   // Wetter noch frisch
+  assert.deepEqual(ids('heute', { heute: 850, wetterhinweise: 990, weather: 0 }), ['heute']);            // veraltetes Wetter lädt erst, wenn sichtbar
+  assert.deepEqual(ids('heute', { heute: 960 }, 1000, () => 10), ['heute', 'wetterhinweise']);          // kürzere Grenze (Rückkehr in den Browser-Tab)
+  // jeder Anbieter gehört zu einem Bereich
+  const lies = p => fs.readFileSync(path.join(__dirname, '../src/js', p), 'utf8');
+  for (const [p, b] of [['providers/heute.js', 'heute'], ['providers/weather.js', 'wetter'], ['providers/kalender.js', 'kalender'], ['providers/links.js', 'mehr'], ['providers/tools.js', 'mehr']])
+    assert.match(lies(p), new RegExp(`export default \\{[^}]*bereich: '${b}'`), p);
+  assert.match(lies('providers/weather.js'), /hinweiseAnbieter = \{ id: 'wetterhinweise', name: 'Wetterhinweise', bereich: 'immer'/);
+  const main = lies('main.js');
+  assert.doesNotMatch(main, /PROVIDERS\.forEach\(run\)/, 'main.js startet noch alle Anbieter');
+  assert.match(main, /document\.readyState === 'complete'\) anmelden\(\)/);   // auch anmelden, wenn „load“ schon vorbei ist
+  assert.match(main, /controllerchange/);                                                              // nach neuer Version einmal neu laden
+  // Service Worker: Speicher zuerst, /api nie, Startseite unter „/“, Tools behalten ihre Adresse, alter Speicher wird geräumt
+  const sw = fs.readFileSync(path.join(__dirname, '../src/sw.js'), 'utf8');
+  assert.match(sw, /url\.pathname\.startsWith\('\/api\/'\)\) return/);
+  assert.match(sw, /c\.match\(schluessel\)\.then\(hit => hit \|\| fetch/);
+  assert.match(sw, /url\.pathname === '\/' \|\| url\.pathname === '\/index\.html'/);
+  assert.match(sw, /cache: 'reload'/);
+  assert.match(sw, /keys\.filter\(k => k !== CACHE\)\.map\(k => caches\.delete\(k\)\)/);
+  assert.match(fs.readFileSync(path.join(__dirname, '../build.js'), 'utf8'), /const CACHE = 'daily-\$\{version\}-\$\{commit \|\| Date\.now\(\)\}'/);   // neue Version → neuer Speicher
+});

@@ -31,7 +31,7 @@ Heute kostet nichts, und nichts kann von selbst eine Rechnung erzeugen.
 | **Tankerkönig** (Tanken, nur noch headless) | nur nicht kommerziell; empfohlen höchstens 1 Anfrage/Minute | eigene Vereinbarung nötig |
 | übrige Quellen (DWD/Bright Sky, OpenHolidays, Wikipedia, OpenLigaDB, EZB, basemap.de, eigene Dateien) | kostenlos | – |
 
-- **Wichtigste Grenze ist Vercel:** Ein Öffnen von DAILY löst heute **≈ 87 Anfragen** aus (67 Programmdateien, 20 Dienst-Anfragen; gemessen im Testserver ohne Browser-Cache) → ≈ 380 Öffnungen am Tag im Hobby-Tarif. Mit der neuen Oberfläche fallen die Info-Anbieter weg, doppelte Anfragen werden vermieden und nur Sichtbares geladen (Phase 1).
+- **Wichtigste Grenze ist Vercel:** (Stand 03.10.2026, App 0.48.0: weiterer Besuch **5 Anfragen**, erster Besuch einmalig ≈ 104 – `entscheidungen.md` 0a, Schritt 1c.) Ein Öffnen von DAILY löste vor Phase 1 **≈ 87 Anfragen** aus (67 Programmdateien, 20 Dienst-Anfragen; gemessen im Testserver ohne Browser-Cache) → ≈ 380 Öffnungen am Tag im Hobby-Tarif. Mit der neuen Oberfläche fallen die Info-Anbieter weg, doppelte Anfragen werden vermieden und nur Sichtbares geladen (Phase 1).
 - **Wetter zählt mehr als gedacht:** Open-Meteo zählt je 10 Werte einen Aufruf → unsere Abfrage (44 Werte, 15 Tage, plus Luft) ≈ **5–6 Aufrufe je Aktualisierung** (Dienstblatt sagt 2). Reduktion auf ≈ 20 Werte in Phase 4.
 - **Mitmach-Dienste kosten fast nichts:** eigene Inhalte, für alle gleich je Tag, keine fremde Quelle. Indirekt: Arbeitszeit für Inhalte und Datenvolumen der Bilder (≈ 50 KB je Bild).
 - **Für den Test (5–10 Leute) bleibt alles kostenlos.** Nach dem Test bei Wachstum zuerst Vercel Pro, dann ggf. Open-Meteo.
@@ -108,7 +108,7 @@ Heute kostet nichts, und nichts kann von selbst eine Rechnung erzeugen.
 | Phase | Inhalt | Ergebnis |
 |---|---|---|
 | **0 Klären** | ✅ 22 Fragen geklärt (02./03.10.2026) | Entscheidungen in `entscheidungen.md` |
-| **1 Fundament** | ✅ 1a Tagesgrenze (0.46.2); ✅ 1b-1 neue Oberfläche „Abreißblock“ (0.47.0); ✅ 1b-2a alte Dateien gelöscht (0.47.2); ✅ 1b-2b Reste und Rechtstexte (0.47.3); offen 1c weniger Anfragen. Tagesgrenze; neue Oberfläche (Tabs/Untertabs, Handy unten/Rechner oben, kein Scrollen) mit Wetter, Kalender, Tagesinhalten, Meine Seiten, Tools; Info-Anbieter, Mein Daily, Deine Nutzung, Termine aus der Oberfläche; doppelte Anfragen vermeiden | DAILY in neuer Form, am Handy benutzbar |
+| **1 Fundament** | ✅ 1a Tagesgrenze (0.46.2); ✅ 1b-1 neue Oberfläche „Abreißblock“ (0.47.0); ✅ 1b-2a alte Dateien gelöscht (0.47.2); ✅ 1b-2b Reste und Rechtstexte (0.47.3); ✅ 1c weniger Anfragen (0.48.0) – **Phase 1 erledigt**. Tagesgrenze; neue Oberfläche (Tabs/Untertabs, Handy unten/Rechner oben, kein Scrollen) mit Wetter, Kalender, Tagesinhalten, Meine Seiten, Tools; Info-Anbieter, Mein Daily, Deine Nutzung, Termine aus der Oberfläche; doppelte Anfragen vermeiden | DAILY in neuer Form, am Handy benutzbar |
 | **2 Mitmachen I** | Grundlage (Spielstand, Teilen, Nachholen) + Rätsel zum Mitmachen | erstes lösbares Format |
 | **3 Mitmachen II** | Quiz (5 Fragen); Bilderrätsel mit Album „Vögel“ | Mitmachen und Sammeln komplett |
 | **4 Testreife** | Inhalte für 31 Tage (Rätsel, Quiz, Bilder); Quiz-Name; Pflegepunkte (Wetter-Werte, Tankerkönig); Firewall-Regel; Rauchtest; Fragebogen; Domain | startklar |

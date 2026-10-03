@@ -18,4 +18,4 @@ kachelEinstellungen('tools', {
   speichern: w => { kachelOptSpeichern('tools', { aus: TOOLS.filter(t => !w['t_' + t.id]).map(t => t.id) }); load(); }
 });
 
-export default { id: 'tools', name: 'Tools', every: 24 * 3600e3, local: true, load };
+export default { id: 'tools', name: 'Tools', bereich: 'mehr', every: 24 * 3600e3, local: true, load };
